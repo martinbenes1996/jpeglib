@@ -27,8 +27,8 @@ jobs:
     
     - name: Build library # build CJpegLib
       run: |
-        - python setup.py bdist
-        - cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
+        python setup.py bdist
+        cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
     
     - name: Run unittests # run unittests
       run:
