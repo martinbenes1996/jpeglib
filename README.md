@@ -8,9 +8,6 @@
 [![GitHub stars](https://github.com/martinbenes1996/jpeglib)](https://img.shields.io/github/stars/martinbenes1996/jpeglib?label=stars&style=social)
 [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
 
-<!-- Place this tag where you want the button to render. -->
-<a class="github-button" href="https://github.com/martinbenes1996/jpeglib" data-show-count="true" aria-label="Star martinbenes1996/jpeglib on GitHub">Star</a>
-
 Python envelope for the popular C library libjpeg for handling JPEG files.
 
 *libjpeg* offers full control over compression and decompression and exposes DCT coefficients and quantization tables.
