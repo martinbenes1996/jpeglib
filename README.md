@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://pypi.org/project/jpeglib/)
 [![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/)
 [![GitHub stars](https://github.com/martinbenes1996/jpeglib)](https://img.shields.io/github/stars/martinbenes1996/jpeglib?label=stars&style=social)
-
+[![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
 
 <!-- Place this tag where you want the button to render. -->
 <a class="github-button" href="https://github.com/martinbenes1996/jpeglib" data-show-count="true" aria-label="Star martinbenes1996/jpeglib on GitHub">Star</a>
