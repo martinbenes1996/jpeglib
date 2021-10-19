@@ -1,8 +1,5 @@
 # jpeglib
 
-<!-- Place this tag in your head or just before your close body tag. -->
-<script async defer src="https://buttons.github.io/buttons.js"></script>
-
 [![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://pypi.org/project/jpeglib/)
 [![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/)
 [![GitHub stars](https://github.com/martinbenes1996/jpeglib)](https://img.shields.io/github/stars/martinbenes1996/jpeglib?label=stars&style=social)
