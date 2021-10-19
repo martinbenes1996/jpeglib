@@ -3,31 +3,36 @@ Usage
 
 .. _installation:
 
-Installation
-------------
+Setup
+-----
 
-To use Lumache, first install it using pip:
+To use ``jpeglib``, first install it using pip:
 
 .. code-block:: console
 
-   (.venv) $ pip install lumache
+   $ pip3 install jpeglib
 
-Creating recipes
+Import the package with
+
+>>> import jpeglib
+
+You can specify a particular libjpeg to use with
+:py:func:`set_libjpeg_version()`.
+
+>>> jpeglib.set_libjpeg_version('6b')
+
+Currently supported versions are ``"6b"`` and ``"8d"``. 
+
+Pixel data
+----------
+
+Get pixel data
+
+TODO
+
+DCT coefficients
 ----------------
 
-To retrieve a list of random ingredients,
-you can use the ``lumache.get_random_ingredients()`` function:
+Get DCT coefficients and quantization matrix
 
-.. autofunction:: lumache.get_random_ingredients
-
-The ``kind`` parameter should be either ``"meat"``, ``"fish"``,
-or ``"veggies"``. Otherwise, :py:func:`lumache.get_random_ingredients`
-will raise an exception.
-
-.. autoexception:: lumache.InvalidKindError
-
-For example:
-
->>> import lumache
->>> lumache.get_random_ingredients()
-['shells', 'gorgonzola', 'parsley']
+TODO

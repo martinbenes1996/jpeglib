@@ -16,7 +16,7 @@ Simply install the package with pip3
 
 
 ```bash
-pip3 install jpeglib
+pip install jpeglib
 ```
 
 ## Usage
