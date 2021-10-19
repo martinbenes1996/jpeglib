@@ -1,0 +1,95 @@
+
+import ctypes
+import os
+import pathlib
+import re
+
+from . import cjpeglib
+
+class CJpegLib:
+
+    @classmethod
+    def read_jpeg_info(cls, srcfile, dct_dims, image_dims, num_components, jpeg_color_space):
+        status = cls.get().read_jpeg_info(cls.cstr(srcfile), dct_dims, image_dims, num_components, jpeg_color_space)
+        if status == 0: raise IOError(f"reading of {srcfile} failed")
+        
+    @classmethod
+    def read_jpeg_dct(cls, srcfile, dct, qt):
+        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), dct, qt)
+        if status == 0: raise IOError(f"reading of {srcfile} DCT failed")
+
+    @classmethod
+    def write_jpeg_dct(cls, srcfile, dstfile, dct):
+        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), dct)
+        if status == 0: raise IOError(f"writing DCT to {dstfile} failed")
+    @classmethod
+    def print_jpeg_params(cls, srcfile):
+        status = cls.get().print_jpeg_params(cls.cstr(srcfile))
+        if status == 0: raise IOError(f"reading of {srcfile} failed")
+
+    @classmethod
+    def read_jpeg_spatial(cls, srcfile, rgb, out_color_space, dither_mode, dct_method, samp_factor, flags):
+        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, out_color_space, dither_mode, dct_method,
+                                             samp_factor, cls.flags_to_mask(flags))
+        if status == 0: raise IOError(f"reading of {srcfile} spatial failed")
+    
+    @classmethod
+    def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, quality, qt, smoothing_factor, flags):
+        status = cls.get().write_jpeg_spatial(cls.cstr(srcfile), cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
+                                              dct_method, samp_factor, quality, qt, smoothing_factor, cls.flags_to_mask(flags))
+        if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
+        
+    MASKS = {
+        "DO_FANCY_UPSAMPLING": 0x1,
+        "DO_BLOCK_SMOOTHING": 0x2,
+        "TWO_PASS_QUANTIZE": 0x4,
+        "ENABLE_1PASS_QUANT": 0x8,
+        "ENABLE_EXTERNAL_QUANT": 0x10,
+        "ENABLE_2PASS_QUANT": 0x20,
+        "OPTIMIZE_CODING": 0x40,
+        "PROGRESSIVE_MODE": 0x80,
+        "QUANTIZE_COLORS": 0x100,
+        "ARITH_CODE": 0x200,
+        "WRITE_JFIF_HEADER": 0x400,
+        "WRITE_ADOBE_MARKER": 0x800,
+        "CCIR601_SAMPLING": 0x1000
+    }
+
+    @classmethod
+    def flags_to_mask(cls, flags):
+        mask = 0
+        if flags is None: return mask
+        for flag in flags:
+            mask = mask | cls.MASKS[flag.upper()]
+        return ctypes.c_ulong(mask)
+
+    _lib = None
+    @classmethod
+    def get(cls):
+        # connect to library
+        if cls._lib is None:
+            cls._lib = cls._bind_lib()
+        # return library
+        return cls._lib
+    
+    @classmethod
+    def set_version(cls, version):
+        cls._lib = cls._bind_lib(version=version)
+
+    @classmethod
+    def _bind_lib(cls, version='8d'):
+        # path of the library
+        so_files = [f for f in os.listdir(cjpeglib.__path__[0]) if re.fullmatch(f'cjpeglib_{version}\..*\.so', f)]
+        try:
+            so_file = so_files[0]
+        except:
+            raise
+            raise Exception(f"dynamic library not found at {cjpeglib.__path__[0]}, is jpeglib installed?")
+        libname = pathlib.Path(cjpeglib.__path__[0]) / so_file
+        # connect
+        cjpeglib_dylib = ctypes.CDLL(libname)
+        return cjpeglib_dylib
+    
+    @staticmethod
+    def cstr(s):
+        return ctypes.c_char_p(s.encode('utf-8'))

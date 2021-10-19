@@ -1,0 +1,43 @@
+
+# build
+build/
+dist/
+*.egg-info
+
+# python
+__pycache__/
+*.pyc
+.ipynb_checkpoints
+
+# R
+.Rhistory
+# Rainer
+tests/MMSec/
+tests/test_rainer.R
+
+# dct
+*.o
+*.dylib
+*.a
+*.so
+
+# dependencies
+stegojpeg/cstegojpeg/6b/*
+!stegojpeg/cstegojpeg/6b/*.c
+!stegojpeg/cstegojpeg/6b/*.h
+stegojpeg/cstegojpeg/8d/*
+!stegojpeg/cstegojpeg/8d/*.c
+!stegojpeg/cstegojpeg/8d/*.h
+
+# vscode
+.vscode
+
+# apple
+.DS_Store
+
+# test
+tmp/
+test.log
+run.py
+result.jpeg
+test.sh
