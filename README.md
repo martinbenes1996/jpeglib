@@ -72,7 +72,7 @@ You can find all the details in the [documentation](https://jpeglib.readthedocs.
 It is possible to choose, which version of libjpeg should be used.
 
 ```python
-jpeglib.set_libjpeg.version('6b')
+jpeglib.set_libjpeg_version('6b')
 ```
 
 
