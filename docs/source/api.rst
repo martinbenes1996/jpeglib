@@ -3,7 +3,7 @@ API
 
 .. contents:: Table of Contents
 
-.. automodule:: jpeglib._bind
+.. automodule:: jpeglib.jpeg
     :members:
     :private-members:
     :special-members:
