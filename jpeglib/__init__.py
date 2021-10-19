@@ -7,6 +7,11 @@ from . import _handle
 from ._timer import Timer
 
 def set_libjpeg_version(version):
+    """Sets the version of libjpeg to use.
+    
+    Args:
+        version (str): Version to use, one of 6b, 8d.
+    """
     from ._bind import CJpegLib
     if version in {'6','6b'}:
         CJpegLib._bind_lib(version='6b')
@@ -16,6 +21,13 @@ def set_libjpeg_version(version):
         raise Exception(f'Unsupported libjpeg version! Currently supported versions: 6b 8d')
 
 class JPEG(_handle.JPEG):
+    """Class representing the JPEG object.
+    
+    Attributes:
+        srcfile (str): Source file name.
+        channels (int): Number of channels.
+        color_space (str): Output color space.
+    """
     def __init__(self, srcfile):
         """Object constructor.
         
