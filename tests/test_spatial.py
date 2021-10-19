@@ -23,56 +23,56 @@ class TestSpatial(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree("tmp")
 
-    def _rainer_rgb(self, outchannel, rgb):
+    # def _rainer_rgb(self, outchannel, rgb):
 
-        # test DCT coefficients
-        # get Rainer's (reference) result
-        res = subprocess.call(
-            "Rscript tests/test_rainer.R " + # script
-            "rgb " + " " + # produce quantization table
-            outchannel + " " +# Y, Cr or Cb
-            "examples/IMG_0791.jpeg " + # input file
-            "tmp/result.csv", # output file
-            shell=True)
-        if res != 0:
-            raise Exception("Rainer's script failed!")
-        df = pd.read_csv("tmp/result.csv", header=None)
-        rgbRainer = df.to_numpy()
-        # convert to 0-1
-        rgb = rgb / 255
+    #     # test DCT coefficients
+    #     # get Rainer's (reference) result
+    #     res = subprocess.call(
+    #         "Rscript tests/test_rainer.R " + # script
+    #         "rgb " + " " + # produce quantization table
+    #         outchannel + " " +# Y, Cr or Cb
+    #         "examples/IMG_0791.jpeg " + # input file
+    #         "tmp/result.csv", # output file
+    #         shell=True)
+    #     if res != 0:
+    #         raise Exception("Rainer's script failed!")
+    #     df = pd.read_csv("tmp/result.csv", header=None)
+    #     rgbRainer = df.to_numpy()
+    #     # convert to 0-1
+    #     rgb = rgb / 255
 
-        # compare DCT coefficient matrices
-        np.testing.assert_almost_equal(rgbRainer, rgb)
+    #     # compare DCT coefficient matrices
+    #     np.testing.assert_almost_equal(rgbRainer, rgb)
 
-    def test_rainer_rgb_R(self):
-        # read images
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            rgb = im.read_spatial(
-                out_color_space="JCS_RGB",
-                flags=['DO_FANCY_UPSAMPLING']
-            )
-            # call test
-            self._rainer_rgb('R', rgb[:,:,0])
+    # def test_rainer_rgb_R(self):
+    #     # read images
+    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    #         rgb = im.read_spatial(
+    #             out_color_space="JCS_RGB",
+    #             flags=['DO_FANCY_UPSAMPLING']
+    #         )
+    #         # call test
+    #         self._rainer_rgb('R', rgb[:,:,0])
     
-    def test_rainer_rgb_G(self):
-        # read images
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            rgb = im.read_spatial(
-                out_color_space="JCS_RGB",
-                flags=['DO_FANCY_UPSAMPLING']
-            )
-            # call test
-            self._rainer_rgb('G', rgb[:,:,1])
+    # def test_rainer_rgb_G(self):
+    #     # read images
+    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    #         rgb = im.read_spatial(
+    #             out_color_space="JCS_RGB",
+    #             flags=['DO_FANCY_UPSAMPLING']
+    #         )
+    #         # call test
+    #         self._rainer_rgb('G', rgb[:,:,1])
 
-    def test_rainer_rgb_B(self):
-        # read images
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            rgb = im.read_spatial(
-                out_color_space="JCS_RGB",
-                flags=['DO_FANCY_UPSAMPLING']
-            )
-            # call test
-            self._rainer_rgb('B', rgb[:,:,2])
+    # def test_rainer_rgb_B(self):
+    #     # read images
+    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    #         rgb = im.read_spatial(
+    #             out_color_space="JCS_RGB",
+    #             flags=['DO_FANCY_UPSAMPLING']
+    #         )
+    #         # call test
+    #         self._rainer_rgb('B', rgb[:,:,2])
 
 
     def test_pil_read(self):
