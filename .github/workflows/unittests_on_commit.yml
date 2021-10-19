@@ -1,0 +1,35 @@
+
+name: utests_on_commit # workflow name
+on: # trigger
+  push:
+    branches: [ master ]
+
+# parallel jobs to perform
+jobs:
+  # === unittest execution ===
+  unittest:
+    runs-on: ubuntu-latest # runner
+    
+    steps: # tasks  
+    - name: Set Github Workspace # access Github Workspace
+      uses: actions/checkout@v2
+    - name: Set up Python 3.x # set architecture and Python3
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+        architecture: 'x64' # architecture
+
+    - name: Install dependencies # dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+    
+    - name: Build library # build CJpegLib
+      run: |
+        - python3 setup.py bdist
+        - cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
+    
+    - name: Run unittests # run unittests
+      run:
+        python tests/test.py
