@@ -1,7 +1,7 @@
 
 # versions
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.5.3')
+__version__ = os.environ.get('VERSION_NEW', '0.5.4')
 libjpeg_versions = ['6b','8d']
 
 # requirements
