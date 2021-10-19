@@ -12,9 +12,6 @@ sphinx:
 formats:
   - pdf
 
-submodules:
-  exclude: ['_bind','_timer']
-
 python:
   install:
     - requirements: requirements.txt
