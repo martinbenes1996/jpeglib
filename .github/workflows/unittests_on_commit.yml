@@ -1,5 +1,5 @@
 
-name: utests_on_commit # workflow name
+name: Unit tests # workflow name
 on: # trigger
   push:
     branches: [ master ]
