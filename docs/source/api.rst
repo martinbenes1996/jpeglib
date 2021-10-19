@@ -4,6 +4,6 @@ API
 Documentation of functions
 
 .. autosummary::
-   :toctree: generated
+   :recursive:
 
    jpeglib
