@@ -67,7 +67,7 @@ class JPEG(_handle.JPEG):
             flags (list, optional):             Bool decompression parameters as str to set to be true.
                                                 Using default from libjpeg by default.
         """
-        super().read_spatial(
+        return super().read_spatial(
             out_color_space = out_color_space, 
             dither_mode     = dither_mode, 
             dct_method      = dct_method, 
@@ -94,7 +94,7 @@ class JPEG(_handle.JPEG):
             flags (list, optional):             Bool decompression parameters as str to set to be true.
                                                 Using default from libjpeg by default.
         """
-        super().write_spatial(
+        return super().write_spatial(
             dstfile          = dstfile,
             data             = data,
             in_color_space   = in_color_space,
@@ -107,7 +107,7 @@ class JPEG(_handle.JPEG):
 
     def to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
         """Converts DCT representation to RGB. Uses temporary file to compress and decompress."""
-        super().to_spatial(
+        return super().to_spatial(
             Y    = Y,
             CbCr = CbCr,
             **kw
