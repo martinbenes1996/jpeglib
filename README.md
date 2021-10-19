@@ -2,7 +2,7 @@
 
 [![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://pypi.org/project/jpeglib/)
 [![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/)
-[![GitHub stars](https://github.com/martinbenes1996/jpeglib)](https://img.shields.io/github/stars/martinbenes1996/jpeglib?label=stars&style=social)
+[![GitHub](https://GitHub.com/martinbenes1996/jpeglib)](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg?style=social&label=Star&maxAge=2592000)
 [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
 
 Python envelope for the popular C library libjpeg for handling JPEG files.
