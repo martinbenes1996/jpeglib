@@ -1,7 +1,12 @@
 # jpeglib
 
-[![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://badge.fury.io/py/jpeglib)
-[![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/en/latest/?badge=latest)
+<!-- Place this tag in your head or just before your close body tag. -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>
+
+[![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://pypi.org/project/jpeglib/)
+[![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/)
+<!-- Place this tag where you want the button to render. -->
+<a class="github-button" href="https://github.com/martinbenes1996/jpeglib" data-show-count="true" aria-label="Star martinbenes1996/jpeglib on GitHub">Star</a>
 
 Python envelope for the popular C library libjpeg for handling JPEG files.
 
