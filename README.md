@@ -5,6 +5,8 @@
 [![GitHub](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg?style=social&label=Star)](https://GitHub.com/martinbenes1996/jpeglib/stargazers)
 [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
 
+<iframe src="https://ghbtns.com/github-btn.html?user=martinbenes1996&repo=jpeglib&type=star&count=true" frameborder="0" scrolling="0" width="150" height="20" title="GitHub"></iframe>
+
 Python envelope for the popular C library libjpeg for handling JPEG files.
 
 *libjpeg* offers full control over compression and decompression and exposes DCT coefficients and quantization tables.
