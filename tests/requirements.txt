@@ -1,0 +1,6 @@
+Pillow
+pandas
+scipy
+#opencv-python
+#pylibjpeg
+#torchjpeg

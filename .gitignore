@@ -22,12 +22,12 @@ tests/test_rainer.R
 *.so
 
 # dependencies
-stegojpeg/cstegojpeg/6b/*
-!stegojpeg/cstegojpeg/6b/*.c
-!stegojpeg/cstegojpeg/6b/*.h
-stegojpeg/cstegojpeg/8d/*
-!stegojpeg/cstegojpeg/8d/*.c
-!stegojpeg/cstegojpeg/8d/*.h
+jpeglib/cjpeglib/6b/*
+!jpeglib/cjpeglib/6b/*.c
+!jpeglib/cjpeglib/6b/*.h
+jpeglib/cjpeglib/8d/*
+!jpeglib/cjpeglib/8d/*.c
+!jpeglib/cjpeglib/8d/*.h
 
 # vscode
 .vscode
