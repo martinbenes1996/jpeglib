@@ -1,9 +1,14 @@
 API
 ===
 
-Documentation of functions
+.. contents:: Table of Contents
+
+.. automodule:: jpeglib._bind
+    :members:
+    :private-members:
+    :special-members:
 
 .. autosummary::
-   :recursive:
+   :toctree: generated
 
    jpeglib

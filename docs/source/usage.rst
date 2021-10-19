@@ -1,7 +1,7 @@
 Usage
 =====
 
-.. _installation:
+.. contents:: Table of Contents
 
 Setup
 -----
