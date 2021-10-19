@@ -6,7 +6,11 @@ API
 .. autosummary::
    :toctree: generated
 
-.. automodule:: jpeglib.jpeg
-    :members:
-    :private-members:
-    :special-members:
+.. automodule:: jpeg
+   :members:
+
+JPEG
+====
+
+.. autoclass:: JPEG
+   :members:
