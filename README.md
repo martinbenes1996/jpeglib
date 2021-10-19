@@ -18,13 +18,18 @@ pip3 install jpeglib
 
 ## Usage
 
+Import the library in Python 3
+
+```python
+import jpeglib
+```
+
 ### DCT
 
 Get *discrete cosine transform* (DCT) coefficients and quantization matrices as numpy array
 
 
 ```python
-import jpeglib
 im = jpeglib.JPEG("input.jpeg") # load metadata
 Y,CbCr,qt = im.read_dct() # load data
 ```
