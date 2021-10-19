@@ -1,7 +1,7 @@
 
 # versions
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.5.4')
+__version__ = os.environ.get('VERSION_NEW', '0.5.5')
 libjpeg_versions = ['6b','8d']
 
 # requirements
@@ -9,7 +9,7 @@ try:
   with open('requirements.txt') as f:
     reqs = f.read().splitlines()
 except:
-  reqs = []
+  reqs = ['numpy']
 
 import codecs
 import setuptools
