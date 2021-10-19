@@ -13,7 +13,7 @@ formats:
   - pdf
 
 submodules:
-  exclude: all
+  exclude: ['_bind','_timer']
 
 python:
   install:
