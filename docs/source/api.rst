@@ -6,11 +6,11 @@ API
 .. autosummary::
    :toctree: generated
 
-.. automodule:: jpeg
+.. automodule:: jpeglib.jpeg
    :members:
 
 JPEG
 ====
 
-.. autoclass:: JPEG
+.. autoclass:: jpeglib.JPEG
    :members:
