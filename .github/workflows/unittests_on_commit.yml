@@ -21,13 +21,12 @@ jobs:
 
     - name: Install dependencies # dependencies
       run: |
-        sudo apt install -y --no-install-recommends build-essential libjpeg-dev
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
-        echo "djpeg is installed at $(which djpeg) path"
-        pip install git+https://github.com/btlorch/dct-coefficient-decoder.git
-        pip install git+https://github.com/daniellerch/python-jpeg-toolbox
+        git clone https://github.com/btlorch/dct-coefficient-decoder
+        cd dct-coefficient-decoder
+        cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
         
 
     
