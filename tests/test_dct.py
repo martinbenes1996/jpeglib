@@ -61,7 +61,8 @@ class TestDCT(unittest.TestCase):
         
         YT = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8))#, order='F')
         YT_ = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8), order='F')
-        #YT = np.einsum('abcde->abcde', YT)
+        YT = np.einsum('abcde->adebc', YT)
+        YT_ = np.einsum('abcde->adebc', YT_)
         CbCrT = np.stack([
             img['coef_arrays'][1].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F'),
             img['coef_arrays'][2].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F')
