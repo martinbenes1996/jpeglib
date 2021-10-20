@@ -62,8 +62,8 @@ class TestDCT(unittest.TestCase):
             .reshape((1,int(img['image_height']/8),8,-1,8))
         YT = np.einsum('abcde->adbec', YT)
         CbCrT = np.stack([
-            img['coef_arrays'][1].T.reshape((int(img['image_height']/8/2),8,-1,8)),
-            img['coef_arrays'][2].T.reshape((int(img['image_height']/8/2),8,-1,8))
+            img['coef_arrays'][1].reshape((int(img['image_height']/8/2),8,-1,8)),
+            img['coef_arrays'][2].reshape((int(img['image_height']/8/2),8,-1,8))
         ])
         CbCrT = np.einsum('abcde->adbec', CbCrT)
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
