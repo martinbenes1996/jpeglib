@@ -58,18 +58,14 @@ class TestDCT(unittest.TestCase):
             return
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
         # process
-        
-        YT1 = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
-        #YT2 = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8))
-        #YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
-        #YT1 = np.einsum('abcde->adebc', YT)
-        #YT2 = np.einsum('abcde->aedbc', YT)
-        #YT = np.einsum('abcde->adecb', YT)
-        #YT4 = np.einsum('abcde->aedcb', YT)
+        YT = img['coef_arrays'][0]\
+            .reshape((1,int(img['image_height']/8),8,-1,8))
+        YT = np.einsum('abcde->adbec', YT)
         CbCrT = np.stack([
-            img['coef_arrays'][1].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F'),
-            img['coef_arrays'][2].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F')
+            img['coef_arrays'][1].T.reshape((int(img['image_height']/8/2),8,-1,8)),
+            img['coef_arrays'][2].T.reshape((int(img['image_height']/8/2),8,-1,8))
         ])
+        CbCrT = np.einsum('abcde->adbec', CbCrT)
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
         #print("======== Y =========")
@@ -79,16 +75,16 @@ class TestDCT(unittest.TestCase):
         #print(img['coef_arrays'][0][0].tolist())
         #print(img['coef_arrays'][0][:,0].tolist())
 
-        print("======== YT =========")
-        print(YT1.shape)
-        print(YT1[0,0,0])
+        #print("======== YT =========")
+        #print(YT1.shape)
+        #print(YT1[0,0,0])
         #print(YT2)
 
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
         # test DCT coefficients
-        #np.testing.assert_array_equal(Y, YT)
-        #np.testing.assert_array_equal(CbCr, CbCrT)
+        np.testing.assert_array_equal(Y, YT)
+        np.testing.assert_array_equal(CbCr, CbCrT)
         
     # def test_torchjpeg(self):
     #     # read image
