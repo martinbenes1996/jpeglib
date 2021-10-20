@@ -57,7 +57,7 @@ class TestDCT(unittest.TestCase):
             logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
-        #print([i.shape for i in img['coef_arrays']])
+        print([i.shape for i in img['coef_arrays']])
         # process
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
