@@ -58,10 +58,11 @@ class TestDCT(unittest.TestCase):
             return
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
         # process
-        YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,64))
+
+        YT = img['coef_arrays'][0].T.reshape((1,int(img['image_width']/8),-1,64))
         CbCrT = np.stack([
-            img['coef_arrays'][1].reshape((int(img['image_width']/8/2),-1,8,8), order='F'),
-            img['coef_arrays'][2].reshape((int(img['image_width']/8/2),-1,8,8), order='F')
+            img['coef_arrays'][1].T.reshape((int(img['image_width']/8/2),-1,8,8), order='F'),
+            img['coef_arrays'][2].T.reshape((int(img['image_width']/8/2),-1,8,8), order='F')
         ])
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
