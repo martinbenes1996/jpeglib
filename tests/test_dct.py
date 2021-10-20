@@ -59,7 +59,7 @@ class TestDCT(unittest.TestCase):
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
         # process
         
-        YT1 = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8))
+        YT1 = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
         #YT2 = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8))
         #YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
         #YT1 = np.einsum('abcde->adebc', YT)
