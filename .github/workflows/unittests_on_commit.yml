@@ -21,6 +21,7 @@ jobs:
 
     - name: Install dependencies # dependencies
       run: |
+        apt-get install -y --no-install-recommends build-essential libjpeg-dev
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
