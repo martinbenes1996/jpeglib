@@ -43,7 +43,7 @@ im = jpeglib.JPEG("input.jpeg")
 rgb = im.read_spatial(output_color_space='JCS_RGB')
 ```
 
-For more parameters check out the :ref:`documentation <jpeglib.JPEG.read_spatial>`.
+For more parameters check out the :func:`documentation <jpeglib.JPEG.read_spatial>`.
 
 Writing
 ^^^^^^^
@@ -55,7 +55,7 @@ spatial = im.read_spatial("output.jpeg", spatial)
 ```
 
 The color space is chosen based on reading. All the parameter options are listen in the
-:ref:`documentation <jpeglib.JPEG.write_spatial>`.
+:func:`documentation <jpeglib.JPEG.write_spatial>`.
 
 DCT coefficients
 ----------------
