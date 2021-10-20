@@ -5,9 +5,9 @@ class version:
     def set(version):
         """Sets the version of libjpeg to use. Loads the library.
         
-        :param version: Version to use, one of 6b, 8d.
+        :param version: libjpeg version, one of 6b, 8d.
         :type version: str
-        :raises [NotImplementedError]: When unsupported libjpeg version is passed.
+        :raises [NotImplementedError]: unsupported libjpeg version
 
         :Example:
 
