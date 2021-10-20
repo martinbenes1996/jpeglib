@@ -1,16 +1,19 @@
-API
-===
+Reference
+=========
+
+Following is the reference for the ``jpeglib`` package.
 
 .. contents:: Table of Contents
 
-.. autosummary::
-   :toctree: generated
 
-.. automodule:: jpeglib
+Version
+-------
+
+.. automodule:: jpeglib.version
    :members:
 
 JPEG
-====
+----
 
 .. autoclass:: jpeglib.JPEG
    :members:

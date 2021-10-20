@@ -1,9 +1,11 @@
+"""
+Module containing conversion of C-structures into numpy and back and memory management.
+"""
 
 import ctypes
 import logging
 import numpy as np
 import tempfile
-import warnings
 
 from ._bind import CJpegLib
 from ._timer import Timer
@@ -13,8 +15,9 @@ class JPEG:
     def __init__(self, srcfile):
         """Object constructor.
         
-        Args:
-            srcfile (str): File to read metadata from.
+        :param srcfile: Source file.
+        :type srcfile: str
+        :raises [IOError]: When file does not exist or can't be read.
         """
         # set filename
         self.srcfile = srcfile
@@ -24,7 +27,7 @@ class JPEG:
         self._num_components = (ctypes.c_int*1)()
         self._color_space = (ctypes.c_int*1)()
         # get image info
-        self._read_info()      
+        self._read_info()   
         # allocate
         self._im_spatial = self._allocate_spatial()
         self._im_dct = self._allocate_dct()
@@ -32,7 +35,11 @@ class JPEG:
         self._samp_factor = ((ctypes.c_int*2)*3)()
     
     def read_dct(self):
-        """Reads the file DCT."""
+        """Reads the file DCT.
+        
+        :return: Luminance tensor, chrominance tensor and quantization tables.
+        :rtype: 3-tuple of np.ndarrays
+        """
         t = Timer('reading %s DCT', self.srcfile) # log execution time
         # execute
         Y,CbCr,qt = self._read_dct(self.srcfile)
@@ -40,12 +47,14 @@ class JPEG:
         return Y,CbCr,qt
 
     def write_dct(self, dstfile, Y=None, CbCr=None): # qt, 
-        """Writes DCT coefficients to the file.
+        """Writes DCT coefficients to a file.
         
-        Args:
-            dstfile (str): Destination file name.
-            Y (np.array, optional): Modified lumo tensor.
-            CbCr (np.array, optional): Modified chroma tensor.
+        :param dstfile: Destination file.
+        :type dstfile: str
+        :param Y: Luminance DCT.
+        :type Y: np.ndarray
+        :param CbCr: Chrominance DCT.
+        :type CbCr: np.ndarray
         """
         t = Timer('writing %s DCT', dstfile) # log execution time
         # execute

@@ -83,8 +83,7 @@ class CJpegLib:
         try:
             so_file = so_files[0]
         except:
-            raise
-            raise Exception(f"dynamic library not found at {cjpeglib.__path__[0]}, is jpeglib installed?")
+            raise Exception(f"dynamic library not found")
         libname = pathlib.Path(cjpeglib.__path__[0]) / so_file
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)
