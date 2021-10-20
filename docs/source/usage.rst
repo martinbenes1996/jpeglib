@@ -78,6 +78,11 @@ Read more about it in `JPEG compression glossary <https://jpeglib.readthedocs.io
 
 Unlike spatial domain writing, reading and writing of quantized DCT coefficients is lossless.
 
+.. info::
+   
+   Package jpeglib reads and writes quantized DCT coefficients (C type ``short``).
+
+
 Reading the DCT coefficients
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
