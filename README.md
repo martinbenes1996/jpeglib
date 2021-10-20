@@ -80,12 +80,17 @@ You can find all the details in the [documentation](https://jpeglib.readthedocs.
 It is possible to choose, which version of libjpeg should be used.
 
 ```python
-jpeglib.set_libjpeg_version('6b')
+jpeglib.version.set('6b')
 ```
-
 
 Currently `jpeglib` supports the most popular versions 6b and 8d. Their source codes is baked inside the package
 and thus distributed with it, avoiding external dependency.
+
+Get currently used libjpeg version by
+
+```python
+version = jpeglib.version.get()
+```
 
 
 ## Credits
