@@ -2,12 +2,10 @@
 import logging
 import numpy as np
 import os
-import pandas as pd
 import shutil
-import subprocess
 import sys
-#import torchjpeg.codec
 import unittest
+import warnings
 
 sys.path.append('.')
 import jpeglib
@@ -27,7 +25,10 @@ class TestDCT(unittest.TestCase):
             Y,CbCr,qt = im.read_dct()
 
         # dct-coefficient-decoder
-        from decoder import PyCoefficientDecoder 
+        try:
+            from decoder import PyCoefficientDecoder 
+        except Exception as e:
+            warnings.warn(f"invalid installation of dct-coefficient-decoder: {e}")
         filename = 'examples/IMG_0791.jpeg'
         d = PyCoefficientDecoder(filename)
         # process
