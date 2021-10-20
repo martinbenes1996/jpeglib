@@ -3,6 +3,7 @@ Usage
 
 .. contents:: Table of Contents
    :local:
+   :depth: 1
 
 Installation and setup
 ----------------------
@@ -70,7 +71,7 @@ DCT coefficients
 ----------------
 
 *Discrete cosine transform* (DCT) is one of the steps during JPEG compression and decompression.
-Read more about it in :ref:`glossary <jpeg-compression>`.
+Read more about it in `JPEG compression glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-compression>`_.
 
 Unlike spatial domain writing, reading and writing of quantized DCT coefficients is lossless.
 
