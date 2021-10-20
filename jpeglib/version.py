@@ -8,6 +8,11 @@ class version:
         :param version: Version to use, one of 6b, 8d.
         :type version: str
         :raises [NotImplementedError]: When unsupported libjpeg version is passed.
+
+        :Example:
+
+        >>> import jpeglib
+        >>> jpeglib.version.set('8d')
         """
         from ._bind import CJpegLib
         if version in {'6','6b'}:
@@ -22,11 +27,19 @@ class version:
         
         :return: libjpeg version or None if not been loaded yet.
         :rtype: str, None
+
+
+        :Example:
+
+        >>> import jpeglib
+        >>> jpeglib.version.set('6b')
+        >>> jpeglib.version.get()
+        '6b'
         """
         from ._bind import CJpegLib
         return CJpegLib.get_version()
     @staticmethod
-    def get_lib():
+    def _get_lib():
         """Low-level getter of the dynamic library.
         
         :return: Dynamic library object or None if not loaded yet.

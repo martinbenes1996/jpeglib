@@ -131,7 +131,7 @@ class JPEG:
         self._im_dct = None # free DCT buffer
         self._im_spatial = None # free spatial buffer
 
-    def to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
+    def _to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
         """Converts DCT representation to RGB. Uses temporary file to compress and decompress."""
         #t = Timer('DCT-RGB conversion')
         if (Y is None or CbCr is None) and self._im_dct is None:
