@@ -25,7 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
-        echo "djpeg is installed at $(which djpeg)""
+        echo "djpeg is installed at $(which djpeg) path"
         pip install git+https://github.com/btlorch/dct-coefficient-decoder.git
         pip install git+https://github.com/daniellerch/python-jpeg-toolbox
         
