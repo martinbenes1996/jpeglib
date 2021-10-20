@@ -32,11 +32,14 @@ In JPEG, the pixel data (such as RGB) are compressed and to get them,
 the image has to be decompressed. Similarly to save pixels as JPEG,
 they are compressed.
 
-Compression comes with loss and thus different implementations might
-produce slightly different results. To better address this,
-jpeglib comes with `unit tests <https://github.com/martinbenes1996/jpeglib/actions/workflows/unittests_on_commit.yml>`_, where you can check, how different
-the result is compared to other popular Python packages for working
-with images.
+.. warning::
+   
+   Compression comes with loss and thus different implementations might
+   produce slightly different results.
+   
+   To better address this, jpeglib comes with `unit tests <https://github.com/martinbenes1996/jpeglib/actions/workflows/unittests_on_commit.yml>`_,
+   where you can check, how different the outputs are compared to other popular
+   Python packages.
 
 Reading the pixel data
 ^^^^^^^^^^^^^^^^^^^^^^
