@@ -2,6 +2,7 @@ Usage
 =====
 
 .. contents:: Table of Contents
+   :local:
 
 Installation and setup
 ----------------------
@@ -51,7 +52,8 @@ The output channels depend on the source file. You can explicitly request return
 >>> rgb = im.read_spatial(output_color_space='JCS_RGB')
 
 
-For more parameters check out the `documentation <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.read_spatial>`_.
+For more parameters check out the `jpeglib.JPEG.read_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.read_spatial>`_
+documentation.
 
 Writing the pixel data
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -61,7 +63,8 @@ Compression of a numpy array to an output file ``output.jpeg`` is done with
 >>> im.write_spatial("output.jpeg", spatial)
 
 The color space is chosen based on reading. All the parameter options are listen in the
-`documentation <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.write_spatial>`_.
+`jpeglib.JPEG.write_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.write_spatial>`_
+documentation.
 
 DCT coefficients
 ----------------
@@ -79,7 +82,8 @@ Acquire the quantized DCT coefficients of an input file ``input.jpeg`` with
 >>> Y,CbCr,qt = im.read_dct()
 
 What you recieve is tensors of luminance and chrominance DCT coefficients and
-quantization tables, read more specific information in the `documentation <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.read_dct>`_.
+quantization tables, read more specific information in the `jpeglib.JPEG.read_dct <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.read_dct>`_
+documentation.
 
 Writing the DCT coefficients
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -88,5 +92,6 @@ Write the quantized coefficients to an output file ``output.jpeg`` with
 
 >>> im.write_dct("output.jpeg", Y, CbCr)
 
-The function reference can be found `here <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.write_dct>`_.
+The function reference can be found in the `jpeglib.JPEG.write_dct <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.write_dct>`_ 
+documentation.
 
