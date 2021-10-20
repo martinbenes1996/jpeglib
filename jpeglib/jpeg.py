@@ -19,6 +19,10 @@ class JPEG:
         :param srcfile: Source file.
         :type srcfile: str
         :raises [IOError]: When file does not exist or can't be read.
+        
+        :Example:
+
+        >>> im = jpeglib.JPEG("input.jpeg")
         """
         # set filename
         self.srcfile = srcfile
@@ -43,7 +47,6 @@ class JPEG:
 
         :Example:
 
-        >>> import jpeglib
         >>> im = jpeglib.JPEG("input.jpeg")
         >>> Y,CbCr,qt = im.read_dct()
         """
@@ -59,13 +62,12 @@ class JPEG:
         :param dstfile: Destination file.
         :type dstfile: str
         :param Y: Luminance DCT.
-        :type Y: np.ndarray
+        :type Y: np.ndarray, optional
         :param CbCr: Chrominance DCT.
-        :type CbCr: np.ndarray
+        :type CbCr: np.ndarray, optional
 
         :Example:
 
-        >>> import jpeglib
         >>> im = jpeglib.JPEG("input.jpeg")
         >>> Y,CbCr,qt = im.read_dct()
         >>> im.write_dct("output.jpeg", Y, CbCr)
@@ -111,7 +113,12 @@ class JPEG:
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
         :type flags: list, optional
         :return: Spatial representation of the source image.
-        :rtype: np.ndarray 
+        :rtype: np.ndarray
+
+        :Example:
+
+        >>> im = jpeglib.JPEG("input.jpeg")
+        >>> rgb = im.read_spatial(out_color_space="JCS_RGB")
         """
         #t = Timer('reading %s spatial', self.srcfile) # log execution time
         # execute
@@ -140,6 +147,12 @@ class JPEG:
         :type smoothing_factor: int, optional
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
         :type flags: list, optional
+
+        :Example:
+
+        >>> im = jpeglib.JPEG("input.jpeg")
+        >>> grayscale = im.read_spatial(out_color_space="JCS_GRAYSCALE")
+        >>> im.write_spatial(grayscale)
         """
         #t = Timer('writing %s spatial', self.srcfile) # log execution time
         # execute
@@ -158,7 +171,13 @@ class JPEG:
         :param CbCr: Chrominance DCT.
         :type CbCr: np.ndarray
         :return: Spatial representation of DCT coefficients
-        :rtype: np.ndarray 
+        :rtype: np.ndarray
+
+        :Example:
+
+        >>> im = jpeglib.JPEG("input.jpeg")
+        >>> Y,CbCr,qt = im.read_dct()
+        >>> im.to_spatial(Y, CbCr)
         """
         #t = Timer('DCT-RGB conversion')
         if (Y is None or CbCr is None) and self._im_dct is None:
@@ -310,7 +329,13 @@ class JPEG:
 
     def print_params(self): self.cjpeglib.print_jpeg_params(self.srcfile)
     def __enter__(self):
-        """Method for using ``with`` statement together with :class:`JPEG`."""
+        """Method for using ``with`` statement together with :class:`JPEG`.
+        
+        :Example:
+        
+        >>> with jpeglib.JPEG("input.jpeg") as im:
+        >>>     Y,CbCr,qt = im.read_dct()
+        """
         return self
     def __exit__(self, exception_type, exception_val, trace):
         """Method for using ``with`` statement together with :class:`JPEG`."""
