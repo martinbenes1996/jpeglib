@@ -341,7 +341,14 @@ class JPEG:
         """Method for using ``with`` statement together with :class:`JPEG`."""
         self.close()
     def close(self):
-        """Closes the object. Defined for interface compatibility with PIL."""
+        """Closes the object. Defined for interface compatibility with PIL.
+        
+        :Example:
+
+        >>> im = jpeglib.JPEG("input.jpeg")
+        >>> # work with im
+        >>> im.close()
+        """
         pass
     def _allocate_dct(self):
         return ((((ctypes.c_short * 64) 
