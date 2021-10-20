@@ -21,7 +21,7 @@ jobs:
 
     - name: Install dependencies # dependencies
       run: |
-        sudo apt install -y --no-install-recommends libturbojpeg
+        which cjpeg
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
