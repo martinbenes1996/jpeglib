@@ -59,8 +59,9 @@ class TestDCT(unittest.TestCase):
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
         # process
         
-        YT = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8), order='F')
-        YT = np.einsum('abcde->adebc', YT)
+        YT = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8))#, order='F')
+        YT_ = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8), order='F')
+        #YT = np.einsum('abcde->abcde', YT)
         CbCrT = np.stack([
             img['coef_arrays'][1].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F'),
             img['coef_arrays'][2].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F')
@@ -75,6 +76,8 @@ class TestDCT(unittest.TestCase):
 
         print("======== YT =========")
         print(YT)
+        print("======== YT_ =========")
+        print(YT_)
 
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
