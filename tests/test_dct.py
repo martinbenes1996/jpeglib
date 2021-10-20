@@ -68,18 +68,6 @@ class TestDCT(unittest.TestCase):
         CbCrT = np.einsum('abcde->adbec', CbCrT)
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
-        #print("======== Y =========")
-        #print(Y[0,0:3,0:3])
-
-        #print("======== Original =========")
-        #print(img['coef_arrays'][0][0].tolist())
-        #print(img['coef_arrays'][0][:,0].tolist())
-
-        #print("======== YT =========")
-        #print(YT1.shape)
-        #print(YT1[0,0,0])
-        #print(YT2)
-
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
         # test DCT coefficients
