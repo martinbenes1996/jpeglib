@@ -2,15 +2,14 @@ Reference
 =========
 .. contents:: Table of Contents
 
-
-Version of libjpeg
+Working with jpegs
 ------------------
 
-.. autoclass:: jpeglib.version
+.. autoclass:: jpeglib.JPEG
    :members:
 
-JPEG
-----
+Manage libjpeg version
+----------------------
 
-.. autoclass:: jpeglib.JPEG
+.. autoclass:: jpeglib.version
    :members:

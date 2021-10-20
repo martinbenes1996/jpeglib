@@ -19,5 +19,6 @@ Contents
 
 .. toctree::
 
+   glossary
    usage
    api
