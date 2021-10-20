@@ -12,7 +12,7 @@ Description of JPEG compression
 References
 """"""""""
 
-List of references for JPEG compression.
+* `Computerphile: JPEG DCT, Discrete Cosine Transform <https://www.youtube.com/watch?v=Q2aEzeMDHMA&ab_channel=Computerphile>`_
 
 libjpeg C library
 -----------------
@@ -24,7 +24,6 @@ Mention different version
 References
 """"""""""
 
-* `Computerphile: JPEG DCT, Discrete Cosine Transform <https://www.youtube.com/watch?v=Q2aEzeMDHMA&ab_channel=Computerphile>`_
 * `Using the IJG JPEG library <https://freedesktop.org/wiki/Software/libjpeg/>`_
 * `Interface Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpegman.html>`_
 * `Data Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpeg-ddefs.html>`_
