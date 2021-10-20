@@ -67,10 +67,14 @@ class TestDCT(unittest.TestCase):
         ])
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
-        print(img['coef_arrays'][0])
-        print(YT)
-
+        print("======== Y =========")
         print(Y)
+
+        print("======== Original =========")
+        print(img['coef_arrays'][0])
+
+        print("======== YT =========")
+        print(YT)
 
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
