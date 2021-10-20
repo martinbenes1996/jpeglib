@@ -68,6 +68,8 @@ class TestDCT(unittest.TestCase):
 
         print(YT)
 
+        print(CbCrT)
+
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
         # test DCT coefficients

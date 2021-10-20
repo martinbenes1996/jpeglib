@@ -310,10 +310,10 @@ class JPEG:
 
     def print_params(self): self.cjpeglib.print_jpeg_params(self.srcfile)
     def __enter__(self):
-        """Method for using ``with`` statement together with :class:`JPEG.`"""
+        """Method for using ``with`` statement together with :class:`JPEG`."""
         return self
     def __exit__(self, exception_type, exception_val, trace):
-        """Method for using ``with`` statement together with :class:`JPEG.`"""
+        """Method for using ``with`` statement together with :class:`JPEG`."""
         self.close()
     def close(self):
         """Closes the object. Defined for interface compatibility with PIL."""
