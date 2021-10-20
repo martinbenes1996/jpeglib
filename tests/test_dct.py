@@ -60,7 +60,7 @@ class TestDCT(unittest.TestCase):
         # process
         
         YT1 = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8))
-        YT2 = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8))
+        #YT2 = img['coef_arrays'][0].reshape((1,int(img['image_height']/8),-1,8,8))
         #YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
         #YT1 = np.einsum('abcde->adebc', YT)
         #YT2 = np.einsum('abcde->aedbc', YT)
@@ -72,16 +72,17 @@ class TestDCT(unittest.TestCase):
         ])
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
-        print("======== Y =========")
-        print(Y)
+        #print("======== Y =========")
+        #print(Y[0,0:3,0:3])
 
-        print("======== Original =========")
-        print(img['coef_arrays'][0][0].tolist())
-        print(img['coef_arrays'][0][:,0].tolist())
+        #print("======== Original =========")
+        #print(img['coef_arrays'][0][0].tolist())
+        #print(img['coef_arrays'][0][:,0].tolist())
 
         print("======== YT =========")
-        print(YT1)
-        print(YT2)
+        print(YT1.shape)
+        print(YT1[0,0,0])
+        #print(YT2)
 
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
