@@ -28,6 +28,7 @@ jobs:
         cd dct-coefficient-decoder
         cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
         python setup.py install
+        pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox
 
     
     - name: Build library # build CJpegLib
@@ -37,4 +38,4 @@ jobs:
     
     - name: Run unittests # run unittests
       run:
-        python tests/test.py
+        python tests/test.py; cat test.log

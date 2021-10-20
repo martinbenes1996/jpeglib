@@ -27,10 +27,10 @@ class TestDCT(unittest.TestCase):
         # dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder 
-        except Exception as e:
-            warnings.warn(f"invalid installation of dct-coefficient-decoder: {e}")
-        filename = 'examples/IMG_0791.jpeg'
-        d = PyCoefficientDecoder(filename)
+        except Exception as e: # error loading
+            logging.info(f"invalid installation of dct-coefficient-decoder: {e}")
+            return
+        d = PyCoefficientDecoder('examples/IMG_0791.jpeg')
         # process
         qtT = np.stack([d.get_quantization_table(i) for i in range(3)])
         YT = d.get_dct_coefficients(0).reshape((1,int(d.image_width/8),-1,8,8), order='F')
@@ -46,8 +46,26 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(qt, qtT)
         
     def test_python_jpeg_toolbox(self):
-        pass
+        # jpeglib
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            Y,CbCr,qt = im.read_dct()
 
+        # jpeg-toolbox
+        try:
+            import jpeg_toolbox
+        except Exception as e:
+            logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
+            return
+        img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
+        #print([i.shape for i in img['coef_arrays']])
+        # process
+        qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
+
+        # test DCT coefficients
+        #np.testing.assert_array_equal(Y, YT)
+        #np.testing.assert_array_equal(CbCr, CbCrT)
+        # test quantization
+        np.testing.assert_array_equal(qt, qtT)
     # def test_torchjpeg(self):
     #     # read image
     #     im = jpeglib.JPEG("examples/IMG_0791.jpeg")
