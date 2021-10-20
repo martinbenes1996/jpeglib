@@ -3,8 +3,8 @@ Usage
 
 .. contents:: Table of Contents
 
-Setup
------
+Installation and setup
+----------------------
 
 To use ``jpeglib``, first install it using pip:
 
@@ -26,9 +26,36 @@ Currently supported versions are ``"6b"`` and ``"8d"``.
 Pixel data
 ----------
 
-Get pixel data
+Reading
+^^^^^^^
 
-TODO
+Decompress input file ``input.jpeg`` into spatial representation in numpy array with
+
+```python
+im = jpeglib.JPEG("input.jpeg")
+spatial = im.read_spatial()
+```
+
+The output channels depend on the source file. You can explicitly request returning RGB
+
+```python
+im = jpeglib.JPEG("input.jpeg")
+rgb = im.read_spatial(output_color_space='JCS_RGB')
+```
+
+For more parameters check out the :ref:`documentation <jpeglib.JPEG.read_spatial>`.
+
+Writing
+^^^^^^^
+
+Compression of a numpy array to an output file ``output.jpeg`` is done with
+
+```python
+spatial = im.read_spatial("output.jpeg", spatial)
+```
+
+The color space is chosen based on reading. All the parameter options are listen in the
+:ref:`documentation <jpeglib.JPEG.write_spatial>`.
 
 DCT coefficients
 ----------------

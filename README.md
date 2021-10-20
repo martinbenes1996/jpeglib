@@ -54,7 +54,7 @@ with jpeglib.JPEG("input.jpeg") as im:
   im.write_dct("output.jpeg", Y, CbCr)
 ```
 
-### Spatial (RGB)
+### Pixel data
 
 Decompress the `input.jpeg` into spatial representation in numpy array with
 
