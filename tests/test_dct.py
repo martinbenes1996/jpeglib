@@ -49,7 +49,7 @@ class TestDCT(unittest.TestCase):
         # jpeglib
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             Y,CbCr,qt = im.read_dct()
-
+        print(Y.shape)
         # jpeg-toolbox
         try:
             import jpeg_toolbox
@@ -57,13 +57,20 @@ class TestDCT(unittest.TestCase):
             logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
-        print([i.shape for i in img['coef_arrays']])
         # process
+        YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
+        CbCrT = np.stack([
+            img['coef_arrays'][1].reshape((1,int(img['image_width']/8/2),-1,8,8), order='F'),
+            img['coef_arrays'][2].reshape((1,int(img['image_width']/8/2),-1,8,8), order='F')
+        ])
         qtT = np.concatenate([img['quant_tables'], img['quant_tables'][1:]])
 
+        print(Y.shape, CbCr.shape, qt.shape)
+        print(YT.shape, CbCrT.shape, qtT.shape)
+
         # test DCT coefficients
-        #np.testing.assert_array_equal(Y, YT)
-        #np.testing.assert_array_equal(CbCr, CbCrT)
+        np.testing.assert_array_equal(Y, YT)
+        np.testing.assert_array_equal(CbCr, CbCrT)
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
     # def test_torchjpeg(self):
