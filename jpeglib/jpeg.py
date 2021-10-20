@@ -6,6 +6,7 @@ import ctypes
 import logging
 import numpy as np
 import tempfile
+import warnings
 
 from ._bind import CJpegLib
 from ._timer import Timer
@@ -39,8 +40,14 @@ class JPEG:
         
         :return: Luminance tensor, chrominance tensor and quantization tables.
         :rtype: 3-tuple of np.ndarrays
+
+        :Example:
+
+        >>> import jpeglib
+        >>> im = jpeglib.JPEG("input.jpeg")
+        >>> Y,CbCr,qt = im.read_dct()
         """
-        t = Timer('reading %s DCT', self.srcfile) # log execution time
+        #t = Timer('reading %s DCT', self.srcfile) # log execution time
         # execute
         Y,CbCr,qt = self._read_dct(self.srcfile)
         # result
@@ -55,8 +62,15 @@ class JPEG:
         :type Y: np.ndarray
         :param CbCr: Chrominance DCT.
         :type CbCr: np.ndarray
+
+        :Example:
+
+        >>> import jpeglib
+        >>> im = jpeglib.JPEG("input.jpeg")
+        >>> Y,CbCr,qt = im.read_dct()
+        >>> im.write_dct("output.jpeg", Y, CbCr)
         """
-        t = Timer('writing %s DCT', dstfile) # log execution time
+        #t = Timer('writing %s DCT', dstfile) # log execution time
         # execute
         self._write_dct(dstfile, Y, CbCr)
         self._im_dct = None # free DCT buffer
@@ -99,6 +113,7 @@ class JPEG:
         :return: Spatial representation of the source image.
         :rtype: np.ndarray 
         """
+        #t = Timer('reading %s spatial', self.srcfile) # log execution time
         # execute
         spatial = self._read_spatial(self.srcfile, out_color_space, dither_mode, dct_method, flags)
         self._im_dct = None # free DCT buffer
@@ -126,13 +141,25 @@ class JPEG:
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
         :type flags: list, optional
         """
+        #t = Timer('writing %s spatial', self.srcfile) # log execution time
         # execute
         self._write_spatial(dstfile, data, in_color_space, dct_method, samp_factor, quality, smoothing_factor, flags)
         self._im_dct = None # free DCT buffer
         self._im_spatial = None # free spatial buffer
 
-    def _to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
-        """Converts DCT representation to RGB. Uses temporary file to compress and decompress."""
+    def to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
+        """Converts DCT representation to spatial.
+        
+        Performs decompression from DCT coefficients to spatial representation.
+        Uses temporary file to save and read from as libjpeg does not have a direct handler.
+        
+        :param Y: Luminance DCT.
+        :type Y: np.ndarray
+        :param CbCr: Chrominance DCT.
+        :type CbCr: np.ndarray
+        :return: Spatial representation of DCT coefficients
+        :rtype: np.ndarray 
+        """
         #t = Timer('DCT-RGB conversion')
         if (Y is None or CbCr is None) and self._im_dct is None:
             raise RuntimeError("Call read_dct() before calling to_spatial() or specify Y and CbCr.")
@@ -254,14 +281,9 @@ class JPEG:
                 qt = None
             # quantization table
             except:
-                #print(quality.shape, file=sys.stderr)
                 qt = np.array(quality).reshape(*quality.shape[:-2],64)
-                #print(qt.shape, file=sys.stderr)
                 qt = self._im_qt = np.ctypeslib.as_ctypes(quality)
-                #print(qt, file=sys.stderr)
                 quality = None
-
-        #print(f"{quality} {qt}")
         # spatial buffer
         if data is not None:
             data = data.reshape(self.channels,data.shape[1],-1)
@@ -287,17 +309,21 @@ class JPEG:
         )
 
     def print_params(self): self.cjpeglib.print_jpeg_params(self.srcfile)
-    def __enter__(self): return self
-    def __exit__(self, exception_type, exception_val, trace): self.close()
-    def close(self): pass
+    def __enter__(self):
+        """Method for using ``with`` statement together with :class:`JPEG.`"""
+        return self
+    def __exit__(self, exception_type, exception_val, trace):
+        """Method for using ``with`` statement together with :class:`JPEG.`"""
+        self.close()
+    def close(self):
+        """Closes the object. Defined for interface compatibility with PIL."""
+        pass
     def _allocate_dct(self):
         return ((((ctypes.c_short * 64) 
                                   * self.dct_shape[0][1])
                                   * self.dct_shape[0][0])
                                   * self.dct_channels)()
     def _allocate_spatial(self):
-        #if channels is None or channels <= 0:
-        #    channels = self.spatial_channels
         return (((ctypes.c_ubyte * self.shape[1])
                                  * self.shape[0])
                                  * self.channels)()
@@ -312,12 +338,7 @@ class JPEG:
                     self._samp_factor[i][0] = f[0]
                     self._samp_factor[i][1] = f[1]
         return self._samp_factor
-            #return ((ctypes.c_int*2)*3)(*samp_factor)
-    #def _out_channels(self, out_color_space):
-    #    _,channels = self.J_COLOR_SPACE[out_color_space]
-    #    if channels is None or channels < 1:
-    #        channels = self.rgb_channels
-    #    return channels
+
 
 
 

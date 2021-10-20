@@ -21,6 +21,32 @@ class TestDCT(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree("tmp")
 
+    def test_dct_coefficient_decoder(self):
+        # jpeglib
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            Y,CbCr,qt = im.read_dct()
+
+        # dct-coefficient-decoder
+        from decoder import PyCoefficientDecoder 
+        filename = 'examples/IMG_0791.jpeg'
+        d = PyCoefficientDecoder(filename)
+        # process
+        qtT = np.stack([d.get_quantization_table(i) for i in range(3)])
+        YT = d.get_dct_coefficients(0).reshape((1,int(d.image_width/8),-1,8,8), order='F')
+        CbCrT = np.stack([
+            d.get_dct_coefficients(1).reshape((int(d.image_width/8/2),-1,8,8), order='F'),
+            d.get_dct_coefficients(2).reshape((int(d.image_width/8/2),-1,8,8), order='F'),
+        ])
+
+        # test DCT coefficients
+        np.testing.assert_array_equal(Y, YT)
+        np.testing.assert_array_equal(CbCr, CbCrT)
+        # test quantization
+        np.testing.assert_array_equal(qt, qtT)
+        
+    def test_python_jpeg_toolbox(self):
+        pass
+
     # def test_torchjpeg(self):
     #     # read image
     #     im = jpeglib.JPEG("examples/IMG_0791.jpeg")
