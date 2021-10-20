@@ -76,25 +76,20 @@ class JPEG:
         "JDCT_FLOAT": 2, # floating-point method
     }
 
-    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None,
-                     flags=[]):
-        """Reads the file in spatial domain.
+    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, flags=[]):
+        """Decompresses the file into the spatial domain. 
         
-        Args:
-            out_color_space (str, optional):    Output color space. Must be key of J_COLOR_SPACE.
-            dither_mode (str,optional):         Dither mode. Must be key of J_DITHER_MODE.
-                                                Using default from libjpeg by default.
-            dct_method (str, optional):         DCT method. Must be key of J_DCT_METHOD.
-                                                Using default from libjpeg by default.
-            flags (list, optional):             Bool decompression parameters as str to set to be true.
-                                                Using default from libjpeg by default.
+        :param out_color_space: Output color space. Must be key of J_COLOR_SPACE.
+        :type out_color_space: str, optional
+        :param dither_mode: Dither mode. Must be key of :class:`jpeg.JPEG.J_DITHER_MODE`. Using default from libjpeg by default.
+        :type dither_mode: str, optional
+        :param dct_method: DCT method. Must be key of :class:`jpeg.JPEG.J_DCT_METHOD`. Using default from libjpeg by default.
+        :type dct_method: str, optional
+        :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
+        :type flags: list, optional
+        :return: Spatial representation of the source image.
+        :rtype: np.ndarray 
         """
-        #t = Timer('reading %s RGB', self.srcfile) # log execution time
-        # check input
-        #assert(out_color_space in self.J_COLOR_SPACE)
-        #assert(dither_mode in self.J_DITHER_MODE)
-        #assert(dct_method in self.J_DCT_METHOD)
-        #assert(all(flag in self.cjpeglib.MASKS for flag in flags))
         # execute
         spatial = self._read_spatial(self.srcfile, out_color_space, dither_mode, dct_method, flags)
         self._im_dct = None # free DCT buffer
@@ -105,27 +100,23 @@ class JPEG:
                       samp_factor=None, quality=100, smoothing_factor=None, flags=[]):
         """Writes spatial image representation (i.e. RGB) to a file.
         
-        Args:
-            dstfile (str):                      Destination file name.
-            data (np.array):                    Numpy array with spatial data.
-            in_color_space (str, optional):     Input color space. Must be key of J_COLOR_SPACE.
-                                                JCS_RGB if data given, otherwise from source.
-            dct_method (str, optional):         DCT method. Must be key of J_DCT_METHOD.
-                                                Using default from libjpeg by default.
-            samp_factor (tuple, optional):      Sampling factor. None, tuple of three ints or tuples of two ints.
-                                                According to source by default.
-            quality (int, optional)             Compression quality, between 0 and 100.
-                                                Defaultly 100 (full quality).
-            smoothing_factor (int, optional):   Smoothing factor, between 0 and 100.
-                                                Using default from libjpeg by default.
-            flags (list, optional):             Bool decompression parameters as str to set to be true.
-                                                Using default from libjpeg by default.
+        :param dstfile: Destination file name.
+        :type dstfile: str
+        :param data: Numpy array with spatial data.
+        :type data: np.darray, optional
+        :param in_color_space: Input color space. Must be key of :class:`jpeg.JPEG.J_COLOR_SPACE`. According to source by default.
+        :type in_color_space: str, optional
+        :param dct_method: DCT method. Must be key of :class:`jpeg.JPEG.J_DCT_METHOD`. Using default from libjpeg by default.
+        :type dct_method: str, optional
+        :param samp_factor: Sampling factor. None, tuple of three ints or tuples of two ints. According to source by default.
+        :type samp_factor: str, optional
+        :param quality: Compression quality, between 0 and 100. Defaultly 100 (full quality).
+        :type quality: int, optional
+        :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
+        :type smothing_factor: int, optional
+        :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
+        :type flags: list, optional
         """
-        #t = Timer('writing %s DCT', dstfile)
-        # check input
-        #assert(not (data is not None and in_color_space is None))
-        #assert(in_color_space in self.J_COLOR_SPACE)
-        #assert(dct_method in self.J_DCT_METHOD)
         # execute
         self._write_spatial(dstfile, data, in_color_space, dct_method, samp_factor, quality, smoothing_factor, flags)
         self._im_dct = None # free DCT buffer
@@ -159,11 +150,6 @@ class JPEG:
         self.shape = np.array([self._dims[0], self._dims[1]])
         self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
 
-        
-        # log
-        #channel_descr = ",".join([f"{self.dctshape[ch][0]}x{self.dctshape[ch][1]}"
-        #                            for ch in range(self.dct_channels)])
-        #logging.debug(f"scanned {self.srcfile} w/DCT channels " + channel_descr)
     
     def _read_dct(self, srcfile):
         # allocate
