@@ -18,7 +18,7 @@ Import the package with
 
 >>> import jpeglib
 
-You can specify a particular libjpeg to use with
+You can specify a particular :term:`libjpeg` version to use with
 :py:func:`set_libjpeg_version()`.
 
 >>> jpeglib.version.set('6b')
@@ -28,7 +28,7 @@ Currently supported versions are ``"6b"`` and ``"8d"``.
 Pixel data
 ----------
 
-In JPEG, the pixel data (such as RGB) are compressed and to get them,
+In :term:`JPEG`, the pixel data (such as RGB) are compressed and to get them,
 the image has to be decompressed. Similarly to save pixels as JPEG,
 they are compressed.
 
@@ -73,7 +73,7 @@ documentation.
 DCT coefficients
 ----------------
 
-*Discrete cosine transform* (DCT) is one of the steps during JPEG compression and decompression.
+:term:`DCT` (*Discrete cosine transform*) is one of the steps during JPEG compression and decompression.
 Read more about it in `JPEG compression glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-compression>`_.
 
 Unlike spatial domain writing, reading and writing of quantized DCT coefficients is lossless.

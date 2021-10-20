@@ -31,3 +31,21 @@ References for libjpeg
 * `Using the IJG JPEG library <https://freedesktop.org/wiki/Software/libjpeg/>`_
 * `Interface Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpegman.html>`_
 * `Data Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpeg-ddefs.html>`_
+
+Glossary terms
+--------------
+
+.. glossary::
+
+    DCT
+        Discrete cosine transform
+
+    libjpeg
+        C library developed by IJC
+
+    JPEG
+        Joint Photographic Experts Group, image compression standard.
+
+    JPG
+        Synonym to :term:`JPEG`.
+    
