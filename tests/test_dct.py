@@ -75,7 +75,8 @@ class TestDCT(unittest.TestCase):
         print(Y)
 
         print("======== Original =========")
-        print(img['coef_arrays'][0][0])
+        print(img['coef_arrays'][0][0].tolist())
+        print(img['coef_arrays'][0][:,0].tolist())
 
         print("======== YT =========")
         print(YT)
