@@ -26,40 +26,67 @@ Currently supported versions are ``"6b"`` and ``"8d"``.
 Pixel data
 ----------
 
-Reading
-^^^^^^^
+In JPEG, the pixel data (such as RGB) are compressed and to get them,
+the image has to be decompressed. Similarly to save pixels as JPEG,
+they are compressed.
+
+Compression comes with loss and thus different implementations might
+produce slightly different results. To better address this,
+jpeglib comes with `unit tests <https://github.com/martinbenes1996/jpeglib/actions/workflows/unittests_on_commit.yml>`_, where you can check, how different
+the result is compared to other popular Python packages for working
+with images.
+
+Reading the pixel data
+^^^^^^^^^^^^^^^^^^^^^^
 
 Decompress input file ``input.jpeg`` into spatial representation in numpy array with
 
-```python
-im = jpeglib.JPEG("input.jpeg")
-spatial = im.read_spatial()
-```
+>>> im = jpeglib.JPEG("input.jpeg")
+>>> spatial = im.read_spatial()
+
 
 The output channels depend on the source file. You can explicitly request returning RGB
 
-```python
-im = jpeglib.JPEG("input.jpeg")
-rgb = im.read_spatial(output_color_space='JCS_RGB')
-```
+>>> im = jpeglib.JPEG("input.jpeg")
+>>> rgb = im.read_spatial(output_color_space='JCS_RGB')
 
-For more parameters check out the :func:`documentation <jpeglib.JPEG.read_spatial>`.
 
-Writing
-^^^^^^^
+For more parameters check out the `documentation <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.read_spatial>`_.
+
+Writing the pixel data
+^^^^^^^^^^^^^^^^^^^^^^
 
 Compression of a numpy array to an output file ``output.jpeg`` is done with
 
-```python
-spatial = im.read_spatial("output.jpeg", spatial)
-```
+>>> im.write_spatial("output.jpeg", spatial)
 
 The color space is chosen based on reading. All the parameter options are listen in the
-:func:`documentation <jpeglib.JPEG.write_spatial>`.
+`documentation <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.write_spatial>`_.
 
 DCT coefficients
 ----------------
 
-Get DCT coefficients and quantization matrix
+*Discrete cosine transform* (DCT) is one of the steps during JPEG compression and decompression.
+Read more about it in :ref:`glossary <jpeg-compression>`.
 
-TODO
+Unlike spatial domain writing, reading and writing of quantized DCT coefficients is lossless.
+
+Reading the DCT coefficients
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Acquire the quantized DCT coefficients of an input file ``input.jpeg`` with
+
+>>> Y,CbCr,qt = im.read_dct()
+
+What you recieve is tensors of luminance and chrominance DCT coefficients and
+quantization tables, read more specific information in the `documentation <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.read_dct>`_.
+
+Writing the DCT coefficients
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Write the quantized coefficients to an output file ``output.jpeg`` with
+
+>>> im.write_dct("output.jpeg", Y, CbCr)
+
+The function reference can be found `here <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.JPEG.write_dct>`_.
+
