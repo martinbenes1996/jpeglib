@@ -19,7 +19,7 @@ Import the package with
 You can specify a particular libjpeg to use with
 :py:func:`set_libjpeg_version()`.
 
->>> jpeglib.set_libjpeg_version('6b')
+>>> jpeglib.version.set('6b')
 
 Currently supported versions are ``"6b"`` and ``"8d"``. 
 

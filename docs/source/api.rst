@@ -1,15 +1,12 @@
 Reference
 =========
-
-Following is the reference for the ``jpeglib`` package.
-
 .. contents:: Table of Contents
 
 
-Version
--------
+Version of libjpeg
+------------------
 
-.. automodule:: jpeglib.version
+.. autoclass:: jpeglib.version
    :members:
 
 JPEG

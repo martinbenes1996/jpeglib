@@ -64,6 +64,7 @@ class CJpegLib:
         return ctypes.c_ulong(mask)
 
     _lib = None
+    version = None
     @classmethod
     def get(cls):
         # connect to library
@@ -75,9 +76,12 @@ class CJpegLib:
     @classmethod
     def set_version(cls, version):
         cls._lib = cls._bind_lib(version=version)
+    @classmethod
+    def get_version(cls):
+        return cls.version
 
     @classmethod
-    def _bind_lib(cls, version='8d'):
+    def _bind_lib(cls, version='6b'):
         # path of the library
         so_files = [f for f in os.listdir(cjpeglib.__path__[0]) if re.fullmatch(f'cjpeglib_{version}\..*\.so', f)]
         try:
@@ -87,6 +91,7 @@ class CJpegLib:
         libname = pathlib.Path(cjpeglib.__path__[0]) / so_file
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)
+        cls.version = version
         return cjpeglib_dylib
     
     @staticmethod

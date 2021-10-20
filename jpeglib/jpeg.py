@@ -122,7 +122,7 @@ class JPEG:
         :param quality: Compression quality, between 0 and 100. Defaultly 100 (full quality).
         :type quality: int, optional
         :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
-        :type smothing_factor: int, optional
+        :type smoothing_factor: int, optional
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
         :type flags: list, optional
         """
