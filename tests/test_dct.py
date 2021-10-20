@@ -59,11 +59,12 @@ class TestDCT(unittest.TestCase):
         img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
         # process
         
-        YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
-        YT1 = np.einsum('abcde->adebc', YT)
-        YT2 = np.einsum('abcde->aedbc', YT)
-        YT3 = np.einsum('abcde->adecb', YT)
-        YT4 = np.einsum('abcde->aedcb', YT)
+        YT = img['coef_arrays'][0].reshape((1,8,8,-1))#int(img['image_width']/8),-1,8,8), order='F')
+        #YT = img['coef_arrays'][0].reshape((1,int(img['image_width']/8),-1,8,8), order='F')
+        #YT1 = np.einsum('abcde->adebc', YT)
+        #YT2 = np.einsum('abcde->aedbc', YT)
+        #YT = np.einsum('abcde->adecb', YT)
+        #YT4 = np.einsum('abcde->aedcb', YT)
         CbCrT = np.stack([
             img['coef_arrays'][1].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F'),
             img['coef_arrays'][2].T.reshape((int(img['image_height']/8/2),-1,8,8), order='F')
@@ -74,18 +75,10 @@ class TestDCT(unittest.TestCase):
         print(Y)
 
         print("======== Original =========")
-        print(img['coef_arrays'][0])
+        print(img['coef_arrays'][0][0])
 
         print("======== YT =========")
         print(YT)
-        print("======== YT1 =========")
-        print(YT1)
-        print("======== YT2 =========")
-        print(YT2)
-        print("======== YT3 =========")
-        print(YT3)
-        print("======== YT4 =========")
-        print(YT4)
 
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
