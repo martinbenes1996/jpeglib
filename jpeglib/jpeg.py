@@ -47,8 +47,6 @@ class JPEG:
             np.ndarray Y non-quantized DCT luminance tensor of shape (1, W/8, H/8, 8, 8)
             np.ndarray CbCr non-quantized DCT chrominance tensor of shape (2, W/8, H/8, 8, 8)
             np.ndarray qt quantization table of shape (2, 8, 8)
-        :return: DCT luminance tensor, DCT chrominance tensor and quantization tables.
-        :rtype: tuple of 3 np.ndarrays
 
         :Example:
 
