@@ -14,9 +14,9 @@ from ._timer import Timer
 class JPEG:
     cjpeglib = CJpegLib
     def __init__(self, srcfile):
-        """Object constructor.
+        """Constructs the :class:`JPEG` object.
         
-        :param srcfile: Source file.
+        :param srcfile: Path to a source file in JPEG format.
         :type srcfile: str
         :raises [IOError]: When file does not exist or can't be read.
         
@@ -40,15 +40,32 @@ class JPEG:
         self._samp_factor = ((ctypes.c_int*2)*3)()
     
     def read_dct(self):
-        """Reads the file DCT.
-        
-        :return: Luminance tensor, chrominance tensor and quantization tables.
-        :rtype: 3-tuple of np.ndarrays
+        """Reads the non-quantized DCT coefficients and quantization tables of the source file.
+
+        :returns: tuple (Y, CbCr, qt)
+            WHERE
+            np.ndarray Y non-quantized DCT luminance tensor of shape (1, W/8, H/8, 8, 8)
+            np.ndarray CbCr non-quantized DCT chrominance tensor of shape (2, W/8, H/8, 8, 8)
+            np.ndarray qt quantization table of shape (2, 8, 8)
+        :return: DCT luminance tensor, DCT chrominance tensor and quantization tables.
+        :rtype: tuple of 3 np.ndarrays
 
         :Example:
 
         >>> im = jpeglib.JPEG("input.jpeg")
         >>> Y,CbCr,qt = im.read_dct()
+
+        Get DCT coefficients in shape (W/8, H/8, 8, 8) with
+
+        >>> Y[0]    # Y
+        >>> CbCr[0] # Cb
+        >>> CbCr[1] # Cr
+
+        Get quantization tables in shape (8,8) with
+
+        >>> qt[0] # Y
+        >>> qt[1] # Cb
+        >>> qt[1] # Cr
         """
         #t = Timer('reading %s DCT', self.srcfile) # log execution time
         # execute
@@ -70,6 +87,8 @@ class JPEG:
 
         >>> im = jpeglib.JPEG("input.jpeg")
         >>> Y,CbCr,qt = im.read_dct()
+        >>> # work with DCT coefficients
+        >>> # ...
         >>> im.write_dct("output.jpeg", Y, CbCr)
         """
         #t = Timer('writing %s DCT', dstfile) # log execution time
@@ -152,6 +171,8 @@ class JPEG:
 
         >>> im = jpeglib.JPEG("input.jpeg")
         >>> grayscale = im.read_spatial(out_color_space="JCS_GRAYSCALE")
+        >>> # work with the data
+        >>> # ...
         >>> im.write_spatial(grayscale)
         """
         #t = Timer('writing %s spatial', self.srcfile) # log execution time
@@ -177,7 +198,7 @@ class JPEG:
 
         >>> im = jpeglib.JPEG("input.jpeg")
         >>> Y,CbCr,qt = im.read_dct()
-        >>> im.to_spatial(Y, CbCr)
+        >>> spatial = im.to_spatial(Y, CbCr, out_color_space="JCS_RGB")
         """
         #t = Timer('DCT-RGB conversion')
         if (Y is None or CbCr is None) and self._im_dct is None:
