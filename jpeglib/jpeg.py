@@ -39,14 +39,14 @@ class JPEG:
         self._im_qt = ((ctypes.c_short*64)*self.dct_channels)()
         self._samp_factor = ((ctypes.c_int*2)*3)()
     
-    def read_dct(self):
+    def read_dct(self, ):
         """Reads the non-quantized DCT coefficients and quantization tables of the source file.
 
-        :returns: tuple (Y, CbCr, qt)
+        :return: tuple (Y, CbCr, qt)
             WHERE
-            np.ndarray Y non-quantized DCT luminance tensor of shape (1, W/8, H/8, 8, 8)
-            np.ndarray CbCr non-quantized DCT chrominance tensor of shape (2, W/8, H/8, 8, 8)
-            np.ndarray qt quantization table of shape (2, 8, 8)
+            np.ndarray Y is non-quantized DCT luminance tensor of shape (1, W/8, H/8, 8, 8)
+            np.ndarray CbCr is non-quantized DCT chrominance tensor of shape (2, W/8, H/8, 8, 8)
+            np.ndarray qt is quantization table of shape (2, 8, 8)
 
         :Example:
 
