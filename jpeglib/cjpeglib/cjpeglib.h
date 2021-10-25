@@ -6,6 +6,7 @@ int read_jpeg_info(
     int *dct_dims,
     int *image_dims,
     int *num_components,
+    int *samp_factor,
     int *jpeg_color_space
 );
 
@@ -13,12 +14,18 @@ int read_jpeg_info(
 int read_jpeg_dct(
     const char *srcfile,
     short *dct,
-    short *qt
+    unsigned short *qt
 );
 int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,
-    short *dct
+    short *dct,
+    int *image_dims,
+    int in_color_space,
+    int in_components,
+    int *samp_factor,
+    unsigned short *qt,
+    short quality
 );
 
 // ----------- RGB -------------
@@ -28,9 +35,9 @@ int read_jpeg_spatial(
     int out_color_space,
     int dither_mode,
     int dct_method,
-    int *samp_factor,
-    unsigned flags
+    unsigned long flags
 );
+
 int write_jpeg_spatial(
     const char *srcfile,
     const char *dstfile,
@@ -40,10 +47,10 @@ int write_jpeg_spatial(
     int in_components,
     int dct_method,
     int *samp_factor,
+    unsigned short *qt,
     short quality,
-    unsigned *qt,
     short smoothing_factor,
-    unsigned flags
+    unsigned long flags
 );
 
 int print_jpeg_params(const char *srcfile);

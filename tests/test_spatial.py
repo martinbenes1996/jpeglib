@@ -14,14 +14,115 @@ import unittest
 sys.path.append('.')
 import jpeglib
 
+# https://www.sciencedirect.com/topics/computer-science/quantization-matrix
+qt50_standard = np.array([
+    [[16,11,10,16,24,40,51,61],
+     [12,12,14,19,26,58,60,55],
+     [14,13,16,24,40,57,69,56],
+     [14,17,22,29,51,87,80,62],
+     [18,22,37,56,68,109,103,77],
+     [24,35,55,64,81,104,113,92],
+     [49,64,78,87,103,121,120,101],
+     [72,92,95,98,112,100,103,99]],
+    [[17,18,24,47,99,99,99,99],
+     [18,21,26,66,99,99,99,99],
+     [24,26,56,99,99,99,99,99],
+     [47,66,99,99,99,99,99,99],
+     [99,99,99,99,99,99,99,99],
+     [99,99,99,99,99,99,99,99],
+     [99,99,99,99,99,99,99,99],
+     [99,99,99,99,99,99,99,99]]
+    ])
 
-class TestSpatial(unittest.TestCase):
+class TestSpatial(unittest.TestCase):        
     def setUp(self):
         try: shutil.rmtree("tmp")
         except: pass
         finally: os.mkdir("tmp")
     def tearDown(self):
         shutil.rmtree("tmp")
+
+    def test_spatial_quality(self):
+        global qt50_standard
+
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            _ = im.read_spatial()
+            im.write_spatial("tmp/output.jpeg", qt=50)
+
+        im = jpeglib.JPEG("tmp/output.jpeg")
+        _,_,qt50 = im.read_dct()
+
+        # test matrix
+        np.testing.assert_array_equal(qt50, qt50_standard)
+
+    def test_spatial_qt(self):
+        global qt50_standard
+
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            _ = im.read_spatial()
+            im.write_spatial("tmp/output.jpeg", qt = qt50_standard)
+        
+        im = jpeglib.JPEG("tmp/output.jpeg")
+        _,_,qt50 = im.read_dct()
+
+        # test matrix
+        np.testing.assert_array_equal(qt50, qt50_standard)
+
+    def test_pil_read(self):
+        # read rgb
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im1:
+            x1 = im1.read_spatial(
+                out_color_space='JCS_RGB',
+                dct_method='JDCT_ISLOW',
+                #dither_mode='JDITHER_NONE',
+                flags=['DO_FANCY_UPSAMPLING','DO_BLOCK_SMOOTHING']
+            )
+            x1 = x1.squeeze()
+        # read rgb via PIL
+        im2 = Image.open("examples/IMG_0791.jpeg")
+        x2 = np.array(im2)
+
+        # test
+        if (x1 != x2).any():
+            logging.info("known PIL mismatch %.2f%%" % (((x2 - x1) != 0).mean()*100))
+        else:
+            np.testing.assert_almost_equal(x1, x2)
+
+        # cleanup
+        im2.close()
+
+    def test_pil_write(self):
+        q = 75 # quality
+
+        # pass the image through jpeglib
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            data = im.read_spatial(flags=['DO_FANCY_UPSAMPLING'])
+            im.write_spatial("tmp/test1.jpeg", data, qt=q, flags=['DO_FANCY_UPSAMPLING'])
+    
+        # pass the image through PIL
+        im = Image.open("examples/IMG_0791.jpeg")
+        im.save("tmp/test2.jpeg", qt=q, subsampling=-1)
+        im.close()
+
+        # load both with PIL
+        im1 = Image.open("tmp/test1.jpeg")
+        x1 = np.array(im1)
+        im2 = Image.open("tmp/test2.jpeg")
+        x2 = np.array(im2)
+        
+        # test
+        if (x1 != x2).any():
+            logging.info("known PIL recompression mismatch %.2f%%" % (((x2 - x1) != 0).mean()*100))
+        else:
+            np.testing.assert_almost_equal(x1, x2)
+
+        # cleanup
+        im1.close()
+        im2.close()
+
+
+
+
 
     # def _rainer_rgb(self, outchannel, rgb):
 
@@ -75,28 +176,7 @@ class TestSpatial(unittest.TestCase):
     #         self._rainer_rgb('B', rgb[:,:,2])
 
 
-    def test_pil_read(self):
-        # read rgb
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im1:
-            x1 = im1.read_spatial(
-                out_color_space='JCS_RGB',
-                dct_method='JDCT_ISLOW',
-                #dither_mode='JDITHER_NONE',
-                flags=['DO_FANCY_UPSAMPLING','DO_BLOCK_SMOOTHING']
-            )
-            x1 = x1.squeeze()
-        # read rgb via PIL
-        im2 = Image.open("examples/IMG_0791.jpeg")
-        x2 = np.array(im2)
 
-        # test
-        if (x1 != x2).any():
-            logging.info("known PIL mismatch %.2f%%" % (((x2 - x1) != 0).mean()*100))
-        else:
-            np.testing.assert_almost_equal(x1, x2)
-
-        # cleanup
-        im2.close()
         
     # def test_cv2(self):
     #     # read rgb
@@ -131,35 +211,6 @@ class TestSpatial(unittest.TestCase):
     #         logging.info("known pylibjpeg mismatch %.2f%%" % (((x2 - x1) != 0).mean()*100))
     #     else:
     #         np.testing.assert_almost_equal(x1, x2)
-
-    def test_pil_write(self):
-        q = 75 # quality
-
-        # pass the image through jpeglib
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            data = im.read_spatial(flags=['DO_FANCY_UPSAMPLING'])
-            im.write_spatial("tmp/test1.jpeg", data, quality=q, flags=['DO_FANCY_UPSAMPLING'])
-    
-        # pass the image through PIL
-        im = Image.open("examples/IMG_0791.jpeg")
-        im.save("tmp/test2.jpeg", quality=q, subsampling=-1)
-        im.close()
-
-        # load both with PIL
-        im1 = Image.open("tmp/test1.jpeg")
-        x1 = np.array(im1)
-        im2 = Image.open("tmp/test2.jpeg")
-        x2 = np.array(im2)
-        
-        # test
-        if (x1 != x2).any():
-            logging.info("known PIL recompression mismatch %.2f%%" % (((x2 - x1) != 0).mean()*100))
-        else:
-            np.testing.assert_almost_equal(x1, x2)
-
-        # cleanup
-        im1.close()
-        im2.close()
 
 
     # def test_dct_pil(self):
@@ -239,5 +290,6 @@ class TestSpatial(unittest.TestCase):
     #     shutil.rmtree("tmp")
     #     im1.close()
     #     im2.close()
+
 
 __all__ = ["TestSpatial"]

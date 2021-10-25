@@ -23,6 +23,7 @@ extern "C" {
 #define WRITE_ADOBE_MARKER 0x800
 #define CCIR601_SAMPLING 0x1000
 
+GLOBAL(long) jround_up (long a, long b);
 //#include "cstegojpeg.h"
 
 FILE *_read_jpeg(const char *filename,
@@ -53,6 +54,7 @@ int read_jpeg_info(
   int *dct_dims,
   int *image_dims,
   int *num_components,
+  int *samp_factor,
   int *jpeg_color_space
 ) {
   // allocate
@@ -85,6 +87,12 @@ int read_jpeg_info(
   if(jpeg_color_space != NULL)
     jpeg_color_space[0] = cinfo.jpeg_color_space;
 
+  if(samp_factor != NULL)
+    for(int comp = 0; comp < cinfo.num_components; comp++) {
+      *(samp_factor + comp*2 + 0) = cinfo.comp_info[comp].h_samp_factor;
+      *(samp_factor + comp*2 + 1) = cinfo.comp_info[comp].v_samp_factor;
+    }
+
   // cleanup
   jpeg_destroy_decompress( &cinfo );
   fclose(fp);
@@ -97,8 +105,11 @@ void *_dct_offset(short * base, int channel, int w, int h, int Wmax, int Hmax)
   return (void *)(base + 64*(h + Hmax*(w + Wmax*(channel))));
 }
 
-int read_jpeg_dct(const char *srcfile, short *dct, short *qt)
-{ 
+int read_jpeg_dct(
+  const char *srcfile,
+  short *dct,
+  unsigned short *qt
+) { 
   // allocate
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -136,10 +147,9 @@ int read_jpeg_dct(const char *srcfile, short *dct, short *qt)
   
   // read quantization table
   if(qt != NULL) {
-    j_decompress_ptr dec_cinfo  = (j_decompress_ptr) &cinfo;
     for(int ch = 0; ch < 2; ch++) {
-      jpeg_component_info *ci_ptr = &dec_cinfo->comp_info[ch];
-      JQUANT_TBL *tbl = ci_ptr->quant_table;
+      //memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
+      JQUANT_TBL *tbl = cinfo.comp_info[ch].quant_table;
       memcpy((void *)(qt + ch*64), (void*)tbl->quantval, sizeof(short)*64);
     }
   }
@@ -152,22 +162,47 @@ int read_jpeg_dct(const char *srcfile, short *dct, short *qt)
   return 1;
 }
 
-// I plan to remove srcfile argument and add qt, so that it creates brand new file
-// without copying the old one
-int write_jpeg_dct(const char *srcfile, const char *dstfile, short *dct)
-{
+/**
+ * Writs the DCT coefficients into the destination file.
+ * 
+ * You must specify either srcfile, qt or quality.
+ * 
+ * @param srcfile Source file to copy parameters from or NULL.
+ * @param dstfile Destination file to write to.
+ * @param dct DCT coefficient matrix of dimensions 3 * W/8 * H/8 * 8 * 8.
+ * @param image_dims Image pixel dimensions.
+ * @param in_color_space JPEG color space.
+ * @param in_components Number of channels.
+ * @param samp_factor Sampling factor of shape 2 * 3 or NULL.
+ * @param qt Quantization table of shape 2 * 8 * 8 or NULL.
+ * @param quality Output quality between 0 - 100. -1, if not used.
+ */
+int write_jpeg_dct(
+  const char *srcfile,
+  const char *dstfile,
+  short *dct,
+  int *image_dims,
+  int in_color_space,
+  int in_components,
+  int *samp_factor,
+  unsigned short *qt,
+  short quality
+) {
+  // check inputs
+  if(dstfile == NULL) {
+    fprintf(stderr, "destination file not specified\n");
+    return 0;
+  }
+  if((srcfile == NULL) && (qt == NULL) && (quality < 0)) {
+    fprintf(stderr, "you must specify either srcfile, qt or quality\n");
+    return 0;
+  }
+
   // allocate
-  struct jpeg_decompress_struct cinfo_in;
-  struct jpeg_error_mgr jerr_in;
   struct jpeg_compress_struct cinfo_out;
   struct jpeg_error_mgr jerr_out;
-  
-  // read jpeg header
-  FILE * fp_in;
-  if((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in)) == NULL) return 0;
-  
-  // read DCT coefficients
-  jvirt_barray_ptr *coeffs_array = jpeg_read_coefficients(&cinfo_in);
+  memset((void *)&cinfo_out, 0x0, sizeof(struct jpeg_compress_struct));
+  memset((void *)&jerr_out, 0x0, sizeof(struct jpeg_error_mgr));
   
   // open the destination file
   FILE * fp_out;
@@ -175,36 +210,88 @@ int write_jpeg_dct(const char *srcfile, const char *dstfile, short *dct)
     fprintf(stderr, "can't open %s\n", dstfile);
     return 0;
   }
-
+  
   cinfo_out.err = jpeg_std_error(&jerr_out);
   jpeg_create_compress(&cinfo_out);
   jpeg_stdio_dest(&cinfo_out, fp_out);
+  
+  // set basic parameters
+  cinfo_out.image_width = image_dims[0];
+  cinfo_out.image_height = image_dims[1];
+  cinfo_out.in_color_space = in_color_space;
+  if(in_components >= 0) cinfo_out.input_components = in_components;
+  cinfo_out.num_components = cinfo_out.input_components;
+  jpeg_set_defaults(&cinfo_out);
 
-  j_compress_ptr cinfo_out_ptr = &cinfo_out;
-  jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in,cinfo_out_ptr);
-  //cinfo_out.comp_info[0].h_samp_factor = 2;
-  jpeg_write_coefficients(cinfo_out_ptr, coeffs_array);
+  // allocate
+  struct jpeg_decompress_struct cinfo_in;
+  struct jpeg_error_mgr jerr_in;
+  FILE * fp_in;
+  // read source jpeg
+  if(srcfile != NULL) {
+    if((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in)) == NULL) return 0;
+    // copy critical parameters to dstfile
+    jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in,&cinfo_out);
+  }
 
-  // read dct
-  JBLOCKARRAY buffer_one;
-  JCOEFPTR blockptr_one;
-  int HblocksY = cinfo_out.comp_info->height_in_blocks; // max height
-  int WblocksY = cinfo_out.comp_info->width_in_blocks; // max width
-  for(int ch = 0; ch < 3; ch++) { // channel iterator
-    jpeg_component_info* compptr_one = cinfo_out.comp_info + ch;
-    int Hblocks = compptr_one->height_in_blocks; // max height
-    int Wblocks = compptr_one->width_in_blocks; // max width
-    for(int h = 0; h < Hblocks; h++) { // height iterator
-      buffer_one = (cinfo_out.mem->access_virt_barray)((j_common_ptr)&cinfo_out, coeffs_array[ch], h, (JDIMENSION)1, FALSE);
-      for(int w = 0; w < Wblocks; w++) { // width iterator
-        blockptr_one = buffer_one[0][w];
-        for(int bh = 0; bh < 8; bh++) {
-          for(int bw = 0; bw < 8; bw++) {
-            int i = bw*8 + bh;
-            blockptr_one[bh*8 + bw] = ((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i];
+  // write qt
+  if(qt != NULL) {
+    for(int ch = 0; ch < 2; ch++) {
+      memcpy((void *)cinfo_out.quant_tbl_ptrs[ch]->quantval, (void *)(qt + ch*64), sizeof(short)*64);
+    }
+  // write quality
+  } else if(quality > 0) {
+    jpeg_set_quality(&cinfo_out, quality, TRUE);
+  }
+
+  // dct
+  if(dct != NULL) {
+
+    // allocate coefficient buffers
+    jvirt_barray_ptr *coeffs_array = (jvirt_barray_ptr *)(cinfo_out.mem->alloc_small)(
+      (j_common_ptr)&cinfo_out,
+      JPOOL_IMAGE,
+      sizeof(jvirt_barray_ptr) * cinfo_out.num_components
+    );
+    for(int ch = 0; ch < 3; ch++) {
+      jpeg_component_info* comp_ptr = cinfo_out.comp_info + ch;
+      long v_samp_factor = *(samp_factor + ch*2 + 0);
+      long h_samp_factor = *(samp_factor + ch*2 + 1);
+      comp_ptr->height_in_blocks = cinfo_out.image_width / 8 * h_samp_factor;// / 4;
+      comp_ptr->width_in_blocks = cinfo_out.image_height / 8 * v_samp_factor;// / 4;
+      coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
+        (j_common_ptr)&cinfo_out,
+        JPOOL_IMAGE,
+        TRUE,
+        (JDIMENSION)jround_up(comp_ptr->width_in_blocks,  //component size in dct blocks (ignoring mcu)
+		                          h_samp_factor),   //round up is important, if border MCUs are not completely needed
+		    (JDIMENSION)jround_up(comp_ptr->height_in_blocks,
+		                          v_samp_factor),
+		    (JDIMENSION)v_samp_factor
+      );
+    }
+    jpeg_write_coefficients(&cinfo_out,coeffs_array);
+
+    // write dct
+    JBLOCKARRAY buffer_one;
+    JCOEFPTR blockptr_one;
+    int HblocksY = cinfo_out.comp_info->height_in_blocks; // max height
+    int WblocksY = cinfo_out.comp_info->width_in_blocks; // max width
+    for(int ch = 0; ch < 3; ch++) { // channel iterator
+      jpeg_component_info* comp_ptr = cinfo_out.comp_info + ch;
+      int Hblocks = comp_ptr->height_in_blocks; // max height
+      int Wblocks = comp_ptr->width_in_blocks; // max width
+      for(int h = 0; h < Hblocks; h++) { // height iterator
+        buffer_one = (cinfo_out.mem->access_virt_barray)((j_common_ptr)&cinfo_out, coeffs_array[ch], h, (JDIMENSION)1, FALSE);
+        for(int w = 0; w < Wblocks; w++) { // width iterator
+          blockptr_one = buffer_one[0][w];
+          for(int bh = 0; bh < 8; bh++) {
+            for(int bw = 0; bw < 8; bw++) {
+              int i = bw*8 + bh;
+              blockptr_one[bh*8 + bw] = ((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i];
+            }
           }
         }
-        //memcpy((void *)blockptr_one, _dct_offset(dct, ch, w, h, WblocksY, HblocksY), sizeof(short)*64);
       }
     }
   }
@@ -212,10 +299,14 @@ int write_jpeg_dct(const char *srcfile, const char *dstfile, short *dct)
   // cleanup
   jpeg_finish_compress( &cinfo_out );
   jpeg_destroy_compress( &cinfo_out );
-  jpeg_finish_decompress( &cinfo_in );
-  jpeg_destroy_decompress( &cinfo_in );
-  fclose( fp_in );
   fclose( fp_out );
+
+  if(srcfile != NULL) {
+    jpeg_finish_decompress( &cinfo_in );
+    jpeg_destroy_decompress( &cinfo_in );
+    fclose( fp_in );
+  }
+  
   return 1;
 }
 
@@ -225,9 +316,9 @@ int read_jpeg_spatial(
   int out_color_space,
   int dither_mode,
   int dct_method,
-  int *samp_factor,
-  unsigned flags
+  unsigned long flags
 ) {
+
   // allocate
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -257,23 +348,12 @@ int read_jpeg_spatial(
   // decompress
   (void)jpeg_start_decompress(&cinfo);
 
-  //fprintf(stderr, "  - Color spaces: %d %d\n", cinfo.out_color_space, cinfo.jpeg_color_space);
-  //fprintf(stderr, "  - Decompression: %d %d\n", cinfo.dither_mode, cinfo.dct_method);
-  //fprintf(stderr, "  - Flags: %u\n", flags);
-  //fprintf(stderr, "  - Params: |%u %u| %u\n", cinfo.output_width, cinfo.output_height, cinfo.out_color_components);
-
   // read
   unsigned char *rowptr = rgb;
   while(cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, &rowptr, 1);
     rowptr += cinfo.output_width * cinfo.out_color_components;
   }
-
-  if(samp_factor != NULL)
-    for(int comp = 0; comp < cinfo.out_color_components; comp++) {
-      *(samp_factor + comp*2 + 0) = cinfo.comp_info[comp].h_samp_factor;
-      *(samp_factor + comp*2 + 1) = cinfo.comp_info[comp].v_samp_factor;
-    }
 
   // cleanup
   (void) jpeg_finish_decompress(&cinfo);
@@ -282,8 +362,6 @@ int read_jpeg_spatial(
 
   return 1;
 }
-
-
 
 int write_jpeg_spatial(
   const char *srcfile,
@@ -294,8 +372,8 @@ int write_jpeg_spatial(
   int in_components,
   int dct_method,
   int *samp_factor,
+  unsigned short *qt,
   short quality,
-  unsigned *qt,
   short smoothing_factor,
   unsigned long flags
 ) {
@@ -322,7 +400,6 @@ int write_jpeg_spatial(
   cinfo.num_components = cinfo.input_components;
   jpeg_set_defaults(&cinfo);
   
-  
   // copy parameters
   struct jpeg_decompress_struct cinfo_in;
   struct jpeg_error_mgr jerr_in;
@@ -335,8 +412,6 @@ int write_jpeg_spatial(
     
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in, (j_compress_ptr)&cinfo);
   }
-  //fprintf(stderr, "After jpeg_copy_critical_parameters.\n");
-  
 
   // set advanced parameters
   if(dct_method >= 0) cinfo.dct_method = dct_method;
@@ -346,13 +421,22 @@ int write_jpeg_spatial(
       cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
     }
 
+  
   if(qt != NULL) {
-    jpeg_add_quant_table(&cinfo, 2, qt, 100, TRUE);
-    cinfo.comp_info[0].quant_tbl_no = 2;
-    jpeg_add_quant_table(&cinfo, 3, qt + 64, 100, TRUE);
-    cinfo.comp_info[1].quant_tbl_no = 3;
-    cinfo.comp_info[1].quant_tbl_no = 3;
-  } else if(quality >= 0) jpeg_set_quality(&cinfo, quality, TRUE);
+    for(int ch = 0; ch < 2; ch++) {
+      memcpy((void *)cinfo.quant_tbl_ptrs[ch]->quantval, (void *)(qt + ch*64), sizeof(short)*64);
+    }
+    // unsigned qt_u[64];
+    // for(int i = 0; i < 64; i++) qt_u[i] = qt[i];
+    // jpeg_add_quant_table(&cinfo, 2, qt_u, 100, TRUE);
+    // cinfo.comp_info[0].quant_tbl_no = 2;
+    // for(int i = 0; i < 64; i++) qt_u[i] = qt[64 + i];
+    // jpeg_add_quant_table(&cinfo, 3, qt_u, 100, TRUE);
+    // cinfo.comp_info[1].quant_tbl_no = 3;
+    // cinfo.comp_info[2].quant_tbl_no = 3;
+  } else if(quality >= 0) {
+    jpeg_set_quality(&cinfo, quality, TRUE);
+  }
   if(smoothing_factor >= 0) cinfo.smoothing_factor = smoothing_factor;
   
   cinfo.progressive_mode   = 0 != (flags & PROGRESSIVE_MODE);
@@ -360,10 +444,10 @@ int write_jpeg_spatial(
   cinfo.arith_code         = 0 != (flags & ARITH_CODE);
   cinfo.write_JFIF_header  = 0 != (flags & WRITE_JFIF_HEADER);
   cinfo.write_Adobe_marker = 0 != (flags & WRITE_ADOBE_MARKER);
-  //cinfo.CCIR601_sampling   = 0 != (flags & CCIR601_SAMPLING);
+  cinfo.CCIR601_sampling   = 0 != (flags & CCIR601_SAMPLING);
 
   // https://gist.github.com/kentakuramochi/f64e7646f1db8335c80f131be8359044
-  
+
   // write data
   unsigned char *rowptr = rgb;
   jpeg_start_compress(&cinfo, TRUE);
@@ -373,13 +457,10 @@ int write_jpeg_spatial(
     rowptr += cinfo.image_width * cinfo.input_components;
   }
 
-
   // cleanup
   jpeg_finish_compress( &cinfo );
   jpeg_destroy_compress( &cinfo );
-
   fclose( fp );
-  
   if(srcfile != NULL) {
     jpeg_destroy_decompress( &cinfo_in );
     fclose( fp_in );

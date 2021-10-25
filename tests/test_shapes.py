@@ -41,7 +41,7 @@ class TestShapes(unittest.TestCase):
         # test qt
         self.assertIsInstance(qt, np.ndarray)
         self.assertEqual(len(qt.shape), 3)
-        self.assertEqual(qt.shape[0], 3) # quantization tables for all three channels
+        self.assertEqual(qt.shape[0], 2) # quantization tables for lumo and chroma channels
         self.assertEqual(qt.shape[1], 8)
         self.assertEqual(qt.shape[2], 8)
 

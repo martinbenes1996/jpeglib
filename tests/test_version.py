@@ -6,7 +6,7 @@ import unittest
 sys.path.append('.')
 import jpeglib
 
-class TestSpatial(unittest.TestCase):
+class TestVersion(unittest.TestCase):
     def test_6b(self):
         jpeglib.version.set('6b')
         with jpeglib.JPEG('examples/IMG_0791.jpeg') as im:
@@ -44,3 +44,4 @@ class TestSpatial(unittest.TestCase):
 
         
 
+__all__ = ["TestVersion"]

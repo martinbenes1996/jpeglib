@@ -31,22 +31,24 @@ class JPEG:
         self._dims = (ctypes.c_int*3)()
         self._num_components = (ctypes.c_int*1)()
         self._color_space = (ctypes.c_int*1)()
+        self._samp_factor = ((ctypes.c_int*2)*3)()
         # get image info
         self._read_info()   
         # allocate
         self._im_spatial = self._allocate_spatial()
         self._im_dct = self._allocate_dct()
-        self._im_qt = ((ctypes.c_short*64)*self.dct_channels)()
-        self._samp_factor = ((ctypes.c_int*2)*3)()
-    
-    def read_dct(self, ):
+        self._im_qt = ((ctypes.c_short*64)*(self.dct_channels-1))()
+
+    def read_dct(self):
         """Reads the non-quantized DCT coefficients and quantization tables of the source file.
 
-        :return: tuple (Y, CbCr, qt)
-            WHERE
-            np.ndarray Y is non-quantized DCT luminance tensor of shape (1, W/8, H/8, 8, 8)
-            np.ndarray CbCr is non-quantized DCT chrominance tensor of shape (2, W/8, H/8, 8, 8)
-            np.ndarray qt is quantization table of shape (2, 8, 8)
+        In the return values, Y is non-quantized DCT luminance tensor
+        of shape (1,W/8,H/8,8,8), CbCr is non-quantized DCT chrominance tensor
+        of shape (2,W/8,H/8,8,8) and qt is a tensor with quantization tables of shape (2,8,8).
+        Check the examples below.
+
+        :return: lumo DCT Y, chroma DCT CbCr, quantization table qt
+        :rtype: tuple
 
         :Example:
 
@@ -71,15 +73,29 @@ class JPEG:
         # result
         return Y,CbCr,qt
 
-    def write_dct(self, dstfile, Y=None, CbCr=None): # qt, 
+    def write_dct(self, dstfile, Y=None, CbCr=None, qt=None, in_color_space=None, samp_factor=None):
         """Writes DCT coefficients to a file.
         
+        The shape and arrangement of the parameters Y and CbCr is the same
+        as what is returned from :meth:`jpeg.JPEG.read_dct`.
+        Y is non-quantized DCT luminance tensor of shape (1,W/8,H/8,8,8),
+        CbCr is non-quantized DCT chrominance tensor of shape (2,W/8,H/8,8,8)
+        and qt is either a tensor with quantization tables of shape (2,8,8)
+        or a quality scalar integer.
+
+
         :param dstfile: Destination file.
         :type dstfile: str
-        :param Y: Luminance DCT.
-        :type Y: np.ndarray, optional
+        :param Y: Lumo DCT.
+        :type Y: numpy.ndarray, optional
         :param CbCr: Chrominance DCT.
-        :type CbCr: np.ndarray, optional
+        :type CbCr: numpy.ndarray, optional
+        :param qt: Quantization tables or quality.
+        :type qt: numpy.ndarray | int, optional
+        :param in_color_space: Input color space. Must be key of :class:`jpeg.JPEG.J_COLOR_SPACE`. According to source by default.
+        :type in_color_space: str, optional
+        :param samp_factor: Sampling factor. None, tuple of three ints or tuples of two ints. According to source by default.
+        :type samp_factor: tuple, optional
 
         :Example:
 
@@ -87,11 +103,18 @@ class JPEG:
         >>> Y,CbCr,qt = im.read_dct()
         >>> # work with DCT coefficients
         >>> # ...
-        >>> im.write_dct("output.jpeg", Y, CbCr)
+        >>> im.write_dct("output.jpeg", Y, CbCr, qt)
+
+        You can specify the quality scalar such as
+
+        >>> im.write_dct("output.jpeg", Y, CbCr, 75)
+
+        If neither quality nor quantization tables are specified,
+        library uses the quantization table from the source.
         """
         #t = Timer('writing %s DCT', dstfile) # log execution time
         # execute
-        self._write_dct(dstfile, Y, CbCr)
+        self._write_dct(dstfile, Y, CbCr, qt, samp_factor)
         self._im_dct = None # free DCT buffer
         self._im_spatial = None # free DCT buffer
 
@@ -130,7 +153,7 @@ class JPEG:
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
         :type flags: list, optional
         :return: Spatial representation of the source image.
-        :rtype: np.ndarray
+        :rtype: numpy.ndarray
 
         :Example:
 
@@ -145,21 +168,21 @@ class JPEG:
         return spatial
 
     def write_spatial(self, dstfile, data=None, in_color_space=None, dct_method="JDCT_ISLOW",
-                      samp_factor=None, quality=100, smoothing_factor=None, flags=[]):
+                      samp_factor=None, qt=100, smoothing_factor=None, flags=[]):
         """Writes spatial image representation (i.e. RGB) to a file.
         
         :param dstfile: Destination file name.
         :type dstfile: str
         :param data: Numpy array with spatial data.
-        :type data: np.darray, optional
+        :type data: numpy.ndarray, optional
         :param in_color_space: Input color space. Must be key of :class:`jpeg.JPEG.J_COLOR_SPACE`. According to source by default.
         :type in_color_space: str, optional
         :param dct_method: DCT method. Must be key of :class:`jpeg.JPEG.J_DCT_METHOD`. Using default from libjpeg by default.
         :type dct_method: str, optional
         :param samp_factor: Sampling factor. None, tuple of three ints or tuples of two ints. According to source by default.
-        :type samp_factor: str, optional
-        :param quality: Compression quality, between 0 and 100. Defaultly 100 (full quality).
-        :type quality: int, optional
+        :type samp_factor: tuple, optional
+        :param qt: Compression quality, between 0 and 100 or a tensor with quantization tables. Defaultly 100 (full quality).
+        :type qt: int | numpy.ndarray, optional
         :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
         :type smoothing_factor: int, optional
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
@@ -175,7 +198,7 @@ class JPEG:
         """
         #t = Timer('writing %s spatial', self.srcfile) # log execution time
         # execute
-        self._write_spatial(dstfile, data, in_color_space, dct_method, samp_factor, quality, smoothing_factor, flags)
+        self._write_spatial(dstfile, data, in_color_space, dct_method, samp_factor, qt, smoothing_factor, flags)
         self._im_dct = None # free DCT buffer
         self._im_spatial = None # free spatial buffer
 
@@ -186,11 +209,11 @@ class JPEG:
         Uses temporary file to save and read from as libjpeg does not have a direct handler.
         
         :param Y: Luminance DCT.
-        :type Y: np.ndarray
+        :type Y: numpy.ndarray
         :param CbCr: Chrominance DCT.
-        :type CbCr: np.ndarray
+        :type CbCr: numpy.ndarray
         :return: Spatial representation of DCT coefficients
-        :rtype: np.ndarray
+        :rtype: numpy.ndarray
 
         :Example:
 
@@ -214,6 +237,7 @@ class JPEG:
             dct_dims = self._dct_dims,
             image_dims = self._dims,
             num_components = self._num_components,
+            samp_factor = self._samp_factor,
             jpeg_color_space = self._color_space
         )
         # parse
@@ -234,7 +258,6 @@ class JPEG:
         # align qt
         qt = np.ctypeslib.as_array(self._im_qt)
         qt = qt.reshape((*qt.shape[:-1],8,8))
-        qt[2,:] = qt[1,:]
         # align lumo
         Y = np.ctypeslib.as_array(self._im_dct[:1])
         Y = Y.reshape((*Y.shape[:-1],8,8))
@@ -245,15 +268,16 @@ class JPEG:
         # finish
         return Y,CbCr,qt
 
-    def _write_dct(self, dstfile, Y=None, CbCr=None): #, qt=None)
+    def _write_dct(self, dstfile, Y=None, CbCr=None, quality=None, in_color_space=None, samp_factor=None):
         # TODO: remove copying from source file
         # allocate
         if self._im_dct is None:
             self._im_dct = self._allocate_dct()
         # reading
-        self.cjpeglib.read_jpeg_dct(self.srcfile, self._im_dct, self._im_qt)
+        if in_color_space is None:
+            in_color_space = self.color_space
+        in_color_space,channels = self.J_COLOR_SPACE[in_color_space]
 
-        # TODO: changed in QT
         # align lumo
         if Y is not None:
             Y = Y.reshape((*Y.shape[:-2],64))
@@ -264,14 +288,25 @@ class JPEG:
             _CbCr = np.zeros((2, self.dct_shape[0][0], self.dct_shape[0][1], 64), np.short)
             _CbCr[:,:int(self.dct_shape[1][0]),:self.dct_shape[1][1]] = CbCr
             self._im_dct[1:] = np.ctypeslib.as_ctypes(_CbCr)
-
+        # quality
+        qt,quality,srcfile = self._parse_quality(quality)
+        # sampling factor
+        samp_factor = self._parse_samp_factor(samp_factor)
         # write
-        self.cjpeglib.write_jpeg_dct(self.srcfile, dstfile, self._im_dct)
+        self.cjpeglib.write_jpeg_dct(
+            srcfile        = srcfile,
+            dstfile        = dstfile,
+            dct            = self._im_dct,
+            image_dims     = self._dims,
+            in_color_space = in_color_space,
+            in_components  = self.channels,
+            samp_factor    = samp_factor,
+            qt             = qt,
+            quality        = quality)
 
 
     def _read_spatial(self, srcfile, out_color_space, dither_mode, dct_method, flags):
         # parameters
-        #print("Color spaces:", self.color_space, out_color_space)
         if out_color_space is None:
             out_color_space = self.color_space
         self.color_space = out_color_space
@@ -284,15 +319,14 @@ class JPEG:
             self._im_spatial = self._allocate_spatial()
         else: self.channels = channels
         
-        #print(f"I read image with {self.channels} channels in colorspace {color_space}.")
+        # call
         self.cjpeglib.read_jpeg_spatial(
-            srcfile = srcfile,
-            rgb = self._im_spatial,
+            srcfile         = srcfile,
+            rgb             = self._im_spatial,
             out_color_space = color_space,
-            dither_mode = dither_mode,
-            dct_method = dct_method,
-            samp_factor = self._samp_factor,
-            flags = flags
+            dither_mode     = dither_mode,
+            dct_method      = dct_method,
+            flags           = flags
         )
         # align rgb
         data = np.ctypeslib.as_array(self._im_spatial).astype(np.ubyte)
@@ -308,20 +342,7 @@ class JPEG:
         in_color_space,channels = self.J_COLOR_SPACE[in_color_space]
         dct_method = self.J_DCT_METHOD[dct_method]
         self._samp_factor = self._parse_samp_factor(samp_factor)
-
-        
-        if quality is None: # not specified
-            qt = None#self._im_qt
-        else:
-            # numeric quality
-            try:
-                quality = int(quality)
-                qt = None
-            # quantization table
-            except:
-                qt = np.array(quality).reshape(*quality.shape[:-2],64)
-                qt = self._im_qt = np.ctypeslib.as_ctypes(quality)
-                quality = None
+        qt,quality,srcfile = self._parse_quality(quality)
         # spatial buffer
         if data is not None:
             data = data.reshape(self.channels,data.shape[1],-1)
@@ -332,18 +353,18 @@ class JPEG:
             return
 
         self.cjpeglib.write_jpeg_spatial(
-            srcfile = self.srcfile,
-            dstfile = dstfile,
-            rgb = self._im_spatial,
-            image_dims = self._dims,
-            in_color_space = in_color_space,
-            in_components = self.channels,
-            dct_method = dct_method,
-            samp_factor = self._samp_factor,
-            quality = quality,
-            qt = qt,
+            srcfile          = self.srcfile,
+            dstfile          = dstfile,
+            rgb              = self._im_spatial,
+            image_dims       = self._dims,
+            in_color_space   = in_color_space,
+            in_components    = self.channels,
+            dct_method       = dct_method,
+            samp_factor      = self._samp_factor,
+            quality          = quality,
+            qt               = qt,
             smoothing_factor = smoothing_factor,
-            flags = flags
+            flags            = flags
         )
 
     def print_params(self): self.cjpeglib.print_jpeg_params(self.srcfile)
@@ -389,7 +410,38 @@ class JPEG:
                     self._samp_factor[i][0] = f[0]
                     self._samp_factor[i][1] = f[1]
         return self._samp_factor
+    def _parse_quality(self, quality):
+        if quality is None: # not specified
+            qt = None
+            srcfile = self.srcfile
+        else:
+            srcfile = None
+            # numeric quality
+            try:
+                quality = int(quality)
+                qt = None
+            # quantization table
+            except:
+                qt = np.array(quality, dtype=np.uint16).reshape(2,64)
+                qt = self._im_qt = np.ctypeslib.as_ctypes(qt)
+                quality = -1
+        return qt,quality,srcfile
 
+
+        if quality is not None:
+            srcfile = None
+            # numeric quality
+            try:
+                quality = int(quality)
+                qt = None
+            # quantization table
+            except:
+                qt = np.array(quality, dtype=np.uint16).reshape(2,64)
+                qt = self._im_qt = np.ctypeslib.as_ctypes(qt)
+                quality = -1
+        else: # not specified
+            srcfile = self.srcfile
+            qt = None
 
 
 

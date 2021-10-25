@@ -9,8 +9,8 @@ from . import cjpeglib
 class CJpegLib:
 
     @classmethod
-    def read_jpeg_info(cls, srcfile, dct_dims, image_dims, num_components, jpeg_color_space):
-        status = cls.get().read_jpeg_info(cls.cstr(srcfile), dct_dims, image_dims, num_components, jpeg_color_space)
+    def read_jpeg_info(cls, srcfile, dct_dims, image_dims, num_components, samp_factor, jpeg_color_space):
+        status = cls.get().read_jpeg_info(cls.cstr(srcfile), dct_dims, image_dims, num_components, samp_factor, jpeg_color_space)
         if status == 0: raise IOError(f"reading of {srcfile} failed")
         
     @classmethod
@@ -19,8 +19,8 @@ class CJpegLib:
         if status == 0: raise IOError(f"reading of {srcfile} DCT failed")
 
     @classmethod
-    def write_jpeg_dct(cls, srcfile, dstfile, dct):
-        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), dct)
+    def write_jpeg_dct(cls, srcfile, dstfile, dct, image_dims, in_color_space, in_components, samp_factor, qt, quality):
+        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), dct, image_dims, in_color_space, in_components, samp_factor, qt, quality)
         if status == 0: raise IOError(f"writing DCT to {dstfile} failed")
     @classmethod
     def print_jpeg_params(cls, srcfile):
@@ -28,15 +28,14 @@ class CJpegLib:
         if status == 0: raise IOError(f"reading of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_spatial(cls, srcfile, rgb, out_color_space, dither_mode, dct_method, samp_factor, flags):
-        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, out_color_space, dither_mode, dct_method,
-                                             samp_factor, cls.flags_to_mask(flags))
+    def read_jpeg_spatial(cls, srcfile, rgb, out_color_space, dither_mode, dct_method, flags):
+        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"reading of {srcfile} spatial failed")
     
     @classmethod
-    def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, quality, qt, smoothing_factor, flags):
+    def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
         status = cls.get().write_jpeg_spatial(cls.cstr(srcfile), cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
-                                              dct_method, samp_factor, quality, qt, smoothing_factor, cls.flags_to_mask(flags))
+                                              dct_method, samp_factor, qt, quality, smoothing_factor, cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
         
     MASKS = {
@@ -96,4 +95,6 @@ class CJpegLib:
     
     @staticmethod
     def cstr(s):
+        if s is None: return None
         return ctypes.c_char_p(s.encode('utf-8'))
+        
