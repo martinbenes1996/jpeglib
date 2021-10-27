@@ -42,6 +42,4 @@ class TestVersion(unittest.TestCase):
         self.assertEqual(jpeglib.version.get(), '6b')
         
 
-        
-
 __all__ = ["TestVersion"]

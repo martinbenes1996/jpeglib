@@ -100,19 +100,32 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(Y, YT)
         np.testing.assert_array_equal(CbCr, CbCrT)
 
-    def test_dct_quality(self):
-        global qt50_standard
-
+    def test_dct(self):
+        # write with different qt
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            _,_,_ = im.read_dct()
-            im.write_dct("tmp/output.jpeg", qt=50)
-        
+            Y,CbCr,qt = im.read_dct()
+            im.write_dct("tmp/output.jpeg", Y, CbCr, qt)
         im = jpeglib.JPEG("tmp/output.jpeg")
-        _,_,qt50 = im.read_dct()
-        
-        np.testing.assert_array_equal(qt50, qt50_standard)
+        Y2,CbCr2,qt2 = im.read_dct()
+        # test matrix
+        np.testing.assert_array_equal(Y, Y2)
+        np.testing.assert_array_equal(CbCr, CbCr2)
+        np.testing.assert_array_equal(qt, qt2)
     
     def test_dct_qt(self):
+        # write with different qt
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            Y,CbCr,qt = im.read_dct()
+            im.write_dct("tmp/output.jpeg")
+        im = jpeglib.JPEG("tmp/output.jpeg")
+        Y2,CbCr2,qt2 = im.read_dct()
+        # test matrix
+        np.testing.assert_array_equal(Y, Y2)
+        np.testing.assert_array_equal(CbCr, CbCr2)
+        np.testing.assert_array_equal(qt, qt2)
+
+
+    def test_dct_qt50(self):
         global qt50_standard
 
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
@@ -124,7 +137,25 @@ class TestDCT(unittest.TestCase):
 
         # test matrix
         np.testing.assert_array_equal(qt50, qt50_standard)
-        
+    
+    def test_dct_qt_edit(self):
+        # write with different qt
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            Y,CbCr,qt = im.read_dct()
+            qt[0,4,4] = 1 # change qt
+            #qt[1,6,6] = 1 
+            im.write_dct("tmp/output.jpeg", qt = qt)
+        im = jpeglib.JPEG("tmp/output.jpeg")
+        Y2,CbCr2,qt2 = im.read_dct()
+        # test matrix
+        np.testing.assert_array_equal(Y, Y2)
+        np.testing.assert_array_equal(CbCr, CbCr2)
+        np.testing.assert_array_equal(qt, qt2)
+
+
+
+
+
     # def test_torchjpeg(self):
     #     # read image
     #     im = jpeglib.JPEG("examples/IMG_0791.jpeg")

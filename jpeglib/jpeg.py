@@ -115,7 +115,7 @@ class JPEG:
         #t = Timer('writing %s DCT', dstfile) # log execution time
         # execute
         self._write_dct(dstfile, Y, CbCr, qt, samp_factor)
-        self._im_dct = None # free DCT buffer
+        #self._im_dct = None # free DCT buffer
         self._im_spatial = None # free DCT buffer
 
     # https://bitmiracle.github.io/libjpeg.net/help/api/BitMiracle.LibJpeg.Classic.J_COLOR_SPACE.html
@@ -412,10 +412,10 @@ class JPEG:
         return self._samp_factor
     def _parse_quality(self, quality):
         if quality is None: # not specified
-            qt = None
+            qt = self._im_qt
             srcfile = self.srcfile
         else:
-            srcfile = None
+            srcfile = self.srcfile #None
             # numeric quality
             try:
                 quality = int(quality)
@@ -426,22 +426,6 @@ class JPEG:
                 qt = self._im_qt = np.ctypeslib.as_ctypes(qt)
                 quality = -1
         return qt,quality,srcfile
-
-
-        if quality is not None:
-            srcfile = None
-            # numeric quality
-            try:
-                quality = int(quality)
-                qt = None
-            # quantization table
-            except:
-                qt = np.array(quality, dtype=np.uint16).reshape(2,64)
-                qt = self._im_qt = np.ctypeslib.as_ctypes(qt)
-                quality = -1
-        else: # not specified
-            srcfile = self.srcfile
-            qt = None
 
 
 
