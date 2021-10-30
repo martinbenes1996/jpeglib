@@ -39,14 +39,16 @@ class JPEG:
         self._im_dct = self._allocate_dct()
         self._im_qt = ((ctypes.c_short*64)*(self.dct_channels-1))()
 
-    def read_dct(self):
-        """Reads the non-quantized DCT coefficients and quantization tables of the source file.
+    def read_dct(self, quantized=False):
+        """Reads the DCT coefficients and quantization tables of the source file.
 
-        In the return values, Y is non-quantized DCT luminance tensor
-        of shape (1,W/8,H/8,8,8), CbCr is non-quantized DCT chrominance tensor
-        of shape (2,W/8,H/8,8,8) and qt is a tensor with quantization tables of shape (2,8,8).
+        In the return values, Y is DCT luminance tensor of shape (1,W/8,H/8,8,8),
+        CbCr is DCT chrominance tensor of shape (2,W/8,H/8,8,8), both not quantized by default.
+        qt is a tensor with quantization tables of shape (2,8,8).
         Check the examples below.
 
+        :param quantized: Indicates whether the output DCT coefficients are quantized or not, False by default.
+        :type quantized: bool, optional 
         :return: lumo DCT Y, chroma DCT CbCr, quantization table qt
         :rtype: tuple
 
@@ -67,22 +69,20 @@ class JPEG:
         >>> qt[1] # Cb
         >>> qt[1] # Cr
         """
-        #t = Timer('reading %s DCT', self.srcfile) # log execution time
         # execute
         Y,CbCr,qt = self._read_dct(self.srcfile)
+        # quantization
+        if quantized: Y,CbCr = Y*qt[0],CbCr*qt[1]
         # result
         return Y,CbCr,qt
 
-    def write_dct(self, dstfile, Y=None, CbCr=None, qt=None, in_color_space=None, samp_factor=None):
+    def write_dct(self, dstfile, Y=None, CbCr=None, qt=None, quantized=False, in_color_space=None, samp_factor=None):
         """Writes DCT coefficients to a file.
         
         The shape and arrangement of the parameters Y and CbCr is the same
         as what is returned from :meth:`jpeg.JPEG.read_dct`.
-        Y is non-quantized DCT luminance tensor of shape (1,W/8,H/8,8,8),
-        CbCr is non-quantized DCT chrominance tensor of shape (2,W/8,H/8,8,8)
-        and qt is either a tensor with quantization tables of shape (2,8,8)
-        or a quality scalar integer.
-
+        Y is DCT luminance tensor of shape (1,W/8,H/8,8,8), CbCr is DCT chrominance tensor of shape (2,W/8,H/8,8,8),
+        both unquantized by default. qt is either a tensor with quantization tables of shape (2,8,8) or a quality scalar integer.
 
         :param dstfile: Destination file.
         :type dstfile: str
@@ -92,6 +92,8 @@ class JPEG:
         :type CbCr: numpy.ndarray, optional
         :param qt: Quantization tables or quality.
         :type qt: numpy.ndarray | int, optional
+        :param quantized: Indicates whether the input DCT coefficients are quantized or unquantized, False by default.
+        :type quantized: bool, optional 
         :param in_color_space: Input color space. Must be key of :class:`jpeg.JPEG.J_COLOR_SPACE`. According to source by default.
         :type in_color_space: str, optional
         :param samp_factor: Sampling factor. None, tuple of three ints or tuples of two ints. According to source by default.
@@ -112,10 +114,9 @@ class JPEG:
         If neither quality nor quantization tables are specified,
         library uses the quantization table from the source.
         """
-        #t = Timer('writing %s DCT', dstfile) # log execution time
         # execute
-        self._write_dct(dstfile, Y, CbCr, qt, samp_factor)
-        #self._im_dct = None # free DCT buffer
+        self._write_dct(dstfile, Y, CbCr, qt, quantized, in_color_space, samp_factor)
+        self._im_dct = None # free DCT buffer
         self._im_spatial = None # free DCT buffer
 
     # https://bitmiracle.github.io/libjpeg.net/help/api/BitMiracle.LibJpeg.Classic.J_COLOR_SPACE.html
@@ -268,7 +269,7 @@ class JPEG:
         # finish
         return Y,CbCr,qt
 
-    def _write_dct(self, dstfile, Y=None, CbCr=None, quality=None, in_color_space=None, samp_factor=None):
+    def _write_dct(self, dstfile, Y=None, CbCr=None, quality=None, quantized=False, in_color_space=None, samp_factor=None):
         # TODO: remove copying from source file
         # allocate
         if self._im_dct is None:
@@ -277,14 +278,20 @@ class JPEG:
         if in_color_space is None:
             in_color_space = self.color_space
         in_color_space,channels = self.J_COLOR_SPACE[in_color_space]
+        # quantization
+        if quantized and quality is None:
+            qt = np.ctypeslib.as_array(self._im_qt)
 
         # align lumo
         if Y is not None:
             Y = Y.reshape((*Y.shape[:-2],64))
-            self._im_dct[:1] = np.ctypeslib.as_ctypes(Y)
+            if quantized:
+                Y /= qt[0]
         # align chroma
         if CbCr is not None:
             CbCr = CbCr.reshape((*CbCr.shape[:-2],64))
+            if quantized:
+                CbCr /= qt[1]
             _CbCr = np.zeros((2, self.dct_shape[0][0], self.dct_shape[0][1], 64), np.short)
             _CbCr[:,:int(self.dct_shape[1][0]),:self.dct_shape[1][1]] = CbCr
             self._im_dct[1:] = np.ctypeslib.as_ctypes(_CbCr)

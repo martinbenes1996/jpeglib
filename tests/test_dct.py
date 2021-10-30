@@ -152,6 +152,28 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(CbCr, CbCr2)
         np.testing.assert_array_equal(qt, qt2)
 
+    def test_dct_quantized(self):
+        # pass quantized qt
+        im = jpeglib.JPEG("examples/IMG_0791.jpeg")
+        Y_q,CbCr_q,qt_q = im.read_dct(quantized=True)
+        im.write_dct("tmp/output.jpeg", quantized=True)
+        # compare quantization
+        Y,CbCr,qt = im.read_dct(quantized=False)
+        # check quantized output
+        np.testing.assert_array_equal(Y_q / qt_q[0], Y)
+        np.testing.assert_array_equal(CbCr_q / qt_q[1], CbCr)
+        np.testing.assert_array_equal(qt_q, qt)
+        # compare quantization tables
+        im1 = jpeglib.JPEG("examples/IMG_0791.jpeg")
+        Y1,CbCr1,qt1 = im1.read_dct()
+        im2 = jpeglib.JPEG("tmp/output.jpeg")
+        Y2,CbCr2,qt2 = im2.read_dct()
+        # test matrix
+        np.testing.assert_array_equal(Y1, Y2)
+        np.testing.assert_array_equal(CbCr1, CbCr2)
+        np.testing.assert_array_equal(qt1, qt2)
+    
+    
 
 
 
