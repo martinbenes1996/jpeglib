@@ -59,8 +59,6 @@ class TestVersion(unittest.TestCase):
         bmp_palette = np.array(list(im_bmp.palette.colors.keys()))
         print(im_bmp.palette.colors)
         print(bmp_palette)
-        #print(im_bmp.palette.colors)
-        # '_palette', 'colors', 'copy', 'dirty', 'getcolor', 'getdata', 'mode', 'palette', 'rawmode', 'save', 'tobytes', 'tostring']
         im = jpeglib.JPEG(f'examples/images-{version}/testorig.jpg')
         rgb = im.read_spatial(out_color_space='JCS_RGB', colormap=np.array(list(im_bmp.palette.colors.keys())), flags=['QUANTIZE_COLORS'])
         #import matplotlib.pyplot as plt
