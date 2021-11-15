@@ -28,8 +28,9 @@ class CJpegLib:
         if status == 0: raise IOError(f"reading of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_spatial(cls, srcfile, rgb, out_color_space, dither_mode, dct_method, flags):
-        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
+    def read_jpeg_spatial(cls, srcfile, rgb, colormap, in_colormap, out_color_space, dither_mode, dct_method, flags):
+        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, colormap, in_colormap,
+                                             out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"reading of {srcfile} spatial failed")
     
     @classmethod

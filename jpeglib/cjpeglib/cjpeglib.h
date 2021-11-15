@@ -32,6 +32,8 @@ int write_jpeg_dct(
 int read_jpeg_spatial(
     const char *srcfile,
     unsigned char *rgb,
+    unsigned char *colormap, // colormap used
+    unsigned char *in_colormap, // colormap to use
     int out_color_space,
     int dither_mode,
     int dct_method,

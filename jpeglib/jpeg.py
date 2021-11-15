@@ -35,7 +35,7 @@ class JPEG:
         # get image info
         self._read_info()   
         # allocate
-        self._im_spatial = self._allocate_spatial()
+        self._im_spatial,self._im_colormap = self._allocate_spatial()
         self._im_dct = self._allocate_dct()
         self._im_qt = ((ctypes.c_short*64)*(self.dct_channels-1))()
 
@@ -142,7 +142,7 @@ class JPEG:
         "JDCT_FLOAT": 2, # floating-point method
     }
 
-    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, flags=[]):
+    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, colormap=None, flags=[]):
         """Decompresses the file into the spatial domain. 
         
         :param out_color_space: Output color space. Must be key of J_COLOR_SPACE.
@@ -151,6 +151,8 @@ class JPEG:
         :type dither_mode: str, optional
         :param dct_method: DCT method. Must be key of :class:`jpeg.JPEG.J_DCT_METHOD`. Using default from libjpeg by default.
         :type dct_method: str, optional
+        :param colormap: Colormap to use for color quantization.
+        :type colormap: np.array, optional
         :param flags: Bool decompression parameters as str to set to be true. Using default from libjpeg by default.
         :type flags: list, optional
         :return: Spatial representation of the source image.
@@ -163,7 +165,7 @@ class JPEG:
         """
         #t = Timer('reading %s spatial', self.srcfile) # log execution time
         # execute
-        spatial = self._read_spatial(self.srcfile, out_color_space, dither_mode, dct_method, flags)
+        spatial = self._read_spatial(self.srcfile, out_color_space, dither_mode, dct_method, colormap, flags)
         self._im_dct = None # free DCT buffer
         # result
         return spatial
@@ -312,7 +314,7 @@ class JPEG:
             quality        = quality)
 
 
-    def _read_spatial(self, srcfile, out_color_space, dither_mode, dct_method, flags):
+    def _read_spatial(self, srcfile, out_color_space, dither_mode, dct_method, colormap, flags):
         # parameters
         if out_color_space is None:
             out_color_space = self.color_space
@@ -320,16 +322,20 @@ class JPEG:
         color_space,channels = self.J_COLOR_SPACE[out_color_space]
         dither_mode = self.J_DITHER_MODE[dither_mode]
         dct_method = self.J_DCT_METHOD[dct_method]
+        if colormap is not None:
+            colormap = np.ctypeslib.as_ctypes(colormap)
         # allocate
         if self._im_spatial is None or channels != self.channels:
             self.channels = channels
-            self._im_spatial = self._allocate_spatial()
+            self._im_spatial,self._im_colormap = self._allocate_spatial()
         else: self.channels = channels
         
         # call
         self.cjpeglib.read_jpeg_spatial(
             srcfile         = srcfile,
             rgb             = self._im_spatial,
+            colormap        = self._im_colormap,
+            in_colormap     = colormap,
             out_color_space = color_space,
             dither_mode     = dither_mode,
             dct_method      = dct_method,
@@ -337,7 +343,18 @@ class JPEG:
         )
         # align rgb
         data = np.ctypeslib.as_array(self._im_spatial).astype(np.ubyte)
-        data = data.reshape(data.shape[2],-1,self.channels)
+        if 'QUANTIZE_COLORS' in flags:
+            data = data.reshape(self.channels,data.shape[2],-1)[0]
+            # parse colormap
+            colormap = np.ctypeslib.as_array(self._im_colormap)
+            colormap = colormap.reshape(colormap.shape[1], self.channels)
+            # index to color
+            data = np.array([[colormap[i] for i in row] for row in data])
+        else:
+            data = data.reshape(data.shape[2],-1,self.channels)
+        # quantization
+        #if 'QUANTIZE_COLORS' in flags:
+        #    data = data[:,:,0]
         # finish
         return data
     
@@ -403,9 +420,10 @@ class JPEG:
                                   * self.dct_shape[0][0])
                                   * self.dct_channels)()
     def _allocate_spatial(self):
-        return (((ctypes.c_ubyte * self.shape[1])
+        return ((((ctypes.c_ubyte * self.shape[1])
                                  * self.shape[0])
-                                 * self.channels)()
+                                 * self.channels)(),
+                ((ctypes.c_ubyte * 256) * self.channels)())
     def _parse_samp_factor(self, samp_factor):
         if samp_factor is not None:
             samp_factor = list(samp_factor)

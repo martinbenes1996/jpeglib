@@ -317,6 +317,8 @@ int write_jpeg_dct(
 int read_jpeg_spatial(
   const char *srcfile,
   unsigned char *rgb,
+  unsigned char *colormap, // colormap used
+  unsigned char *in_colormap, // colormap to use
   int out_color_space,
   int dither_mode,
   int dct_method,
@@ -341,6 +343,14 @@ int read_jpeg_spatial(
   cinfo.do_fancy_upsampling   = 0 != (flags & DO_FANCY_UPSAMPLING);
   cinfo.do_block_smoothing    = 0 != (flags & DO_BLOCK_SMOOTHING);
   cinfo.quantize_colors       = 0 != (flags & QUANTIZE_COLORS);
+  if(flags & QUANTIZE_COLORS) {
+    cinfo.actual_number_of_colors = 256; // TODO: parametrized
+    cinfo.desired_number_of_colors = 256;
+    if(in_colormap != NULL) cinfo.colormap = in_colormap;
+  }
+  //jpeg_new_colormap(&cinfo);
+
+  // set colormap
   cinfo.progressive_mode      = 0 != (flags & PROGRESSIVE_MODE);
   cinfo.arith_code            = 0 != (flags & ARITH_CODE);
   cinfo.CCIR601_sampling      = 0 != (flags & CCIR601_SAMPLING);
@@ -352,11 +362,21 @@ int read_jpeg_spatial(
   // decompress
   (void)jpeg_start_decompress(&cinfo);
 
-  // read
+  // read pixels
   unsigned char *rowptr = rgb;
+  unsigned short stride =  (flags & QUANTIZE_COLORS)?1:cinfo.out_color_components;
   while(cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, &rowptr, 1);
-    rowptr += cinfo.output_width * cinfo.out_color_components;
+    rowptr += cinfo.output_width * stride;
+  }
+  // read quantization colormap
+  if(flags & QUANTIZE_COLORS) {
+    int N = cinfo.out_color_components;
+    for(int ch=0; ch < N; ch++) {
+      for(int i=0; i < 256; i++) {
+        colormap[i*N + ch] = cinfo.colormap[ch][i];
+      }
+    }
   }
 
   // cleanup
