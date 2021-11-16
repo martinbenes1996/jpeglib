@@ -149,7 +149,10 @@ int read_jpeg_dct(
   // read quantization table
   if(qt != NULL) {
     for(int ch = 0; ch < 2; ch++) {
-      memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
+      for(int i = 0; i < 64; i++)
+        qt[ch*64 + i] = cinfo.quant_tbl_ptrs[ch]->quantval[i];//[(i&7)*8+(i>>3)];
+      //(i&7)*8+(i>>3)
+      //memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
       //JQUANT_TBL *tbl = cinfo.comp_info[ch].quant_table;
       //memcpy((void *)(qt + ch*64), (void*)tbl->quantval, sizeof(short)*64);
     }
@@ -243,7 +246,10 @@ int write_jpeg_dct(
   // write qt
   if(qt != NULL)
     for(int ch = 0; ch < 2; ch++)
-      memcpy((void *)cinfo_out.quant_tbl_ptrs[ch]->quantval, (void *)(qt + ch*64), sizeof(short)*64);
+      for(int i = 0; i < 64; i++)
+        cinfo_out.quant_tbl_ptrs[ch]->quantval[i]/*(i&7)*8+(i>>3)*/ = qt[ch*64 + i];
+        //qt[ch*64 + i] = cinfo_out.quant_tbl_ptrs[ch]->quantval[(i&7)*8+(i>>3)];
+      //memcpy((void *)cinfo_out.quant_tbl_ptrs[ch]->quantval, (void *)(qt + ch*64), sizeof(short)*64);
   // write quality
   else if(quality > 0)
     jpeg_set_quality(&cinfo_out, quality, TRUE);
@@ -318,7 +324,7 @@ int read_jpeg_spatial(
   const char *srcfile,
   unsigned char *rgb,
   unsigned char *colormap, // colormap used
-  unsigned char **in_colormap, // colormap to use
+  unsigned char *in_colormap, // colormap to use
   int out_color_space,
   int dither_mode,
   int dct_method,
@@ -343,14 +349,20 @@ int read_jpeg_spatial(
   cinfo.do_fancy_upsampling   = 0 != (flags & DO_FANCY_UPSAMPLING);
   cinfo.do_block_smoothing    = 0 != (flags & DO_BLOCK_SMOOTHING);
   cinfo.quantize_colors       = 0 != (flags & QUANTIZE_COLORS);
+  
+  unsigned char *cmap[256];
+  if(in_colormap != NULL)
+    for(int i = 0; i < 256; i++) {
+      cmap[i] = in_colormap + i*3;
+      //if(i < 3) fprintf(stderr, " %d %d |", i, cmap[i][0]);
+      //if(i == 255) fprintf(stderr, "\n");
+    }
   if(flags & QUANTIZE_COLORS) {
     cinfo.actual_number_of_colors = 256; // TODO: parametrized
     cinfo.desired_number_of_colors = 256;
-    if(in_colormap != NULL) cinfo.colormap = in_colormap;
+    if(in_colormap != NULL) cinfo.colormap = (unsigned char**)cmap;
   }
-  //jpeg_new_colormap(&cinfo);
-
-  // set colormap
+  
   cinfo.progressive_mode      = 0 != (flags & PROGRESSIVE_MODE);
   cinfo.arith_code            = 0 != (flags & ARITH_CODE);
   cinfo.CCIR601_sampling      = 0 != (flags & CCIR601_SAMPLING);
@@ -358,10 +370,9 @@ int read_jpeg_spatial(
   cinfo.enable_1pass_quant    = 0 != (flags & ENABLE_1PASS_QUANT);
   cinfo.enable_external_quant = 0 != (flags & ENABLE_EXTERNAL_QUANT);
   cinfo.enable_2pass_quant    = 0 != (flags & ENABLE_2PASS_QUANT);
-
+  
   // decompress
   (void)jpeg_start_decompress(&cinfo);
-
   // read pixels
   unsigned char *rowptr = rgb;
   unsigned short stride =  (flags & QUANTIZE_COLORS)?1:cinfo.out_color_components;
@@ -374,7 +385,8 @@ int read_jpeg_spatial(
     int N = cinfo.out_color_components;
     for(int ch=0; ch < N; ch++) {
       for(int i=0; i < 256; i++) {
-        colormap[i*N + ch] = cinfo.colormap[ch][i];
+        colormap[ch*256 + i] = cinfo.colormap[ch][i];
+        //colormap[ch*256 + i] = cinfo.colormap[i][ch];
       }
     }
   }
@@ -417,13 +429,16 @@ int write_jpeg_spatial(
   jpeg_stdio_dest(&cinfo, fp);
 
   // set basic parameters
-  cinfo.image_width = image_dims[0];
-  cinfo.image_height = image_dims[1];
-  cinfo.in_color_space = in_color_space;
-  if(in_components >= 0) cinfo.input_components = in_components;
-  cinfo.num_components = cinfo.input_components;
-  jpeg_set_defaults(&cinfo);
+  if(srcfile == NULL) {
+    cinfo.image_width = image_dims[0];
+    cinfo.image_height = image_dims[1];
+    cinfo.in_color_space = in_color_space;
+    if(in_components >= 0) cinfo.input_components = in_components;
+    cinfo.num_components = cinfo.input_components;
+    jpeg_set_defaults(&cinfo);
+  }
   
+
   // copy parameters
   struct jpeg_decompress_struct cinfo_in;
   struct jpeg_error_mgr jerr_in;
@@ -433,9 +448,10 @@ int write_jpeg_spatial(
     if((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in)) == NULL) return 0;
     // decompress
     (void)jpeg_start_decompress(&cinfo_in);
-    
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in, (j_compress_ptr)&cinfo);
   }
+
+  
 
   // set advanced parameters
   if(dct_method >= 0) cinfo.dct_method = dct_method;
@@ -444,22 +460,22 @@ int write_jpeg_spatial(
       cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
       cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
     }
-
   
   if(qt != NULL) {
-    for(int ch = 0; ch < 2; ch++) {
-      memcpy((void *)cinfo.quant_tbl_ptrs[ch]->quantval, (void *)(qt + ch*64), sizeof(short)*64);
-    }
-    // unsigned qt_u[64];
-    // for(int i = 0; i < 64; i++) qt_u[i] = qt[i];
-    // jpeg_add_quant_table(&cinfo, 2, qt_u, 100, TRUE);
-    // cinfo.comp_info[0].quant_tbl_no = 2;
-    // for(int i = 0; i < 64; i++) qt_u[i] = qt[64 + i];
-    // jpeg_add_quant_table(&cinfo, 3, qt_u, 100, TRUE);
-    // cinfo.comp_info[1].quant_tbl_no = 3;
-    // cinfo.comp_info[2].quant_tbl_no = 3;
+    unsigned qt_u[64];
+    for(int i = 0; i < 64; i++)
+      qt_u[i] = qt[i];
+      //qt_u[(i&7)*8+(i>>3)] = qt[i];
+    jpeg_add_quant_table(&cinfo, 0, qt_u, 100, FALSE);
+    cinfo.comp_info[0].quant_tbl_no = 0;
+    for(int i = 0; i < 64; i++)
+      qt_u[i] = qt[64 + i];
+      //qt_u[(i&7)*8+(i>>3)] = qt[64 + i];
+    jpeg_add_quant_table(&cinfo, 1, qt_u, 100, FALSE);
+    cinfo.comp_info[1].quant_tbl_no = 1;
+    cinfo.comp_info[2].quant_tbl_no = 1;
   } else if(quality >= 0) {
-    jpeg_set_quality(&cinfo, quality, TRUE);
+    jpeg_set_quality(&cinfo, quality, FALSE);
   }
   if(smoothing_factor >= 0) cinfo.smoothing_factor = smoothing_factor;
   
@@ -475,7 +491,6 @@ int write_jpeg_spatial(
   // write data
   unsigned char *rowptr = rgb;
   jpeg_start_compress(&cinfo, TRUE);
-
   for(unsigned h = 0; h < cinfo.image_height; h++) {
     jpeg_write_scanlines(&cinfo, &rowptr, 1);
     rowptr += cinfo.image_width * cinfo.input_components;

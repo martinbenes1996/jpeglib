@@ -1,13 +1,9 @@
 
-#import cv2
 import logging
 import numpy as np
 import os
-import pandas as pd
 from PIL import Image
-#from pylibjpeg import decode
 import shutil
-import subprocess
 import sys
 import unittest
 
@@ -41,14 +37,26 @@ class TestSpatial(unittest.TestCase):
         finally: os.mkdir("tmp")
     def tearDown(self):
         shutil.rmtree("tmp")
+        
+    def test_synthetic(self):
+        global qt50_standard
+        # generate uniform image
+        x_in = np.ones((256, 256, 3), np.uint8)*255
+        # compress
+        im = jpeglib.JPEG()
+        im.write_spatial("tmp/output.jpeg", x_in)
+        # decompress
+        im = jpeglib.JPEG("tmp/output.jpeg")
+        x_out = im.read_spatial()
+
+        # test matrix
+        np.testing.assert_array_equal(x_in, x_out)
 
     def test_spatial_quality(self):
         global qt50_standard
-
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             _ = im.read_spatial()
             im.write_spatial("tmp/output.jpeg", qt=50)
-
         im = jpeglib.JPEG("tmp/output.jpeg")
         _,_,qt50 = im.read_dct()
 
@@ -57,10 +65,9 @@ class TestSpatial(unittest.TestCase):
 
     def test_spatial_qt(self):
         global qt50_standard
-
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             _ = im.read_spatial()
-            im.write_spatial("tmp/output.jpeg", qt = qt50_standard)
+            im.write_spatial("tmp/output.jpeg", qt=qt50_standard)
         
         im = jpeglib.JPEG("tmp/output.jpeg")
         _,_,qt50 = im.read_dct()
@@ -93,17 +100,16 @@ class TestSpatial(unittest.TestCase):
 
     def test_pil_write(self):
         q = 75 # quality
-
         # pass the image through jpeglib
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            #print("read spatial")
             data = im.read_spatial(flags=['DO_FANCY_UPSAMPLING'])
+            #print("write spatial")
             im.write_spatial("tmp/test1.jpeg", data, qt=q, flags=['DO_FANCY_UPSAMPLING'])
-    
         # pass the image through PIL
         im = Image.open("examples/IMG_0791.jpeg")
         im.save("tmp/test2.jpeg", qt=q, subsampling=-1)
         im.close()
-
         # load both with PIL
         im1 = Image.open("tmp/test1.jpeg")
         x1 = np.array(im1)
@@ -119,6 +125,9 @@ class TestSpatial(unittest.TestCase):
         # cleanup
         im1.close()
         im2.close()
+
+
+
 
 
 

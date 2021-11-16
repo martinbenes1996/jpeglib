@@ -4,6 +4,7 @@ Module containing conversion of C-structures into numpy and back and memory mana
 
 import ctypes
 import logging
+import math
 import numpy as np
 import tempfile
 import warnings
@@ -13,7 +14,7 @@ from ._timer import Timer
 
 class JPEG:
     cjpeglib = CJpegLib
-    def __init__(self, srcfile):
+    def __init__(self, srcfile=None):
         """Constructs the :class:`JPEG` object.
         
         :param srcfile: Path to a source file in JPEG format.
@@ -32,12 +33,13 @@ class JPEG:
         self._num_components = (ctypes.c_int*1)()
         self._color_space = (ctypes.c_int*1)()
         self._samp_factor = ((ctypes.c_int*2)*3)()
+        self.dct_channels = 3
+        self.color_space = 'JCS_RGB'
+        #self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
         # get image info
-        self._read_info()   
-        # allocate
-        self._im_spatial,self._im_colormap = self._allocate_spatial()
-        self._im_dct = self._allocate_dct()
-        self._im_qt = ((ctypes.c_short*64)*(self.dct_channels-1))()
+        if srcfile is not None:
+            self._read_info()
+            self._allocate() # allocate
 
     def read_dct(self, quantized=False):
         """Reads the DCT coefficients and quantization tables of the source file.
@@ -244,13 +246,37 @@ class JPEG:
             jpeg_color_space = self._color_space
         )
         # parse
-        self.dct_channels = 3
         self.channels = self._num_components[0]
         self.dct_shape = np.array([self._dct_dims[i] for i in range(6)], int)\
             .reshape(self.dct_channels, 2)
         self.shape = np.array([self._dims[0], self._dims[1]])
-        self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
 
+    def _allocate(self):
+        self._im_spatial,self._im_colormap = self._allocate_spatial()
+        self._im_dct = self._allocate_dct()
+        self._im_qt = ((ctypes.c_short*64)*(self.dct_channels-1))()
+
+    def _initialize_info(self, data=None, Y=None, CbCr=None):
+        if data is not None:
+            self.channels = data.shape[2]
+            self.shape = np.array(data.shape[:2])
+        else:
+            self.channels = 3
+            self.shape = np.array([0,0])
+        if Y is not None and CbCr is not None:
+            self._dct_dims[0] = Y.shape[0]
+            self._dct_dims[1] = Y.shape[1]
+            self._dct_dims[2] = CbCr.shape[0]
+            self._dct_dims[3] = CbCr.shape[1]
+            self._dct_dims[4] = CbCr.shape[0]
+            self._dct_dims[5] = CbCr.shape[1]
+        else:
+            for i in range(6):
+                self._dct_dims[i] = math.ceil((data.shape[i % 2] / 8) / self._samp_factor[i // 2][i % 2])
+
+        self.dct_shape = np.array([self._dct_dims[i] for i in range(6)], int)\
+            .reshape(self.dct_channels, 2)
+        self._allocate()
     
     def _read_dct(self, srcfile):
         # allocate
@@ -272,7 +298,10 @@ class JPEG:
         return Y,CbCr,qt
 
     def _write_dct(self, dstfile, Y=None, CbCr=None, quality=None, quantized=False, in_color_space=None, samp_factor=None):
-        # TODO: remove copying from source file
+        # initialize default
+        samp_factor = self._parse_samp_factor(samp_factor) # sampling factor
+        if self.srcfile is None:
+            self._initialize_info(Y=Y, CbCr=CbCr)
         # allocate
         if self._im_dct is None:
             self._im_dct = self._allocate_dct()
@@ -283,7 +312,6 @@ class JPEG:
         # quantization
         if quantized and quality is None:
             qt = np.ctypeslib.as_array(self._im_qt)
-
         # align lumo
         if Y is not None:
             Y = Y.reshape((*Y.shape[:-2],64))
@@ -299,8 +327,6 @@ class JPEG:
             self._im_dct[1:] = np.ctypeslib.as_ctypes(_CbCr)
         # quality
         qt,quality,srcfile = self._parse_quality(quality)
-        # sampling factor
-        samp_factor = self._parse_samp_factor(samp_factor)
         # write
         self.cjpeglib.write_jpeg_dct(
             srcfile        = srcfile,
@@ -311,31 +337,45 @@ class JPEG:
             in_components  = self.channels,
             samp_factor    = samp_factor,
             qt             = qt,
-            quality        = quality)
+            quality        = quality
+        )
 
 
     def _read_spatial(self, srcfile, out_color_space, dither_mode, dct_method, colormap, flags):
         # parameters
-        if out_color_space is None:
+        out_color_space = out_color_space if out_color_space is not None else None
+        if out_color_space is None and self.color_space is not None:
             out_color_space = self.color_space
-        self.color_space = out_color_space
+        #out_color_space = self.color_space
         color_space,channels = self.J_COLOR_SPACE[out_color_space]
         dither_mode = self.J_DITHER_MODE[dither_mode]
         dct_method = self.J_DCT_METHOD[dct_method]
+        in_cmap = None
         if colormap is not None:
-            colormap = np.ctypeslib.as_ctypes(colormap)
+            if 'QUANTIZE_COLORS' not in flags:
+                flags.append('QUANTIZE_COLORS')
+            in_colormap = colormap
+            # print("Raw input:")
+            # print(in_colormap[:6])
+            in_cmap = np.ascontiguousarray(in_colormap)#.transpose().reshape(-1,in_colormap.shape[1]))
+            # print("Before input:")
+            # print(in_colormap[:6])
+            in_cmap = np.ctypeslib.as_ctypes(in_cmap.astype(np.ubyte))
+            #print(in_cmap[0][:], in_cmap[1][:], in_cmap[2][:])
+        #print("allocate:", self.shape, self.channels, channels)
         # allocate
         if self._im_spatial is None or channels != self.channels:
-            self.channels = channels
+            if channels > 0:
+                self.channels = channels
             self._im_spatial,self._im_colormap = self._allocate_spatial()
         else: self.channels = channels
-        
+
         # call
         self.cjpeglib.read_jpeg_spatial(
             srcfile         = srcfile,
             rgb             = self._im_spatial,
             colormap        = self._im_colormap,
-            in_colormap     = colormap,
+            in_colormap     = in_cmap,
             out_color_space = color_space,
             dither_mode     = dither_mode,
             dct_method      = dct_method,
@@ -348,9 +388,15 @@ class JPEG:
             # parse colormap
             colormap = np.ctypeslib.as_array(self._im_colormap)
             colormap = colormap.reshape(colormap.shape[1], self.channels)
+            # print("After output:")
+            # print(colormap[:6])
+            # print("After input:")
+            # print(in_colormap[:6])
+            
             # index to color
-            data = np.array([[colormap[i] for i in row] for row in data])
+            data = np.array([[in_colormap[i] for i in row] for row in np.array(data)])
         else:
+            #print(data.shape, self.channels)
             data = data.reshape(data.shape[2],-1,self.channels)
         # quantization
         #if 'QUANTIZE_COLORS' in flags:
@@ -360,12 +406,16 @@ class JPEG:
     
     def _write_spatial(self, dstfile, data, in_color_space, dct_method, samp_factor, quality, smoothing_factor, flags):
         """"""
+        # initialize default
+        self._samp_factor = self._parse_samp_factor(samp_factor)
+        if self.srcfile is None:
+            self._initialize_info(data=data)
         # parameters
-        if in_color_space is None:
-            in_color_space = self.color_space
+        #print("in_color_space 1", in_color_space, self.color_space)
+        in_color_space = in_color_space if in_color_space is not None else self.color_space
+        #print("in_color_space 2", in_color_space, self.color_space)
         in_color_space,channels = self.J_COLOR_SPACE[in_color_space]
         dct_method = self.J_DCT_METHOD[dct_method]
-        self._samp_factor = self._parse_samp_factor(samp_factor)
         qt,quality,srcfile = self._parse_quality(quality)
         # spatial buffer
         if data is not None:
@@ -375,7 +425,17 @@ class JPEG:
         elif self._im_spatial is None:
             warnings.warn('Writing unsuccessful, call read_spatial() before calling write_spatial() or specify data parameter.', RuntimeWarning)
             return
-
+        # print("write_jpeg_spatial")
+        # print("- _im_spatial", [self._im_spatial[0][0][0], self._im_spatial[0][0][1], self._im_spatial[0][0][2]])
+        # print("- _dims", self._dims[:])
+        # print("- in_color_space", in_color_space)
+        # print("- channels", self.channels)
+        # print("- dct_method", dct_method)
+        # print("- _samp_factor", [self._samp_factor[0][:], self._samp_factor[1][:], self._samp_factor[2][:]])
+        # print("- quality", quality)
+        # print("- qt", qt)
+        # print("- smoothing_factor", smoothing_factor)
+        # print("- flags", flags)
         self.cjpeglib.write_jpeg_spatial(
             srcfile          = self.srcfile,
             dstfile          = dstfile,
@@ -434,6 +494,9 @@ class JPEG:
                 else:
                     self._samp_factor[i][0] = f[0]
                     self._samp_factor[i][1] = f[1]
+        else:
+            for i in range(6):
+                self._samp_factor[i // 2][i % 2] = 1
         return self._samp_factor
     def _parse_quality(self, quality):
         if quality is None: # not specified

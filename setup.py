@@ -50,7 +50,7 @@ for v in libjpeg_versions:
     sources = sources,
     headers = hfiles[v],
     define_macros = [("BITS_IN_JSAMPLE", 8)],
-    extra_compile_args=["-fPIC"],
+    extra_compile_args=["-fPIC","-g"],
     library_dirs=[f'./{clib}'],
     include_dirs=[f'./{clib}'],
   )
