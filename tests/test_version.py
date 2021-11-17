@@ -17,8 +17,8 @@ class TestVersion(unittest.TestCase):
         try: shutil.rmtree("tmp")
         except: pass
         finally: os.mkdir("tmp")
-    def tearDown(self):
-        shutil.rmtree("tmp")
+    # def tearDown(self):
+    #     shutil.rmtree("tmp")
 
     def test_6b(self):
         jpeglib.version.set('6b')
@@ -83,25 +83,26 @@ class TestVersion(unittest.TestCase):
         #return
 
         # compress
-        kw = {'flags': ['DO_FANCY_UPSAMPLING','DO_BLOCK_SMOOTHING']}
-        im_ppm = Image.open(f"examples/images-{version}/testimg.ppm")
-        rgb_ppm = np.array(im_ppm)
-        im = jpeglib.JPEG()#f'examples/images-{version}/testimg.jpg')
-        im.write_spatial('tmp/output.jpeg', rgb_ppm, **kw)
-        im_compressed = jpeglib.JPEG('tmp/output.jpeg')
-        rgb_compressed = im_compressed.read_spatial(**kw)
-        im = jpeglib.JPEG(f'examples/images-{version}/testimg.jpg')
-        rgb = im.read_spatial(**kw)
-        # test same histogram
-        hist1,_ = np.histogram(rgb, bins=256, range=(0,256), density=True)
-        hist2,_ = np.histogram(rgb_compressed, bins=256, range=(0,256), density=True)
-        self.assertGreaterEqual(kstest(hist2, hist1).pvalue, .05)
+        # kw = {'flags': ['DO_FANCY_UPSAMPLING','DO_BLOCK_SMOOTHING']}
+        # im_ppm = Image.open(f"examples/images-{version}/testimg.ppm")
+        # rgb_ppm = np.array(im_ppm)
+        # im = jpeglib.JPEG()#f'examples/images-{version}/testimg.jpg')
+        # im.write_spatial('tmp/output.jpeg', rgb_ppm, **kw)
+        # im_compressed = jpeglib.JPEG('tmp/output.jpeg')
+        # rgb_compressed = im_compressed.read_spatial(**kw)
+        # im = jpeglib.JPEG(f'examples/images-{version}/testimg.jpg')
+        # rgb = im.read_spatial(**kw)
+        # # test same histogram
+        # hist1,_ = np.histogram(rgb, bins=256, range=(0,256), density=True)
+        # hist2,_ = np.histogram(rgb_compressed, bins=256, range=(0,256), density=True)
+        # self.assertGreaterEqual(kstest(hist2, hist1).pvalue, .05)
 
         # load dct
         im_prog = jpeglib.JPEG(f'examples/images-{version}/testprog.jpg')
         print("read_dct")
         Y,CbCr,qt = im_prog.read_dct()
         print("write_dct")
+        im_prog = jpeglib.JPEG()
         im_prog.write_dct("tmp/output.jpeg", Y, CbCr, qt)
         print("open")
         im = jpeglib.JPEG("tmp/output.jpeg")

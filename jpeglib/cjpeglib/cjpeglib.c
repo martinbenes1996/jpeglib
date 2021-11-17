@@ -211,7 +211,7 @@ int write_jpeg_dct(
   struct jpeg_error_mgr jerr_out;
   //memset((void *)&cinfo_out, 0x0, sizeof(struct jpeg_compress_struct));
   //memset((void *)&jerr_out, 0x0, sizeof(struct jpeg_error_mgr));
-  
+
   // open the destination file
   FILE * fp_out;
   if ((fp_out = fopen(dstfile, "wb")) == NULL) {
@@ -233,15 +233,30 @@ int write_jpeg_dct(
 
   if(srcfile != NULL) // copy critical parameters to dstfile
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in,&cinfo_out);
-  else // set defaults
-    jpeg_set_defaults(&cinfo_out);
 
   // set basic parameters
+  for(int i = 0; i < 3; i++) fprintf(stderr, "image_dims[%d] = %d\n", i, image_dims[i]);
   cinfo_out.image_width = image_dims[0];
   cinfo_out.image_height = image_dims[1];
   cinfo_out.in_color_space = in_color_space;
   if(in_components >= 0) cinfo_out.input_components = in_components;
   cinfo_out.num_components = cinfo_out.input_components;
+
+  if(srcfile == NULL) // set defaults
+    jpeg_set_defaults(&cinfo_out);
+
+  // set advanced parameters
+  if(samp_factor != NULL)
+    for(int comp = 0; comp < cinfo_out.input_components; comp++) {
+      fprintf(stderr, "scale %d: %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
+      cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
+      cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
+      fprintf(stderr, "scale %d': %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
+    }
+  
+  fprintf(stderr, "After setting sampling factors.\n");
+  //fprintf(stderr, "Components: %d %d\n", cinfo_out.input_components, cinfo_out.num_components);
+  fprintf(stderr, "MCU blocks %d %d\n", cinfo_out.blocks_in_MCU, C_MAX_BLOCKS_IN_MCU);
 
   // write qt
   if(qt != NULL)
@@ -254,31 +269,40 @@ int write_jpeg_dct(
   else if(quality > 0)
     jpeg_set_quality(&cinfo_out, quality, TRUE);
 
+  fprintf(stderr, "After setting of qt.\n");
+
   // DCT coefficients
   jvirt_barray_ptr *coeffs_array;
   if(srcfile != NULL) { // copy from source
+    fprintf(stderr, "Copy from source.\n");
     coeffs_array = jpeg_read_coefficients(&cinfo_in);
   } else { // allocate new
+    fprintf(stderr, "Create new array.\n");
     coeffs_array = (jvirt_barray_ptr *)(cinfo_out.mem->alloc_small)(
       (j_common_ptr)&cinfo_out,
       JPOOL_IMAGE,
       sizeof(jvirt_barray_ptr) * cinfo_out.num_components
     );
+    fprintf(stderr, "Set the coefficients. Image: %dx%d\n", cinfo_out.image_width, cinfo_out.image_height);
     for(int ch = 0; ch < (cinfo_out.num_components); ch++) {
       jpeg_component_info* comp_ptr = cinfo_out.comp_info + ch;
-      long v_samp_factor = *(samp_factor + ch*2 + 0);
-      long h_samp_factor = *(samp_factor + ch*2 + 1);
-      comp_ptr->height_in_blocks = cinfo_out.image_width / 8 * h_samp_factor;// / 4;
-      comp_ptr->width_in_blocks = cinfo_out.image_height / 8 * v_samp_factor;// / 4;
+      //long v_samp_factor = *(samp_factor + ch*2 + 0);
+      //long h_samp_factor = *(samp_factor + ch*2 + 1);
+      comp_ptr->width_in_blocks = cinfo_out.image_width / 8;// * comp_ptr->h_samp_factor / 4;
+      comp_ptr->height_in_blocks = cinfo_out.image_height / 8;// * comp_ptr->v_samp_factor / 4;
+      fprintf(stderr, "Component %d:\n", ch);
+      fprintf(stderr, "  - dims %dx%d\n", comp_ptr->width_in_blocks, comp_ptr->height_in_blocks);
+      fprintf(stderr, "  - samp %dx%d\n", comp_ptr->v_samp_factor, comp_ptr->h_samp_factor);
+      //fprintf(stderr, "  - block size %d\n", comp_ptr->DCT_h_scaled_size);
       coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
         (j_common_ptr)&cinfo_out,
         JPOOL_IMAGE,
         TRUE,
         (JDIMENSION)jround_up(comp_ptr->width_in_blocks,  //component size in dct blocks (ignoring mcu)
-		                          h_samp_factor),   //round up is important, if border MCUs are not completely needed
+		                          comp_ptr->h_samp_factor),   //round up is important, if border MCUs are not completely needed
 		    (JDIMENSION)jround_up(comp_ptr->height_in_blocks,
-		                          v_samp_factor),
-		    (JDIMENSION)v_samp_factor
+		                          comp_ptr->v_samp_factor),
+		    (JDIMENSION)comp_ptr->v_samp_factor
       );
     }
   }
@@ -375,7 +399,7 @@ int read_jpeg_spatial(
   (void)jpeg_start_decompress(&cinfo);
   // read pixels
   unsigned char *rowptr = rgb;
-  unsigned short stride =  (flags & QUANTIZE_COLORS)?1:cinfo.out_color_components;
+  unsigned short stride = (flags & QUANTIZE_COLORS)?1:cinfo.out_color_components;
   while(cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, &rowptr, 1);
     rowptr += cinfo.output_width * stride;
@@ -437,7 +461,14 @@ int write_jpeg_spatial(
     cinfo.num_components = cinfo.input_components;
     jpeg_set_defaults(&cinfo);
   }
-  
+
+  // set advanced parameters
+  if(dct_method >= 0) cinfo.dct_method = dct_method;
+  if(samp_factor != NULL)
+    for(int comp = 0; comp < cinfo.input_components; comp++) {
+      cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
+      cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
+    }
 
   // copy parameters
   struct jpeg_decompress_struct cinfo_in;
@@ -451,16 +482,6 @@ int write_jpeg_spatial(
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in, (j_compress_ptr)&cinfo);
   }
 
-  
-
-  // set advanced parameters
-  if(dct_method >= 0) cinfo.dct_method = dct_method;
-  if(samp_factor != NULL)
-    for(int comp = 0; comp < cinfo.input_components; comp++) {
-      cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
-      cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
-    }
-  
   if(qt != NULL) {
     unsigned qt_u[64];
     for(int i = 0; i < 64; i++)

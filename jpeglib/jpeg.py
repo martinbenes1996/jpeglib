@@ -264,18 +264,24 @@ class JPEG:
             self.channels = 3
             self.shape = np.array([0,0])
         if Y is not None and CbCr is not None:
-            self._dct_dims[0] = Y.shape[0]
-            self._dct_dims[1] = Y.shape[1]
-            self._dct_dims[2] = CbCr.shape[0]
-            self._dct_dims[3] = CbCr.shape[1]
-            self._dct_dims[4] = CbCr.shape[0]
-            self._dct_dims[5] = CbCr.shape[1]
+            self._dct_dims[0] = Y.shape[1]
+            self._dct_dims[1] = Y.shape[2]
+            self._dct_dims[2] = CbCr.shape[1]
+            self._dct_dims[3] = CbCr.shape[2]
+            self._dct_dims[4] = CbCr.shape[1]
+            self._dct_dims[5] = CbCr.shape[2]
+            self.shape = np.array([self._dct_dims[0], self._dct_dims[1]]) * 8
+            self.channels = 3
         else:
             for i in range(6):
-                self._dct_dims[i] = math.ceil((data.shape[i % 2] / 8) / self._samp_factor[i // 2][i % 2])
+                self._dct_dims[i] = math.ceil((data.shape[i % 2] / 8))
+                if self._samp_factor[i // 2][i % 2] != 0:
+                    self._dct_dims[i] = math.ceil(self._dct_dims[i] / self._samp_factor[i // 2][i % 2])
 
         self.dct_shape = np.array([self._dct_dims[i] for i in range(6)], int)\
             .reshape(self.dct_channels, 2)
+        self._dims = (ctypes.c_int * 3)(self.shape[1], self.shape[0], self.channels)
+
         self._allocate()
     
     def _read_dct(self, srcfile):
@@ -290,7 +296,7 @@ class JPEG:
         # align lumo
         Y = np.ctypeslib.as_array(self._im_dct[:1])
         Y = Y.reshape((*Y.shape[:-1],8,8))
-        # align chroma 
+        # align chroma
         CbCr = np.ctypeslib.as_array(self._im_dct[1:])
         CbCr = CbCr[:,:self.dct_shape[1][0],:self.dct_shape[1][1]]
         CbCr = CbCr.reshape((*CbCr.shape[:-1],8,8))
@@ -328,6 +334,7 @@ class JPEG:
         # quality
         qt,quality,srcfile = self._parse_quality(quality)
         # write
+        print("write_jpeg_dct:", self._dims[:], in_color_space, self.channels, [samp_factor[i][:] for i in range(3)])
         self.cjpeglib.write_jpeg_dct(
             srcfile        = srcfile,
             dstfile        = dstfile,
@@ -436,6 +443,7 @@ class JPEG:
         # print("- qt", qt)
         # print("- smoothing_factor", smoothing_factor)
         # print("- flags", flags)
+        print("write_jpeg_dct:", self._dims[:], in_color_space, self.channels, [self._samp_factor[i][:] for i in range(3)])
         self.cjpeglib.write_jpeg_spatial(
             srcfile          = self.srcfile,
             dstfile          = dstfile,
@@ -495,8 +503,10 @@ class JPEG:
                     self._samp_factor[i][0] = f[0]
                     self._samp_factor[i][1] = f[1]
         else:
-            for i in range(6):
-                self._samp_factor[i // 2][i % 2] = 1
+            for i in range(2):
+                self._samp_factor[i // 2][i % 2] = 4
+            for i in range(2,6):
+                self._samp_factor[i // 2][i % 2] = 2
         return self._samp_factor
     def _parse_quality(self, quality):
         if quality is None: # not specified
