@@ -1,10 +1,10 @@
 
 import importlib
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image
-from scipy.stats import kstest
+#from scipy.stats import kstest
 import shutil
 import sys
 import unittest
