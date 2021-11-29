@@ -32,7 +32,7 @@ class JPEG:
         self._dims = (ctypes.c_int*3)()
         self._num_components = (ctypes.c_int*1)()
         self._color_space = (ctypes.c_int*1)()
-        self._samp_factor = ((ctypes.c_int*2)*3)()
+        self._samp_factor = self._parse_samp_factor()
         self.dct_channels = 3
         self.color_space = 'JCS_RGB'
         #self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
@@ -270,13 +270,13 @@ class JPEG:
             self._dct_dims[3] = CbCr.shape[2]
             self._dct_dims[4] = CbCr.shape[1]
             self._dct_dims[5] = CbCr.shape[2]
-            self.shape = np.array([self._dct_dims[0], self._dct_dims[1]]) * 8
+            self.shape = np.array([self._dct_dims[1], self._dct_dims[0]]) * 8
             self.channels = 3
         else:
             for i in range(6):
                 self._dct_dims[i] = math.ceil((data.shape[i % 2] / 8))
-                if self._samp_factor[i // 2][i % 2] != 0:
-                    self._dct_dims[i] = math.ceil(self._dct_dims[i] / self._samp_factor[i // 2][i % 2])
+                #if self._samp_factor[i // 2][i % 2] != 0:
+                #    self._dct_dims[i] = math.ceil(self._dct_dims[i])# / self._samp_factor[i // 2][i % 2])
 
         self.dct_shape = np.array([self._dct_dims[i] for i in range(6)], int)\
             .reshape(self.dct_channels, 2)
@@ -323,18 +323,22 @@ class JPEG:
             Y = Y.reshape((*Y.shape[:-2],64))
             if quantized:
                 Y /= qt[0]
+            #print(Y.shape, '->', np.ctypeslib.as_ctypes(Y[0]), '->', self._im_dct[0])
+            self._im_dct[0] = np.ctypeslib.as_ctypes(Y[0])
         # align chroma
         if CbCr is not None:
             CbCr = CbCr.reshape((*CbCr.shape[:-2],64))
             if quantized:
                 CbCr /= qt[1]
             _CbCr = np.zeros((2, self.dct_shape[0][0], self.dct_shape[0][1], 64), np.short)
-            _CbCr[:,:int(self.dct_shape[1][0]),:self.dct_shape[1][1]] = CbCr
+            #print(CbCr.shape, _CbCr.shape)
+            _CbCr[:,:int(self.dct_shape[1][0]),:int(self.dct_shape[1][1])] = CbCr
+            #print(self.dct_shape[0][0], self.dct_shape[0][1], self.dct_shape[1][0], self.dct_shape[1][1])
             self._im_dct[1:] = np.ctypeslib.as_ctypes(_CbCr)
         # quality
         qt,quality,srcfile = self._parse_quality(quality)
         # write
-        print("write_jpeg_dct:", self._dims[:], in_color_space, self.channels, [samp_factor[i][:] for i in range(3)])
+        #print("write_jpeg_dct:", self._dims[:], in_color_space, self.channels, [samp_factor[i] for i in range(3)])
         self.cjpeglib.write_jpeg_dct(
             srcfile        = srcfile,
             dstfile        = dstfile,
@@ -361,15 +365,8 @@ class JPEG:
         if colormap is not None:
             if 'QUANTIZE_COLORS' not in flags:
                 flags.append('QUANTIZE_COLORS')
-            in_colormap = colormap
-            # print("Raw input:")
-            # print(in_colormap[:6])
-            in_cmap = np.ascontiguousarray(in_colormap)#.transpose().reshape(-1,in_colormap.shape[1]))
-            # print("Before input:")
-            # print(in_colormap[:6])
+            in_cmap = np.ascontiguousarray(colormap)
             in_cmap = np.ctypeslib.as_ctypes(in_cmap.astype(np.ubyte))
-            #print(in_cmap[0][:], in_cmap[1][:], in_cmap[2][:])
-        #print("allocate:", self.shape, self.channels, channels)
         # allocate
         if self._im_spatial is None or channels != self.channels:
             if channels > 0:
@@ -395,13 +392,8 @@ class JPEG:
             # parse colormap
             colormap = np.ctypeslib.as_array(self._im_colormap)
             colormap = colormap.reshape(colormap.shape[1], self.channels)
-            # print("After output:")
-            # print(colormap[:6])
-            # print("After input:")
-            # print(in_colormap[:6])
-            
             # index to color
-            data = np.array([[in_colormap[i] for i in row] for row in np.array(data)])
+            data = np.array([[colormap[i] for i in row] for row in np.array(data)])
         else:
             #print(data.shape, self.channels)
             data = data.reshape(data.shape[2],-1,self.channels)
@@ -432,18 +424,6 @@ class JPEG:
         elif self._im_spatial is None:
             warnings.warn('Writing unsuccessful, call read_spatial() before calling write_spatial() or specify data parameter.', RuntimeWarning)
             return
-        # print("write_jpeg_spatial")
-        # print("- _im_spatial", [self._im_spatial[0][0][0], self._im_spatial[0][0][1], self._im_spatial[0][0][2]])
-        # print("- _dims", self._dims[:])
-        # print("- in_color_space", in_color_space)
-        # print("- channels", self.channels)
-        # print("- dct_method", dct_method)
-        # print("- _samp_factor", [self._samp_factor[0][:], self._samp_factor[1][:], self._samp_factor[2][:]])
-        # print("- quality", quality)
-        # print("- qt", qt)
-        # print("- smoothing_factor", smoothing_factor)
-        # print("- flags", flags)
-        print("write_jpeg_dct:", self._dims[:], in_color_space, self.channels, [self._samp_factor[i][:] for i in range(3)])
         self.cjpeglib.write_jpeg_spatial(
             srcfile          = self.srcfile,
             dstfile          = dstfile,
@@ -492,21 +472,21 @@ class JPEG:
                                  * self.shape[0])
                                  * self.channels)(),
                 ((ctypes.c_ubyte * 256) * self.channels)())
-    def _parse_samp_factor(self, samp_factor):
-        if samp_factor is not None:
-            samp_factor = list(samp_factor)
-            for i,f in enumerate(samp_factor):
-                if isinstance(f,int):
-                    self._samp_factor[i][0] = f
-                    self._samp_factor[i][1] = f
-                else:
-                    self._samp_factor[i][0] = f[0]
-                    self._samp_factor[i][1] = f[1]
-        else:
-            for i in range(2):
-                self._samp_factor[i // 2][i % 2] = 4
-            for i in range(2,6):
-                self._samp_factor[i // 2][i % 2] = 2
+    def _parse_samp_factor(self, samp_factor=None):
+        if samp_factor is None:
+            samp_factor = [[2,2],[1,1],[1,1]]#[4, 2, 2]
+
+        samp_factor = np.array(samp_factor, dtype=np.int32)
+        
+        #samp_factor = list(samp_factor)
+        #J,a,b = samp_factor
+        #samp_factor = np.array([
+        #    [int(J / a), int(a == b) + 1],
+        #    [1, 1],
+        #    [1, 1]
+        #], dtype=np.int32)
+
+        self._samp_factor = np.ctypeslib.as_ctypes(samp_factor)
         return self._samp_factor
     def _parse_quality(self, quality):
         if quality is None: # not specified

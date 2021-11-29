@@ -38,6 +38,7 @@ LOCAL(void) transencode_coef_controller
 GLOBAL(void)
 jpeg_write_coefficients (j_compress_ptr cinfo, jvirt_barray_ptr * coef_arrays)
 {
+  
   if (cinfo->global_state != CSTATE_START)
     ERREXIT1(cinfo, JERR_BAD_STATE, cinfo->global_state);
   /* Mark all tables to be written */
@@ -163,9 +164,10 @@ LOCAL(void)
 transencode_master_selection (j_compress_ptr cinfo,
 			      jvirt_barray_ptr * coef_arrays)
 {
+  
   /* Initialize master control (includes parameter checking/processing) */
   jinit_c_master_control(cinfo, TRUE /* transcode only */);
-
+  
   /* Entropy encoding: either Huffman or arithmetic coding. */
   if (cinfo->arith_code)
     jinit_arith_encoder(cinfo);

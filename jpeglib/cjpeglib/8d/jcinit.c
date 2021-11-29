@@ -29,6 +29,7 @@
 GLOBAL(void)
 jinit_compress_master (j_compress_ptr cinfo)
 {
+  
   /* Initialize master control (includes parameter checking/processing) */
   jinit_c_master_control(cinfo, FALSE /* full compression */);
 

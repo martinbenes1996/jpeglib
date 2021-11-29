@@ -1,8 +1,12 @@
 
 # versions
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.5.10')
-libjpeg_versions = ['6b','8d']
+__version__ = os.environ.get('VERSION_NEW', '0.5.11')
+libjpeg_versions = {
+  '6b': None,
+  '8d': None,
+  'turbo210': '2.1.0'
+}
 
 # requirements
 try:
@@ -23,33 +27,57 @@ with codecs.open("README.md", "r", encoding="UTF-8") as fh:
 #     return test_suite
 
 # create version dependent extensions
+import ctypes
+from pathlib import Path
 import sys
 import re
 cfiles = {}
 hfiles = {}
 cjpeglib = {}
 for v in libjpeg_versions:
+  is_turbo = v[:5] == "turbo"
   clib = f'jpeglib/cjpeglib/{v}'
-  #files = []
+  
+  package_name = 'libjpeg'
+  if is_turbo:
+    package_name += '-turbo'
+    (Path(clib) / 'jconfigint.h').touch()
+
   files = [f'{clib}/{f}' for f in os.listdir(clib) if re.fullmatch(f'.*\.(c|h)', f)]
   for excluded_module in ['jmemdos','jmemmac','jmemansi','ansi2knr','ckconfig','jmemname', # platform dependents
                           'djpeg','cjpeg','rdjpgcom','wrjpgcom','cdjpeg','jpegtran', # executables
                           'rdbmp','wrbmp','rdcolmap','rdppm','wrppm','rdtarga','wrtarga','rdrle','wrrle','rdgif','wrgif','rdswitch', # others
-                          'example']: # example
+                          'example', # example
+                          # turbo
+                          'jccolext','jdcolext','jdcol565','jdmrg565','jdmrgext',"jcstest","tjunittest","tjbench",
+                          'jstdhuff','turbojpeg-jni','turbojpeg'
+                          ]: 
     lim = -2 - len(excluded_module)
     files = [f for f in files if f[lim:-2] != excluded_module]
   #
   cfiles[v] = [f for f in files if f[-2:] == '.c']
   hfiles[v] = [f for f in files if f[-2:] == '.h']
-
   sources = ['jpeglib/cjpeglib/cjpeglib.c',*cfiles[v]]
   if sys.argv[1] == 'sdist':
     sources = [*sources, *hfiles[v]]
+  
+  turbo_macros = [
+    ("JPEG_LIB_VERSION",70),
+    ("INLINE","__inline__"),
+    ("PACKAGE_NAME",f"\"{package_name}\""),
+    ("BUILD",f"\"unknown\""),
+    ("VERSION",f"\"{libjpeg_versions[v]}\""),
+    ("SIZEOF_SIZE_T",int(ctypes.sizeof(ctypes.c_size_t))),
+    ("THREAD_LOCAL", "__thread")
+  ] if is_turbo else []
   cjpeglib[v] = setuptools.Extension(
     name = f"jpeglib/cjpeglib/cjpeglib_{v}",
     sources = sources,
     headers = hfiles[v],
-    define_macros = [("BITS_IN_JSAMPLE", 8)],
+    define_macros = [
+      ("BITS_IN_JSAMPLE",8),
+      *turbo_macros
+    ],
     extra_compile_args=["-fPIC","-g"],
     library_dirs=[f'./{clib}'],
     include_dirs=[f'./{clib}'],

@@ -19,6 +19,8 @@ class version:
             CJpegLib.set_version(version='6b')
         elif version in {'8','8d'}:
             CJpegLib.set_version(version='8d')
+        elif version in {'turbo2.1.0','turbo2.1','turbo210','turbo21'}:
+            CJpegLib.set_version(version='turbo210')
         else:
             raise NotImplementedError(f'Unsupported libjpeg version')
     @staticmethod

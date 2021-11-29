@@ -4,9 +4,15 @@ extern "C" {
 
 // https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpegman.html
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef USE_TURBO
+#include <jmorecfg.h>
+#endif
+
 #include <jpeglib.h>
 
 #define DO_FANCY_UPSAMPLING 0x1
@@ -25,6 +31,10 @@ extern "C" {
 
 GLOBAL(long) jround_up (long a, long b);
 //#include "cstegojpeg.h"
+
+void log_version() {
+  fprintf(stderr, "%d", JPEG_LIB_VERSION);
+}
 
 FILE *_read_jpeg(const char *filename,
                  struct jpeg_decompress_struct *cinfo,
@@ -234,8 +244,6 @@ int write_jpeg_dct(
   if(srcfile != NULL) // copy critical parameters to dstfile
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in,&cinfo_out);
 
-  // set basic parameters
-  for(int i = 0; i < 3; i++) fprintf(stderr, "image_dims[%d] = %d\n", i, image_dims[i]);
   cinfo_out.image_width = image_dims[0];
   cinfo_out.image_height = image_dims[1];
   cinfo_out.in_color_space = in_color_space;
@@ -245,18 +253,53 @@ int write_jpeg_dct(
   if(srcfile == NULL) // set defaults
     jpeg_set_defaults(&cinfo_out);
 
-  // set advanced parameters
-  if(samp_factor != NULL)
-    for(int comp = 0; comp < cinfo_out.input_components; comp++) {
-      fprintf(stderr, "scale %d: %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
+  // set sampling factors
+  int chroma_factor[2];
+  if(samp_factor != NULL) {
+    chroma_factor[0] = *(samp_factor + 0);
+    chroma_factor[1] = *(samp_factor + 1);
+    for(int comp = 0; comp < cinfo_out.num_components; comp++) {
       cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
       cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
-      fprintf(stderr, "scale %d': %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
     }
+  } else {
+    chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
+    chroma_factor[1] = cinfo_out.comp_info[0].v_samp_factor;
+  }
+  // for(int comp = 0; comp < cinfo.num_components; comp++) {
+  //     *(samp_factor + comp*2 + 0) = cinfo.comp_info[comp].h_samp_factor;
+  //     *(samp_factor + comp*2 + 1) = cinfo.comp_info[comp].v_samp_factor;
+  //   }
+  // if(samp_factor != NULL) {
+  //   int J_factor = *(samp_factor + 0);
+  //   int a_factor = *(samp_factor + 1);
+  //   int b_factor = *(samp_factor + 2);
+    
+  //   cinfo_out.comp_info[0].h_samp_factor = chroma_factor[0] = J_factor / a_factor;
+  //   cinfo_out.comp_info[0].v_samp_factor = chroma_factor[1] = (int)(a_factor == b_factor) + 1;
+  //   cinfo_out.comp_info[1].h_samp_factor = cinfo_out.comp_info[1].v_samp_factor = 1;
+  //   cinfo_out.comp_info[2].h_samp_factor = cinfo_out.comp_info[2].v_samp_factor = 1;
+  // } else {
+  //   chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
+  //   chroma_factor[1] = cinfo_out.comp_info[0].v_samp_factor;
+  // }
+  //fprintf(stderr, "chroma factors %d %d\n", chroma_factor[0], chroma_factor[1]);
+  //for(int ch = 0; ch < 3; ch++) {
+  //  fprintf(stderr, "sampling factors(%d) %d %d\n", ch, cinfo_out.comp_info[ch].v_samp_factor, cinfo_out.comp_info[ch].h_samp_factor);
+  //}
   
-  fprintf(stderr, "After setting sampling factors.\n");
-  //fprintf(stderr, "Components: %d %d\n", cinfo_out.input_components, cinfo_out.num_components);
-  fprintf(stderr, "MCU blocks %d %d\n", cinfo_out.blocks_in_MCU, C_MAX_BLOCKS_IN_MCU);
+    // for(int comp = 0; comp < cinfo_out.input_components; comp++) {
+    //   //cinfo_out.comp_info[comp].h_samp_factor
+    //   //int J_factor,a_factor,b_factor;
+    //   //J,a,b = samp_factor
+    //   //  #samp_factor = np.array([
+    //   //  #    [int(J / a), int(a == b) + 1],
+    //   //fprintf(stderr, "scale %d: %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
+    //   cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
+    //   cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
+    //   //fprintf(stderr, "scale %d': %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
+    // }
+  
 
   // write qt
   if(qt != NULL)
@@ -269,45 +312,51 @@ int write_jpeg_dct(
   else if(quality > 0)
     jpeg_set_quality(&cinfo_out, quality, TRUE);
 
-  fprintf(stderr, "After setting of qt.\n");
+  //fprintf(stderr, "After setting of qt.\n");
 
   // DCT coefficients
   jvirt_barray_ptr *coeffs_array;
   if(srcfile != NULL) { // copy from source
-    fprintf(stderr, "Copy from source.\n");
+    //fprintf(stderr, "Copy from source.\n");
     coeffs_array = jpeg_read_coefficients(&cinfo_in);
   } else { // allocate new
-    fprintf(stderr, "Create new array.\n");
+    //fprintf(stderr, "Create new array.\n");
     coeffs_array = (jvirt_barray_ptr *)(cinfo_out.mem->alloc_small)(
       (j_common_ptr)&cinfo_out,
       JPOOL_IMAGE,
       sizeof(jvirt_barray_ptr) * cinfo_out.num_components
     );
-    fprintf(stderr, "Set the coefficients. Image: %dx%d\n", cinfo_out.image_width, cinfo_out.image_height);
-    for(int ch = 0; ch < (cinfo_out.num_components); ch++) {
+    //fprintf(stderr, "Set the coefficients. Image: %dx%d\n", cinfo_out.image_width, cinfo_out.image_height);
+    for(int ch = 0; ch < (cinfo_out.num_components); ch++) { // channel iterator
       jpeg_component_info* comp_ptr = cinfo_out.comp_info + ch;
       //long v_samp_factor = *(samp_factor + ch*2 + 0);
       //long h_samp_factor = *(samp_factor + ch*2 + 1);
-      comp_ptr->width_in_blocks = cinfo_out.image_width / 8;// * comp_ptr->h_samp_factor / 4;
-      comp_ptr->height_in_blocks = cinfo_out.image_height / 8;// * comp_ptr->v_samp_factor / 4;
-      fprintf(stderr, "Component %d:\n", ch);
-      fprintf(stderr, "  - dims %dx%d\n", comp_ptr->width_in_blocks, comp_ptr->height_in_blocks);
-      fprintf(stderr, "  - samp %dx%d\n", comp_ptr->v_samp_factor, comp_ptr->h_samp_factor);
-      //fprintf(stderr, "  - block size %d\n", comp_ptr->DCT_h_scaled_size);
+      comp_ptr->width_in_blocks = (JDIMENSION)ceil(((double)cinfo_out.image_width) / 8);// * comp_ptr->h_samp_factor / 4;
+      comp_ptr->height_in_blocks = (JDIMENSION)ceil(((double)cinfo_out.image_height) / 8);// * comp_ptr->v_samp_factor / 4;
+      if(ch > 0) {
+        comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
+        comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);
+      }
       coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
         (j_common_ptr)&cinfo_out,
         JPOOL_IMAGE,
         TRUE,
         (JDIMENSION)jround_up(comp_ptr->width_in_blocks,  //component size in dct blocks (ignoring mcu)
 		                          comp_ptr->h_samp_factor),   //round up is important, if border MCUs are not completely needed
-		    (JDIMENSION)jround_up(comp_ptr->height_in_blocks,
+        (JDIMENSION)jround_up(comp_ptr->height_in_blocks,
 		                          comp_ptr->v_samp_factor),
 		    (JDIMENSION)comp_ptr->v_samp_factor
       );
-    }
-  }
-  jpeg_write_coefficients(&cinfo_out,coeffs_array);
 
+    }
+    //fprintf(stderr, "ready to write coefficient\n");
+  }
+  #if JPEG_LIB_VERSION >= 80
+  jpeg_calc_jpeg_dimensions(&cinfo_out);
+  #endif
+  //fprintf(stderr, "before writing coefficients\n");
+  jpeg_write_coefficients(&cinfo_out,coeffs_array);
+  //fprintf(stderr, "written coefficients\n");
   // write DCT coefficients
   if(dct != NULL) {
     JBLOCKARRAY buffer_one;
@@ -319,7 +368,8 @@ int write_jpeg_dct(
       int Hblocks = comp_ptr->height_in_blocks; // max height
       int Wblocks = comp_ptr->width_in_blocks; // max width
       for(int h = 0; h < Hblocks; h++) { // height iterator
-        buffer_one = (cinfo_out.mem->access_virt_barray)((j_common_ptr)&cinfo_out, coeffs_array[ch], h, (JDIMENSION)1, FALSE);
+        //fprintf(stderr, "accessing ch%d h%d/[H%d,W%d]\n", ch, h, Hblocks, Wblocks);
+        buffer_one = (cinfo_out.mem->access_virt_barray)((j_common_ptr)&cinfo_out, coeffs_array[ch], h, (JDIMENSION)1, TRUE);
         for(int w = 0; w < Wblocks; w++) { // width iterator
           blockptr_one = buffer_one[0][w];
           for(int bh = 0; bh < 8; bh++)
@@ -329,7 +379,6 @@ int write_jpeg_dct(
       }
     }
   }
-  
   // cleanup
   jpeg_finish_compress( &cinfo_out );
   jpeg_destroy_compress( &cinfo_out );
@@ -464,11 +513,28 @@ int write_jpeg_spatial(
 
   // set advanced parameters
   if(dct_method >= 0) cinfo.dct_method = dct_method;
-  if(samp_factor != NULL)
-    for(int comp = 0; comp < cinfo.input_components; comp++) {
+  int chroma_factor[2];
+  if(samp_factor != NULL) {
+    chroma_factor[0] = *(samp_factor + 0);
+    chroma_factor[1] = *(samp_factor + 1);
+    for(int comp = 0; comp < cinfo.num_components; comp++) {
       cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
       cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
     }
+  // }
+  // if(samp_factor != NULL) {
+  //   int J_factor = *(samp_factor + 0);
+  //   int a_factor = *(samp_factor + 1);
+  //   int b_factor = *(samp_factor + 2);
+    
+  //   cinfo.comp_info[0].h_samp_factor = chroma_factor[0] = J_factor / a_factor;
+  //   cinfo.comp_info[0].v_samp_factor = chroma_factor[1] = (int)(a_factor == b_factor) + 1;
+  //   cinfo.comp_info[1].h_samp_factor = cinfo.comp_info[1].v_samp_factor = 1;
+  //   cinfo.comp_info[2].h_samp_factor = cinfo.comp_info[2].v_samp_factor = 1;
+  } else {
+    chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;
+    chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
+  }
 
   // copy parameters
   struct jpeg_decompress_struct cinfo_in;
@@ -525,7 +591,6 @@ int write_jpeg_spatial(
     jpeg_destroy_decompress( &cinfo_in );
     fclose( fp_in );
   }
-  
   
   return 1;
 }

@@ -76,6 +76,7 @@ class TestSpatial(unittest.TestCase):
         np.testing.assert_array_equal(qt50, qt50_standard)
 
     def test_pil_read(self):
+        jpeglib.version.set('8d')
         # read rgb
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im1:
             x1 = im1.read_spatial(
@@ -188,6 +189,7 @@ class TestSpatial(unittest.TestCase):
 
         
     # def test_cv2(self):
+    #     jpeglib.version.set('8d')
     #     # read rgb
     #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im1:
     #         x1 = im1.read_spatial(

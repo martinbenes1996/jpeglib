@@ -809,6 +809,7 @@ access_virt_sarray (j_common_ptr cinfo, jvirt_sarray_ptr ptr,
    */
   if (ptr->first_undef_row < end_row) {
     if (ptr->first_undef_row < start_row) {
+      if(writable) fprintf(stderr, "jmemmgr.c:812: access_virt_sarray()\n");
       if (writable)		/* writer skipped over a section of array */
 	ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
       undef_row = start_row;	/* but reader is allowed to read ahead */
@@ -826,6 +827,7 @@ access_virt_sarray (j_common_ptr cinfo, jvirt_sarray_ptr ptr,
 	undef_row++;
       }
     } else {
+      if(!writable) fprintf(stderr, "jmemmgr.c:830: access_virt_sarray()\n");
       if (! writable)		/* reader looking at undefined data */
 	ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
     }
@@ -851,9 +853,11 @@ access_virt_barray (j_common_ptr cinfo, jvirt_barray_ptr ptr,
 
   /* debugging check */
   if (end_row > ptr->rows_in_array || num_rows > ptr->maxaccess ||
-      ptr->mem_buffer == NULL)
-    ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
-
+      ptr->mem_buffer == NULL) {
+    fprintf(stderr, "apply for %d/%d rows until %d/%d\n", num_rows, ptr->maxaccess, end_row, ptr->rows_in_array);
+    fprintf(stderr, "jmemmgr.c:857: access_virt_barray()\n");
+    ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);  
+  }
   /* Make the desired part of the virtual array accessible */
   if (start_row < ptr->cur_start_row ||
       end_row > ptr->cur_start_row+ptr->rows_in_mem) {
@@ -894,6 +898,7 @@ access_virt_barray (j_common_ptr cinfo, jvirt_barray_ptr ptr,
    */
   if (ptr->first_undef_row < end_row) {
     if (ptr->first_undef_row < start_row) {
+      if(writable) fprintf(stderr, "jmemmgr.c:900: access_virt_barray()\n");
       if (writable)		/* writer skipped over a section of array */
 	ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
       undef_row = start_row;	/* but reader is allowed to read ahead */
@@ -911,6 +916,7 @@ access_virt_barray (j_common_ptr cinfo, jvirt_barray_ptr ptr,
 	undef_row++;
       }
     } else {
+      if(!writable) fprintf(stderr, "jmemmgr.c:918: access_virt_barray()\n");
       if (! writable)		/* reader looking at undefined data */
 	ERREXIT(cinfo, JERR_BAD_VIRTUAL_ACCESS);
     }
