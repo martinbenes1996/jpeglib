@@ -116,7 +116,7 @@ class TestDCT(unittest.TestCase):
         qtT = np.array(jpeg.quant_tables)
         # process
         YT = YT.reshape((1,-1,8,int(YT.shape[2]/8),8)).transpose((0,3,1,4,2))
-        CbCrT = CbCrT.reshape((1,-1,8,int(CbCrT.shape[2]/8),8)).transpose((0,3,1,4,2))
+        CbCrT = CbCrT.reshape((2,-1,8,int(CbCrT.shape[2]/8),8)).transpose((0,3,1,4,2))
 
         print(Y.shape, CbCr.shape, qt.shape)
         print(YT.shape, CbCrT.shape, qtT.shape)
