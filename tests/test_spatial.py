@@ -102,7 +102,7 @@ class TestSpatial(unittest.TestCase):
 
         # test
         if (x1 != x2).any():
-            logging.info("known PIL mismatch %.2f%%" % (((x2 - x1) != 0).mean()*100))
+            logging.info("known PIL mismatch %.2f%% (%d)" % (((x2 - x1) != 0).mean()*100, ((x2 - x1) != 0).sum()))
         else:
             np.testing.assert_almost_equal(x1, x2)
 
