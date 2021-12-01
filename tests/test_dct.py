@@ -100,6 +100,21 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(Y, YT)
         np.testing.assert_array_equal(CbCr, CbCrT)
 
+    def test_jpegio(self):
+        # jpeglib
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            Y,CbCr,qt = im.read_dct()
+        # jpegio
+        try:
+            import jpegio
+        except Exception as e:
+            logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
+            return
+        jpeg = jpegio.read('examples/IMG_0791.jpeg')
+        coef_array = jpeg.coef_arrays[0]
+        quant_tbl = jpeg.quant_tables[0]
+        print(coef_array.shape, quant_tbl.shape)
+
     def test_dct(self):
         # write with different qt
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:

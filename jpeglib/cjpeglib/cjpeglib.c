@@ -94,8 +94,9 @@ int read_jpeg_info(
     //num_components[1] = cinfo.out_color_components;
     //num_components[2] = cinfo.output_components;
   }
+  //fprintf(stderr, "setting jpeg color space %d %d\n", cinfo.jpeg_color_space, cinfo.out_color_space);
   if(jpeg_color_space != NULL)
-    jpeg_color_space[0] = cinfo.jpeg_color_space;
+    jpeg_color_space[0] = cinfo.out_color_space;
 
   if(samp_factor != NULL)
     for(int comp = 0; comp < cinfo.num_components; comp++) {
@@ -130,7 +131,6 @@ int read_jpeg_dct(
 
   // read DCT
   jvirt_barray_ptr *coeffs_array = jpeg_read_coefficients(&cinfo);
-
   // read dct
   JBLOCKARRAY buffer_one;
   JCOEFPTR blockptr_one;
@@ -155,12 +155,15 @@ int read_jpeg_dct(
       }
     }
   }
-  
+  //fprintf(stderr, "Read qt.\n");
   // read quantization table
   if(qt != NULL) {
     for(int ch = 0; ch < 2; ch++) {
-      for(int i = 0; i < 64; i++)
+      //fprintf(stderr, "qt[%d] = %p -> %p\n", ch, cinfo.quant_tbl_ptrs[ch], cinfo.quant_tbl_ptrs[ch]->quantval);
+      for(int i = 0; i < 64; i++) {
+        
         qt[ch*64 + i] = cinfo.quant_tbl_ptrs[ch]->quantval[i];//[(i&7)*8+(i>>3)];
+      }
       //(i&7)*8+(i>>3)
       //memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
       //JQUANT_TBL *tbl = cinfo.comp_info[ch].quant_table;
@@ -415,6 +418,7 @@ int read_jpeg_spatial(
   // set parameters
   if(out_color_space >= 0) cinfo.out_color_space = out_color_space;
   else cinfo.out_color_space = cinfo.jpeg_color_space;
+  //fprintf(stderr, "cjpeglib.c: out_color_space: %d %d\n", out_color_space, cinfo.out_color_space);
   
   if(dither_mode >= 0) cinfo.dither_mode = dither_mode;
   if(dct_method >= 0) cinfo.dct_method = dct_method;
@@ -505,8 +509,11 @@ int write_jpeg_spatial(
   if(srcfile == NULL) {
     cinfo.image_width = image_dims[0];
     cinfo.image_height = image_dims[1];
-    cinfo.in_color_space = in_color_space;
-    if(in_components >= 0) cinfo.input_components = in_components;
+    if(in_color_space >= 0)
+      cinfo.in_color_space = in_color_space;
+    //fprintf(stderr, "writing 1 from cs %d to %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
+    if(in_components >= 0)
+      cinfo.input_components = in_components;
     cinfo.num_components = cinfo.input_components;
     jpeg_set_defaults(&cinfo);
   }
@@ -521,16 +528,6 @@ int write_jpeg_spatial(
       cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
       cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
     }
-  // }
-  // if(samp_factor != NULL) {
-  //   int J_factor = *(samp_factor + 0);
-  //   int a_factor = *(samp_factor + 1);
-  //   int b_factor = *(samp_factor + 2);
-    
-  //   cinfo.comp_info[0].h_samp_factor = chroma_factor[0] = J_factor / a_factor;
-  //   cinfo.comp_info[0].v_samp_factor = chroma_factor[1] = (int)(a_factor == b_factor) + 1;
-  //   cinfo.comp_info[1].h_samp_factor = cinfo.comp_info[1].v_samp_factor = 1;
-  //   cinfo.comp_info[2].h_samp_factor = cinfo.comp_info[2].v_samp_factor = 1;
   } else {
     chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;
     chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
@@ -550,21 +547,29 @@ int write_jpeg_spatial(
 
   if(qt != NULL) {
     unsigned qt_u[64];
-    for(int i = 0; i < 64; i++)
-      qt_u[i] = qt[i];
-      //qt_u[(i&7)*8+(i>>3)] = qt[i];
+    // component 0
+    for(int i = 0; i < 64; i++) qt_u[i] = qt[i]; // (i&7)*8+(i>>3)
     jpeg_add_quant_table(&cinfo, 0, qt_u, 100, FALSE);
+    cinfo.comp_info[0].component_id = 0;
     cinfo.comp_info[0].quant_tbl_no = 0;
-    for(int i = 0; i < 64; i++)
-      qt_u[i] = qt[64 + i];
-      //qt_u[(i&7)*8+(i>>3)] = qt[64 + i];
+    // component 1
+    for(int i = 0; i < 64; i++) qt_u[i] = qt[64 + i]; // (i&7)*8+(i>>3)
     jpeg_add_quant_table(&cinfo, 1, qt_u, 100, FALSE);
+    cinfo.comp_info[1].component_id = 1;
     cinfo.comp_info[1].quant_tbl_no = 1;
+    // component 2
+    cinfo.comp_info[2].component_id = 2;
     cinfo.comp_info[2].quant_tbl_no = 1;
   } else if(quality >= 0) {
     jpeg_set_quality(&cinfo, quality, FALSE);
   }
   if(smoothing_factor >= 0) cinfo.smoothing_factor = smoothing_factor;
+  if(in_color_space >= 0) {
+    cinfo.in_color_space = in_color_space;
+    //jpeg_set_colorspace(&cinfo, in_color_space);
+    //fprintf(stderr, "writing 2 from cs %d to %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
+  }
+  //fprintf(stderr, "colorspace conversion %d -> %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
   
   cinfo.progressive_mode   = 0 != (flags & PROGRESSIVE_MODE);
   cinfo.optimize_coding    = 0 != (flags & OPTIMIZE_CODING);

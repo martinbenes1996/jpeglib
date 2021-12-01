@@ -28,6 +28,15 @@ jobs:
         cd dct-coefficient-decoder
         cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
         python setup.py install
+        cd ..
+        apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
+        git clone https://github.com/dwgoon/jpegio
+        cd jpegio
+        cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
+        mv setup2.py setup.py
+        python3 setup.py install; true
+        python3 setup.py install
+        cd ..
         pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox
 
     

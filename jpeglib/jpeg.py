@@ -31,7 +31,6 @@ class JPEG:
         self._dct_dims = (ctypes.c_int*6)()
         self._dims = (ctypes.c_int*3)()
         self._num_components = (ctypes.c_int*1)()
-        self._color_space = (ctypes.c_int*1)()
         self._samp_factor = self._parse_samp_factor()
         self.dct_channels = 3
         self.color_space = 'JCS_RGB'
@@ -207,6 +206,10 @@ class JPEG:
         self._im_dct = None # free DCT buffer
         self._im_spatial = None # free spatial buffer
 
+    def source_color_space(self):
+        """Returns the color space of the source file."""
+        return self.color_space
+
     def to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
         """Converts DCT representation to spatial.
         
@@ -237,19 +240,23 @@ class JPEG:
 
     def _read_info(self):
         # get information
+        _color_space = (ctypes.c_int*1)()
         self.cjpeglib.read_jpeg_info(
             srcfile = self.srcfile,
             dct_dims = self._dct_dims,
             image_dims = self._dims,
             num_components = self._num_components,
             samp_factor = self._samp_factor,
-            jpeg_color_space = self._color_space
+            jpeg_color_space = _color_space
         )
         # parse
         self.channels = self._num_components[0]
         self.dct_shape = np.array([self._dct_dims[i] for i in range(6)], int)\
             .reshape(self.dct_channels, 2)
         self.shape = np.array([self._dims[0], self._dims[1]])
+        self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == _color_space[0]][0]
+        #print("self.color_space set to", self.color_space, _color_space[0])
+        #print("init color space", _color_space[0], self.color_space)
 
     def _allocate(self):
         self._im_spatial,self._im_colormap = self._allocate_spatial()
@@ -323,7 +330,6 @@ class JPEG:
             Y = Y.reshape((*Y.shape[:-2],64))
             if quantized:
                 Y /= qt[0]
-            #print(Y.shape, '->', np.ctypeslib.as_ctypes(Y[0]), '->', self._im_dct[0])
             self._im_dct[0] = np.ctypeslib.as_ctypes(Y[0])
         # align chroma
         if CbCr is not None:
@@ -331,9 +337,7 @@ class JPEG:
             if quantized:
                 CbCr /= qt[1]
             _CbCr = np.zeros((2, self.dct_shape[0][0], self.dct_shape[0][1], 64), np.short)
-            #print(CbCr.shape, _CbCr.shape)
             _CbCr[:,:int(self.dct_shape[1][0]),:int(self.dct_shape[1][1])] = CbCr
-            #print(self.dct_shape[0][0], self.dct_shape[0][1], self.dct_shape[1][0], self.dct_shape[1][1])
             self._im_dct[1:] = np.ctypeslib.as_ctypes(_CbCr)
         # quality
         qt,quality,srcfile = self._parse_quality(quality)
@@ -357,8 +361,8 @@ class JPEG:
         out_color_space = out_color_space if out_color_space is not None else None
         if out_color_space is None and self.color_space is not None:
             out_color_space = self.color_space
-        #out_color_space = self.color_space
         color_space,channels = self.J_COLOR_SPACE[out_color_space]
+        #print("reading with color space:", out_color_space, color_space, 'default', self.color_space)
         dither_mode = self.J_DITHER_MODE[dither_mode]
         dct_method = self.J_DCT_METHOD[dct_method]
         in_cmap = None
@@ -410,10 +414,9 @@ class JPEG:
         if self.srcfile is None:
             self._initialize_info(data=data)
         # parameters
-        #print("in_color_space 1", in_color_space, self.color_space)
         in_color_space = in_color_space if in_color_space is not None else self.color_space
-        #print("in_color_space 2", in_color_space, self.color_space)
-        in_color_space,channels = self.J_COLOR_SPACE[in_color_space]
+        color_space,channels = self.J_COLOR_SPACE[in_color_space]
+        #print("writing with color space:", in_color_space, color_space, channels)
         dct_method = self.J_DCT_METHOD[dct_method]
         qt,quality,srcfile = self._parse_quality(quality)
         # spatial buffer
@@ -429,7 +432,7 @@ class JPEG:
             dstfile          = dstfile,
             rgb              = self._im_spatial,
             image_dims       = self._dims,
-            in_color_space   = in_color_space,
+            in_color_space   = color_space,
             in_components    = self.channels,
             dct_method       = dct_method,
             samp_factor      = self._samp_factor,

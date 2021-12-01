@@ -35,25 +35,34 @@ class TestSpatial(unittest.TestCase):
         try: shutil.rmtree("tmp")
         except: pass
         finally: os.mkdir("tmp")
-    def tearDown(self):
-        shutil.rmtree("tmp")
+    # def tearDown(self):
+    #     shutil.rmtree("tmp")
         
-    def test_synthetic(self):
+    def _test_synthetic(self, color_space=None):
         global qt50_standard
         # generate uniform image
         x_in = np.ones((256, 256, 3), np.uint8)*255
         # compress
         im = jpeglib.JPEG()
-        im.write_spatial("tmp/output.jpeg", x_in)
+        output_file = f"tmp/output_{color_space}.jpeg"
+        im.write_spatial(output_file, x_in, in_color_space=color_space)
         # decompress
-        im = jpeglib.JPEG("tmp/output.jpeg")
-        x_out = im.read_spatial()
+        im = jpeglib.JPEG(output_file)
+        x_out = im.read_spatial(out_color_space=color_space)
 
         # test matrix
         np.testing.assert_array_equal(x_in, x_out)
 
+    def test_synthetic_default(self):
+        self._test_synthetic()
+    def test_synthetic_rgb(self):
+        self._test_synthetic(color_space='JCS_RGB')
+    def test_synthetic_ycbcr(self):
+        self._test_synthetic(color_space='JCS_YCbCr')
+
     def test_spatial_quality(self):
         global qt50_standard
+        #print("test_spatial_quality")
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             _ = im.read_spatial()
             im.write_spatial("tmp/output.jpeg", qt=50)
@@ -65,6 +74,7 @@ class TestSpatial(unittest.TestCase):
 
     def test_spatial_qt(self):
         global qt50_standard
+        #print("test_spatial_qt")
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             _ = im.read_spatial()
             im.write_spatial("tmp/output.jpeg", qt=qt50_standard)
@@ -100,6 +110,7 @@ class TestSpatial(unittest.TestCase):
         im2.close()
 
     def test_pil_write(self):
+        #print("test_pil_write")
         q = 75 # quality
         # pass the image through jpeglib
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
@@ -274,33 +285,38 @@ class TestSpatial(unittest.TestCase):
     # #    im1.close()
     # #    im2_rgb.close()
 
-    # def test_change_block1(self):
-    #     # setup
-    #     try:
-    #         shutil.rmtree("tmp")
-    #     except:
-    #         pass
-    #     finally:
-    #         os.mkdir("tmp")
-    #     # pass the image through
-    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-    #         Y,CbCr,qt = im.read_dct()
-    #         # change
-    #         Y[0,0,0,:4]
-    #         im.write_dct("tmp/test.jpeg", Y, CbCr)
-    #     # images
-    #     im1 = Image.open("examples/IMG_0791.jpeg")
-    #     im2 = Image.open("tmp/test.jpeg")
-    #     # to numpy
-    #     x1,x2 = np.array(im1),np.array(im2)
+    def test_change_block1(self):
+        # pass the image through
+        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+            Y,CbCr,qt = im.read_dct()
+            # change
+            Y[0,0,0,:4] = 0
+            im.write_dct("tmp/test.jpeg", Y, CbCr)
+        # images
+        im1 = Image.open("examples/IMG_0791.jpeg")
+        im2 = Image.open("tmp/test.jpeg")
+        # to numpy
+        x1,x2 = np.array(im1),np.array(im2)
+        
+        D = np.abs(x1 - x2)
+        np.testing.assert_raises(
+            AssertionError,
+            np.testing.assert_array_equal,
+            D[:8,:8,:],
+            np.zeros((8,8,3))
+        )
+        D[:8,:8,:] = 0
+        np.testing.assert_array_almost_equal(D, np.zeros(D.shape))
+        #D[D != 0] = 255
+        #print(D[:8,:8,:])
+
+        #import matplotlib.pyplot as plt
+        #
+        #plt.imshow(D)
+        #plt.show()
         
     #     # test
     #     np.testing.assert_almost_equal(x1, x2)
-
-    #     # cleanup 
-    #     shutil.rmtree("tmp")
-    #     im1.close()
-    #     im2.close()
 
 
 __all__ = ["TestSpatial"]
