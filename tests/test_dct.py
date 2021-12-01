@@ -114,12 +114,18 @@ class TestDCT(unittest.TestCase):
         YT = np.array(jpeg.coef_arrays[:1])
         CbCrT = np.array(jpeg.coef_arrays[1:])
         qtT = np.array(jpeg.quant_tables)
-
         print(Y.shape, CbCr.shape, qt.shape)
         print(YT.shape, CbCrT.shape, qtT.shape)
 
+        # process
+        YT = YT.reshape((1,-1,8,int(YT.shape[1]/8),8)).transpose((0,1,3,2,4)) #(0,2,1,3)
+        CbCrT = CbCrT.reshape((2,-1,8,int(YT.shape[1]/8),8)).transpose((0,1,3,2,4)) #(0,2,1,3)
+
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
+        # test DCT coefficients
+        np.testing.assert_array_equal(Y, YT)
+        np.testing.assert_array_equal(CbCr, CbCrT)
 
         # print("coef_array:", len(coef_array), [coef_array[i].shape for i in range(len(coef_array))])
         # print("quant_tbl:", , [quant_tbl[i].shape for i in range(len(quant_tbl))])
