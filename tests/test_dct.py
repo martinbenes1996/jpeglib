@@ -111,8 +111,8 @@ class TestDCT(unittest.TestCase):
             logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         jpeg = jpegio.read('examples/IMG_0791.jpeg')
-        coef_array = jpeg.coef_arrays[0]
-        quant_tbl = jpeg.quant_tables[0]
+        coef_array = jpeg.coef_arrays
+        quant_tbl = jpeg.quant_tables
         print(coef_array.shape, quant_tbl.shape)
 
     def test_dct(self):

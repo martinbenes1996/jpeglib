@@ -110,7 +110,7 @@ class TestVersion(unittest.TestCase):
         rgb = im_prog.read_spatial(flags=['PROGRESSIVE_MODE','DO_FANCY_UPSAMPLING'])
         x = np.array(Image.open(f'examples/images-{version}/testprog.jpg'))
         #print(np.sum((x - rgb) != 0))
-        D = np.abs((x.astype(np.int) - rgb.astype(np.int)))
+        #D = np.abs((x.astype(np.int64) - rgb.astype(np.int64)))
         #print(x[D!=0])
         #plt.imshow(D)
         #plt.show()
