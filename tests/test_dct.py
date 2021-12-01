@@ -111,19 +111,24 @@ class TestDCT(unittest.TestCase):
             logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         jpeg = jpegio.read('examples/IMG_0791.jpeg')
-        coef_array = jpeg.coef_arrays
-        quant_tbl = jpeg.quant_tables
+        YT = np.array(jpeg.coef_arrays[:1])
+        CbCrT = np.array(jpeg.coef_arrays[1:])
+        qtT = np.array(jpeg.quant_tables)
 
+        print(Y.shape, CbCr.shape, qt.shape)
+        print(YT.shape, CbCrT.shape, qtT.shape)
 
-        print("coef_array:", len(coef_array), [coef_array[i].shape for i in range(len(coef_array))])
-        print("quant_tbl:", len(quant_tbl), [quant_tbl[i].shape for i in range(len(quant_tbl))])
+        # test quantization
+        np.testing.assert_array_equal(qt, qtT)
 
-        qtT = np.array(quant_tbl)
-        print("qt:", qt)
-        print("qtT:", qtT)
-        print(coef_array[0][:8,:8], Y[0,0,0])
-        print(coef_array[0][8:16,:8], Y[0,1,0])
-        print(coef_array[0][:8,8:16], Y[0,0,1])
+        # print("coef_array:", len(coef_array), [coef_array[i].shape for i in range(len(coef_array))])
+        # print("quant_tbl:", , [quant_tbl[i].shape for i in range(len(quant_tbl))])
+        # qtT = np.array(quant_tbl)
+        # print("qt:", qt)
+        # print("qtT:", qtT)
+        # print(coef_array[0][:8,:8], Y[0,0,0])
+        # print(coef_array[0][8:16,:8], Y[0,1,0])
+        # print(coef_array[0][:8,8:16], Y[0,0,1])
 
 
     def test_dct(self):
