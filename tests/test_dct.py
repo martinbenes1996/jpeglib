@@ -118,24 +118,11 @@ class TestDCT(unittest.TestCase):
         YT = YT.reshape((1,-1,8,int(YT.shape[2]/8),8)).transpose((0,3,1,4,2))
         CbCrT = CbCrT.reshape((2,-1,8,int(CbCrT.shape[2]/8),8)).transpose((0,3,1,4,2))
 
-        print(Y.shape, CbCr.shape, qt.shape)
-        print(YT.shape, CbCrT.shape, qtT.shape)
-
         # test quantization
         np.testing.assert_array_equal(qt, qtT)
         # test DCT coefficients
         np.testing.assert_array_equal(Y, YT)
         np.testing.assert_array_equal(CbCr, CbCrT)
-
-        # print("coef_array:", len(coef_array), [coef_array[i].shape for i in range(len(coef_array))])
-        # print("quant_tbl:", , [quant_tbl[i].shape for i in range(len(quant_tbl))])
-        # qtT = np.array(quant_tbl)
-        # print("qt:", qt)
-        # print("qtT:", qtT)
-        # print(coef_array[0][:8,:8], Y[0,0,0])
-        # print(coef_array[0][8:16,:8], Y[0,1,0])
-        # print(coef_array[0][:8,8:16], Y[0,0,1])
-
 
     def test_dct(self):
         # write with different qt
