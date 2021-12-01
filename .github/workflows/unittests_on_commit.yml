@@ -29,7 +29,7 @@ jobs:
         cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
         python setup.py install
         cd ..
-        apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
+        sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
         git clone https://github.com/dwgoon/jpegio
         cd jpegio
         cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
