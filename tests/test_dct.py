@@ -113,7 +113,8 @@ class TestDCT(unittest.TestCase):
         jpeg = jpegio.read('examples/IMG_0791.jpeg')
         coef_array = jpeg.coef_arrays
         quant_tbl = jpeg.quant_tables
-        print(coef_array.shape, quant_tbl.shape)
+        print(len(coef_array), [coef_array[i].shape for i in range(len(coef_array))])
+        print(len(quant_tbl), [quant_tbl[i].shape for i in range(len(quant_tbl))])
 
     def test_dct(self):
         # write with different qt
