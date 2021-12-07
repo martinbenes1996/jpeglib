@@ -147,7 +147,6 @@ int read_jpeg_dct(
         for(int bh = 0; bh < 8; bh++) {
           for(int bw = 0; bw < 8; bw++) {
             int i = bw*8 + bh;
-            //int i = bh*8 + bw;
             ((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i] = blockptr_one[bh*8 + bw];
           }
         }

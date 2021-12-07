@@ -25,6 +25,7 @@ class JPEG:
 
         >>> im = jpeglib.JPEG("input.jpeg")
         """
+        t = Timer("allocate default")
         # set filename
         self.srcfile = srcfile
         # allocate resources
@@ -34,6 +35,7 @@ class JPEG:
         self._samp_factor = self._parse_samp_factor()
         self.dct_channels = 3
         self.color_space = 'JCS_RGB'
+        del t
         #self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
         # get image info
         if srcfile is not None:
@@ -240,6 +242,7 @@ class JPEG:
 
     def _read_info(self):
         # get information
+        t = Timer("read_jpeg_info()")
         _color_space = (ctypes.c_int*1)()
         self.cjpeglib.read_jpeg_info(
             srcfile = self.srcfile,
@@ -249,19 +252,24 @@ class JPEG:
             samp_factor = self._samp_factor,
             jpeg_color_space = _color_space
         )
+        del t
         # parse
+        t = Timer("parse arguments")
         self.channels = self._num_components[0]
         self.dct_shape = np.array([self._dct_dims[i] for i in range(6)], int)\
             .reshape(self.dct_channels, 2)
         self.shape = np.array([self._dims[0], self._dims[1]])
         self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == _color_space[0]][0]
+        del t
         #print("self.color_space set to", self.color_space, _color_space[0])
         #print("init color space", _color_space[0], self.color_space)
 
     def _allocate(self):
+        t = Timer("allocate()")
         self._im_spatial,self._im_colormap = self._allocate_spatial()
         self._im_dct = self._allocate_dct()
         self._im_qt = ((ctypes.c_short*64)*(self.dct_channels-1))()
+        del t
 
     def _initialize_info(self, data=None, Y=None, CbCr=None):
         if data is not None:
@@ -293,20 +301,30 @@ class JPEG:
     
     def _read_dct(self, srcfile):
         # allocate
+        t = Timer("_allocate_dct()")
         if self._im_dct is None:
             self._im_dct = self._allocate_dct()
+        del t
         # reading
+        t = Timer("read_jpeg_dct()")
         self.cjpeglib.read_jpeg_dct(srcfile, self._im_dct, self._im_qt)
+        del t
         # align qt
+        t = Timer("parse qt")
         qt = np.ctypeslib.as_array(self._im_qt)
         qt = qt.reshape((*qt.shape[:-1],8,8))
+        del t
         # align lumo
+        t = Timer("parse lumo")
         Y = np.ctypeslib.as_array(self._im_dct[:1])
         Y = Y.reshape((*Y.shape[:-1],8,8))
+        del t
         # align chroma
+        t = Timer("parse chroma")
         CbCr = np.ctypeslib.as_array(self._im_dct[1:])
         CbCr = CbCr[:,:self.dct_shape[1][0],:self.dct_shape[1][1]]
         CbCr = CbCr.reshape((*CbCr.shape[:-1],8,8))
+        del t
         # finish
         return Y,CbCr,qt
 

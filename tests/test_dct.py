@@ -1,16 +1,11 @@
 
 import logging
+from multiprocessing import Process
 import numpy as np
 import os
-import pandas as pd
 import shutil
-import subprocess
 import sys
 import unittest
-import warnings
-
-# try: import torchjpeg.codec
-# except: pass
 
 sys.path.append('.')
 import jpeglib
@@ -34,6 +29,31 @@ qt50_standard = np.array([
      [99,99,99,99,99,99,99,99],
      [99,99,99,99,99,99,99,99]]
     ])
+
+def _test_jpegio():
+    # jpeglib
+    with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+        Y,CbCr,qt = im.read_dct()
+    # jpegio
+    try:
+        import jpegio
+    except Exception as e:
+        logging.info(f"invalid installation of jpegio: {e}")
+        return 1
+    jpeg = jpegio.read('examples/IMG_0791.jpeg')
+    
+    YT = np.array(jpeg.coef_arrays[:1])
+    CbCrT = np.array(jpeg.coef_arrays[1:])
+    qtT = np.array(jpeg.quant_tables)
+    # process
+    YT = YT.reshape((1,-1,8,int(YT.shape[2]/8),8)).transpose((0,3,1,4,2))
+    CbCrT = CbCrT.reshape((2,-1,8,int(CbCrT.shape[2]/8),8)).transpose((0,3,1,4,2))
+
+    # test quantization
+    np.testing.assert_array_equal(qt, qtT)
+    # test DCT coefficients
+    np.testing.assert_array_equal(Y, YT)
+    np.testing.assert_array_equal(CbCr, CbCrT)
 
 class TestDCT(unittest.TestCase):
     logger = logging.getLogger(__name__)
@@ -101,28 +121,13 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(CbCr, CbCrT)
 
     def test_jpegio(self):
-        # jpeglib
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            Y,CbCr,qt = im.read_dct()
-        # jpegio
-        try:
-            import jpegio
-        except Exception as e:
-            logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
-            return
-        jpeg = jpegio.read('examples/IMG_0791.jpeg')
-        YT = np.array(jpeg.coef_arrays[:1])
-        CbCrT = np.array(jpeg.coef_arrays[1:])
-        qtT = np.array(jpeg.quant_tables)
-        # process
-        YT = YT.reshape((1,-1,8,int(YT.shape[2]/8),8)).transpose((0,3,1,4,2))
-        CbCrT = CbCrT.reshape((2,-1,8,int(CbCrT.shape[2]/8),8)).transpose((0,3,1,4,2))
-
-        # test quantization
-        np.testing.assert_array_equal(qt, qtT)
-        # test DCT coefficients
-        np.testing.assert_array_equal(Y, YT)
-        np.testing.assert_array_equal(CbCr, CbCrT)
+        # run jpegio
+        global _test_jpegio
+        p = Process(target=_test_jpegio, args=())
+        p.start()
+        p.join()
+        # check exit code
+        self.assertEqual(p.exitcode, 0)
 
     def test_dct(self):
         # write with different qt
