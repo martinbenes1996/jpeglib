@@ -239,9 +239,7 @@ class JPEG:
         if (Y is None or CbCr is None) and self._im_dct is None:
             raise RuntimeError("Call read_dct() before calling to_spatial() or specify Y and CbCr.")
         with tempfile.NamedTemporaryFile() as tmp:
-            print("write dct")
             self.write_dct(tmp.name, Y=Y, CbCr=CbCr, qt=qt, quantized=quantized)
-            print("read_spatial", kw)
             with JPEG(tmp.name) as im:
                 data = im.read_spatial(**kw)
         self._im_dct = None
