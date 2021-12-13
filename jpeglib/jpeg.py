@@ -46,7 +46,7 @@ class JPEG:
         """Reads the DCT coefficients and quantization tables of the source file.
 
         In the return values, Y is DCT luminance tensor of shape (1,W/8,H/8,8,8),
-        CbCr is DCT chrominance tensor of shape (2,W/8,H/8,8,8), both not quantized by default.
+        CbCr is DCT chrominance tensor of shape (2,W/8,H/8,8,8), both not-quantized by default.
         qt is a tensor with quantization tables of shape (2,8,8).
         Check the examples below.
 
@@ -54,6 +54,7 @@ class JPEG:
         :type quantized: bool, optional 
         :return: lumo DCT Y, chroma DCT CbCr, quantization table qt
         :rtype: tuple
+        :raises [IOError]: When source file was not given in constructor.
 
         :Example:
 
@@ -212,16 +213,20 @@ class JPEG:
         """Returns the color space of the source file."""
         return self.color_space
 
-    def to_spatial(self, Y=None, CbCr=None, **kw): #, qt=None):
+    def to_spatial(self, Y=None, CbCr=None, qt=None, quantized=False, **kw): #, qt=None):
         """Converts DCT representation to spatial.
         
         Performs decompression from DCT coefficients to spatial representation.
         Uses temporary file to save and read from as libjpeg does not have a direct handler.
         
-        :param Y: Luminance DCT.
-        :type Y: numpy.ndarray
+        :param Y: Lumo DCT.
+        :type Y: numpy.ndarray, optional
         :param CbCr: Chrominance DCT.
-        :type CbCr: numpy.ndarray
+        :type CbCr: numpy.ndarray, optional
+        :param qt: Quantization tables or quality.
+        :type qt: numpy.ndarray | int, optional
+        :param quantized: Indicates whether the input DCT coefficients are quantized or unquantized, False by default.
+        :type quantized: bool, optional
         :return: Spatial representation of DCT coefficients
         :rtype: numpy.ndarray
 
@@ -231,12 +236,14 @@ class JPEG:
         >>> Y,CbCr,qt = im.read_dct()
         >>> spatial = im.to_spatial(Y, CbCr, out_color_space="JCS_RGB")
         """
-        #t = Timer('DCT-RGB conversion')
         if (Y is None or CbCr is None) and self._im_dct is None:
             raise RuntimeError("Call read_dct() before calling to_spatial() or specify Y and CbCr.")
         with tempfile.NamedTemporaryFile() as tmp:
-            self.write_dct(tmp.name, Y=Y, CbCr=CbCr)
-            data = self._read_spatial(tmp.name, **kw)
+            print("write dct")
+            self.write_dct(tmp.name, Y=Y, CbCr=CbCr, qt=qt, quantized=quantized)
+            print("read_spatial", kw)
+            with JPEG(tmp.name) as im:
+                data = im.read_spatial(**kw)
         self._im_dct = None
         return data
 
@@ -301,30 +308,23 @@ class JPEG:
     
     def _read_dct(self, srcfile):
         # allocate
-        t = Timer("_allocate_dct()")
         if self._im_dct is None:
             self._im_dct = self._allocate_dct()
-        del t
+        # check source file
+        if srcfile is None:
+            raise IOError("source file not given")
         # reading
-        t = Timer("read_jpeg_dct()")
         self.cjpeglib.read_jpeg_dct(srcfile, self._im_dct, self._im_qt)
-        del t
         # align qt
-        t = Timer("parse qt")
         qt = np.ctypeslib.as_array(self._im_qt)
         qt = qt.reshape((*qt.shape[:-1],8,8))
-        del t
         # align lumo
-        t = Timer("parse lumo")
         Y = np.ctypeslib.as_array(self._im_dct[:1])
         Y = Y.reshape((*Y.shape[:-1],8,8))
-        del t
         # align chroma
-        t = Timer("parse chroma")
         CbCr = np.ctypeslib.as_array(self._im_dct[1:])
         CbCr = CbCr[:,:self.dct_shape[1][0],:self.dct_shape[1][1]]
         CbCr = CbCr.reshape((*CbCr.shape[:-1],8,8))
-        del t
         # finish
         return Y,CbCr,qt
 
@@ -380,6 +380,8 @@ class JPEG:
         if out_color_space is None and self.color_space is not None:
             out_color_space = self.color_space
         color_space,channels = self.J_COLOR_SPACE[out_color_space]
+        if srcfile is None:
+            raise IOError("source file not given")
         #print("reading with color space:", out_color_space, color_space, 'default', self.color_space)
         dither_mode = self.J_DITHER_MODE[dither_mode]
         dct_method = self.J_DCT_METHOD[dct_method]
