@@ -28,7 +28,7 @@ jpeglib/cjpeglib/6b/*
 jpeglib/cjpeglib/8d/*
 !jpeglib/cjpeglib/8d/*.c
 !jpeglib/cjpeglib/8d/*.h
-
+jpeglib/mjpeglib
 # vscode
 .vscode
 
