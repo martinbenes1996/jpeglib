@@ -30,11 +30,6 @@ extern "C" {
 #define CCIR601_SAMPLING 0x1000
 
 GLOBAL(long) jround_up (long a, long b);
-//#include "cstegojpeg.h"
-
-void log_version() {
-  fprintf(stderr, "%d", JPEG_LIB_VERSION);
-}
 
 FILE *_read_jpeg(const char *filename,
                  struct jpeg_decompress_struct *cinfo,
