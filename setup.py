@@ -1,11 +1,11 @@
 
 # versions
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.6.1')
+__version__ = os.environ.get('VERSION_NEW', '0.6.5')
 libjpeg_versions = {
   '6b': None,
   '8d': None,
-  'turbo210': '2.1.0'
+  #'turbo210': '2.1.0'
 }
 
 # requirements
@@ -49,7 +49,9 @@ for v in libjpeg_versions:
                           'rdbmp','wrbmp','rdcolmap','rdppm','wrppm','rdtarga','wrtarga','rdrle','wrrle','rdgif','wrgif','rdswitch', # others
                           'example', # example
                           # turbo
-                          'jccolext','jdcolext','jdcol565','jdmrg565','jdmrgext',"jcstest","tjunittest","tjbench",
+                          'jccolext','jdcolext','jdcol565','jdmrg565',"jcstest","tjunittest","tjbench",
+                          #'jdmrgext','jdmerge',
+                          #'jdhuff','jdphuff',
                           'jstdhuff','turbojpeg-jni','turbojpeg'
                           ]: 
     lim = -2 - len(excluded_module)
