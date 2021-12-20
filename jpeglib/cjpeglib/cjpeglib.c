@@ -9,9 +9,8 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
-#include "cjpeglib.h"
-
 #include "vjpeglib.h"
+
 // #if LIBVERSION == 60
 // #include "6b/jpeglib.h"
 // #elif LIBVERSION == 80
