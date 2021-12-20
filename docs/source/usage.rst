@@ -33,7 +33,7 @@ You can specify a particular :term:`libjpeg` version to use with
 
 >>> jpeglib.version.set('6b')
 
-Currently supported versions are ``"6b"``, ``"8d"`` and ``"turbo210"``. 
+Currently supported versions are ``"6b"``, ``"8d"``, ``"9d"`` and ``"turbo210"``. 
 
 Pixel data
 ----------

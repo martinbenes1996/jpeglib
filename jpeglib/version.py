@@ -7,7 +7,7 @@ class version:
     def set(version):
         """Sets the version of libjpeg to use. Loads the library.
         
-        :param version: libjpeg version, one of 6b, 8d.
+        :param version: libjpeg version, one of 6b, 8d, 9d, turbo210.
         :type version: str
         :raises [NotImplementedError]: unsupported libjpeg version
 
@@ -20,6 +20,8 @@ class version:
             CJpegLib.set_version(version='6b')
         elif version in {'8','8d'}:
             CJpegLib.set_version(version='8d')
+        elif version in {'9','9d'}:
+            CJpegLib.set_version(version='9d')
         elif version in {'turbo2.1.0','turbo2.1','turbo210','turbo21'}:
             CJpegLib.set_version(version='turbo210')
         else:
@@ -44,7 +46,6 @@ class version:
     def _jpeg_lib_version():
         """Returns value of jpeg_lib_version macro."""
         return CJpegLib.jpeg_lib_version()
-
     @staticmethod
     def _get_lib():
         """Low-level getter of the dynamic library.
@@ -53,5 +54,9 @@ class version:
         :rtype: ctypes.CDLL, None
         """
         return CJpegLib.get()
+    @staticmethod
+    def versions():
+        """Lists present DLLs of versions."""
+        return CJpegLib.versions()
 
 __all__ = ['version']

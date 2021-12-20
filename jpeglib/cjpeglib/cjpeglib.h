@@ -1,5 +1,4 @@
 
-
 // ---------- Meta -------------
 int read_jpeg_info(
     const char *srcfile,
@@ -55,5 +54,5 @@ int write_jpeg_spatial(
     unsigned long flags
 );
 
-int jpeg_lib_version();
+//int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }
 int print_jpeg_params(const char *srcfile);

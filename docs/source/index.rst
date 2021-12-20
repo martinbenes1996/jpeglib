@@ -16,7 +16,7 @@ Getting the DCT coefficients with jpeglib is as simple as
 >>>     Y,CbCr,qt = im.read_dct()
 
 With **jpeglib** you can choose a particular version of *libjpeg* to
-work with. Currently supported are *libjpeg 6b*, *8d* and *libjpeg-turbo 2.1.0*.
+work with. Currently supported are *libjpeg 6b*, *8d*, *9d* and *libjpeg-turbo 2.1.0*.
 
 >>> jpeglib.version.set('6b')
 >>> with jpeglib.JPEG("input.jpeg") as im:

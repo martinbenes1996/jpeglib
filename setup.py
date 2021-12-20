@@ -4,9 +4,10 @@
 import os
 __version__ = os.environ.get('VERSION_NEW', '0.6.11')
 libjpeg_versions = {
-  '6b': None,
-  '8d': None,
-  'turbo210': '2.1.0'
+  '6b': (None,60),
+  '8d': (None,80),
+  '9d': (None,90),
+  'turbo210': ('2.1.0',210)
 }
 
 # requirements
@@ -31,11 +32,10 @@ cjpeglib = {}
 for v in libjpeg_versions:
   is_turbo = v[:5] == "turbo"
   clib = f'jpeglib/cjpeglib/{v}'
+  print(clib)
   
   package_name = 'libjpeg'
   (Path(clib) / 'jconfig.h').touch()
-  with open(Path(clib) / 'jconfig.h','w') as fp:
-    fp.write('#include <stdlib.h>\n')
   if is_turbo:
     package_name += '-turbo'
     (Path(clib) / 'jconfigint.h').touch()
@@ -45,6 +45,7 @@ for v in libjpeg_versions:
                           'djpeg','cjpeg','rdjpgcom','wrjpgcom','cdjpeg','jpegtran', # executables
                           'rdbmp','wrbmp','rdcolmap','rdppm','wrppm','rdtarga','wrtarga','rdrle','wrrle','rdgif','wrgif','rdswitch', # others
                           'example', # example
+                          #'jerror',
                           # turbo
                           'jccolext','jdcolext','jdcol565','jdmrg565','jdmrgext',"jcstest","tjunittest","tjbench",
                           'jstdhuff','turbojpeg-jni','turbojpeg']: 
@@ -52,6 +53,7 @@ for v in libjpeg_versions:
     files = [f for f in files if f[lim:-2] != excluded_module]
   #
   cfiles[v] = [f for f in files if f[-2:] == '.c']
+  hfiles[v] = [f for f in files if f[-2:] == '.h']
   sources = ['jpeglib/cjpeglib/cjpeglib.c',*cfiles[v]]
   
   turbo_macros = [
@@ -59,22 +61,25 @@ for v in libjpeg_versions:
     ("INLINE","__inline__"),
     ("PACKAGE_NAME",f"\"{package_name}\""),
     ("BUILD",f"\"unknown\""),
-    ("VERSION",f"\"{libjpeg_versions[v]}\""),
+    ("VERSION",f"\"{libjpeg_versions[v][0]}\""),
     ("SIZEOF_SIZE_T",int(ctypes.sizeof(ctypes.c_size_t))),
     ("THREAD_LOCAL", "__thread")
   ] if is_turbo else []
 
   cjpeglib[v] = setuptools.Extension(
     name = f"jpeglib/cjpeglib/cjpeglib_{v}",
-    library_dirs=[f'./{clib}'],
-    include_dirs=[f'./{clib}'],
+    library_dirs=['./jpeglib/cjpeglib',f'./{clib}'],#[f'./{clib}'],
+    include_dirs=['./jpeglib/cjpeglib',f'./{clib}'],#[f'./{clib}'],
     sources = sources,
-    #headers = hfiles[v],
+    headers = hfiles[v],
     define_macros = [
       ("BITS_IN_JSAMPLE",8),
+      ("HAVE_STDLIB_H",1),
+      ("LIBVERSION",libjpeg_versions[v][1]),
+      ("HAVE_PROTOTYPES",1),
       *turbo_macros
     ],
-    extra_compile_args=["-fPIC","-g","-###"],
+    extra_compile_args=["-fPIC","-g"],
     language="c",
   )
 
