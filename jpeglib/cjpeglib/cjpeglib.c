@@ -13,7 +13,7 @@ extern "C" {
 #include <jmorecfg.h>
 #endif
 
-#include <jpeglib.h>
+#include "jpeglib.h"
 
 #define DO_FANCY_UPSAMPLING 0x1
 #define DO_BLOCK_SMOOTHING 0x2
@@ -30,6 +30,8 @@ extern "C" {
 #define CCIR601_SAMPLING 0x1000
 
 GLOBAL(long) jround_up (long a, long b);
+
+int jpeg_lib_version() { return JPEG_LIB_VERSION; }
 
 FILE *_read_jpeg(const char *filename,
                  struct jpeg_decompress_struct *cinfo,
@@ -348,9 +350,9 @@ int write_jpeg_dct(
     }
     //fprintf(stderr, "ready to write coefficient\n");
   }
-  #if JPEG_LIB_VERSION >= 80
+  //#if JPEG_LIB_VERSION >= 80
   jpeg_calc_jpeg_dimensions(&cinfo_out);
-  #endif
+  //#endif
   //fprintf(stderr, "before writing coefficients\n");
   jpeg_write_coefficients(&cinfo_out,coeffs_array);
   //fprintf(stderr, "written coefficients\n");
@@ -431,7 +433,7 @@ int read_jpeg_spatial(
   if(flags & QUANTIZE_COLORS) {
     cinfo.actual_number_of_colors = 256; // TODO: parametrized
     cinfo.desired_number_of_colors = 256;
-    if(in_colormap != NULL) cinfo.colormap = (unsigned char**)cmap;
+    if(in_colormap != NULL) cinfo.colormap = (char**)cmap;
   }
   
   cinfo.progressive_mode      = 0 != (flags & PROGRESSIVE_MODE);

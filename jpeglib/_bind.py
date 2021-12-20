@@ -9,6 +9,10 @@ from . import cjpeglib
 class CJpegLib:
 
     @classmethod
+    def jpeg_lib_version(cls):
+        return cls.get().jpeg_lib_version()
+
+    @classmethod
     def read_jpeg_info(cls, srcfile, dct_dims, image_dims, num_components, samp_factor, jpeg_color_space):
         status = cls.get().read_jpeg_info(cls.cstr(srcfile), dct_dims, image_dims, num_components, samp_factor, jpeg_color_space)
         if status == 0: raise IOError(f"reading of {srcfile} failed")
@@ -84,11 +88,14 @@ class CJpegLib:
     def _bind_lib(cls, version='6b'):
         # path of the library
         so_files = [f for f in os.listdir(cjpeglib.__path__[0]) if re.fullmatch(f'cjpeglib_{version}\..*\.so', f)]
+        print(so_files)
         try:
             so_file = so_files[0]
         except:
             raise Exception(f"dynamic library not found")
+        print(so_file)
         libname = pathlib.Path(cjpeglib.__path__[0]) / so_file
+        print(libname)
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)
         cls.version = version

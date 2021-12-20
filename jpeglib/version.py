@@ -1,4 +1,6 @@
 
+from ._bind import CJpegLib
+
 class version:
     """Class grouping functions for controlling libjpeg method."""
     @staticmethod
@@ -14,7 +16,6 @@ class version:
         >>> import jpeglib
         >>> jpeglib.version.set('8d')
         """
-        from ._bind import CJpegLib
         if version in {'6','6b'}:
             CJpegLib.set_version(version='6b')
         elif version in {'8','8d'}:
@@ -38,8 +39,12 @@ class version:
         >>> jpeglib.version.get()
         '6b'
         """
-        from ._bind import CJpegLib
         return CJpegLib.get_version()
+    @staticmethod
+    def _jpeg_lib_version():
+        """Returns value of jpeg_lib_version macro."""
+        return CJpegLib.jpeg_lib_version()
+
     @staticmethod
     def _get_lib():
         """Low-level getter of the dynamic library.
@@ -47,7 +52,6 @@ class version:
         :return: Dynamic library object or None if not loaded yet.
         :rtype: ctypes.CDLL, None
         """
-        from ._bind import CJpegLib
         return CJpegLib.get()
 
 __all__ = ['version']

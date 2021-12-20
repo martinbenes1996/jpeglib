@@ -55,4 +55,5 @@ int write_jpeg_spatial(
     unsigned long flags
 );
 
+int jpeg_lib_version();
 int print_jpeg_params(const char *srcfile);
