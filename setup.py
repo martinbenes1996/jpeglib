@@ -103,7 +103,7 @@ class custom_build_ext(build_ext):
         # 'set_link_objects', 'set_runtime_library_dirs', 'shared_lib_extension', 'shared_lib_format', 'shared_object_filename',
         # 'spawn', 'src_extensions', 'static_lib_extension', 'static_lib_format', 'undefine_macro', 'verbose', 'warn',
         # 'xcode_stub_lib_extension', 'xcode_stub_lib_format'
-        print("==========", self.compiler.library_dirs)
+        #print("==========", self.compiler.library_dirs)
         build_ext.build_extensions(self)
         
 
