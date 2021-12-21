@@ -1,3 +1,3 @@
-recursive-include jpeglib/cjpeglib/* *.h *.hpp
+recursive-include jpeglib/cjpeglib/* *.h
 include jpeglib/cjpeglib/*.h
-recursive-include jpeglib/cjpeglib/* jccolext.c jdcolext.c jdcol565.c jstdhuff.c
+include jpeglib/cjpeglib/turbo210/*.c
