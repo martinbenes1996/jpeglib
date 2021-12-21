@@ -2,7 +2,7 @@
 
 # versions
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.6.13')
+__version__ = os.environ.get('VERSION_NEW', '0.6.14')
 libjpeg_versions = {
   '6b': (None,60),
   '8d': (None,80),
@@ -32,10 +32,11 @@ cjpeglib = {}
 for v in libjpeg_versions:
   is_turbo = v[:5] == "turbo"
   clib = f'jpeglib/cjpeglib/{v}'
-  print(clib)
   
+  # create missing
   package_name = 'libjpeg'
   (Path(clib) / 'jconfig.h').touch()
+  (Path(clib) / 'vjpeglib.h').touch()
   if is_turbo:
     package_name += '-turbo'
     (Path(clib) / 'jconfigint.h').touch()
@@ -47,8 +48,9 @@ for v in libjpeg_versions:
                           'example', # example
                           #'jerror',
                           # turbo
-                          'jccolext','jdcolext','jdcol565','jdmrg565','jdmrgext',"jcstest","tjunittest","tjbench",
-                          'jstdhuff','turbojpeg-jni','turbojpeg']: 
+                          'jccolext','jdcolext','jdcol565','jstdhuff',
+                          'jdmrg565','jdmrgext',"jcstest","tjunittest","tjbench",
+                          'turbojpeg-jni','turbojpeg']: 
     lim = -2 - len(excluded_module)
     files = [f for f in files if f[lim:-2] != excluded_module]
   #
@@ -83,6 +85,28 @@ for v in libjpeg_versions:
     language="c",
   )
 
+from setuptools.command.build_ext import build_ext
+class custom_build_ext(build_ext):
+    def build_extensions(self):
+        #self.compiler.set_executable("compiler_so", "g++")
+        #self.compiler.set_executable("compiler_cxx", "g++")
+        #self.compiler.set_executable("linker_so", "g++")
+        # 'add_include_dir', 'add_library', 'add_library_dir', 'add_link_object', 'add_runtime_library_dir',
+        # 'announce', 'archiver', 'compile', 'compiler', 'compiler_cxx', 'compiler_so', 'compiler_type',
+        # 'create_static_lib', 'debug_print', 'define_macro', 'detect_language', 'dry_run', 'dylib_lib_extension',
+        # 'dylib_lib_format', 'exe_extension', 'executable_filename', 'executables', 'execute', 'find_library_file',
+        # 'force', 'has_function', 'include_dirs', 'language_map', 'language_order', 'libraries', 'library_dir_option',
+        # 'library_dirs', 'library_filename', 'library_option', 'link', 'link_executable', 'link_shared_lib',
+        # 'link_shared_object', 'linker_exe', 'linker_so', 'macros', 'mkpath', 'move_file', 'obj_extension',
+        # 'object_filenames', 'objects', 'output_dir', 'preprocess', 'preprocessor', 'ranlib', 'runtime_library_dir_option',
+        # 'runtime_library_dirs', 'set_executable', 'set_executables', 'set_include_dirs', 'set_libraries', 'set_library_dirs',
+        # 'set_link_objects', 'set_runtime_library_dirs', 'shared_lib_extension', 'shared_lib_format', 'shared_object_filename',
+        # 'spawn', 'src_extensions', 'static_lib_extension', 'static_lib_format', 'undefine_macro', 'verbose', 'warn',
+        # 'xcode_stub_lib_extension', 'xcode_stub_lib_format'
+        print("==========", self.compiler.library_dirs)
+        build_ext.build_extensions(self)
+        
+
 setuptools.setup(
   name = 'jpeglib',
   version = __version__,
@@ -102,6 +126,7 @@ setuptools.setup(
   package_data={'': ['data/*']},
   include_package_data=True,
   ext_modules=[cjpeglib[v] for v in libjpeg_versions],
+  cmdclass={"build_ext": custom_build_ext},
   classifiers=[
     'Development Status :: 4 - Beta',
     'Intended Audience :: Science/Research',

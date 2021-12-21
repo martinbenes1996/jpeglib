@@ -9,22 +9,13 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+// this is envelope for jpeglib.h
+// trying to avoid naming the same as system library
 #include "vjpeglib.h"
 
-// #if LIBVERSION == 60
-// #include "6b/jpeglib.h"
-// #elif LIBVERSION == 80
-// #include "8d/jpeglib.h"
-// #elif LIBVERSION == 210
-// #include "turbo210/jpeglib.h"
-// #else
-// // intentional syntax error
-// Not supported version.
+// #ifdef USE_TURBO
+// #include "jmorecfg.h"
 // #endif
-
-//#ifdef USE_TURBO
-//#include <jmorecfg.h>
-//#endif
 
 #define DO_FANCY_UPSAMPLING 0x1
 #define DO_BLOCK_SMOOTHING 0x2
