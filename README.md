@@ -27,6 +27,15 @@ Import the library in Python 3
 import jpeglib
 ```
 
+To install the dev version with *all the libjpeg versions inside*, type
+
+```bash
+pip uninstall jpeglib
+pip install -U --no-cache-dir git+https://www.github.com/martinbenes1996/jpeglib.git@versions
+```
+
+> :warning: Branch *versions* is dev so it is less stable and takes longer to install than the package.
+
 ### DCT
 
 Get *discrete cosine transform* (DCT) coefficients and quantization matrices as numpy array
