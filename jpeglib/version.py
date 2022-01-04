@@ -33,7 +33,6 @@ class version:
         :return: libjpeg version or None if not been loaded yet.
         :rtype: str, None
 
-
         :Example:
 
         >>> import jpeglib
@@ -70,16 +69,30 @@ class version:
 
         :Example:
 
-        >>> import jpeglib
-        >>> # default version
+        >>> jpeglib.version.set('6b')
+        >>> # working with 6b
+        >>> # [...]
         >>> with jpeglib.version('8d'):
-        >>>     # work with 8d
-        >>> # back to default version
+        >>>     # working with 8d
+        >>>     # [...]
+        >>>     pass
         """
         self.prev = self.get()
         self.set(self.next)
     def __exit__(self, *args, **kw):
-        """Recovers a previous version, when exiting `with` block."""
+        """Recovers a previous version, when exiting `with` block.
+        
+        :Example:
+
+        >>> # working with 6b
+        >>> # [...]
+        >>> with jpeglib.version('8d'):
+        >>>     # working with 8d
+        >>>     # [...]
+        >>>     pass
+        >>> # working with 6b (again)
+        >>> # [...]
+        """
         self.set(self.prev)
 
 __all__ = ['version']
