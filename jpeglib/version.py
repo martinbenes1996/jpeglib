@@ -58,5 +58,19 @@ class version:
     def versions():
         """Lists present DLLs of versions."""
         return CJpegLib.versions()
+    def __init__(self, version):
+        """Constructor, used in with statement.
+        
+        :param version: Version to set inside with block.
+        :type version: str
+        """
+        self.next = version
+    def __enter__(self):
+        """Enter of with statement, set new version"""
+        self.prev = self.get()
+        self.set(self.next)
+    def __exit__(self, *args, **kw):
+        """Exit from with statement, recover previous version."""
+        self.set(self.prev)
 
 __all__ = ['version']
