@@ -89,7 +89,7 @@ class CJpegLib:
         return so_files
     @classmethod
     def versions(cls):
-        vs = [re.search(f'cjpeg_[^.]*\..*\.so', f) for f in cls._versions()]
+        vs = [re.search(f'cjpeglib_[^.]*\..*\.so', f) for f in cls._versions()]
         vs = [v[0] for v in vs if v]
         return vs
     @classmethod
