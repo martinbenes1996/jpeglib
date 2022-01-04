@@ -30,9 +30,9 @@ class TestPerformance(unittest.TestCase):
                 flags=['DO_FANCY_UPSAMPLING','DO_BLOCK_SMOOTHING']
             )
             stego.append(t_stego.stop())
-        # test it isn't more than 1.5x slower
-        max_2x_slower = ttest_ind(np.array(pil)*1.5, stego, alternative='less')
-        self.assertGreater(max_2x_slower.pvalue, .05)
+        # test it isn't more than 3x slower
+        max_3x_slower = ttest_ind(np.array(pil)*3, stego, alternative='less')
+        self.assertGreater(max_3x_slower.pvalue, .05)
     
     def test_writing(self):
         pass
