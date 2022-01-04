@@ -16,3 +16,4 @@ Manage libjpeg version
 
 .. autoclass:: jpeglib.version
    :members:
+   :special-members: __enter__, __exit__

@@ -66,11 +66,20 @@ class version:
         """
         self.next = version
     def __enter__(self):
-        """Enter of with statement, set new version"""
+        """Sets new version in a block.
+
+        :Example:
+
+        >>> import jpeglib
+        >>> # default version
+        >>> with jpeglib.version('8d'):
+        >>>     # work with 8d
+        >>> # back to default version
+        """
         self.prev = self.get()
         self.set(self.next)
     def __exit__(self, *args, **kw):
-        """Exit from with statement, recover previous version."""
+        """Recovers a previous version, when exiting `with` block."""
         self.set(self.prev)
 
 __all__ = ['version']
