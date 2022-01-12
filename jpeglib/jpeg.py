@@ -100,8 +100,8 @@ class JPEG:
         :type quantized: bool, optional 
         :param in_color_space: Input color space. Must be key of :class:`jpeg.JPEG.J_COLOR_SPACE`. According to source by default.
         :type in_color_space: str, optional
-        :param samp_factor: Sampling factor. None, tuple of three ints or tuples of two ints. According to source by default.
-        :type samp_factor: tuple, optional
+        :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default.
+        :type samp_factor: list, optional
 
         :Example:
 
@@ -186,8 +186,8 @@ class JPEG:
         :type in_color_space: str, optional
         :param dct_method: DCT method. Must be key of :class:`jpeg.JPEG.J_DCT_METHOD`. Using default from libjpeg by default.
         :type dct_method: str, optional
-        :param samp_factor: Sampling factor. None, tuple of three ints or tuples of two ints. According to source by default.
-        :type samp_factor: tuple, optional
+        :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default.
+        :type samp_factor: list, optional
         :param qt: Compression quality, between 0 and 100 or a tensor with quantization tables. Defaultly 100 (full quality).
         :type qt: int | numpy.ndarray, optional
         :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
@@ -328,7 +328,7 @@ class JPEG:
 
     def _write_dct(self, dstfile, Y=None, CbCr=None, quality=None, quantized=False, in_color_space=None, samp_factor=None):
         # initialize default
-        samp_factor = self._parse_samp_factor(samp_factor) # sampling factor
+        samp_factor = self._parse_samp_factor(samp_factor, Y, CbCr) # sampling factor
         if self.srcfile is None:
             self._initialize_info(Y=Y, CbCr=CbCr)
         # allocate
@@ -493,19 +493,23 @@ class JPEG:
                                  * self.shape[0])
                                  * self.channels)(),
                 ((ctypes.c_ubyte * 256) * self.channels)())
-    def _parse_samp_factor(self, samp_factor=None):
+    def _parse_samp_factor(self, samp_factor=None, Y=None, CbCr=None):
         if samp_factor is None:
-            samp_factor = [[2,2],[1,1],[1,1]]#[4, 2, 2]
-
+            if Y is not None and CbCr is not None:
+                hs = [Y.shape[1], CbCr.shape[1], CbCr.shape[1]]
+                ws = [Y.shape[2], CbCr.shape[2], CbCr.shape[2]]
+                hmax,wmax = max(hs),max(ws)
+                hs,ws = [h/hmax for h in hs],[w/wmax for w in ws]
+                hmin,wmin = min(hs),min(ws)
+                hs,ws = [round(h/hmin) for h in hs],[round(w/wmin) for w in ws]
+                samp_factor = [[h,w] for h,w in zip(hs,ws)]
+        if samp_factor is None:
+            samp_factor = [[2,2],[1,1],[1,1]]
         samp_factor = np.array(samp_factor, dtype=np.int32)
-        
-        #samp_factor = list(samp_factor)
-        #J,a,b = samp_factor
-        #samp_factor = np.array([
-        #    [int(J / a), int(a == b) + 1],
-        #    [1, 1],
-        #    [1, 1]
-        #], dtype=np.int32)
+        if np.sum(np.prod(samp_factor, axis=1)) > 10:
+            raise Exception("linear combination of samp_factor greater than 10")
+        if np.any(~np.isin(samp_factor,[1,2,3,4])):
+            raise Exception("factors not in 1,2,3,4")
 
         self._samp_factor = np.ctypeslib.as_ctypes(samp_factor)
         return self._samp_factor
