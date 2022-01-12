@@ -100,8 +100,7 @@ class JPEG:
         :type quantized: bool, optional 
         :param in_color_space: Input color space. Must be key of :class:`jpeg.JPEG.J_COLOR_SPACE`. According to source by default.
         :type in_color_space: str, optional
-        :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default. Read more at 
-`glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-sampling-factor>`_.
+        :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-sampling-factor>`_.
         :type samp_factor: list, optional
 
         :Example:
@@ -187,8 +186,7 @@ class JPEG:
         :type in_color_space: str, optional
         :param dct_method: DCT method. Must be key of :class:`jpeg.JPEG.J_DCT_METHOD`. Using default from libjpeg by default.
         :type dct_method: str, optional
-        :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default. Read more at 
-`glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-sampling-factor>`_.
+        :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-sampling-factor>`_.
         :type samp_factor: list, optional
         :param qt: Compression quality, between 0 and 100 or a tensor with quantization tables. Defaultly 100 (full quality).
         :type qt: int | numpy.ndarray, optional
