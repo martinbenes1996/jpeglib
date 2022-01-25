@@ -59,7 +59,7 @@ class TestVersion(unittest.TestCase):
         import jpeglib
         importlib.reload(jpeglib)
         # check that library is not loaded
-        self.assertIsNone(jpeglib.version.get())
+        self.assertEqual(jpeglib.version.get(), '6b')
         # read
         im = jpeglib.JPEG('examples/IMG_0791.jpeg')
         Y,CbCr,qt = im.read_dct()
