@@ -16,3 +16,6 @@ try:
     __version__ = pkg_resources.get_distribution("jpeglib").version
 except:
     __version__ = None
+
+# set default version
+version.set('6b')
