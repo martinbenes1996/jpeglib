@@ -146,7 +146,7 @@ class JPEG:
         "JDCT_FLOAT": 2, # floating-point method
     }
 
-    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, colormap=None, flags=[]):
+    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, colormap=None, flags=['DO_FANCY_UPSAMPLING']):
         """Decompresses the file into the spatial domain. 
         
         :param out_color_space: Output color space. Must be key of J_COLOR_SPACE.
