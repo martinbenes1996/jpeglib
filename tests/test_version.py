@@ -141,7 +141,7 @@ class TestVersion(unittest.TestCase):
 
         # load progressive image
         im_seq = jpeglib.JPEG(f'examples/images-{version}/testimg.jpg')
-        rgb_seq = im_seq.read_spatial(out_color_space='JCS_RGB')
+        rgb_seq = im_seq.read_spatial(out_color_space='JCS_RGB', flags=[])
         im_p = jpeglib.JPEG(f'examples/images-{version}/testimgp.jpg')
         rgb_p = im_p.read_spatial(out_color_space='JCS_RGB', flags=['PROGRESSIVE_MODE'])
         np.testing.assert_array_almost_equal(rgb_seq, rgb_p)
