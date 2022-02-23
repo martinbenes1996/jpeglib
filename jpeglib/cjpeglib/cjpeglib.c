@@ -13,36 +13,33 @@ extern "C" {
 // trying to avoid naming the same as system library
 #include "vjpeglib.h"
 
+#include "cjpeglib.h"
+
 // #ifdef USE_TURBO
 // #include "jmorecfg.h"
 // #endif
 
-#define DO_FANCY_UPSAMPLING 0x1
-#define DO_BLOCK_SMOOTHING 0x2
-#define TWO_PASS_QUANTIZE 0x4
-#define ENABLE_1PASS_QUANT 0x8
-#define ENABLE_EXTERNAL_QUANT 0x10
-#define ENABLE_2PASS_QUANT 0x20
-#define OPTIMIZE_CODING 0x40
-#define PROGRESSIVE_MODE 0x80
-#define QUANTIZE_COLORS 0x100
-#define ARITH_CODE 0x200
-#define WRITE_JFIF_HEADER 0x400
-#define WRITE_ADOBE_MARKER 0x800
-#define CCIR601_SAMPLING 0x1000
+char flag_is_set (BITMASK flags, BITMASK mask) { return (flags & mask) != 0; }
+char overwrite_flag (BITMASK flags, BITMASK mask) { return (flags & (mask << 1)) == 0;}
 
-GLOBAL(long) jround_up (long a, long b);
+#define DO_FANCY_UPSAMPLING          ((BITMASK)0b1 <<  0)
+#define DO_BLOCK_SMOOTHING           ((BITMASK)0b1 <<  2)
+#define TWO_PASS_QUANTIZE            ((BITMASK)0b1 <<  4)
+#define ENABLE_1PASS_QUANT           ((BITMASK)0b1 <<  6)
+#define ENABLE_EXTERNAL_QUANT        ((BITMASK)0b1 <<  8)
+#define ENABLE_2PASS_QUANT           ((BITMASK)0b1 << 10)
+#define OPTIMIZE_CODING              ((BITMASK)0b1 << 12)
+#define PROGRESSIVE_MODE             ((BITMASK)0b1 << 14)
+#define QUANTIZE_COLORS              ((BITMASK)0b1 << 16)
+#define ARITH_CODE                   ((BITMASK)0b1 << 18)
+#define WRITE_JFIF_HEADER            ((BITMASK)0b1 << 20)
+#define WRITE_ADOBE_MARKER           ((BITMASK)0b1 << 22)
+#define CCIR601_SAMPLING             ((BITMASK)0b1 << 24)
 
-// void error_exit (j_common_ptr cinfo)
-// {
-//   /* Always display the message */
-//   (*cinfo->err->output_message) (cinfo);
 
-//   /* Let the memory manager delete any temp files before we die */
-//   jpeg_destroy(cinfo);
 
-//   exit(EXIT_FAILURE);
-// }
+
+long jround_up (long a, long b);
 
 FILE *_read_jpeg(const char *filename,
                  struct jpeg_decompress_struct *cinfo,
@@ -504,6 +501,7 @@ int write_jpeg_spatial(
   short smoothing_factor,
   unsigned long flags
 ) {
+  fprintf(stderr, "received flags: %lu\n", flags);
 
   // allocate
   struct jpeg_compress_struct cinfo;
@@ -585,12 +583,28 @@ int write_jpeg_spatial(
   }
   //fprintf(stderr, "colorspace conversion %d -> %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
   
-  cinfo.progressive_mode   = 0 != (flags & PROGRESSIVE_MODE);
-  cinfo.optimize_coding    = 0 != (flags & OPTIMIZE_CODING);
-  cinfo.arith_code         = 0 != (flags & ARITH_CODE);
-  cinfo.write_JFIF_header  = 0 != (flags & WRITE_JFIF_HEADER);
-  cinfo.write_Adobe_marker = 0 != (flags & WRITE_ADOBE_MARKER);
-  cinfo.CCIR601_sampling   = 0 != (flags & CCIR601_SAMPLING);
+
+  // fprintf(stderr, "JPEG_LIB_VERSION %d\n", JPEG_LIB_VERSION);
+  // fprintf(stderr, "DO_FANCY_UPSAMPLING flag  ovwrt %d set %d\n",
+  //         overwrite_flag(flags, DO_FANCY_UPSAMPLING),
+  //         flag_is_set(flags, DO_FANCY_UPSAMPLING));
+  // fprintf(stderr, "flags %X\n", flags);
+  #if JPEG_LIB_VERSION >= 70
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
+    cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+  #endif
+  if (overwrite_flag(flags, PROGRESSIVE_MODE))
+    cinfo.progressive_mode   = flag_is_set(flags, PROGRESSIVE_MODE);
+  if (overwrite_flag(flags, OPTIMIZE_CODING))
+    cinfo.optimize_coding    = flag_is_set(flags, OPTIMIZE_CODING);
+  if (overwrite_flag(flags, ARITH_CODE))
+    cinfo.arith_code         = flag_is_set(flags, ARITH_CODE);
+  if (overwrite_flag(flags, WRITE_JFIF_HEADER))
+    cinfo.write_JFIF_header  = flag_is_set(flags, WRITE_JFIF_HEADER);
+  if (overwrite_flag(flags, WRITE_ADOBE_MARKER))
+    cinfo.write_Adobe_marker = flag_is_set(flags, WRITE_ADOBE_MARKER);
+  if (overwrite_flag(flags, CCIR601_SAMPLING))
+    cinfo.CCIR601_sampling   = flag_is_set(flags, CCIR601_SAMPLING);
 
   // https://gist.github.com/kentakuramochi/f64e7646f1db8335c80f131be8359044
 

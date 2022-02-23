@@ -39,33 +39,52 @@ class CJpegLib:
     
     @classmethod
     def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
+        flagmask = cls.flags_to_mask(flags)
+        print("passing flagmask", flagmask)
         status = cls.get().write_jpeg_spatial(cls.cstr(srcfile), cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
-                                              dct_method, samp_factor, qt, quality, smoothing_factor, cls.flags_to_mask(flags))
+                                              dct_method, samp_factor, qt, quality, smoothing_factor, flagmask)
         if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
         
     MASKS = {
-        "DO_FANCY_UPSAMPLING": 0x1,
-        "DO_BLOCK_SMOOTHING": 0x2,
-        "TWO_PASS_QUANTIZE": 0x4,
-        "ENABLE_1PASS_QUANT": 0x8,
-        "ENABLE_EXTERNAL_QUANT": 0x10,
-        "ENABLE_2PASS_QUANT": 0x20,
-        "OPTIMIZE_CODING": 0x40,
-        "PROGRESSIVE_MODE": 0x80,
-        "QUANTIZE_COLORS": 0x100,
-        "ARITH_CODE": 0x200,
-        "WRITE_JFIF_HEADER": 0x400,
-        "WRITE_ADOBE_MARKER": 0x800,
-        "CCIR601_SAMPLING": 0x1000
+        "DO_FANCY_SAMPLING": (0b1 << 0), "DO_FANCY_UPSAMPLING": (0b1 << 0), "DO_FANCY_DOWNSAMPLING": (0b1 << 0),
+        "DO_BLOCK_SMOOTHING": (0b1 << 2),
+        "TWO_PASS_QUANTIZE": (0b1 << 4),
+        "ENABLE_1PASS_QUANT": (0b1 << 6),
+        "ENABLE_EXTERNAL_QUANT": (0b1 << 8),
+        "ENABLE_2PASS_QUANT": (0b1 << 10),
+        "OPTIMIZE_CODING": (0b1 << 12),
+        "PROGRESSIVE_MODE": (0b1 << 14),
+        "QUANTIZE_COLORS": (0b1 << 16),
+        "ARITH_CODE": (0b1 << 18),
+        "WRITE_JFIF_HEADER": (0b1 << 20),
+        "WRITE_ADOBE_MARKER": (0b1 << 22),
+        "CCIR601_SAMPLING": (0b1 << 24)
     }
 
     @classmethod
     def flags_to_mask(cls, flags):
-        mask = 0
+        mask = 0xFFFFFFFF
         if flags is None: return mask
         for flag in flags:
-            mask = mask | cls.MASKS[flag.upper()]
-        return ctypes.c_ulong(mask)
+            # print(f"flag {flag}:")
+            # parse sign
+            sign = '-' if flag[0] == '-' else '+'
+            if not flag[0].isalpha(): flag = flag[1:]
+            # get flags
+            flagbit = cls.MASKS[flag.upper()]
+            defbit = cls.MASKS[flag.upper()] << 1
+            # map
+            mask ^= defbit # reset default value
+            if sign == '-':
+                mask ^= (~flagbit + 2**32) # erase bit
+            #import sys
+            #print('sign:', sign, mask & flagbit, file=sys.stderr)
+            # print('  flagbit:', bin(~flagbit + 2**32).replace("0b", "").zfill(32))
+            # print('  defbit:', bin(~defbit + 2**32).replace("0b", "").zfill(32))
+            # print('  = ', bin(mask + 2**32).replace("0b", "").zfill(32))
+            
+        #print('final:', mask + 2**32, ctypes.c_ulonglong(mask + 2**32))
+        return ctypes.c_ulonglong(mask + 2**32)
 
     _lib = None
     version = None
