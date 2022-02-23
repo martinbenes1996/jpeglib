@@ -415,9 +415,8 @@ int read_jpeg_spatial(
   int out_color_space,
   int dither_mode,
   int dct_method,
-  unsigned long flags
+  BITMASK flags
 ) {
-
   // allocate
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -433,11 +432,14 @@ int read_jpeg_spatial(
   
   if(dither_mode >= 0) cinfo.dither_mode = dither_mode;
   if(dct_method >= 0) cinfo.dct_method = dct_method;
-  
-  cinfo.do_fancy_upsampling   = 0 != (flags & DO_FANCY_UPSAMPLING);
-  cinfo.do_block_smoothing    = 0 != (flags & DO_BLOCK_SMOOTHING);
-  cinfo.quantize_colors       = 0 != (flags & QUANTIZE_COLORS);
-  
+
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
+    cinfo.do_fancy_upsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+  if (overwrite_flag(flags, DO_BLOCK_SMOOTHING))
+    cinfo.do_block_smoothing  = flag_is_set(flags, DO_BLOCK_SMOOTHING);
+  if (overwrite_flag(flags, QUANTIZE_COLORS))
+    cinfo.quantize_colors     = flag_is_set(flags, QUANTIZE_COLORS);
+
   unsigned char *cmap[256];
   if(in_colormap != NULL)
     for(int i = 0; i < 256; i++) {
@@ -445,31 +447,61 @@ int read_jpeg_spatial(
       //if(i < 3) fprintf(stderr, " %d %d |", i, cmap[i][0]);
       //if(i == 255) fprintf(stderr, "\n");
     }
-  if(flags & QUANTIZE_COLORS) {
+
+  if (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
     cinfo.actual_number_of_colors = 256; // TODO: parametrized
     cinfo.desired_number_of_colors = 256;
     if(in_colormap != NULL) cinfo.colormap = (char**)cmap;
   }
   
-  cinfo.progressive_mode      = 0 != (flags & PROGRESSIVE_MODE);
-  cinfo.arith_code            = 0 != (flags & ARITH_CODE);
-  cinfo.CCIR601_sampling      = 0 != (flags & CCIR601_SAMPLING);
-  cinfo.two_pass_quantize     = 0 != (flags & TWO_PASS_QUANTIZE);
-  cinfo.enable_1pass_quant    = 0 != (flags & ENABLE_1PASS_QUANT);
-  cinfo.enable_external_quant = 0 != (flags & ENABLE_EXTERNAL_QUANT);
-  cinfo.enable_2pass_quant    = 0 != (flags & ENABLE_2PASS_QUANT);
-  
+  // fprintf(stderr, "PROGRESSIVE_MODE: owrt %d set %d\n", 
+  //   overwrite_flag(flags, PROGRESSIVE_MODE),
+  //   flag_is_set(flags, PROGRESSIVE_MODE)
+  // );fprintf(stderr, "ARITH_CODE: owrt %d set %d\n", 
+  //   overwrite_flag(flags, ARITH_CODE),
+  //   flag_is_set(flags, ARITH_CODE)
+  // );fprintf(stderr, "CCIR601_SAMPLING: owrt %d set %d\n", 
+  //   overwrite_flag(flags, CCIR601_SAMPLING),
+  //   flag_is_set(flags, CCIR601_SAMPLING)
+  // );fprintf(stderr, "TWO_PASS_QUANTIZE: owrt %d set %d\n", 
+  //   overwrite_flag(flags, TWO_PASS_QUANTIZE),
+  //   flag_is_set(flags, TWO_PASS_QUANTIZE)
+  // );fprintf(stderr, "ENABLE_1PASS_QUANT: owrt %d set %d\n", 
+  //   overwrite_flag(flags, ENABLE_1PASS_QUANT),
+  //   flag_is_set(flags, ENABLE_1PASS_QUANT)
+  // );fprintf(stderr, "ENABLE_EXTERNAL_QUANT: owrt %d set %d\n", 
+  //   overwrite_flag(flags, ENABLE_EXTERNAL_QUANT),
+  //   flag_is_set(flags, ENABLE_EXTERNAL_QUANT)
+  // );fprintf(stderr, "ENABLE_2PASS_QUANT: owrt %d set %d\n", 
+  //   overwrite_flag(flags, ENABLE_2PASS_QUANT),
+  //   flag_is_set(flags, ENABLE_2PASS_QUANT)
+  // );
+  if (overwrite_flag(flags, PROGRESSIVE_MODE))
+    cinfo.progressive_mode      = flag_is_set(flags, PROGRESSIVE_MODE);
+  if (overwrite_flag(flags, ARITH_CODE))
+    cinfo.arith_code            = flag_is_set(flags, ARITH_CODE);
+  if (overwrite_flag(flags, CCIR601_SAMPLING))
+    cinfo.CCIR601_sampling      = flag_is_set(flags, CCIR601_SAMPLING);
+  if (overwrite_flag(flags, TWO_PASS_QUANTIZE))
+    cinfo.two_pass_quantize     = flag_is_set(flags, TWO_PASS_QUANTIZE);
+  if (overwrite_flag(flags, ENABLE_1PASS_QUANT))
+    cinfo.enable_1pass_quant    = flag_is_set(flags, ENABLE_1PASS_QUANT);
+  if (overwrite_flag(flags, ENABLE_EXTERNAL_QUANT))
+    cinfo.enable_external_quant = flag_is_set(flags, ENABLE_EXTERNAL_QUANT);
+  if (overwrite_flag(flags, ENABLE_2PASS_QUANT))
+    cinfo.enable_2pass_quant    = flag_is_set(flags, ENABLE_2PASS_QUANT);
+
   // decompress
   (void)jpeg_start_decompress(&cinfo);
   // read pixels
   unsigned char *rowptr = rgb;
-  unsigned short stride = (flags & QUANTIZE_COLORS)?1:cinfo.out_color_components;
+  unsigned short stride = (flag_is_set(flags, QUANTIZE_COLORS)) ? 1 : cinfo.out_color_components;
   while(cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, &rowptr, 1);
     rowptr += cinfo.output_width * stride;
   }
   // read quantization colormap
-  if(flags & QUANTIZE_COLORS) {
+  if(overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
     int N = cinfo.out_color_components;
     for(int ch=0; ch < N; ch++) {
       for(int i=0; i < 256; i++) {
@@ -499,7 +531,7 @@ int write_jpeg_spatial(
   unsigned short *qt,
   short quality,
   short smoothing_factor,
-  unsigned long flags
+  BITMASK flags
 ) {
 
   // allocate

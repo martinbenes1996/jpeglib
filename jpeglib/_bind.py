@@ -75,13 +75,7 @@ class CJpegLib:
             mask ^= defbit # reset default value
             if sign == '-':
                 mask ^= (flagbit) # erase bit
-            #import sys
-            #print('sign:', sign, mask & flagbit, file=sys.stderr)
-            # print('  flagbit:', bin(~flagbit + 2**32).replace("0b", "").zfill(32))
-            # print('  defbit:', bin(~defbit + 2**32).replace("0b", "").zfill(32))
-            # print('  = ', bin(mask + 2**32).replace("0b", "").zfill(32))
-            
-        #print('final:', mask + 2**32, ctypes.c_ulonglong(mask + 2**32))
+
         return ctypes.c_ulonglong(mask)
     @classmethod
     def factor(cls, factor):

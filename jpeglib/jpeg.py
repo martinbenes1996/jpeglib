@@ -146,7 +146,7 @@ class JPEG:
         "JDCT_FLOAT": 2, # floating-point method
     }
 
-    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, colormap=None, flags=['DO_FANCY_UPSAMPLING']):
+    def read_spatial(self, out_color_space=None, dither_mode=None, dct_method=None, colormap=None, flags=[]):
         """Decompresses the file into the spatial domain. 
         
         :param out_color_space: Output color space. Must be key of J_COLOR_SPACE.
@@ -175,7 +175,7 @@ class JPEG:
         return spatial
 
     def write_spatial(self, dstfile, data=None, in_color_space=None, dct_method="JDCT_ISLOW",
-                      samp_factor=None, qt=100, smoothing_factor=None, flags=[]):
+                      samp_factor=None, qt=75, smoothing_factor=None, flags=[]):
         """Writes spatial image representation (i.e. RGB) to a file.
         
         :param dstfile: Destination file name.
@@ -385,8 +385,8 @@ class JPEG:
         dct_method = self.J_DCT_METHOD[dct_method]
         in_cmap = None
         if colormap is not None:
-            if 'QUANTIZE_COLORS' not in flags:
-                flags.append('QUANTIZE_COLORS')
+            if 'QUANTIZE_COLORS' not in flags and '+QUANTIZE_COLORS' not in flags:
+                flags.append('+QUANTIZE_COLORS')
             in_cmap = np.ascontiguousarray(colormap)
             in_cmap = np.ctypeslib.as_ctypes(in_cmap.astype(np.ubyte))
         # allocate
@@ -409,7 +409,7 @@ class JPEG:
         )
         # align rgb
         data = np.ctypeslib.as_array(self._im_spatial).astype(np.ubyte)
-        if 'QUANTIZE_COLORS' in flags:
+        if 'QUANTIZE_COLORS' in flags and '+QUANTIZE_COLORS' in flags:
             data = data.reshape(self.channels,data.shape[2],-1)[0]
             # parse colormap
             colormap = np.ctypeslib.as_array(self._im_colormap)

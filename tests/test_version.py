@@ -73,7 +73,7 @@ class TestVersion(unittest.TestCase):
         im_ppm = Image.open(f'examples/images-{version}/testimg.ppm')
         rgb_ppm = np.array(im_ppm)
         im = jpeglib.JPEG(f'examples/images-{version}/testorig.jpg')
-        rgb = im.read_spatial(out_color_space='JCS_RGB', flags=['DO_FANCY_UPSAMPLING','DO_BLOCK_SMOOTHING'])
+        rgb = im.read_spatial(out_color_space='JCS_RGB', flags=['+DO_FANCY_UPSAMPLING','+DO_BLOCK_SMOOTHING'])
         # if not np.all((rgb - rgb_ppm) < .01):
         #     import matplotlib.pyplot as plt
         #     D = (rgb - rgb_ppm)
@@ -118,7 +118,7 @@ class TestVersion(unittest.TestCase):
         # self.assertGreaterEqual(kstest(hist2, hist1).pvalue, .05)
 
         im_prog = jpeglib.JPEG(f'examples/images-{version}/testprog.jpg')
-        rgb = im_prog.read_spatial(flags=['PROGRESSIVE_MODE','DO_FANCY_UPSAMPLING'])
+        rgb = im_prog.read_spatial(flags=['+PROGRESSIVE_MODE','+DO_FANCY_UPSAMPLING'])
         x = np.array(Image.open(f'examples/images-{version}/testprog.jpg'))
         #print(np.sum((x - rgb) != 0))
         #D = np.abs((x.astype(np.int64) - rgb.astype(np.int64)))
@@ -141,9 +141,9 @@ class TestVersion(unittest.TestCase):
 
         # load progressive image
         im_seq = jpeglib.JPEG(f'examples/images-{version}/testimg.jpg')
-        rgb_seq = im_seq.read_spatial(out_color_space='JCS_RGB', flags=[])
+        rgb_seq = im_seq.read_spatial(out_color_space='JCS_RGB', flags=['-PROGRESSIVE_MODE'])
         im_p = jpeglib.JPEG(f'examples/images-{version}/testimgp.jpg')
-        rgb_p = im_p.read_spatial(out_color_space='JCS_RGB', flags=['PROGRESSIVE_MODE'])
+        rgb_p = im_p.read_spatial(out_color_space='JCS_RGB', flags=['+PROGRESSIVE_MODE'])
         np.testing.assert_array_almost_equal(rgb_seq, rgb_p)
 
     def test_libjpeg_images_6b(self):
