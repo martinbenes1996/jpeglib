@@ -203,7 +203,10 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(qt1, qt2)
     
     
-
+    def test_qt1(self):
+        im = jpeglib.JPEG("examples/qt1.jpeg")
+        _,_,qt = im.read_dct()
+        np.testing.assert_array_equal(qt[0], qt[1])
 
 
 

@@ -144,7 +144,7 @@ int read_jpeg_dct(
   JCOEFPTR blockptr_one;
   int HblocksY = cinfo.comp_info->height_in_blocks; // max height
   int WblocksY = cinfo.comp_info->width_in_blocks; // max width
-  for(int ch = 0; ch < 3; ch++) {
+  for(int ch = 0; ch < cinfo.num_components; ch++) {
     jpeg_component_info* compptr_one = cinfo.comp_info + ch;
     int Hblocks = compptr_one->height_in_blocks; // max height
     int Wblocks = compptr_one->width_in_blocks; // max width
@@ -162,14 +162,21 @@ int read_jpeg_dct(
       }
     }
   }
-  //fprintf(stderr, "Read qt.\n");
   // read quantization table
   if(qt != NULL) {
+    if(cinfo.num_components > 1) {
+      if(cinfo.comp_info[1].quant_tbl_no != cinfo.comp_info[2].quant_tbl_no) {
+        fprintf(stderr, "Mismatching chrominance quantization tables not supported.");
+        return 0;
+      }
+    }
+
     for(int ch = 0; ch < 2; ch++) {
+
       //fprintf(stderr, "qt[%d] = %p -> %p\n", ch, cinfo.quant_tbl_ptrs[ch], cinfo.quant_tbl_ptrs[ch]->quantval);
       for(int i = 0; i < 64; i++) {
-        
-        qt[ch*64 + i] = cinfo.quant_tbl_ptrs[ch]->quantval[i];//[(i&7)*8+(i>>3)];
+        int qt_i = cinfo.comp_info[ch].quant_tbl_no;
+        qt[ch*64 + i] = cinfo.quant_tbl_ptrs[qt_i]->quantval[i];//[(i&7)*8+(i>>3)];
       }
       //(i&7)*8+(i>>3)
       //memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
