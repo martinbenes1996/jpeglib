@@ -501,7 +501,6 @@ int write_jpeg_spatial(
   short smoothing_factor,
   unsigned long flags
 ) {
-  fprintf(stderr, "received flags: %x\n", flags);
 
   // allocate
   struct jpeg_compress_struct cinfo;
