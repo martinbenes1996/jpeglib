@@ -39,10 +39,8 @@ class CJpegLib:
     
     @classmethod
     def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
-        flagmask = cls.flags_to_mask(flags)
-        print("passing flagmask", flagmask)
         status = cls.get().write_jpeg_spatial(cls.cstr(srcfile), cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
-                                              dct_method, samp_factor, qt, quality, smoothing_factor, flagmask)
+                                              dct_method, samp_factor, qt, cls.factor(quality), cls.factor(smoothing_factor), cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
         
     MASKS = {
@@ -76,7 +74,7 @@ class CJpegLib:
             # map
             mask ^= defbit # reset default value
             if sign == '-':
-                mask ^= (~flagbit + 2**32) # erase bit
+                mask ^= (flagbit) # erase bit
             #import sys
             #print('sign:', sign, mask & flagbit, file=sys.stderr)
             # print('  flagbit:', bin(~flagbit + 2**32).replace("0b", "").zfill(32))
@@ -84,8 +82,13 @@ class CJpegLib:
             # print('  = ', bin(mask + 2**32).replace("0b", "").zfill(32))
             
         #print('final:', mask + 2**32, ctypes.c_ulonglong(mask + 2**32))
-        return ctypes.c_ulonglong(mask + 2**32)
-
+        return ctypes.c_ulonglong(mask)
+    @classmethod
+    def factor(cls, factor):
+        if factor is None:
+            factor = 0
+        return ctypes.c_short(factor)
+    
     _lib = None
     version = None
     @classmethod

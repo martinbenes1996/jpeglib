@@ -40,7 +40,6 @@ int read_jpeg_spatial(
     BITMASK flags
 );
 
-
 int write_jpeg_spatial(
     const char *srcfile,
     const char *dstfile,

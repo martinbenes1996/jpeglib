@@ -501,7 +501,7 @@ int write_jpeg_spatial(
   short smoothing_factor,
   unsigned long flags
 ) {
-  fprintf(stderr, "received flags: %lu\n", flags);
+  fprintf(stderr, "received flags: %x\n", flags);
 
   // allocate
   struct jpeg_compress_struct cinfo;
@@ -576,22 +576,18 @@ int write_jpeg_spatial(
     jpeg_set_quality(&cinfo, quality, FALSE);
   }
   if(smoothing_factor >= 0) cinfo.smoothing_factor = smoothing_factor;
-  if(in_color_space >= 0) {
+  if(in_color_space >= 0)
     cinfo.in_color_space = in_color_space;
-    //jpeg_set_colorspace(&cinfo, in_color_space);
-    //fprintf(stderr, "writing 2 from cs %d to %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
-  }
-  //fprintf(stderr, "colorspace conversion %d -> %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
-  
 
-  // fprintf(stderr, "JPEG_LIB_VERSION %d\n", JPEG_LIB_VERSION);
-  // fprintf(stderr, "DO_FANCY_UPSAMPLING flag  ovwrt %d set %d\n",
-  //         overwrite_flag(flags, DO_FANCY_UPSAMPLING),
-  //         flag_is_set(flags, DO_FANCY_UPSAMPLING));
-  // fprintf(stderr, "flags %X\n", flags);
   #if JPEG_LIB_VERSION >= 70
-  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
+    fprintf(stderr, "-> Overwriting DO_FANCY_UPSAMPLING to %d.\n", flag_is_set(flags, DO_FANCY_UPSAMPLING));
     cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+  } else {
+    fprintf(stderr, "-> Leaving DO_FANCY_UPSAMPLING default (%d).\n", cinfo.do_fancy_downsampling);
+  }
+  #else
+    fprintf(stderr, "-> Ignoring settings of DO_FANCY_UPSAMPLING.\n");
   #endif
   if (overwrite_flag(flags, PROGRESSIVE_MODE))
     cinfo.progressive_mode   = flag_is_set(flags, PROGRESSIVE_MODE);
