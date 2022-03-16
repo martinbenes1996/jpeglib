@@ -71,6 +71,8 @@ class CJpegLib:
             # get flags
             flagbit = cls.MASKS[flag.upper()]
             defbit = cls.MASKS[flag.upper()] << 1
+            if flag == 'PROGRESSIVE_MODE':
+                print('%s %s %x %x' % (flag, sign, flagbit, defbit))
             # map
             mask ^= defbit # reset default value
             if sign == '-':

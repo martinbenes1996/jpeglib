@@ -454,10 +454,10 @@ int read_jpeg_spatial(
     if(in_colormap != NULL) cinfo.colormap = (char**)cmap;
   }
   
-  // fprintf(stderr, "PROGRESSIVE_MODE: owrt %d set %d\n", 
-  //   overwrite_flag(flags, PROGRESSIVE_MODE),
-  //   flag_is_set(flags, PROGRESSIVE_MODE)
-  // );fprintf(stderr, "ARITH_CODE: owrt %d set %d\n", 
+  fprintf(stderr, "read PROGRESSIVE_MODE: owrt %d set %d\n", 
+    overwrite_flag(flags, PROGRESSIVE_MODE),
+    flag_is_set(flags, PROGRESSIVE_MODE)
+  );//fprintf(stderr, "ARITH_CODE: owrt %d set %d\n", 
   //   overwrite_flag(flags, ARITH_CODE),
   //   flag_is_set(flags, ARITH_CODE)
   // );fprintf(stderr, "CCIR601_SAMPLING: owrt %d set %d\n", 
@@ -616,8 +616,11 @@ int write_jpeg_spatial(
   if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
     cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
   #endif
+  //fprintf(stderr, "write PROGRESSIVE_MODE owr %d set %d\n", overwrite_flag(flags, PROGRESSIVE_MODE), flag_is_set(flags, OPTIMIZE_CODING));
   if (overwrite_flag(flags, PROGRESSIVE_MODE))
     cinfo.progressive_mode   = flag_is_set(flags, PROGRESSIVE_MODE);
+  if (overwrite_flag(flags, PROGRESSIVE_MODE) && flag_is_set(flags, PROGRESSIVE_MODE))
+    jpeg_simple_progression(&cinfo);
   if (overwrite_flag(flags, OPTIMIZE_CODING))
     cinfo.optimize_coding    = flag_is_set(flags, OPTIMIZE_CODING);
   if (overwrite_flag(flags, ARITH_CODE))
