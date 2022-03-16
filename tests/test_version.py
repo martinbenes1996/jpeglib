@@ -145,12 +145,12 @@ class TestVersion(unittest.TestCase):
         rgb_p = im_p.read_spatial(out_color_space='JCS_RGB', flags=['+PROGRESSIVE_MODE'])
         np.testing.assert_array_almost_equal(rgb_seq, rgb_p)
 
-    # def test_libjpeg_images_6b(self):
-    #     """Test on test images from libjpeg 6b."""
-    #     self._test_libjpeg_images("6b")
-    # def test_libjpeg_images_8d(self):
-    #     """Test on test images from libjpeg 8d."""
-    #     self._test_libjpeg_images("8d")
+    def test_libjpeg_images_6b(self):
+        """Test on test images from libjpeg 6b."""
+        self._test_libjpeg_images("6b")
+    def test_libjpeg_images_8d(self):
+        """Test on test images from libjpeg 8d."""
+        self._test_libjpeg_images("8d")
     # TODO
     #def test_libjpeg_images_turbo210(self):
     #    """Test on test images from libjpeg-turbo 2.1.0."""

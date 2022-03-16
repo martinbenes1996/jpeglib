@@ -38,28 +38,21 @@ class TestSpatial(unittest.TestCase):
     # def tearDown(self):
     #     shutil.rmtree("tmp")
         
-    def _test_synthetic(self, color_space=None):
+    def test_synthetic(self):
         global qt50_standard
         # generate uniform image
-        x_in = (np.random.rand(256, 256, 3)*255).astype(np.uint8)
+        Y_in = (np.random.rand(1,32,32,8,8)*255).astype(np.int16)
+        CbCr_in = (np.random.rand(2,16,16,8,8)*255).astype(np.int16)
         # compress
         im = jpeglib.JPEG()
-        output_file = f"tmp/output_{color_space}.jpeg"
-        im.write_spatial(output_file, x_in, in_color_space=color_space, flags=['+DO_FANCY_UPSAMPLING'])
+        output_file = f"tmp/output.jpeg"
+        im.write_dct(output_file, Y_in, CbCr_in, samp_factor=((2,2),(1,1),(1,1)))
         # decompress
         im = jpeglib.JPEG(output_file)
-        x_out = im.read_spatial(out_color_space=color_space, flags=['+DO_FANCY_UPSAMPLING'])
-        print(x_in)
-        print(x_out)
+        Y_out,CbCr_out,_ = im.read_dct()
         # test matrix
-        np.testing.assert_array_almost_equal(x_in, x_out)
-
-    # def test_synthetic_default(self):
-    #     self._test_synthetic()
-    # def test_synthetic_rgb(self):
-    #     self._test_synthetic(color_space='JCS_RGB')
-    # def test_synthetic_ycbcr(self):
-    #     self._test_synthetic(color_space='JCS_YCbCr')
+        np.testing.assert_array_almost_equal(Y_in, Y_out)
+        np.testing.assert_array_almost_equal(CbCr_in, CbCr_out)
 
     def test_spatial_quality(self):
         global qt50_standard
