@@ -101,7 +101,7 @@ class CJpegLib:
         return cls.version
     @classmethod
     def _versions(cls):
-        so_files = [f for f in os.listdir(cjpeglib.__path__[0]) if re.fullmatch(f'cjpeglib_.*\..*\.so', f)]
+        so_files = [f for f in os.listdir(list(cjpeglib.__path__)[0]) if re.fullmatch(f'cjpeglib_.*\..*\.so', f)]
         return so_files
     @classmethod
     def versions(cls):
@@ -116,7 +116,7 @@ class CJpegLib:
             so_file = so_files[0]
         except:
             raise Exception(f"dynamic library not found")
-        libname = pathlib.Path(cjpeglib.__path__[0]) / so_file
+        libname = pathlib.Path(list(cjpeglib.__path__)[0]) / so_file
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)
         cls.version = version
