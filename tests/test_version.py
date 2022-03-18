@@ -148,9 +148,39 @@ class TestVersion(unittest.TestCase):
     def test_libjpeg_images_6b(self):
         """Test on test images from libjpeg 6b."""
         self._test_libjpeg_images("6b")
-    def test_libjpeg_images_8d(self):
-        """Test on test images from libjpeg 8d."""
-        self._test_libjpeg_images("8d")
+    # def test_libjpeg_images_7(self):
+    #     """Test on test images from libjpeg 7."""
+    #     self._test_libjpeg_images("7")
+    # def test_libjpeg_images_8(self):
+    #     """Test on test images from libjpeg 8."""
+    #     self._test_libjpeg_images("8")
+    # def test_libjpeg_images_8a(self):
+    #     """Test on test images from libjpeg 8a."""
+    #     self._test_libjpeg_images("8a")
+    # def test_libjpeg_images_8b(self):
+    #     """Test on test images from libjpeg 8b."""
+    #     self._test_libjpeg_images("8b")
+    # def test_libjpeg_images_8c(self):
+    #     """Test on test images from libjpeg 8c."""
+    #     self._test_libjpeg_images("8c")
+    # def test_libjpeg_images_8d(self):
+    #     """Test on test images from libjpeg 8d."""
+    #     self._test_libjpeg_images("8d")
+    # def test_libjpeg_images_9(self):
+    #     """Test on test images from libjpeg 9."""
+    #     self._test_libjpeg_images("9")
+    # def test_libjpeg_images_9a(self):
+    #     """Test on test images from libjpeg 9a."""
+    #     self._test_libjpeg_images("9a")
+    # def test_libjpeg_images_9b(self):
+    #     """Test on test images from libjpeg 9b."""
+    #     self._test_libjpeg_images("9b")
+    # def test_libjpeg_images_9c(self):
+    #     """Test on test images from libjpeg 9c."""
+    #     self._test_libjpeg_images("9c")
+    # def test_libjpeg_images_9d(self):
+    #     """Test on test images from libjpeg 9d."""
+    #     self._test_libjpeg_images("9d")
     # TODO
     #def test_libjpeg_images_turbo210(self):
     #    """Test on test images from libjpeg-turbo 2.1.0."""
