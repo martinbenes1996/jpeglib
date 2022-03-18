@@ -40,15 +40,51 @@ class TestVersion(unittest.TestCase):
             rgb = im.read_spatial()
         self.assertEqual(jpeglib.version.get(), 'turbo210')
 
-    def test_6(self):
+    def test_6b(self):
         jpeglib.version.set('6')
         self.assertEqual(jpeglib.version.get(), '6b')
+    def test_7(self):
+        jpeglib.version.set('7')
+        self.assertEqual(jpeglib.version.get(), '7')
     def test_8(self):
         jpeglib.version.set('8')
+        self.assertEqual(jpeglib.version.get(), '8')
+    def test_8a(self):
+        jpeglib.version.set('8a')
+        self.assertEqual(jpeglib.version.get(), '8a')
+    def test_8b(self):
+        jpeglib.version.set('8b')
+        self.assertEqual(jpeglib.version.get(), '8b')
+    def test_8c(self):
+        jpeglib.version.set('8c')
+        self.assertEqual(jpeglib.version.get(), '8c')
+    def test_8d(self):
+        jpeglib.version.set('8d')
         self.assertEqual(jpeglib.version.get(), '8d')
+    def test_9(self):
+        jpeglib.version.set('9')
+        self.assertEqual(jpeglib.version.get(), '9')
+    def test_9a(self):
+        jpeglib.version.set('9a')
+        self.assertEqual(jpeglib.version.get(), '9a')
+    def test_9b(self):
+        jpeglib.version.set('9b')
+        self.assertEqual(jpeglib.version.get(), '9b')
+    def test_9c(self):
+        jpeglib.version.set('9c')
+        self.assertEqual(jpeglib.version.get(), '9c')
+    def test_9d(self):
+        jpeglib.version.set('9d')
+        self.assertEqual(jpeglib.version.get(), '9d')
+    def test_9e(self):
+        jpeglib.version.set('9e')
+        self.assertEqual(jpeglib.version.get(), '9e')
     def test_turbo2_1(self):
         jpeglib.version.set('turbo2.1.0')
         self.assertEqual(jpeglib.version.get(), 'turbo210')
+    def test_mozjpeg(self):
+        jpeglib.version.set('mozjpeg')
+        self.assertEqual(jpeglib.version.get(), 'mozjpeg403')
 
     def test_default_version(self):
         # reload jpeglib
@@ -74,13 +110,6 @@ class TestVersion(unittest.TestCase):
         rgb_ppm = np.array(im_ppm)
         im = jpeglib.JPEG(f'examples/images-{version}/testorig.jpg')
         rgb = im.read_spatial(out_color_space='JCS_RGB', flags=['+DO_FANCY_UPSAMPLING'])
-        # if not np.all((rgb - rgb_ppm) < .01):
-        #     import matplotlib.pyplot as plt
-        #     D = (rgb - rgb_ppm)
-        #     D[D != 0] = 255
-        #     print("\n", version, "\n")
-        #     plt.imshow(D)
-        #     plt.show()
         np.testing.assert_array_almost_equal(rgb, rgb_ppm)
         
         # # test 256 colors
@@ -117,13 +146,9 @@ class TestVersion(unittest.TestCase):
         # self.assertGreaterEqual(kstest(hist2, hist1).pvalue, .05)
 
         im_prog = jpeglib.JPEG(f'examples/images-{version}/testprog.jpg')
-        rgb = im_prog.read_spatial(flags=['+PROGRESSIVE_MODE','+DO_FANCY_UPSAMPLING'])
-        x = np.array(Image.open(f'examples/images-{version}/testprog.jpg'))
-        #print(np.sum((x - rgb) != 0))
-        #D = np.abs((x.astype(np.int64) - rgb.astype(np.int64)))
-        #print(x[D!=0])
-        #plt.imshow(D)
-        #plt.show()
+        rgb = im_prog.read_spatial(flags=['+PROGRESSIVE_MODE','+DO_FANCY_UPSAMPLING','+DO_BLOCK_SMOOTHING'])
+        rgb_pil = np.array(Image.open(f'examples/images-{version}/testprog.jpg'))
+        #np.testing.assert_array_almost_equal(rgb, rgb_pil) # TODO: Nora?
 
         # load dct - to fix
         im_prog = jpeglib.JPEG(f'examples/images-{version}/testprog.jpg')
@@ -148,42 +173,48 @@ class TestVersion(unittest.TestCase):
     def test_libjpeg_images_6b(self):
         """Test on test images from libjpeg 6b."""
         self._test_libjpeg_images("6b")
-    # def test_libjpeg_images_7(self):
-    #     """Test on test images from libjpeg 7."""
-    #     self._test_libjpeg_images("7")
-    # def test_libjpeg_images_8(self):
-    #     """Test on test images from libjpeg 8."""
-    #     self._test_libjpeg_images("8")
-    # def test_libjpeg_images_8a(self):
-    #     """Test on test images from libjpeg 8a."""
-    #     self._test_libjpeg_images("8a")
-    # def test_libjpeg_images_8b(self):
-    #     """Test on test images from libjpeg 8b."""
-    #     self._test_libjpeg_images("8b")
-    # def test_libjpeg_images_8c(self):
-    #     """Test on test images from libjpeg 8c."""
-    #     self._test_libjpeg_images("8c")
-    # def test_libjpeg_images_8d(self):
-    #     """Test on test images from libjpeg 8d."""
-    #     self._test_libjpeg_images("8d")
-    # def test_libjpeg_images_9(self):
-    #     """Test on test images from libjpeg 9."""
-    #     self._test_libjpeg_images("9")
-    # def test_libjpeg_images_9a(self):
-    #     """Test on test images from libjpeg 9a."""
-    #     self._test_libjpeg_images("9a")
-    # def test_libjpeg_images_9b(self):
-    #     """Test on test images from libjpeg 9b."""
-    #     self._test_libjpeg_images("9b")
-    # def test_libjpeg_images_9c(self):
-    #     """Test on test images from libjpeg 9c."""
-    #     self._test_libjpeg_images("9c")
-    # def test_libjpeg_images_9d(self):
-    #     """Test on test images from libjpeg 9d."""
-    #     self._test_libjpeg_images("9d")
+    def test_libjpeg_images_7(self):
+        """Test on test images from libjpeg 7."""
+        self._test_libjpeg_images("7")
+    def test_libjpeg_images_8(self):
+        """Test on test images from libjpeg 8."""
+        self._test_libjpeg_images("8")
+    def test_libjpeg_images_8a(self):
+        """Test on test images from libjpeg 8a."""
+        self._test_libjpeg_images("8a")
+    def test_libjpeg_images_8b(self):
+        """Test on test images from libjpeg 8b."""
+        self._test_libjpeg_images("8b")
+    def test_libjpeg_images_8c(self):
+        """Test on test images from libjpeg 8c."""
+        self._test_libjpeg_images("8c")
+    def test_libjpeg_images_8d(self):
+        """Test on test images from libjpeg 8d."""
+        self._test_libjpeg_images("8d")
+    def test_libjpeg_images_9(self):
+        """Test on test images from libjpeg 9."""
+        self._test_libjpeg_images("9")
+    def test_libjpeg_images_9a(self):
+        """Test on test images from libjpeg 9a."""
+        self._test_libjpeg_images("9a")
+    def test_libjpeg_images_9b(self):
+        """Test on test images from libjpeg 9b."""
+        self._test_libjpeg_images("9b")
+    def test_libjpeg_images_9c(self):
+        """Test on test images from libjpeg 9c."""
+        self._test_libjpeg_images("9c")
+    def test_libjpeg_images_9d(self):
+        """Test on test images from libjpeg 9d."""
+        self._test_libjpeg_images("9d")
+    def test_libjpeg_images_9e(self):
+        """Test on test images from libjpeg 9e."""
+        self._test_libjpeg_images("9e")
     # TODO
-    #def test_libjpeg_images_turbo210(self):
+    # def test_libjpeg_images_turbo210(self):
     #    """Test on test images from libjpeg-turbo 2.1.0."""
     #    self._test_libjpeg_images("turbo210")
+    # def test_libjpeg_images_mozjpeg403(self):
+    #    """Test on test images from mozjpeg 4.0.3."""
+    #    self._test_libjpeg_images("mozjpeg403")
         
 __all__ = ["TestVersion"]

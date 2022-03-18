@@ -1,7 +1,7 @@
 
 # versions
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.9.2')
+__version__ = os.environ.get('VERSION_NEW', '0.9.3')
 libjpeg_versions = {
   '6b': (None,60),
   '7': (None,70),
@@ -32,6 +32,12 @@ import setuptools
 with codecs.open("README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
 
+
+
+
+
+
+
 # create version dependent extensions
 import ctypes
 from pathlib import Path
@@ -40,7 +46,9 @@ cfiles = {}
 hfiles = {}
 cjpeglib = {}
 for v in libjpeg_versions:
-  is_turbo = v[:5] == "turbo"
+  is_moz = v[:3] == "moz"
+  is_turbo = v[:5] == "turbo" or is_moz
+  
   clib = f'jpeglib/cjpeglib/{v}'
   
   # create missing
@@ -56,6 +64,7 @@ for v in libjpeg_versions:
                           'djpeg','cjpeg','rdjpgcom','wrjpgcom','cdjpeg','jpegtran', # executables
                           'rdbmp','wrbmp','rdcolmap','rdppm','wrppm','rdtarga','wrtarga','rdrle','wrrle','rdgif','wrgif','rdswitch', # others
                           'example', # example
+                          'cjpegalt','djpegalt',
                           #'jerror',
                           # turbo
                           'jccolext','jdcolext','jdcol565','jstdhuff',
@@ -68,15 +77,26 @@ for v in libjpeg_versions:
   hfiles[v] = [f for f in files if f[-2:] == '.h']
   sources = ['jpeglib/cjpeglib/cjpeglib.c',*cfiles[v]]
   
-  turbo_macros = [
-    ("JPEG_LIB_VERSION",70),
-    ("INLINE","__inline__"),
-    ("PACKAGE_NAME",f"\"{package_name}\""),
-    ("BUILD",f"\"unknown\""),
-    ("VERSION",f"\"{libjpeg_versions[v][0]}\""),
-    ("SIZEOF_SIZE_T",int(ctypes.sizeof(ctypes.c_size_t))),
-    ("THREAD_LOCAL", "__thread")
-  ] if is_turbo else []
+  macros = [
+    ("BITS_IN_JSAMPLE",8),
+    ("HAVE_STDLIB_H",1),
+    ("LIBVERSION",libjpeg_versions[v][1]),
+    ("HAVE_PROTOTYPES",1),
+  ]
+  if is_turbo:
+    macros += [
+      ("JPEG_LIB_VERSION",80),#70),
+      ("INLINE","__inline__"),
+      ("PACKAGE_NAME",f"\"{package_name}\""),
+      ("BUILD",f"\"unknown\""),
+      ("VERSION",f"\"{libjpeg_versions[v][0]}\""),
+      ("SIZEOF_SIZE_T",int(ctypes.sizeof(ctypes.c_size_t))),
+      ("THREAD_LOCAL", "__thread")
+    ]
+  if is_moz:
+    macros += [
+      ('C_ARITH_CODING_SUPPORTED',1)
+    ]
 
   cjpeglib[v] = setuptools.Extension(
     name = f"jpeglib/cjpeglib/cjpeglib_{v}",
@@ -84,13 +104,7 @@ for v in libjpeg_versions:
     include_dirs=['./jpeglib/cjpeglib',f'./{clib}'],#[f'./{clib}'],
     sources = sources,
     headers = hfiles[v],
-    define_macros = [
-      ("BITS_IN_JSAMPLE",8),
-      ("HAVE_STDLIB_H",1),
-      ("LIBVERSION",libjpeg_versions[v][1]),
-      ("HAVE_PROTOTYPES",1),
-      *turbo_macros
-    ],
+    define_macros = macros,
     extra_compile_args=["-fPIC","-g"],
     language="c",
   )
@@ -115,7 +129,6 @@ class custom_build_ext(build_ext):
         # 'xcode_stub_lib_extension', 'xcode_stub_lib_format'
         #print("==========", self.compiler.library_dirs)
         build_ext.build_extensions(self)
-        
 
 setuptools.setup(
   name = 'jpeglib',
@@ -164,3 +177,6 @@ setuptools.setup(
     'Topic :: Utilities'
   ],
 )
+
+
+

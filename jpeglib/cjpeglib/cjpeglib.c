@@ -454,10 +454,10 @@ int read_jpeg_spatial(
     if(in_colormap != NULL) cinfo.colormap = (char**)cmap;
   }
   
-  fprintf(stderr, "read PROGRESSIVE_MODE: owrt %d set %d\n", 
-    overwrite_flag(flags, PROGRESSIVE_MODE),
-    flag_is_set(flags, PROGRESSIVE_MODE)
-  );//fprintf(stderr, "ARITH_CODE: owrt %d set %d\n", 
+  //fprintf(stderr, "read PROGRESSIVE_MODE: owrt %d set %d\n", 
+  //  overwrite_flag(flags, PROGRESSIVE_MODE),
+  //  flag_is_set(flags, PROGRESSIVE_MODE)
+  //);fprintf(stderr, "ARITH_CODE: owrt %d set %d\n", 
   //   overwrite_flag(flags, ARITH_CODE),
   //   flag_is_set(flags, ARITH_CODE)
   // );fprintf(stderr, "CCIR601_SAMPLING: owrt %d set %d\n", 
