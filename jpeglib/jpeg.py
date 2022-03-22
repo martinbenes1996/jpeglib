@@ -175,7 +175,7 @@ class JPEG:
         return spatial
 
     def write_spatial(self, dstfile, data=None, in_color_space=None, dct_method="JDCT_ISLOW",
-                      samp_factor=None, qt=75, smoothing_factor=None, flags=[]):
+                      samp_factor=None, qt=-1, smoothing_factor=None, flags=[]):
         """Writes spatial image representation (i.e. RGB) to a file.
         
         :param dstfile: Destination file name.
@@ -188,7 +188,7 @@ class JPEG:
         :type dct_method: str, optional
         :param samp_factor: Sampling factor. None, or list of 3 tuples of 2 ints. According to source by default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#jpeg-sampling-factor>`_.
         :type samp_factor: list, optional
-        :param qt: Compression quality, between 0 and 100 or a tensor with quantization tables. Defaultly 100 (full quality).
+        :param qt: Compression quality, between 0 and 100 or a tensor with quantization tables. Defaultly -1 (default factor kept).
         :type qt: int | numpy.ndarray, optional
         :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
         :type smoothing_factor: int, optional
