@@ -590,7 +590,7 @@ int write_jpeg_spatial(
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in, (j_compress_ptr)&cinfo);
   }
 
-  fprintf(stderr, "quality %d\n", quality);
+  //fprintf(stderr, "quality %d\n", quality);
   if(qt != NULL) {
     unsigned qt_u[64];
     // component 0

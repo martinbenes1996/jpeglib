@@ -54,17 +54,23 @@ class TestSpatial(unittest.TestCase):
         np.testing.assert_array_almost_equal(Y_in, Y_out)
         np.testing.assert_array_almost_equal(CbCr_in, CbCr_out)
 
-    def test_default_quality(self):
-        jpeglib.version.set('9e')
+    def _test_default_quality(self, version, quality):
+        jpeglib.version.set(version)
         #print("test_default_quality")
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             x = im.read_spatial()
-            im.write_spatial("tmp/output1.jpeg", x, qt=75)
+            im.write_spatial("tmp/output1.jpeg", x, qt=quality)
             im.write_spatial("tmp/output2.jpeg", x)
         _,_,qt1 = jpeglib.JPEG("tmp/output1.jpeg").read_dct()
         _,_,qt2 = jpeglib.JPEG("tmp/output2.jpeg").read_dct()
         # test matrix
         np.testing.assert_array_equal(qt1, qt2)
+    def test_6b_quality(self):
+        self._test_default_quality('6b', 75)
+    def test_9d_quality(self):
+        self._test_default_quality('9d', 92)
+    def test_9e_quality(self):
+        self._test_default_quality('9e', 92)
 
     def test_spatial_quality(self):
         global qt50_standard
