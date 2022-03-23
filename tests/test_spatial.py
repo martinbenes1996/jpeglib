@@ -55,6 +55,7 @@ class TestSpatial(unittest.TestCase):
         np.testing.assert_array_almost_equal(CbCr_in, CbCr_out)
 
     def test_default_quality(self):
+        jpeglib.version.set('9e')
         #print("test_default_quality")
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             x = im.read_spatial()
