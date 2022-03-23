@@ -56,7 +56,7 @@ class TestSpatial(unittest.TestCase):
 
     def _test_default_quality(self, version, quality):
         jpeglib.version.set(version)
-        #print("test_default_quality")
+        print(jpeglib.version.get())
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             x = im.read_spatial()
             im.write_spatial("tmp/output1.jpeg", x, qt=quality)
@@ -66,9 +66,9 @@ class TestSpatial(unittest.TestCase):
         # test matrix
         np.testing.assert_array_equal(qt1, qt2)
     def test_6b_quality(self):
-        self._test_default_quality('6b', 75)
+        self._test_default_quality('6b', 92)
     def test_9d_quality(self):
-        self._test_default_quality('9d', 92)
+        self._test_default_quality('9a', 92)
     def test_9e_quality(self):
         self._test_default_quality('9e', 92)
 

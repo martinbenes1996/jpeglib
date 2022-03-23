@@ -32,12 +32,6 @@ import setuptools
 with codecs.open("README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
 
-
-
-
-
-
-
 # create version dependent extensions
 import ctypes
 from pathlib import Path
