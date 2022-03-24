@@ -149,7 +149,14 @@ class TestSpatial(unittest.TestCase):
         im1.close()
         im2.close()
 
-
+    def test_only_write(self):
+        # generate random image
+        x = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
+        # write into file
+        with jpeglib.JPEG(self.tmp.name) as im:
+            im.write_spatial(x)
+            
+        
 
 
 

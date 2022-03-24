@@ -50,6 +50,11 @@ FILE *_read_jpeg(const char *filename,
     fprintf(stderr, "can't open %s\n", filename);
     return NULL;
   }
+  // check file size
+  fseek(fp, 0L, SEEK_END);
+  size_t fsize = ftell(fp);
+  fseek(fp, 0L, SEEK_SET);
+  if(fsize == 0) return NULL;
 
   // zero the structures
   memset(cinfo,0x00,sizeof(struct jpeg_decompress_struct));

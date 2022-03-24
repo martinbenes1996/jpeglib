@@ -38,9 +38,14 @@ class JPEG:
         #self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
         # get image info
         if srcfile is not None:
-            self._read_info()
-            self._allocate() # allocate
-
+            try:
+                self._read_info()
+                self._allocate() # allocate
+            except:
+                self._im_spatial,self._im_colormap = None,None
+                self._im_dct = None
+                self._im_qt = None
+                
     def read_dct(self, quantized=False):
         """Reads the DCT coefficients and quantization tables of the source file.
 
@@ -459,8 +464,9 @@ class JPEG:
     def _write_spatial(self, dstfile, data, in_color_space, dct_method, samp_factor, quality, smoothing_factor, flags):
         """"""
         # initialize default
-        if self.srcfile is None:
-            self._initialize_info(data=data)
+        #if self.srcfile is None:
+        #    self._initialize_info(data=data)
+        self._initialize_info(data=data)
         self._samp_factor = self._parse_samp_factor(samp_factor)
         
         # parameters
