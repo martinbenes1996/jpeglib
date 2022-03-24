@@ -41,7 +41,6 @@ int read_jpeg_spatial(
 );
 
 int write_jpeg_spatial(
-    const char *srcfile,
     const char *dstfile,
     unsigned char *rgb,
     int *image_dims,

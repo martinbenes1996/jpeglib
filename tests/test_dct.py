@@ -5,6 +5,7 @@ import numpy as np
 import os
 import shutil
 import sys
+import tempfile
 import unittest
 
 sys.path.append('.')
@@ -58,13 +59,13 @@ def _test_jpegio():
 class TestDCT(unittest.TestCase):
     logger = logging.getLogger(__name__)
     def setUp(self):
-        try: shutil.rmtree("tmp")
-        except: pass
-        finally: os.mkdir("tmp")
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
     def tearDown(self):
-        shutil.rmtree("tmp")
+        del self.tmp
 
     def test_dct_coefficient_decoder(self):
+        #print('test_dct_coefficient_decoder')
+        
         # jpeglib
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             Y,CbCr,qt = im.read_dct()
@@ -91,6 +92,7 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(qt, qtT)
         
     def test_python_jpeg_toolbox(self):
+        #print('test_python_jpeg_toolbox')
         # jpeglib
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             Y,CbCr,qt = im.read_dct()
@@ -121,6 +123,7 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(CbCr, CbCrT)
 
     def test_jpegio(self):
+        #print('test_jpegio')
         # run jpegio
         global _test_jpegio
         p = Process(target=_test_jpegio, args=())
@@ -130,11 +133,13 @@ class TestDCT(unittest.TestCase):
         self.assertEqual(p.exitcode, 0)
 
     def test_dct(self):
+        #print('test_dct')
+        
         # write with different qt
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             Y,CbCr,qt = im.read_dct()
-            im.write_dct("tmp/output.jpeg", Y, CbCr, qt)
-        im = jpeglib.JPEG("tmp/output.jpeg")
+            im.write_dct(Y, CbCr, self.tmp.name, qt=qt)
+        im = jpeglib.JPEG(self.tmp.name)
         Y2,CbCr2,qt2 = im.read_dct()
         # test matrix
         np.testing.assert_array_equal(Y, Y2)
@@ -142,11 +147,12 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(qt, qt2)
     
     def test_dct_qt(self):
+        #print('test_dct_qt')
         # write with different qt
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             Y,CbCr,qt = im.read_dct()
-            im.write_dct("tmp/output.jpeg")
-        im = jpeglib.JPEG("tmp/output.jpeg")
+            im.write_dct(Y, CbCr, self.tmp.name)
+        im = jpeglib.JPEG(self.tmp.name)
         Y2,CbCr2,qt2 = im.read_dct()
         # test matrix
         np.testing.assert_array_equal(Y, Y2)
@@ -156,25 +162,27 @@ class TestDCT(unittest.TestCase):
 
     def test_dct_qt50(self):
         global qt50_standard
+        #print('test_dct_qt50')
 
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            _,_,_ = im.read_dct()
-            im.write_dct("tmp/output.jpeg", qt = qt50_standard)
+            Y, CbCr, _ = im.read_dct()
+            im.write_dct(Y, CbCr, self.tmp.name, qt = qt50_standard)
         
-        im = jpeglib.JPEG("tmp/output.jpeg")
+        im = jpeglib.JPEG(self.tmp.name)
         _,_,qt50 = im.read_dct()
 
         # test matrix
         np.testing.assert_array_equal(qt50, qt50_standard)
     
     def test_dct_qt_edit(self):
+        #print('test_dct_qt_edit')
         # write with different qt
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             Y,CbCr,qt = im.read_dct()
             qt[0,4,4] = 1 # change qt
             #qt[1,6,6] = 1 
-            im.write_dct("tmp/output.jpeg", qt = qt)
-        im = jpeglib.JPEG("tmp/output.jpeg")
+            im.write_dct(Y, CbCr, self.tmp.name, qt = qt)
+        im = jpeglib.JPEG(self.tmp.name)
         Y2,CbCr2,qt2 = im.read_dct()
         # test matrix
         np.testing.assert_array_equal(Y, Y2)
@@ -182,10 +190,11 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(qt, qt2)
 
     def test_dct_quantized(self):
+        #print('test_dct_quantized')
         # pass quantized qt
         im = jpeglib.JPEG("examples/IMG_0791.jpeg")
         Y_q,CbCr_q,qt_q = im.read_dct(quantized=True)
-        im.write_dct("tmp/output.jpeg", quantized=True)
+        im.write_dct(Y_q, CbCr_q, self.tmp.name, qt=qt_q, quantized=True)
         # compare quantization
         Y,CbCr,qt = im.read_dct(quantized=False)
         # check quantized output
@@ -195,7 +204,7 @@ class TestDCT(unittest.TestCase):
         # compare quantization tables
         im1 = jpeglib.JPEG("examples/IMG_0791.jpeg")
         Y1,CbCr1,qt1 = im1.read_dct()
-        im2 = jpeglib.JPEG("tmp/output.jpeg")
+        im2 = jpeglib.JPEG(self.tmp.name)
         Y2,CbCr2,qt2 = im2.read_dct()
         # test matrix
         np.testing.assert_array_equal(Y1, Y2)

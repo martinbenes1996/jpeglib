@@ -1,12 +1,11 @@
 
 import importlib
-#import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image
-#from scipy.stats import kstest
 import shutil
 import sys
+import tempfile
 import unittest
 
 sys.path.append('.')
@@ -14,11 +13,9 @@ import jpeglib
 
 class TestVersion(unittest.TestCase):
     def setUp(self):
-        try: shutil.rmtree("tmp")
-        except: pass
-        finally: os.mkdir("tmp")
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
     def tearDown(self):
-        shutil.rmtree("tmp")
+        del self.tmp
 
     def test_6b(self):
         jpeglib.version.set('6b')
@@ -154,8 +151,8 @@ class TestVersion(unittest.TestCase):
         im_prog = jpeglib.JPEG(f'examples/images-{version}/testprog.jpg')
         Y,CbCr,qt = im_prog.read_dct()
         im_prog = jpeglib.JPEG()
-        im_prog.write_dct("tmp/output.jpeg", Y, CbCr, qt)
-        im = jpeglib.JPEG("tmp/output.jpeg")
+        im_prog.write_dct(Y, CbCr, self.tmp.name, qt=qt)
+        im = jpeglib.JPEG(self.tmp.name)
         Y2,CbCr2,qt2 = im.read_dct()
         np.testing.assert_array_equal(Y, Y2)
         #D = np.abs((CbCr.astype(np.int) - CbCr2.astype(np.int)))

@@ -522,7 +522,6 @@ int read_jpeg_spatial(
 }
 
 int write_jpeg_spatial(
-  const char *srcfile,
   const char *dstfile,
   unsigned char *rgb,
   int *image_dims,
@@ -549,19 +548,16 @@ int write_jpeg_spatial(
   cinfo.err = jpeg_std_error(&jerr);
   jpeg_create_compress(&cinfo);
   jpeg_stdio_dest(&cinfo, fp);
-
+  
   // set basic parameters
-  if(srcfile == NULL) {
-    cinfo.image_width = image_dims[0];
-    cinfo.image_height = image_dims[1];
-    if(in_color_space >= 0)
-      cinfo.in_color_space = in_color_space;
-    //fprintf(stderr, "writing 1 from cs %d to %d\n", cinfo.in_color_space, cinfo.jpeg_color_space);
-    if(in_components >= 0)
-      cinfo.input_components = in_components;
-    cinfo.num_components = cinfo.input_components;
-    jpeg_set_defaults(&cinfo);
-  }
+  cinfo.image_width = image_dims[0];
+  cinfo.image_height = image_dims[1];
+  if(in_color_space >= 0)
+    cinfo.in_color_space = in_color_space;
+  if(in_components >= 0)
+    cinfo.input_components = in_components;
+  cinfo.num_components = cinfo.input_components;
+  jpeg_set_defaults(&cinfo);
 
   // set advanced parameters
   if(dct_method >= 0) cinfo.dct_method = dct_method;
@@ -578,19 +574,6 @@ int write_jpeg_spatial(
     chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
   }
 
-  // copy parameters
-  struct jpeg_decompress_struct cinfo_in;
-  struct jpeg_error_mgr jerr_in;
-  FILE * fp_in = NULL;
-  if(srcfile != NULL) {
-    // read file
-    if((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in)) == NULL) return 0;
-    // decompress
-    (void)jpeg_start_decompress(&cinfo_in);
-    jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in, (j_compress_ptr)&cinfo);
-  }
-
-  //fprintf(stderr, "quality %d\n", quality);
   if(qt != NULL) {
     unsigned qt_u[64];
     // component 0
@@ -609,6 +592,7 @@ int write_jpeg_spatial(
   } else if(quality >= 0) {
     jpeg_set_quality(&cinfo, quality, FALSE);
   }
+
   if(smoothing_factor >= 0) cinfo.smoothing_factor = smoothing_factor;
   if(in_color_space >= 0)
     cinfo.in_color_space = in_color_space;
@@ -635,6 +619,9 @@ int write_jpeg_spatial(
 
   // https://gist.github.com/kentakuramochi/f64e7646f1db8335c80f131be8359044
 
+  //fprintf(stderr, "before reading!!!\n");
+  //return 0;
+
   // write data
   unsigned char *rowptr = rgb;
   jpeg_start_compress(&cinfo, TRUE);
@@ -642,15 +629,10 @@ int write_jpeg_spatial(
     jpeg_write_scanlines(&cinfo, &rowptr, 1);
     rowptr += cinfo.image_width * cinfo.input_components;
   }
-
   // cleanup
   jpeg_finish_compress( &cinfo );
   jpeg_destroy_compress( &cinfo );
   fclose( fp );
-  if(srcfile != NULL) {
-    jpeg_destroy_decompress( &cinfo_in );
-    fclose( fp_in );
-  }
   
   return 1;
 }

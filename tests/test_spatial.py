@@ -5,6 +5,7 @@ import os
 from PIL import Image
 import shutil
 import sys
+import tempfile
 import unittest
 
 sys.path.append('.')
@@ -32,11 +33,11 @@ qt50_standard = np.array([
 
 class TestSpatial(unittest.TestCase):        
     def setUp(self):
-        try: shutil.rmtree("tmp")
-        except: pass
-        finally: os.mkdir("tmp")
-    # def tearDown(self):
-    #     shutil.rmtree("tmp")
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        self.tmp2 = tempfile.NamedTemporaryFile(suffix='.jpeg')
+    def tearDown(self):
+        del self.tmp
+        del self.tmp2
         
     def test_synthetic(self):
         global qt50_standard
@@ -45,10 +46,9 @@ class TestSpatial(unittest.TestCase):
         CbCr_in = (np.random.rand(2,16,16,8,8)*255).astype(np.int16)
         # compress
         im = jpeglib.JPEG()
-        output_file = f"tmp/output.jpeg"
-        im.write_dct(output_file, Y_in, CbCr_in, samp_factor=((2,2),(1,1),(1,1)))
+        im.write_dct(Y_in, CbCr_in, self.tmp.name, samp_factor=((2,2),(1,1),(1,1)))
         # decompress
-        im = jpeglib.JPEG(output_file)
+        im = jpeglib.JPEG(self.tmp.name)
         Y_out,CbCr_out,_ = im.read_dct()
         # test matrix
         np.testing.assert_array_almost_equal(Y_in, Y_out)
@@ -56,29 +56,28 @@ class TestSpatial(unittest.TestCase):
 
     def _test_default_quality(self, version, quality):
         jpeglib.version.set(version)
-        print(jpeglib.version.get())
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
             x = im.read_spatial()
-            im.write_spatial("tmp/output1.jpeg", x, qt=quality)
-            im.write_spatial("tmp/output2.jpeg", x)
-        _,_,qt1 = jpeglib.JPEG("tmp/output1.jpeg").read_dct()
-        _,_,qt2 = jpeglib.JPEG("tmp/output2.jpeg").read_dct()
+            im.write_spatial(x, self.tmp.name,  qt=quality)
+            im.write_spatial(x, self.tmp2.name)
+        _,_,qt1 = jpeglib.JPEG(self.tmp.name).read_dct()
+        _,_,qt2 = jpeglib.JPEG(self.tmp2.name).read_dct()
         # test matrix
         np.testing.assert_array_equal(qt1, qt2)
     def test_6b_quality(self):
-        self._test_default_quality('6b', 92)
+        self._test_default_quality('6b', 75)
     def test_9d_quality(self):
-        self._test_default_quality('9a', 92)
+        self._test_default_quality('9a', 75)
     def test_9e_quality(self):
-        self._test_default_quality('9e', 92)
+        self._test_default_quality('9e', 75)
 
     def test_spatial_quality(self):
         global qt50_standard
         #print("test_spatial_quality")
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            _ = im.read_spatial()
-            im.write_spatial("tmp/output.jpeg", qt=50)
-        im = jpeglib.JPEG("tmp/output.jpeg")
+            x = im.read_spatial()
+            im.write_spatial(x, self.tmp.name, qt=50)
+        im = jpeglib.JPEG(self.tmp.name)
         _,_,qt50 = im.read_dct()
 
         # test matrix
@@ -88,10 +87,10 @@ class TestSpatial(unittest.TestCase):
         global qt50_standard
         #print("test_spatial_qt")
         with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            _ = im.read_spatial()
-            im.write_spatial("tmp/output.jpeg", qt=qt50_standard)
+            x = im.read_spatial()
+            im.write_spatial(x, self.tmp.name, qt=qt50_standard)
         
-        im = jpeglib.JPEG("tmp/output.jpeg")
+        im = jpeglib.JPEG(self.tmp.name)
         _,_,qt50 = im.read_dct()
 
         # test matrix
@@ -129,15 +128,15 @@ class TestSpatial(unittest.TestCase):
             #print("read spatial")
             data = im.read_spatial(flags=['DO_FANCY_UPSAMPLING'])
             #print("write spatial")
-            im.write_spatial("tmp/test1.jpeg", data, qt=q, flags=['DO_FANCY_UPSAMPLING'])
+            im.write_spatial(data, self.tmp.name, qt=q, flags=['DO_FANCY_UPSAMPLING'])
         # pass the image through PIL
         im = Image.open("examples/IMG_0791.jpeg")
-        im.save("tmp/test2.jpeg", qt=q, subsampling=-1)
+        im.save(self.tmp2.name, qt=q, subsampling=-1)
         im.close()
         # load both with PIL
-        im1 = Image.open("tmp/test1.jpeg")
+        im1 = Image.open(self.tmp.name)
         x1 = np.array(im1)
-        im2 = Image.open("tmp/test2.jpeg")
+        im2 = Image.open(self.tmp2.name)
         x2 = np.array(im2)
         
         # test
@@ -303,10 +302,10 @@ class TestSpatial(unittest.TestCase):
             Y,CbCr,qt = im.read_dct()
             # change
             Y[0,0,0,:4] = 0
-            im.write_dct("tmp/test.jpeg", Y, CbCr)
+            im.write_dct(Y, CbCr, self.tmp.name)
         # images
         im1 = Image.open("examples/IMG_0791.jpeg")
-        im2 = Image.open("tmp/test.jpeg")
+        im2 = Image.open(self.tmp.name)
         # to numpy
         x1,x2 = np.array(im1),np.array(im2)
         

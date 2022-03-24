@@ -38,8 +38,8 @@ class CJpegLib:
         if status == 0: raise IOError(f"reading of {srcfile} spatial failed")
     
     @classmethod
-    def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
-        status = cls.get().write_jpeg_spatial(cls.cstr(srcfile), cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
+    def write_jpeg_spatial(cls, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
+        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
                                               dct_method, samp_factor, qt, cls.factor(quality), cls.factor(smoothing_factor), cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
         
