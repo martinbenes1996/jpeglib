@@ -6,6 +6,7 @@ It offers full control over compression and decompression and exposes DCT coeffi
 
 import pkg_resources
 from .jpeg import *
+from .functional import *
 from .version import *
 
 # for unit tests

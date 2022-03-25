@@ -46,16 +46,21 @@ class JPEG:
                 self._im_dct = None
                 self._im_qt = None
                 
-    def read_dct(self, quantized=False):
+    def read_dct(self, quantized=False, format='block'):
         """Reads the DCT coefficients and quantization tables of the source file.
 
-        In the return values, Y is DCT luminance tensor of shape (1,W/8,H/8,8,8),
-        CbCr is DCT chrominance tensor of shape (2,W/8,H/8,8,8), both not-quantized by default.
+        In the return values (when format is 'block'), Y is DCT luminance tensor of shape (1,W/8,H/8,8,8),
+        CbCr is DCT chrominance tensor of shape (2,W/8/sw,H/8/sh,8,8), both not-quantized by default,
+        where sw, sh are corresponsing chrominance scaling factors.
         qt is a tensor with quantization tables of shape (2,8,8).
+        
+        When format is 'jpegio', DCT tensors have shapes (W,H) and (W/sw, H/sh).
         Check the examples below.
 
         :param quantized: Indicates whether the output DCT coefficients are quantized or not, False by default.
-        :type quantized: bool, optional 
+        :type quantized: bool, optional
+        :param format: Format of output, one of 'block', 'jpegio'.
+        :type format: str, optional
         :return: lumo DCT Y, chroma DCT CbCr, quantization table qt
         :rtype: tuple
         :raises [IOError]: When source file was not given in constructor.
@@ -76,15 +81,30 @@ class JPEG:
         >>> qt[0] # Y
         >>> qt[1] # Cb
         >>> qt[1] # Cr
+        
+        Get DCT coefficients in shape (W, H) with
+        
+        >>> Y,CbCr,qt = im.read_dct(format='jpegio')
         """
         # execute
         Y,CbCr,qt = self._read_dct(self.srcfile)
         # quantization
         if quantized: Y,CbCr = Y*qt[0],CbCr*qt[1]
+        # format
+        if format == 'block': pass
+        elif format == 'jpegio':
+            Y = (Y
+                .transpose((0,2,4,1,3))
+                .reshape((Y.shape[2]*Y.shape[4], Y.shape[1]*Y.shape[3]))
+            )
+            CbCr = (CbCr
+                    .transpose((0,2,4,1,3))
+                    .reshape((Y.shape[2]*Y.shape[4], Y.shape[1]*Y.shape[3]))
+            )
         # result
         return Y,CbCr,qt
 
-    def write_dct(self, Y, CbCr=None, dstfile=None, qt=None, quantized=False, in_color_space=None, samp_factor=None):
+    def write_dct(self, Y, CbCr=None, dstfile=None, qt=None, quantized=False, format='block', in_color_space=None, samp_factor=None):
         """Writes DCT coefficients to a file.
         
         The shape and arrangement of the parameters Y and CbCr is the same
