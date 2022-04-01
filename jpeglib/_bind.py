@@ -13,13 +13,13 @@ class CJpegLib:
         return cls.get().jpeg_lib_version()
 
     @classmethod
-    def read_jpeg_info(cls, srcfile, dct_dims, image_dims, num_components, samp_factor, jpeg_color_space):
-        status = cls.get().read_jpeg_info(cls.cstr(srcfile), dct_dims, image_dims, num_components, samp_factor, jpeg_color_space)
+    def read_jpeg_info(cls, srcfile, block_dims, image_dims, num_components, samp_factor, jpeg_color_space):
+        status = cls.get().read_jpeg_info(cls.cstr(srcfile), block_dims, image_dims, num_components, samp_factor, jpeg_color_space)
         if status == 0: raise IOError(f"reading of {srcfile} failed")
         
     @classmethod
-    def read_jpeg_dct(cls, srcfile, dct, qt):
-        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), dct, qt)
+    def read_jpeg_dct(cls, srcfile, Y, Cb, Cr, qt):
+        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt)
         if status == 0: raise IOError(f"reading of {srcfile} DCT failed")
 
     @classmethod

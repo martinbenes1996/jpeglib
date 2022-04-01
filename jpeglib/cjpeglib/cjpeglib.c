@@ -71,7 +71,7 @@ FILE *_read_jpeg(const char *filename,
 
 int read_jpeg_info(
   const char *srcfile,
-  int *dct_dims,
+  int *block_dims,
   int *image_dims,
   int *num_components,
   int *samp_factor,
@@ -89,10 +89,10 @@ int read_jpeg_info(
   (void)jpeg_read_coefficients(&cinfo);
 
   // copy to caller
-  if(dct_dims != NULL) {
+  if(block_dims != NULL) {
     for(int i = 0; i < 3; i++) {
-      dct_dims[2*i] = cinfo.comp_info[i].width_in_blocks;
-      dct_dims[2*i+1] = cinfo.comp_info[i].height_in_blocks;
+      block_dims[2*i] = cinfo.comp_info[i].width_in_blocks;
+      block_dims[2*i+1] = cinfo.comp_info[i].height_in_blocks;
     }
   }
   if(image_dims != NULL) {
@@ -128,9 +128,11 @@ void *_dct_offset(short * base, int channel, int w, int h, int Wmax, int Hmax)
 
 int read_jpeg_dct(
   const char *srcfile,
-  short *dct,
+  short *Y,
+  short *Cb,
+  short *Cr,
   unsigned short *qt
-) { 
+) {
   // allocate
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -146,7 +148,11 @@ int read_jpeg_dct(
   JCOEFPTR blockptr_one;
   int HblocksY = cinfo.comp_info->height_in_blocks; // max height
   int WblocksY = cinfo.comp_info->width_in_blocks; // max width
+  short * dct[3] = {Y, Cb, Cr};
+  fprintf(stderr, "dct: [%p %p %p]\n", dct[0], dct[1], dct[2]);
   for(int ch = 0; ch < cinfo.num_components; ch++) {
+    fprintf(stderr, "- ch: %d\n", ch);
+    if(dct[ch] == NULL) continue; // skip component, if null
     jpeg_component_info* compptr_one = cinfo.comp_info + ch;
     int Hblocks = compptr_one->height_in_blocks; // max height
     int Wblocks = compptr_one->width_in_blocks; // max width

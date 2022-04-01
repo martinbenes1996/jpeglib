@@ -2,7 +2,7 @@
 // ---------- Meta -------------
 int read_jpeg_info(
     const char *srcfile,
-    int *dct_dims,
+    int *block_dims,
     int *image_dims,
     int *num_components,
     int *samp_factor,
@@ -12,7 +12,9 @@ int read_jpeg_info(
 // ----------- DCT -------------
 int read_jpeg_dct(
     const char *srcfile,
-    short *dct,
+    short *Y,
+    short *Cb,
+    short *Cr,
     unsigned short *qt
 );
 int write_jpeg_dct(
