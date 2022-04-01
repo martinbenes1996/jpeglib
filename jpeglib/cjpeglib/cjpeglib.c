@@ -148,10 +148,13 @@ int read_jpeg_dct(
   JCOEFPTR blockptr_one;
   int HblocksY = cinfo.comp_info->height_in_blocks; // max height
   int WblocksY = cinfo.comp_info->width_in_blocks; // max width
-  short * dct[3] = {Y, Cb, Cr};
-  fprintf(stderr, "dct: [%p %p %p]\n", dct[0], dct[1], dct[2]);
+  short *dct;//[3] = {Y, Cb, Cr};
   for(int ch = 0; ch < cinfo.num_components; ch++) {
     fprintf(stderr, "- ch: %d\n", ch);
+    if(ch == 0) dct = Y;
+    else if(ch == 1) dct = Cb;
+    else if(ch == 2) dct = Cr;
+    else fprintf(stderr, "ERROR: ch=%d\n", ch);
     if(dct[ch] == NULL) continue; // skip component, if null
     jpeg_component_info* compptr_one = cinfo.comp_info + ch;
     int Hblocks = compptr_one->height_in_blocks; // max height
@@ -160,6 +163,7 @@ int read_jpeg_dct(
       buffer_one = (cinfo.mem->access_virt_barray)((j_common_ptr)&cinfo, coeffs_array[ch], h, (JDIMENSION)1, FALSE);
       for(int w = 0; w < Wblocks; w++) {
         blockptr_one = buffer_one[0][w];
+        fprintf(stderr, "- access: %d %d %d\n", ch, h, w);
         for(int bh = 0; bh < 8; bh++) {
           for(int bw = 0; bw < 8; bw++) {
             int i = bw*8 + bh;
@@ -172,14 +176,14 @@ int read_jpeg_dct(
   }
   // read quantization table
   if(qt != NULL) {
-    if(cinfo.num_components > 1) {
-      if(cinfo.comp_info[1].quant_tbl_no != cinfo.comp_info[2].quant_tbl_no) {
-        fprintf(stderr, "Mismatching chrominance quantization tables not supported.");
-        return 0;
-      }
-    }
+    // if(cinfo.num_components > 1) {
+    //   if(cinfo.comp_info[1].quant_tbl_no != cinfo.comp_info[2].quant_tbl_no) {
+    //     fprintf(stderr, "Mismatching chrominance quantization tables not supported.");
+    //     return 0;
+    //   }
+    // }
 
-    for(int ch = 0; ch < 2; ch++) {
+    for(int ch = 0; ch < cinfo.num_components; ch++) {
 
       //fprintf(stderr, "qt[%d] = %p -> %p\n", ch, cinfo.quant_tbl_ptrs[ch], cinfo.quant_tbl_ptrs[ch]->quantval);
       for(int i = 0; i < 64; i++) {

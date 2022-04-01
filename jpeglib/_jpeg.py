@@ -84,7 +84,7 @@ def read_dct(path:str, jpeg:JPEG):
         qt          = _qt
     )
     # process
-    qt = np.ctypeslib.as_array(_qt)
+    qt = np.ctypeslib.as_array(_qt)[:jpeg.num_components]
     qt = qt.reshape((*qt.shape[:-1],8,8))
     Y = np.ctypeslib.as_array(_Y)
     Y = Y.reshape((*Y.shape[:-1],8,8))
@@ -93,5 +93,7 @@ def read_dct(path:str, jpeg:JPEG):
         Cb = Cb.reshape((*Cb.shape[:-1],8,8))
         Cr = np.ctypeslib.as_array(_Cr)
         Cr = Cb.reshape((*Cr.shape[:-1],8,8))
+    # crop
+    
     return Y,Cb,Cr,qt
     
