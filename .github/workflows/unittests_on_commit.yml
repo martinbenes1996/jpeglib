@@ -2,7 +2,7 @@
 name: Unit tests # workflow name
 on: # trigger
   push:
-    branches: [ master, newifce ]
+    branches: [ master ]
 
 # parallel jobs to perform
 jobs:
