@@ -148,13 +148,13 @@ int read_jpeg_dct(
   JCOEFPTR blockptr_one;
   int HblocksY = cinfo.comp_info->height_in_blocks; // max height
   int WblocksY = cinfo.comp_info->width_in_blocks; // max width
-  short *dct;//[3] = {Y, Cb, Cr};
+  short *dct[3] = {Y, Cb, Cr};
   for(int ch = 0; ch < cinfo.num_components; ch++) {
-    fprintf(stderr, "- ch: %d\n", ch);
-    if(ch == 0) dct = Y;
-    else if(ch == 1) dct = Cb;
-    else if(ch == 2) dct = Cr;
-    else fprintf(stderr, "ERROR: ch=%d\n", ch);
+    //fprintf(stderr, "- ch: %d\n", ch);
+    //if(ch == 0) dct = Y;
+    //else if(ch == 1) dct = Cb;
+    //else if(ch == 2) dct = Cr;
+    //else fprintf(stderr, "ERROR: ch=%d\n", ch);
     if(dct[ch] == NULL) continue; // skip component, if null
     jpeg_component_info* compptr_one = cinfo.comp_info + ch;
     int Hblocks = compptr_one->height_in_blocks; // max height
@@ -163,11 +163,12 @@ int read_jpeg_dct(
       buffer_one = (cinfo.mem->access_virt_barray)((j_common_ptr)&cinfo, coeffs_array[ch], h, (JDIMENSION)1, FALSE);
       for(int w = 0; w < Wblocks; w++) {
         blockptr_one = buffer_one[0][w];
-        fprintf(stderr, "- access: %d %d %d\n", ch, h, w);
+        //fprintf(stderr, "- access: %d %d %d\n", ch, h, w);
         for(int bh = 0; bh < 8; bh++) {
           for(int bw = 0; bw < 8; bw++) {
             int i = bw*8 + bh;
-            ((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i] = blockptr_one[bh*8 + bw];
+            //((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i] = blockptr_one[bh*8 + bw];
+            ((short *)_dct_offset(dct[ch], 0, w, h, WblocksY, HblocksY))[i] = blockptr_one[bh*8 + bw];
           }
         }
         //memcpy(_dct_offset(dct, ch, w, h, WblocksY, HblocksY), (void *)blockptr_one, sizeof(short)*64);

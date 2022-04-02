@@ -65,12 +65,9 @@ def read_dct(path:str, jpeg:JPEG):
     def _allocate_component(i:int, block_dims:np.ndarray):
         return (((ctypes.c_short * 64) * block_dims[i][1]) * block_dims[i][0])()
     _Y = _allocate_component(0, jpeg.block_dims)
-    print("Allocated Y:", _Y)
     if jpeg.num_components > 1: # has chrominance
         _Cb = _allocate_component(1, jpeg.block_dims)
-        print("Allocated Cb:", _Y)
         _Cr = _allocate_component(2, jpeg.block_dims)
-        print("Allocated Cr:", _Y)
     else: # grayscale
         _Cb,_Cr = None,None
     # allocate QT
@@ -84,7 +81,7 @@ def read_dct(path:str, jpeg:JPEG):
         qt          = _qt
     )
     # process
-    qt = np.ctypeslib.as_array(_qt)[:jpeg.num_components]
+    qt = np.ctypeslib.as_array(_qt)
     qt = qt.reshape((*qt.shape[:-1],8,8))
     Y = np.ctypeslib.as_array(_Y)
     Y = Y.reshape((*Y.shape[:-1],8,8))
@@ -94,6 +91,10 @@ def read_dct(path:str, jpeg:JPEG):
         Cr = np.ctypeslib.as_array(_Cr)
         Cr = Cb.reshape((*Cr.shape[:-1],8,8))
     # crop
-    
+    Y = Y[:jpeg.block_dims[0][1],:jpeg.block_dims[0][0]]
+    if jpeg.num_components > 1: # has chrominance
+        Cb = Cb[:jpeg.block_dims[1][1],:jpeg.block_dims[1][0]]
+        Cr = Cr[:jpeg.block_dims[2][1],:jpeg.block_dims[2][0]]
+    qt = qt[:jpeg.num_components]
     return Y,Cb,Cr,qt
     

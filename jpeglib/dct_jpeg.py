@@ -21,8 +21,7 @@ class DCTJPEG(_jpeg.JPEG):
     
     @property
     def Y(self) -> np.ndarray:
-        if self._Y is None:
-            self._read_dct()
+        if self._Y is None: self._read_dct()
         return self._Y
     @Y.setter
     def Y(self, Y: np.ndarray):
@@ -30,8 +29,7 @@ class DCTJPEG(_jpeg.JPEG):
         
     @property
     def Cb(self) -> np.ndarray:
-        if self._Cb is None:
-            self._read_dct()
+        if self._Cb is None: self._read_dct()
         return self._Cb
     @Cb.setter
     def Cb(self, Cb: np.ndarray):
@@ -39,8 +37,7 @@ class DCTJPEG(_jpeg.JPEG):
         
     @property
     def Cr(self) -> np.ndarray:
-        if self._Cr is None:
-            self._read_dct()
+        if self._Cr is None: self._read_dct()
         return self._Cr
     @Cr.setter
     def Cr(self, Cr: np.ndarray):
@@ -48,8 +45,7 @@ class DCTJPEG(_jpeg.JPEG):
         
     @property
     def qt(self) -> np.ndarray:
-        if self._qt is None:
-            self._read_dct()
+        if self._qt is None: self._read_dct()
         return self._qt
     @qt.setter
     def qt(self, qt: np.ndarray):
