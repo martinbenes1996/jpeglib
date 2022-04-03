@@ -4,7 +4,7 @@ import tempfile
 from .jpeg import DCTJPEG,SpatialJPEG
 from . import _jpeg
 
-def jpeg_dct(path: str):
+def read_jpeg_dct(path: str):
     """Reads the DCT JPEG.
     
     :param path: Path to a source file in JPEG format.
@@ -37,7 +37,8 @@ def jpeg_dct(path: str):
         Cr                  = None,
         qt                  = None
     )
-    
+
+
     
     #with JPEG(srcfile) as im:
     #    Y,CbCr,qt = im.read_dct(*args, **kwargs)

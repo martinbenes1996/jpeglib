@@ -47,8 +47,8 @@ def _test_jpegio():
     CbCrT = np.array(jpeg.coef_arrays[1:])
     qtT = np.array(jpeg.quant_tables)
     # process
-    YT = YT.reshape((1,-1,8,int(YT.shape[2]/8),8)).transpose((0,3,1,4,2))
-    CbCrT = CbCrT.reshape((2,-1,8,int(CbCrT.shape[2]/8),8)).transpose((0,3,1,4,2))
+    YT = YT.reshape((-1,8,int(YT.shape[2]/8),8)).transpose((3,1,4,2))
+    CbCrT = CbCrT.reshape((-1,8,int(CbCrT.shape[2]/8),8)).transpose((3,1,4,2))
 
     # test quantization
     np.testing.assert_array_equal(qt, qtT)

@@ -23,8 +23,8 @@ class CJpegLib:
         if status == 0: raise IOError(f"reading of {srcfile} DCT failed")
 
     @classmethod
-    def write_jpeg_dct(cls, srcfile, dstfile, dct, image_dims, in_color_space, in_components, samp_factor, qt, quality):
-        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), dct, image_dims, in_color_space, in_components, samp_factor, qt, quality)
+    def write_jpeg_dct(cls, srcfile, dstfile, Y, Cb, Cr, image_dims, block_dims, in_color_space, in_components, qt, quality):
+        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), Y, Cb, Cr, image_dims, block_dims, in_color_space, in_components, qt, quality)
         if status == 0: raise IOError(f"writing DCT to {dstfile} failed")
     @classmethod
     def print_jpeg_params(cls, srcfile):

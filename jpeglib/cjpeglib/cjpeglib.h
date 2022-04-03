@@ -20,11 +20,13 @@ int read_jpeg_dct(
 int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,
-    short *dct,
+    short *Y,
+    short *Cb,
+    short *Cr,
     int *image_dims,
+    int *block_dims,
     int in_color_space,
     int in_components,
-    int *samp_factor,
     unsigned short *qt,
     short quality
 );

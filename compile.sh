@@ -14,4 +14,4 @@ fi
 cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
 
 
-python -c 'import jpeglib; _ = jpeglib.jpeg_dct("examples/IMG_0311.jpeg")'
+python -c 'import jpeglib; im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg"); print(im.qt)'
