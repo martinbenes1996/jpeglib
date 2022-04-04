@@ -45,9 +45,12 @@ class JPEG:
                 self._im_spatial = None
                 self._im_colormap = None
                 self._im_dct = None
-                
-                
-    def read_dct(self, quantized=False, format='block'):
+        else:
+            self._im_spatial = None
+            self._im_colormap = None
+            self._im_dct = None
+
+    def read_dct(self, quantized=False):
         """Reads the DCT coefficients and quantization tables of the source file.
 
         In the return values (when format is 'block'), Y is DCT luminance tensor of shape (1,W/8,H/8,8,8),
