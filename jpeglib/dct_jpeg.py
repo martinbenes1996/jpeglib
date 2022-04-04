@@ -80,9 +80,7 @@ class DCTJPEG(_jpeg.JPEG):
         else: Cb,Cr = None,None
         # convert qt
         assert(quality in set(range(-1,101)))
-        if quality == -1:
-            qt = np.ctypeslib.as_ctypes(self.qt)
-        else:
+        if quality != -1:
             qt = None
         # call
         CJpegLib.write_jpeg_dct(

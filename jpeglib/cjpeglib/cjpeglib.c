@@ -121,9 +121,9 @@ int read_jpeg_info(
   return 1;
 }
 
-void *_dct_offset(short * base, int channel, int h, int w, int Hmax, int Wmax)
+void *_dct_offset(short ** base, int channel, int h, int w, int Hmax, int Wmax)
 {
-  return (void *)(base + 64*(w + Wmax*(h + Hmax*(channel))));
+  return (void *)(base[channel] + 64*(w + Wmax*(h + Hmax*(0))));
 }
 
 int read_jpeg_dct(
@@ -150,11 +150,6 @@ int read_jpeg_dct(
   int WblocksY = cinfo.comp_info->width_in_blocks; // max width
   short *dct[3] = {Y, Cb, Cr};
   for(int ch = 0; ch < cinfo.num_components; ch++) {
-    //fprintf(stderr, "- ch: %d\n", ch);
-    //if(ch == 0) dct = Y;
-    //else if(ch == 1) dct = Cb;
-    //else if(ch == 2) dct = Cr;
-    //else fprintf(stderr, "ERROR: ch=%d\n", ch);
     if(dct[ch] == NULL) continue; // skip component, if null
     jpeg_component_info* compptr_one = cinfo.comp_info + ch;
     int Hblocks = compptr_one->height_in_blocks; // max height
@@ -168,7 +163,7 @@ int read_jpeg_dct(
           for(int bw = 0; bw < 8; bw++) {
             int i = bw*8 + bh;
             //((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i] = blockptr_one[bh*8 + bw];
-            ((short *)_dct_offset(dct[ch], 0, h, w, HblocksY, WblocksY))[i] = blockptr_one[bh*8 + bw];
+            ((short *)_dct_offset(dct, ch, h, w, HblocksY, WblocksY))[i] = blockptr_one[bh*8 + bw];
           }
         }
         //memcpy(_dct_offset(dct, ch, w, h, WblocksY, HblocksY), (void *)blockptr_one, sizeof(short)*64);
@@ -252,6 +247,7 @@ int write_jpeg_dct(
     return 0;
   }
 
+
   // allocate
   struct jpeg_compress_struct cinfo_out;
   struct jpeg_error_mgr jerr_out;
@@ -280,8 +276,8 @@ int write_jpeg_dct(
   if(srcfile != NULL) // copy critical parameters to dstfile
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in,&cinfo_out);
 
-  cinfo_out.image_width = image_dims[0];
-  cinfo_out.image_height = image_dims[1];
+  cinfo_out.image_height = image_dims[0];
+  cinfo_out.image_width = image_dims[1];
   cinfo_out.in_color_space = in_color_space;
   if(in_components >= 0) cinfo_out.input_components = in_components;
   cinfo_out.num_components = cinfo_out.input_components;
@@ -367,8 +363,8 @@ int write_jpeg_dct(
       jpeg_component_info* comp_ptr = cinfo_out.comp_info + ch;
       //long v_samp_factor = *(samp_factor + ch*2 + 0);
       //long h_samp_factor = *(samp_factor + ch*2 + 1);
-      comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2*ch];//(JDIMENSION)ceil(((double)cinfo_out.image_width) / 8);// * comp_ptr->h_samp_factor / 4;
-      comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2*ch+1];//ceil(((double)cinfo_out.image_height) / 8);// * comp_ptr->v_samp_factor / 4;
+      comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2*ch];//(JDIMENSION)ceil(((double)cinfo_out.image_width) / 8);// * comp_ptr->h_samp_factor / 4;
+      comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2*ch+1];//ceil(((double)cinfo_out.image_height) / 8);// * comp_ptr->v_samp_factor / 4;
       //if(ch > 0) {
       //  comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
       //  comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);
@@ -409,7 +405,7 @@ int write_jpeg_dct(
         blockptr_one = buffer_one[0][w];
         for(int bh = 0; bh < 8; bh++)
           for(int bw = 0; bw < 8; bw++)
-            blockptr_one[bh*8 + bw] = ((short *)_dct_offset(dct[ch], 0, h, w, HblocksY, WblocksY))[bw*8 + bh];
+            blockptr_one[bh*8 + bw] = ((short *)_dct_offset(dct, ch, h, w, HblocksY, WblocksY))[bw*8 + bh];
       }
     }
   }
