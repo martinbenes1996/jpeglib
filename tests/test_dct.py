@@ -90,9 +90,9 @@ class TestDCT(unittest.TestCase):
             d.get_quantization_table(1),
             d.get_quantization_table(1),
         ])
-        YT = d.get_dct_coefficients(0).reshape((int(d.image_height/8),-1,8,8), order='F')
-        CbT = d.get_dct_coefficients(1).reshape((int(d.image_height/8/2),-1,8,8), order='F')
-        CrT = d.get_dct_coefficients(2).reshape((int(d.image_height/8/2),-1,8,8), order='F')
+        YT = d.get_dct_coefficients(0).reshape((int(d.image_height/8),-1,8,8), order='C')
+        CbT = d.get_dct_coefficients(1).reshape((int(d.image_height/8/2),-1,8,8), order='C')
+        CrT = d.get_dct_coefficients(2).reshape((int(d.image_height/8/2),-1,8,8), order='C')
 
         # test DCT coefficients
         np.testing.assert_array_equal(im.Y, YT)

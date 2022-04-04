@@ -123,7 +123,7 @@ int read_jpeg_info(
 
 void *_dct_offset(short ** base, int channel, int h, int w, int Hmax, int Wmax)
 {
-  return (void *)(base[channel] + 64*(w + Wmax*(h + Hmax*(0))));
+  return (void *)(base[channel] + 64*(h + Hmax*(w + Wmax*(0))));
 }
 
 int read_jpeg_dct(
@@ -136,7 +136,6 @@ int read_jpeg_dct(
   // allocate
   struct jpeg_decompress_struct cinfo;
   struct jpeg_error_mgr jerr;
-
   // read jpeg header
   FILE *fp;
   if((fp = _read_jpeg(srcfile, &cinfo, &jerr)) == NULL) return 0;
