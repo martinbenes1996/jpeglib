@@ -39,8 +39,17 @@ class JPEG:
         #self.color_space = [k for k,v in self.J_COLOR_SPACE.items() if v[0] == self._color_space[0]][0]
         # get image info
         if srcfile is not None:
-            self._read_info()
-            self._allocate() # allocate
+            try:
+                self._read_info()
+                self._allocate() # allocate
+            except:
+                self._im_spatial = None
+                self._im_colormap = None
+                self._im_dct = None
+        else:
+            self._im_spatial = None
+            self._im_colormap = None
+            self._im_dct = None
 
     def read_dct(self, quantized=False):
         """Reads the DCT coefficients and quantization tables of the source file.
