@@ -39,31 +39,6 @@ qt50_standard = np.array([
      [99,99,99,99,99,99,99,99]]
     ])
 
-def _test_jpegio():
-    # jpeglib
-    with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-        Y,CbCr,qt = im.read_dct()
-    # jpegio
-    try:
-        import jpegio
-    except Exception as e:
-        logging.info(f"invalid installation of jpegio: {e}")
-        return 1
-    jpeg = jpegio.read('examples/IMG_0791.jpeg')
-    
-    YT = np.array(jpeg.coef_arrays[:1])
-    CbCrT = np.array(jpeg.coef_arrays[1:])
-    qtT = np.array(jpeg.quant_tables)
-    # process
-    YT = YT.reshape((-1,8,int(YT.shape[2]/8),8)).transpose((3,1,4,2))
-    CbCrT = CbCrT.reshape((-1,8,int(CbCrT.shape[2]/8),8)).transpose((3,1,4,2))
-
-    # test quantization
-    np.testing.assert_array_equal(qt, qtT)
-    # test DCT coefficients
-    np.testing.assert_array_equal(Y, YT)
-    np.testing.assert_array_equal(CbCr, CbCrT)
-
 class TestDCT(unittest.TestCase):
     logger = logging.getLogger(__name__)
     def setUp(self):
@@ -72,28 +47,33 @@ class TestDCT(unittest.TestCase):
         del self.tmp
 
     def test_dct_coefficient_decoder(self):
-        print('test_dct_coefficient_decoder')
-        
         # jpeglib
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
-        
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         # dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder 
         except Exception as e: # error loading
             logging.info(f"invalid installation of dct-coefficient-decoder: {e}")
             return
-        d = PyCoefficientDecoder('examples/IMG_0791.jpeg')
+        d = PyCoefficientDecoder('examples/IMG_0311.jpeg')
         # process
         qtT = np.stack([
             d.get_quantization_table(0),
             d.get_quantization_table(1),
             d.get_quantization_table(1),
         ])
-        YT = d.get_dct_coefficients(0).reshape((int(d.image_height/8),-1,8,8), order='C')
-        CbT = d.get_dct_coefficients(1).reshape((int(d.image_height/8/2),-1,8,8), order='C')
-        CrT = d.get_dct_coefficients(2).reshape((int(d.image_height/8/2),-1,8,8), order='C')
-
+        YT = (
+            d.get_dct_coefficients(0)
+            .reshape((im.width_in_blocks(0),-1,8,8), order='F')
+            .transpose((1,0,2,3)))
+        CbT = (
+            d.get_dct_coefficients(1)
+            .reshape((im.width_in_blocks(1),-1,8,8), order='F')
+            .transpose((1,0,2,3)))
+        CrT = (
+            d.get_dct_coefficients(2)
+            .reshape((im.width_in_blocks(2),-1,8,8), order='F')
+            .transpose((1,0,2,3)))
         # test DCT coefficients
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
@@ -102,17 +82,15 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im.qt, qtT)
         
     def test_python_jpeg_toolbox(self):
-        print('test_python_jpeg_toolbox')
         # jpeglib
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
-
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         # jpeg-toolbox
         try:
             import jpeg_toolbox
         except Exception as e:
             logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
             return
-        img = jpeg_toolbox.load('examples/IMG_0791.jpeg')
+        img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
         # process
         YT = img['coef_arrays'][0]\
             .reshape((1,int(img['image_height']/8),8,-1,8))
@@ -129,21 +107,10 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
         np.testing.assert_array_equal(im.Cr, CrT)
-
-    # def test_jpegio(self):
-    #     print('test_jpegio')
-    #     # run jpegio
-    #     global _test_jpegio
-    #     p = Process(target=_test_jpegio, args=())
-    #     p.start()
-    #     p.join()
-    #     # check exit code
-    #     self.assertEqual(p.exitcode, 0)
     
     def test_to_jpegio(self):
-        print('test_to_jpegio')
         # jpeglib
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         im = jpeglib.to_jpegio(im)
         # jpegio
         try:
@@ -151,7 +118,7 @@ class TestDCT(unittest.TestCase):
         except Exception as e:
             logging.info(f"invalid installation of jpegio: {e}")
             return 1
-        jpeg = jpegio.read('examples/IMG_0791.jpeg')
+        jpeg = jpegio.read('examples/IMG_0311.jpeg')
         # test quantization
         np.testing.assert_array_equal(jpeg.quant_tables[0], im.quant_tables[0])
         np.testing.assert_array_equal(jpeg.quant_tables[1], im.quant_tables[1])
@@ -179,9 +146,8 @@ class TestDCT(unittest.TestCase):
     # np.testing.assert_array_equal(CbCr, CbCrT)
     
     def test_dct(self):
-        print('test_dct')
         # pass qt through
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         fname = 'tmp.jpeg' # self.tmp.name
         im.write_dct(fname)
         im2 = jpeglib.read_jpeg_dct(fname)
@@ -192,9 +158,8 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im.qt, im2.qt)
     
     def test_dct_qt(self):
-        print('test_dct_qt')
         # pass qt through
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         im.qt = im.qt
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_jpeg_dct(self.tmp.name)
@@ -206,9 +171,8 @@ class TestDCT(unittest.TestCase):
 
     def test_dct_qt50(self):
         global qt50_standard
-        print('test_dct_qt50')
         # pass qt through
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         im.qt = qt50_standard
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_jpeg_dct(self.tmp.name)
@@ -216,9 +180,8 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im2.qt, qt50_standard)
     
     def test_dct_qt_edit(self):
-        print('test_dct_qt_edit')
         # write with different qt
-        im = jpeglib.read_jpeg_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_jpeg_dct("examples/IMG_0311.jpeg")
         qt = (im.qt).copy()
         qt[0,4,4] = 1 # change qt
         im.qt = qt
@@ -257,7 +220,6 @@ class TestDCT(unittest.TestCase):
     
     
     def test_qt1(self):
-        print('test_qt1')
         im = jpeglib.read_jpeg_dct("examples/qt1.jpeg")
         np.testing.assert_array_equal(im.qt[0], im.qt[1])
 

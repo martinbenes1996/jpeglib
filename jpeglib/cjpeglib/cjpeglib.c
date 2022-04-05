@@ -5,6 +5,7 @@ extern "C" {
 // https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpegman.html
 
 #include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,7 +44,8 @@ long jround_up (long a, long b);
 
 FILE *_read_jpeg(const char *filename,
                  struct jpeg_decompress_struct *cinfo,
-                 struct jpeg_error_mgr *jerr) {
+                 struct jpeg_error_mgr *jerr,
+                 bool read_header) {
   // open file
   FILE *fp;
   if ((fp = fopen(filename, "rb")) == NULL) {
@@ -64,7 +66,9 @@ FILE *_read_jpeg(const char *filename,
   cinfo->err = jpeg_std_error(jerr);
   jpeg_create_decompress(cinfo);
   jpeg_stdio_src(cinfo, fp);
-  (void) jpeg_read_header(cinfo, TRUE);
+
+  if(read_header)
+    (void) jpeg_read_header(cinfo, TRUE);
 
   return fp;
 }
@@ -83,7 +87,7 @@ int read_jpeg_info(
 
   // read jpeg header
   FILE *fp;
-  if((fp = _read_jpeg(srcfile, &cinfo, &jerr)) == NULL) return 0;
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
   jpeg_calc_output_dimensions(&cinfo);
 
   (void)jpeg_read_coefficients(&cinfo);
@@ -123,7 +127,7 @@ int read_jpeg_info(
 
 void *_dct_offset(short ** base, int channel, int h, int w, int Hmax, int Wmax)
 {
-  return (void *)(base[channel] + 64*(h + Hmax*(w + Wmax*(0))));
+  return (void *)(base[channel] + 64*(w + Wmax*(h + Hmax*(0))));
 }
 
 int read_jpeg_dct(
@@ -138,15 +142,16 @@ int read_jpeg_dct(
   struct jpeg_error_mgr jerr;
   // read jpeg header
   FILE *fp;
-  if((fp = _read_jpeg(srcfile, &cinfo, &jerr)) == NULL) return 0;
-
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
+  // TODO: read markers
+  (void) jpeg_read_header(&cinfo, TRUE);
   // read DCT
   jvirt_barray_ptr *coeffs_array = jpeg_read_coefficients(&cinfo);
   // read dct
   JBLOCKARRAY buffer_one;
   JCOEFPTR blockptr_one;
-  int HblocksY = cinfo.comp_info->height_in_blocks; // max height
-  int WblocksY = cinfo.comp_info->width_in_blocks; // max width
+  //int HblocksY = cinfo.comp_info->height_in_blocks; // max height
+  //int WblocksY = cinfo.comp_info->width_in_blocks; // max width
   short *dct[3] = {Y, Cb, Cr};
   for(int ch = 0; ch < cinfo.num_components; ch++) {
     if(dct[ch] == NULL) continue; // skip component, if null
@@ -157,12 +162,11 @@ int read_jpeg_dct(
       buffer_one = (cinfo.mem->access_virt_barray)((j_common_ptr)&cinfo, coeffs_array[ch], h, (JDIMENSION)1, FALSE);
       for(int w = 0; w < Wblocks; w++) {
         blockptr_one = buffer_one[0][w];
-        //fprintf(stderr, "- access: %d %d %d\n", ch, h, w);
+        //fprintf(stderr, "* access: %d %d\n", ch, h, w);
         for(int bh = 0; bh < 8; bh++) {
           for(int bw = 0; bw < 8; bw++) {
             int i = bw*8 + bh;
-            //((short *)_dct_offset(dct, ch, w, h, WblocksY, HblocksY))[i] = blockptr_one[bh*8 + bw];
-            ((short *)_dct_offset(dct, ch, h, w, HblocksY, WblocksY))[i] = blockptr_one[bh*8 + bw];
+            ((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[i] = blockptr_one[bh*8 + bw];
           }
         }
         //memcpy(_dct_offset(dct, ch, w, h, WblocksY, HblocksY), (void *)blockptr_one, sizeof(short)*64);
@@ -265,8 +269,11 @@ int write_jpeg_dct(
   struct jpeg_error_mgr jerr_in;
   FILE * fp_in;
   // read source jpeg
-  if(srcfile != NULL)
-    if((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in)) == NULL) return 0;
+  if(srcfile != NULL) {
+    if((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in, FALSE)) == NULL) return 0;
+    // todo write markers
+    (void) jpeg_read_header(&cinfo_in, TRUE);
+  }
 
   cinfo_out.err = jpeg_std_error(&jerr_out);
   jpeg_create_compress(&cinfo_out);
@@ -389,8 +396,8 @@ int write_jpeg_dct(
   // write DCT coefficients
   JBLOCKARRAY buffer_one;
   JCOEFPTR blockptr_one;
-  int HblocksY = cinfo_out.comp_info->height_in_blocks; // max height
-  int WblocksY = cinfo_out.comp_info->width_in_blocks; // max width
+  //int HblocksY = cinfo_out.comp_info->height_in_blocks; // max height
+  //int WblocksY = cinfo_out.comp_info->width_in_blocks; // max width
   short *dct[3] = {Y, Cb, Cr};
   for(int ch = 0; ch < 3; ch++) { // channel iterator
     if(dct[ch] == NULL) continue;
@@ -404,7 +411,7 @@ int write_jpeg_dct(
         blockptr_one = buffer_one[0][w];
         for(int bh = 0; bh < 8; bh++)
           for(int bw = 0; bw < 8; bw++)
-            blockptr_one[bh*8 + bw] = ((short *)_dct_offset(dct, ch, h, w, HblocksY, WblocksY))[bw*8 + bh];
+            blockptr_one[bh*8 + bw] = ((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[bw*8 + bh];
       }
     }
   }
@@ -439,7 +446,9 @@ int read_jpeg_spatial(
 
   // read jpeg header
   FILE *fp;
-  if((fp = _read_jpeg(srcfile, &cinfo, &jerr)) == NULL) return 0;
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
+  // read markers
+  (void) jpeg_read_header(&cinfo, TRUE);
 
   // set parameters
   if(out_color_space >= 0) cinfo.out_color_space = out_color_space;
@@ -449,8 +458,12 @@ int read_jpeg_spatial(
   if(dither_mode >= 0) cinfo.dither_mode = dither_mode;
   if(dct_method >= 0) cinfo.dct_method = dct_method;
 
-  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
     cinfo.do_fancy_upsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+    #if JPEG_LIB_VERSION >= 70
+    fprintf(stderr, "- read %s: DO_FANCY_UPSAMPLING %d min_DCT_h_scaled_size %d max_DCT_h_scaled_size %d\n", srcfile, cinfo.do_fancy_upsampling, cinfo.min_DCT_h_scaled_size, cinfo.min_DCT_h_scaled_size);
+    #endif
+  }
   if (overwrite_flag(flags, DO_BLOCK_SMOOTHING))
     cinfo.do_block_smoothing  = flag_is_set(flags, DO_BLOCK_SMOOTHING);
   if (overwrite_flag(flags, QUANTIZE_COLORS))
@@ -510,7 +523,7 @@ int read_jpeg_spatial(
   // decompress
   (void)jpeg_start_decompress(&cinfo);
   // read pixels
-  unsigned char *rowptr = rgb;
+  char *rowptr = (char *)rgb;
   unsigned short stride = (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) ?
     1 : cinfo.out_color_components;
   
@@ -566,8 +579,8 @@ int write_jpeg_spatial(
   jpeg_stdio_dest(&cinfo, fp);
   
   // set basic parameters
-  cinfo.image_width = image_dims[0];
-  cinfo.image_height = image_dims[1];
+  cinfo.image_height = image_dims[0];
+  cinfo.image_width = image_dims[1];
   if(in_color_space >= 0)
     cinfo.in_color_space = in_color_space;
   if(in_components >= 0)
@@ -614,8 +627,10 @@ int write_jpeg_spatial(
     cinfo.in_color_space = in_color_space;
 
   #if JPEG_LIB_VERSION >= 70
-  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
     cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+    fprintf(stderr, "- write %s: DO_FANCY_UPSAMPLING %d min_DCT_h_scaled_size %d max_DCT_h_scaled_size %d\n", dstfile, cinfo.do_fancy_downsampling, cinfo.min_DCT_h_scaled_size, cinfo.min_DCT_v_scaled_size);
+  }
   #endif
   //fprintf(stderr, "write PROGRESSIVE_MODE owr %d set %d\n", overwrite_flag(flags, PROGRESSIVE_MODE), flag_is_set(flags, OPTIMIZE_CODING));
   if (overwrite_flag(flags, PROGRESSIVE_MODE))
@@ -639,7 +654,7 @@ int write_jpeg_spatial(
   //return 0;
 
   // write data
-  unsigned char *rowptr = rgb;
+  char *rowptr = (char *)rgb;
   jpeg_start_compress(&cinfo, TRUE);
   for(unsigned h = 0; h < cinfo.image_height; h++) {
     jpeg_write_scanlines(&cinfo, &rowptr, 1);
@@ -662,7 +677,7 @@ int print_jpeg_params(const char *srcfile)
 
   // read jpeg header
   FILE *fp;
-  if((fp = _read_jpeg(srcfile, &cinfo, &jerr)) == NULL) return 0;
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
 
   (void)jpeg_start_decompress(&cinfo);
 

@@ -39,12 +39,13 @@ class DCTJPEG(_jpeg.JPEG):
         qt = ((ctypes.c_short * 64) * 4)()
         # call
         CJpegLib.read_jpeg_dct(
-            srcfile     = self.path,
+            srcfile     = tmp.name,
             Y           = Y,
             Cb          = Cb,
             Cr          = Cr,
             qt          = qt
         )
+        # close temporary file
         # process
         def process_component(comp):
             comp_np = np.ctypeslib.as_array(comp)
@@ -60,14 +61,11 @@ class DCTJPEG(_jpeg.JPEG):
         return self.Y,(self.Cb,self.Cr),self.qt
 
     def write_dct(self, path:str = None, quality:int=-1):
+        # write content into temporary file
+        tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+        tmp.write(self.content)
         # parameters
         dstfile = path if path is not None else self.path
-        image_dims = (ctypes.c_int * 2)(self.height,self.width)
-        block_dims = (ctypes.c_int * 6)(
-            self.block_dims[0][0], self.block_dims[0][1],
-            self.block_dims[1][0], self.block_dims[1][1],
-            self.block_dims[2][0], self.block_dims[2][1],
-        )
         # convert dct
         def process_component(comp):
             comp = comp.reshape((*comp.shape[:-2],64))
@@ -84,13 +82,13 @@ class DCTJPEG(_jpeg.JPEG):
             qt = None
         # call
         CJpegLib.write_jpeg_dct(
-            srcfile         = self.path, #TODO: remove
+            srcfile         = tmp.name,
             dstfile         = dstfile,
             Y               = Y,
             Cb              = Cb,
             Cr              = Cr,
-            image_dims      = image_dims,
-            block_dims      = block_dims,
+            image_dims      = self.c_image_dims(),
+            block_dims      = self.c_block_dims(),
             in_color_space  = self.jpeg_color_space.name,
             in_components   = self.num_components,
             qt              = qt,
@@ -148,7 +146,7 @@ class DCTJPEGio(DCTJPEG):
     quant_tables: list
     def _convert_dct_jpegio(self, dct):
         return (dct
-            .transpose((0,2,1,3))
+            .transpose((1,3,0,2))
             .reshape((dct.shape[0]*dct.shape[2], dct.shape[1]*dct.shape[3]))
         )
     

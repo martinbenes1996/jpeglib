@@ -13,33 +13,33 @@ class CJpegLib:
         return cls.get().jpeg_lib_version()
 
     @classmethod
-    def read_jpeg_info(cls, srcfile, block_dims, image_dims, num_components, samp_factor, jpeg_color_space):
+    def read_jpeg_info(cls, srcfile:str, block_dims, image_dims, num_components, samp_factor, jpeg_color_space):
         status = cls.get().read_jpeg_info(cls.cstr(srcfile), block_dims, image_dims, num_components, samp_factor, jpeg_color_space)
         if status == 0: raise IOError(f"reading of {srcfile} failed")
         
     @classmethod
-    def read_jpeg_dct(cls, srcfile, Y, Cb, Cr, qt):
+    def read_jpeg_dct(cls, srcfile:str, Y, Cb, Cr, qt):
         status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt)
         if status == 0: raise IOError(f"reading of {srcfile} DCT failed")
 
     @classmethod
-    def write_jpeg_dct(cls, srcfile, dstfile, Y, Cb, Cr, image_dims, block_dims, in_color_space, in_components, qt, quality):
+    def write_jpeg_dct(cls, srcfile:str, dstfile:str, Y, Cb, Cr, image_dims, block_dims, in_color_space, in_components, qt, quality):
         status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), Y, Cb, Cr, image_dims, block_dims, in_color_space, in_components, qt, quality)
         if status == 0: raise IOError(f"writing DCT to {dstfile} failed")
     @classmethod
-    def print_jpeg_params(cls, srcfile):
+    def print_jpeg_params(cls, srcfile:str):
         status = cls.get().print_jpeg_params(cls.cstr(srcfile))
         if status == 0: raise IOError(f"reading of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_spatial(cls, srcfile, rgb, colormap, in_colormap, out_color_space, dither_mode, dct_method, flags):
-        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, colormap, in_colormap,
+    def read_jpeg_spatial(cls, srcfile:str, spatial, colormap, in_colormap, out_color_space, dither_mode, dct_method, flags):
+        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), spatial, colormap, in_colormap,
                                              out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"reading of {srcfile} spatial failed")
     
     @classmethod
-    def write_jpeg_spatial(cls, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
-        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
+    def write_jpeg_spatial(cls, dstfile:str, spatial, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
+        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), spatial, image_dims, in_color_space, in_components,
                                               dct_method, samp_factor, qt, cls.factor(quality), cls.factor(smoothing_factor), cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
         

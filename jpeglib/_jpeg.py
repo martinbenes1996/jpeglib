@@ -18,13 +18,24 @@ class JPEG:
     jpeg_color_space: Colorspace
     num_components: int
     
-    
     def height_in_blocks(self, component):
         return self.block_dims[component][0]
     def width_in_blocks(self, component):
         return self.block_dims[component][1]
     def has_chrominance(self):
         return self.num_components > 1
+    
+    def c_image_dims(self):
+        return (ctypes.c_int * 2)(self.height,self.width)
+    def c_block_dims(self):
+        return (ctypes.c_int * 6)(
+            self.block_dims[0][0], self.block_dims[0][1],
+            self.block_dims[1][0], self.block_dims[1][1],
+            self.block_dims[2][0], self.block_dims[2][1],)
+    def c_samp_factor(self):
+        samp_factor = np.array(self.samp_factor, dtype=np.int32)
+        return np.ctypeslib.as_ctypes(samp_factor)
+    
     def _free(self):
         raise NotImplementedError
 
