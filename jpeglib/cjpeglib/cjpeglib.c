@@ -41,11 +41,10 @@ char overwrite_flag (BITMASK flags, BITMASK mask) { return (flags & (mask << 1))
 // === MARKERS ===
 // globals
 #define MAX_MARKER 20
-#define MAX_MARKER_NAME 20
-static unsigned mpos = 0;
-static char mark_name[MAX_MARKER][MAX_MARKER_NAME];
-static int mark_length[MAX_MARKER];
-static unsigned char * mark_data[MAX_MARKER];
+static int gpos = 0;
+static int gmarker_types[MAX_MARKER];
+static int gmarker_lengths[MAX_MARKER];
+static unsigned char * gmarker_data[MAX_MARKER];
 int set_marker_handlers(struct jpeg_decompress_struct * cinfo); // set up handlers
 int unset_marker_handlers(struct jpeg_decompress_struct * cinfo); // unset up handlers
 int jpeg_getc (j_decompress_ptr cinfo); // read next byte
@@ -94,7 +93,7 @@ int read_jpeg_info(
   int *samp_factor,
   int *jpeg_color_space,
   int *marker_lengths,
-  char *marker_names
+  int *marker_types
 ) {
   // allocate
   struct jpeg_decompress_struct cinfo;
@@ -105,15 +104,15 @@ int read_jpeg_info(
   if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
 
   // markers
-  if((marker_lengths != NULL) || (marker_names != NULL)) {
+  if((marker_lengths != NULL) || (marker_types != NULL)) {
     // setup
     set_marker_handlers(&cinfo);
     // read markers
     (void) jpeg_read_header(&cinfo, TRUE);
     // collect marker data
-    for(unsigned i = 0; i < mpos; i++) {
-      marker_lengths[i] = mark_length[i]; 
-      strncpy(marker_names + 20*i, mark_name[i], 20);
+    for(int i = 0; i < gpos; i++) {
+      marker_lengths[i] = gmarker_lengths[i];
+      marker_types[i] = gmarker_types[i];
     }
     // cleanup
     unset_marker_handlers(&cinfo);
@@ -175,11 +174,11 @@ int read_jpeg_markers(
     (void) jpeg_read_header(&cinfo, TRUE);
     // collect marker data
     int offset = 0;
-    for(int i = 0; i < mpos; i++) {
-      for(int j = 0; j < mark_length[i]; j++) {
-        markers[offset + j] = mark_data[i][j];
+    for(int i = 0; i < gpos; i++) {
+      for(int j = 0; j < gmarker_lengths[i]; j++) {
+        markers[offset + j] = gmarker_data[i][j];
       }
-      offset += mark_length[i];
+      offset += gmarker_lengths[i];
     }
     unset_marker_handlers(&cinfo);
   }
@@ -297,7 +296,11 @@ int write_jpeg_dct(
   int in_color_space,
   int in_components,
   unsigned short *qt,
-  short quality
+  short quality,
+  int num_markers,
+  int *marker_types,
+  int *marker_lengths,
+  unsigned char *markers
 ) {
   // check inputs
   if(dstfile == NULL) {
@@ -316,7 +319,6 @@ int write_jpeg_dct(
     fprintf(stderr, "you must specify Y or YCbCr\n");
     return 0;
   }
-
 
   // allocate
   struct jpeg_compress_struct cinfo_out;
@@ -345,7 +347,7 @@ int write_jpeg_dct(
   cinfo_out.err = jpeg_std_error(&jerr_out);
   jpeg_create_compress(&cinfo_out);
   jpeg_stdio_dest(&cinfo_out, fp_out);
-
+  
   if(srcfile != NULL) // copy critical parameters to dstfile
     jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in,&cinfo_out);
 
@@ -388,11 +390,7 @@ int write_jpeg_dct(
   //   chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
   //   chroma_factor[1] = cinfo_out.comp_info[0].v_samp_factor;
   // }
-  //fprintf(stderr, "chroma factors %d %d\n", chroma_factor[0], chroma_factor[1]);
-  //for(int ch = 0; ch < 3; ch++) {
-  //  fprintf(stderr, "sampling factors(%d) %d %d\n", ch, cinfo_out.comp_info[ch].v_samp_factor, cinfo_out.comp_info[ch].h_samp_factor);
-  //}
-  
+
     // for(int comp = 0; comp < cinfo_out.input_components; comp++) {
     //   //cinfo_out.comp_info[comp].h_samp_factor
     //   //int J_factor,a_factor,b_factor;
@@ -459,7 +457,17 @@ int write_jpeg_dct(
   #if JPEG_LIB_VERSION >= 80
   jpeg_calc_jpeg_dimensions(&cinfo_out);
   #endif
+
   jpeg_write_coefficients(&cinfo_out,coeffs_array);
+
+  // write markers
+  int offset = 0;
+  for(int i = 0; i < num_markers; i++) {
+    //fprintf(stderr, "- %d type %d length %d offset %d data [%d %d %d %d ...]\n", i, marker_types[i], marker_lengths[i], offset, markers[offset], markers[offset+1], markers[offset+2], markers[offset+3]);
+    jpeg_write_marker(&cinfo_out, marker_types[i], markers + offset, marker_lengths[i]);
+    offset += marker_lengths[i];
+  }
+
   // write DCT coefficients
   JBLOCKARRAY buffer_one;
   JCOEFPTR blockptr_one;
@@ -600,6 +608,10 @@ int write_jpeg_spatial(
   unsigned short *qt,
   short quality,
   short smoothing_factor,
+  int num_markers,
+  int *marker_types,
+  int *marker_lengths,
+  unsigned char *markers,
   BITMASK flags
 ) {
 
@@ -671,12 +683,9 @@ int write_jpeg_spatial(
     cinfo.in_color_space = in_color_space;
 
   #if JPEG_LIB_VERSION >= 70
-  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
     cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
-    //fprintf(stderr, "- write %s: DO_FANCY_UPSAMPLING %d min_DCT_h_scaled_size %d max_DCT_h_scaled_size %d\n", dstfile, cinfo.do_fancy_downsampling, cinfo.min_DCT_h_scaled_size, cinfo.min_DCT_v_scaled_size);
-  }
   #endif
-  //fprintf(stderr, "write PROGRESSIVE_MODE owr %d set %d\n", overwrite_flag(flags, PROGRESSIVE_MODE), flag_is_set(flags, OPTIMIZE_CODING));
   if (overwrite_flag(flags, PROGRESSIVE_MODE))
     cinfo.progressive_mode   = flag_is_set(flags, PROGRESSIVE_MODE);
   if (overwrite_flag(flags, PROGRESSIVE_MODE) && flag_is_set(flags, PROGRESSIVE_MODE))
@@ -694,12 +703,18 @@ int write_jpeg_spatial(
   if (overwrite_flag(flags, CCIR601_SAMPLING))
     cinfo.CCIR601_sampling   = flag_is_set(flags, CCIR601_SAMPLING);
 
-  //fprintf(stderr, "before reading!!!\n");
-  //return 0;
+  // start compression
+  jpeg_start_compress(&cinfo, TRUE);
+
+  // write markers
+  int offset = 0;
+  for(int i = 0; i < num_markers; i++) {
+    jpeg_write_marker(&cinfo, marker_types[i], markers + offset, marker_lengths[i]);
+    offset += marker_lengths[i];
+  }
 
   // write data
   char *rowptr = (char *)rgb;
-  jpeg_start_compress(&cinfo, TRUE);
   for(unsigned h = 0; h < cinfo.image_height; h++) {
     jpeg_write_scanlines(&cinfo, &rowptr, 1);
     rowptr += cinfo.image_width * cinfo.input_components;
@@ -784,30 +799,35 @@ int print_jpeg_params(const char *srcfile)
 
 int set_marker_handlers(struct jpeg_decompress_struct * cinfo) {
   // jpeg globals
-  mpos = 0;
+  gpos = 0;
   for(int i = 0; i < MAX_MARKER; i++) {
-    memset(mark_name[i], 0, sizeof(char) * MAX_MARKER_NAME);
-    mark_data[i] = NULL;
-    mark_length[i] = 0;
+    gmarker_types[i] = 0;
+    gmarker_data[i] = NULL;
+    gmarker_lengths[i] = 0;
   }
   // set handlers
   jpeg_set_marker_processor(cinfo, JPEG_COM, jpeg_handle_marker);
   jpeg_set_marker_processor(cinfo, JPEG_APP0+15, jpeg_handle_marker);
   for (int i=1; i<14; i++)
     jpeg_set_marker_processor(cinfo, JPEG_APP0+i, jpeg_handle_marker);
+  
+  return 1;
 }
 
 int unset_marker_handlers(struct jpeg_decompress_struct * cinfo) {
   // jpeg globals
-  mpos = 0;
-  for(int i = 0; i < mpos; i++) {
-    mark_length[i] = 0;
-    if(mark_data[i] != NULL)
-      free((void*)mark_data[i]);
+  for(int i = 0; i < gpos; i++) {
+    gmarker_lengths[i] = 0;
+    gmarker_types[i] = 0;
+    if(gmarker_data[i] != NULL)
+      free((void*)gmarker_data[i]);
   }
+  gpos = 0;
   
   // set handlers
   (void)cinfo;
+
+  return 1;
 }
 
 /**
@@ -832,27 +852,28 @@ int jpeg_getc (j_decompress_ptr cinfo)
 int jpeg_handle_marker (j_decompress_ptr cinfo)
 {
   // get marker name
-  char mname[MAX_MARKER_NAME];
+  char mname[20];
   if (cinfo->unread_marker == JPEG_COM) sprintf(mname, "COM");
   else sprintf(mname, "APP%d", cinfo->unread_marker - JPEG_APP0);
-
+  
   // get length
   unsigned char * p = NULL;
   int length = 0;
   length = jpeg_getc(cinfo) << 8;
   length += jpeg_getc(cinfo);
   length -= 2; // discount the length word itself
-  mark_length[mpos] = length;
+  gmarker_lengths[gpos] = length;
 
   // allocate
-  if(mpos < MAX_MARKER) {
-    strcpy(mark_name[mpos], mname);
-    if((p = (unsigned char *)malloc(length*sizeof(unsigned char))) == NULL) {
+  if(gpos < MAX_MARKER) {
+    gmarker_types[gpos] = cinfo->unread_marker;
+    //strcpy(mark_name[gpos], mname);
+    if((p = (unsigned char *)malloc(length*sizeof(char))) == NULL) {
       fprintf(stderr, "Bad malloc!\n");
       return FALSE;
     }
-    mark_data[mpos] = p;
-    mpos += 1;
+    gmarker_data[gpos] = p;
+    gpos += 1;
 
   // too many markers
   } else {
@@ -860,12 +881,14 @@ int jpeg_handle_marker (j_decompress_ptr cinfo)
   }
 
   // iterate over data
+  int c;
   while (--length >= 0) {
-    if((*(p) = jpeg_getc(cinfo)) == -1) {
+    if((c = jpeg_getc(cinfo)) == -1) {
       fprintf(stderr, "Error parsing marker %s\n", mname);
       return FALSE;
     }
-    if (!p[0]) p[0] = 0x20; // replace 0x0 byte with 0x20
+    *(p) = (unsigned char)c;
+    //if (!p[0]) p[0] = 0x20; // replace 0x0 byte with 0x20
     p++;
   }
   p[0] = 0; // set the last byte to 0

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import numpy as np
 from ._bind import CJpegLib
 from ._colorspace import Colorspace
+from ._marker import Marker
 
 @dataclass
 class JPEG:
@@ -17,8 +18,6 @@ class JPEG:
     samp_factor: np.ndarray
     jpeg_color_space: Colorspace
     num_components: int
-    marker_lengths: np.ndarray
-    marker_names: list
     markers: list 
     
     def height_in_blocks(self, component):
@@ -27,6 +26,8 @@ class JPEG:
         return self.block_dims[component][1]
     def has_chrominance(self):
         return self.num_components > 1
+    def num_markers(self) -> int:
+        return len(self.markers)
     
     def c_image_dims(self):
         return (ctypes.c_int * 2)(self.height,self.width)
@@ -38,7 +39,19 @@ class JPEG:
     def c_samp_factor(self):
         samp_factor = np.array(self.samp_factor, dtype=np.int32)
         return np.ctypeslib.as_ctypes(samp_factor)
-    
+    def c_marker_types(self):
+        marker_types = [marker.index for marker in self.markers]
+        return (ctypes.c_int32*self.num_markers())(*marker_types)
+    def c_marker_lengths(self):
+        marker_lengths = [marker.length for marker in self.markers]
+        return (ctypes.c_int32*self.num_markers())(*marker_lengths)
+    def c_markers(self):
+        marker_lengths = [marker.length for marker in self.markers]
+        marker_contents = []
+        for marker in self.markers:
+            marker_contents += [i for i in marker.content]
+        return (ctypes.c_ubyte*np.sum(marker_lengths))(*marker_contents)
+        
     def _free(self):
         raise NotImplementedError
 
@@ -52,7 +65,7 @@ def load_jpeg_info(path: str):
     _samp_factor = (ctypes.c_int*6)()
     _jpeg_color_space = (ctypes.c_int*1)()
     _marker_lengths = (ctypes.c_int*20)()
-    _marker_names = (ctypes.c_char*20*20)()
+    _marker_types = (ctypes.c_uint32*20)()
     # call
     CJpegLib.read_jpeg_info(
         srcfile             = str(path),
@@ -62,28 +75,33 @@ def load_jpeg_info(path: str):
         samp_factor         = _samp_factor,
         jpeg_color_space    = _jpeg_color_space,
         marker_lengths      = _marker_lengths,
-        marker_names        = _marker_names,
+        marker_types        = _marker_types,
     )
     # process
     num_components = _num_components[0] # number of components in JPEG
     block_dims = (
         np.array([_block_dims[i] for i in range(2*num_components)], int)
-        .reshape(num_components, 2)
-    )
+        .reshape(num_components, 2))
     samp_factor = (
         np.array([_samp_factor[i] for i in range(2*num_components)], int)
-        .reshape(num_components, 2)
-    )
-    marker_lengths = np.array([_marker_lengths[i] for i in range(20)])
-    marker_lengths = marker_lengths[marker_lengths > 0]
-    num_markers = marker_lengths.shape[0]
-    marker_names = [_marker_names[i] for i in range(num_markers)]
-    marker_names = [
-        (''.join([name[i].decode('ascii') for i in range(len(name))])
-        .split('\x00')[0]
+        .reshape(num_components, 2))
+    markers = []
+    for i in range(20):
+        # marker length
+        marker_length = _marker_lengths[i]
+        if marker_length == 0:
+            break
+        # marker type
+        marker_type = _marker_types[i]
+        # create marker
+        marker = Marker.from_index(
+            index=marker_type, 
+            length=marker_length, 
+            content=None,
         )
-        for name in marker_names
-    ]
+        markers.append(marker)
+    marker_lengths = np.array([marker.length for marker in markers], dtype=np.int32)
+    num_markers = marker_lengths.shape[0]
     
     # allocate
     _markers = (ctypes.c_ubyte * np.sum(marker_lengths))()
@@ -94,8 +112,8 @@ def load_jpeg_info(path: str):
     )
     # process
     cumlens = np.cumsum([0] + marker_lengths.tolist())
-    markers = [bytes(_markers[cumlens[i]:cumlens[i+1]]) for i in range(num_markers)]
-    
+    for i in range(num_markers):
+        markers[i].content = bytes(_markers[cumlens[i]:cumlens[i+1]])
     # create jpeg
     return JPEG(
         path                = path,
@@ -106,47 +124,5 @@ def load_jpeg_info(path: str):
         num_components      = num_components,
         jpeg_color_space    = Colorspace.from_index(_jpeg_color_space[0]),
         content             = None,
-        marker_lengths      = marker_lengths,
-        marker_names        = marker_names,
         markers             = markers,
     )
-
-    
-# def read_dct(path:str, jpeg:JPEG):
-#     # allocate DCT
-#     def _allocate_component(i:int, block_dims:np.ndarray):
-#         return (((ctypes.c_short * 64) * block_dims[i][1]) * block_dims[i][0])()
-#     _Y = _allocate_component(0, jpeg.block_dims)
-#     if jpeg.num_components > 1: # has chrominance
-#         _Cb = _allocate_component(1, jpeg.block_dims)
-#         _Cr = _allocate_component(2, jpeg.block_dims)
-#     else: # grayscale
-#         _Cb,_Cr = None,None
-#     # allocate QT
-#     _qt = ((ctypes.c_short * 64) * 4)()
-#     # call
-#     CJpegLib.read_jpeg_dct(
-#         srcfile     = path,
-#         Y           = _Y,
-#         Cb          = _Cb,
-#         Cr          = _Cr,
-#         qt          = _qt
-#     )
-#     # process
-#     qt = np.ctypeslib.as_array(_qt)
-#     qt = qt.reshape((*qt.shape[:-1],8,8))
-#     Y = np.ctypeslib.as_array(_Y)
-#     Y = Y.reshape((*Y.shape[:-1],8,8))
-#     if jpeg.num_components > 1: # has chrominance
-#         Cb = np.ctypeslib.as_array(_Cb)
-#         Cb = Cb.reshape((*Cb.shape[:-1],8,8))
-#         Cr = np.ctypeslib.as_array(_Cr)
-#         Cr = Cb.reshape((*Cr.shape[:-1],8,8))
-#     # crop
-#     Y = Y[:jpeg.block_dims[0][1],:jpeg.block_dims[0][0]]
-#     if jpeg.num_components > 1: # has chrominance
-#         Cb = Cb[:jpeg.block_dims[1][1],:jpeg.block_dims[1][0]]
-#         Cr = Cr[:jpeg.block_dims[2][1],:jpeg.block_dims[2][0]]
-#     qt = qt[:jpeg.num_components]
-#     return Y,Cb,Cr,qt
-    

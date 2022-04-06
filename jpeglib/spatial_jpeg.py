@@ -88,7 +88,7 @@ class SpatialJPEG(JPEG):
         # colorspace
         if self.color_space is None:
             self.color_space = self.jpeg_color_space
-        # parameters
+        # path
         dstfile = path if path is not None else self.path
         # dct method
         if dct_method is not None:
@@ -124,6 +124,10 @@ class SpatialJPEG(JPEG):
             qt                  = qt,
             quality             = quality,
             smoothing_factor    = smoothing_factor,
+            num_markers         = self.num_markers(),
+            marker_types        = self.c_marker_types(),
+            marker_lengths      = self.c_marker_lengths(),
+            markers             = self.c_markers(),
             flags               = flags,
         )
     

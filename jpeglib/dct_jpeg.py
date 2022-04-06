@@ -23,7 +23,7 @@ class DCTJPEG(_jpeg.JPEG):
             (has_Y and has_qt and has_no_CbCr) # grayscale
             or (has_Y and has_qt and has_CbCr) # color
         )
-        
+    
     def _alloc_dct_component(self, i:int):
         return (((ctypes.c_short * 64) * self.width_in_blocks(i)) * self.height_in_blocks(i))()
     def read_dct(self):
@@ -59,7 +59,7 @@ class DCTJPEG(_jpeg.JPEG):
         self.qt = qt[:self.num_components]
         # return
         return self.Y,(self.Cb,self.Cr),self.qt
-
+    
     def write_dct(self, path:str = None, quality:int=-1):
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
@@ -92,11 +92,13 @@ class DCTJPEG(_jpeg.JPEG):
             in_color_space  = self.jpeg_color_space.name,
             in_components   = self.num_components,
             qt              = qt,
-            quality         = quality
+            quality         = quality,
+            num_markers     = self.num_markers(),
+            marker_types    = self.c_marker_types(),
+            marker_lengths  = self.c_marker_lengths(),
+            markers         = self.c_markers(),
         )
-
-        
-
+    
     @property
     def Y(self) -> np.ndarray:
         if self._Y is None:
@@ -105,7 +107,7 @@ class DCTJPEG(_jpeg.JPEG):
     @Y.setter
     def Y(self, Y: np.ndarray):
         self._Y = Y
-        
+    
     @property
     def Cb(self) -> np.ndarray:
         if self.has_chrominance() and self._Cb is None:
@@ -114,7 +116,7 @@ class DCTJPEG(_jpeg.JPEG):
     @Cb.setter
     def Cb(self, Cb: np.ndarray):
         self._Cb = Cb
-        
+    
     @property
     def Cr(self) -> np.ndarray:
         if self.has_chrominance() and self._Cr is None:
@@ -123,7 +125,7 @@ class DCTJPEG(_jpeg.JPEG):
     @Cr.setter
     def Cr(self, Cr: np.ndarray):
         self._Cr = Cr
-        
+    
     @property
     def qt(self) -> np.ndarray:
         if self._qt is None:

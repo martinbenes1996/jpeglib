@@ -41,3 +41,6 @@ test.log
 run.py
 result.jpeg
 test.sh
+
+# temporary output
+output*.jpeg

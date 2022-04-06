@@ -8,7 +8,7 @@ int read_jpeg_info(
     int *samp_factor,
     int *jpeg_color_space,
     int *marker_lengths,
-    char *marker_names
+    int *mark_types
 );
 
 int read_jpeg_markers(
@@ -35,7 +35,11 @@ int write_jpeg_dct(
     int in_color_space,
     int in_components,
     unsigned short *qt,
-    short quality
+    short quality,
+    int num_markers,
+    int *marker_types,
+    int *marker_lengths,
+    unsigned char *markers
 );
 
 // ----------- RGB -------------
@@ -62,6 +66,10 @@ int write_jpeg_spatial(
     unsigned short *qt,
     short quality,
     short smoothing_factor,
+    int num_markers,
+    int *marker_types,
+    int *marker_lengths,
+    unsigned char *markers,
     BITMASK flags
 );
 
