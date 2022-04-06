@@ -7,9 +7,32 @@ Reference
 Working with jpegs
 ------------------
 
-.. autoclass:: jpeglib.JPEG
+.. autofunction:: jpeglib.read_dct
    :members:
-   :special-members: __init__, J_COLOR_SPACE, J_DITHER_MODE, J_DCT_METHOD
+
+.. autofunction:: jpeglib.read_spatial
+   :members:
+
+.. autoclass:: jpeglib.jpeg.SpatialJPEG
+   :members:
+   :special-members: __init__
+
+.. autoclass:: jpeglib.jpeg.DCTJPEG
+   :members:
+   :special-members: __init__
+
+.. autoclass:: jpeglib.Dithermode
+   :members:
+
+.. autoclass:: jpeglib.Colorspace
+   :members:
+
+.. autoclass:: jpeglib.DCTMethod
+   :members:
+
+.. autoclass:: jpeglib.Marker
+   :members:
+
 
 Manage libjpeg version
 ----------------------
