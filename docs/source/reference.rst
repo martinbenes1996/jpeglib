@@ -13,24 +13,24 @@ Working with jpegs
 .. autofunction:: jpeglib.read_spatial
    :members:
 
-.. autoclass:: jpeglib.jpeg.SpatialJPEG
+.. autoclass:: jpeglib.spatial_jpeg.SpatialJPEG
    :members:
    :special-members: __init__
 
-.. autoclass:: jpeglib.jpeg.DCTJPEG
+.. autoclass:: jpeglib.dct_jpeg.DCTJPEG
    :members:
    :special-members: __init__
 
-.. autoclass:: jpeglib.Dithermode
+.. autoclass:: jpeglib._dithermode.Dithermode
    :members:
 
-.. autoclass:: jpeglib.Colorspace
+.. autoclass:: jpeglib._colorspace.Colorspace
    :members:
 
-.. autoclass:: jpeglib.DCTMethod
+.. autoclass:: jpeglib._dctmethod.DCTMethod
    :members:
 
-.. autoclass:: jpeglib.Marker
+.. autoclass:: jpeglib._marker.Marker
    :members:
 
 
