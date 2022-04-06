@@ -99,7 +99,11 @@ class TestDCT(unittest.TestCase):
         CbT = np.einsum('bcde->dbec', CbT)
         CrT = img['coef_arrays'][2].reshape((int(img['image_height']/8/2),8,-1,8))
         CrT = np.einsum('bcde->dbec', CrT)
-        qtT = img['quant_tables']
+        qtT = np.stack([
+            img['quant_tables'][0],
+            img['quant_tables'][1],
+            img['quant_tables'][1],
+        ])
 
         # test quantization
         np.testing.assert_array_equal(im.qt, qtT)
