@@ -5,8 +5,17 @@ It offers full control over compression and decompression and exposes DCT coeffi
 """
 
 import pkg_resources
-from .jpeg import *
+# functions
 from .functional import *
+# jpeg objects
+from .dct_jpeg import *
+from .spatial_jpeg import *
+# cstructs
+from ._colorspace import *
+from ._dctmethod import *
+from ._dithermode import *
+from ._marker import *
+# versions
 from .version import *
 
 # for unit tests
