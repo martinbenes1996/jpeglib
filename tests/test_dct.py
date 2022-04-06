@@ -94,16 +94,16 @@ class TestDCT(unittest.TestCase):
         # process
         YT = (
             img['coef_arrays'][0]
-            .reshape((im.width_in_blocks(1),8,-1,8))
-            .transpose((2,0,3,1)))
+            .reshape((im.width_in_blocks(0),8,-1,8))
+            .transpose((0,2,3,1)))
         CbT = (
             img['coef_arrays'][1]
             .reshape((im.width_in_blocks(1),8,-1,8))
-            .transpose((2,0,3,1)))
+            .transpose((0,2,3,1)))
         CrT = (
             img['coef_arrays'][2]
-            .reshape((im.width_in_blocks(1),8,-1,8))
-            .transpose((2,0,3,1)))
+            .reshape((im.width_in_blocks(2),8,-1,8))
+            .transpose((0,2,3,1)))
         qtT = np.stack([
             img['quant_tables'][0],
             img['quant_tables'][1],
