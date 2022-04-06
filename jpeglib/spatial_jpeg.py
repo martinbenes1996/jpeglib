@@ -46,6 +46,7 @@ class SpatialJPEG(JPEG):
             
         # allocate spatial
         spatial = self._alloc_spatial(self.color_space.channels)
+
         # call
         CJpegLib.read_jpeg_spatial(
             srcfile             = tmp.name,

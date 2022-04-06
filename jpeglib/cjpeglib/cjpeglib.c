@@ -20,23 +20,36 @@ extern "C" {
 // #include "jmorecfg.h"
 // #endif
 
+// === FLAGS ===
 char flag_is_set (BITMASK flags, BITMASK mask) { return (flags & mask) != 0; }
 char overwrite_flag (BITMASK flags, BITMASK mask) { return (flags & (mask << 1)) == 0;}
+#define DO_FANCY_UPSAMPLING     ((BITMASK)0b1 <<  0)
+#define DO_BLOCK_SMOOTHING      ((BITMASK)0b1 <<  2)
+#define TWO_PASS_QUANTIZE       ((BITMASK)0b1 <<  4)
+#define ENABLE_1PASS_QUANT      ((BITMASK)0b1 <<  6)
+#define ENABLE_EXTERNAL_QUANT   ((BITMASK)0b1 <<  8)
+#define ENABLE_2PASS_QUANT      ((BITMASK)0b1 << 10)
+#define OPTIMIZE_CODING         ((BITMASK)0b1 << 12)
+#define PROGRESSIVE_MODE        ((BITMASK)0b1 << 14)
+#define QUANTIZE_COLORS         ((BITMASK)0b1 << 16)
+#define ARITH_CODE              ((BITMASK)0b1 << 18)
+#define WRITE_JFIF_HEADER       ((BITMASK)0b1 << 20)
+#define WRITE_ADOBE_MARKER      ((BITMASK)0b1 << 22)
+#define CCIR601_SAMPLING        ((BITMASK)0b1 << 24)
+#define FORCE_BASELINE          ((BITMASK)0b1 << 26)
 
-#define DO_FANCY_UPSAMPLING          ((BITMASK)0b1 <<  0)
-#define DO_BLOCK_SMOOTHING           ((BITMASK)0b1 <<  2)
-#define TWO_PASS_QUANTIZE            ((BITMASK)0b1 <<  4)
-#define ENABLE_1PASS_QUANT           ((BITMASK)0b1 <<  6)
-#define ENABLE_EXTERNAL_QUANT        ((BITMASK)0b1 <<  8)
-#define ENABLE_2PASS_QUANT           ((BITMASK)0b1 << 10)
-#define OPTIMIZE_CODING              ((BITMASK)0b1 << 12)
-#define PROGRESSIVE_MODE             ((BITMASK)0b1 << 14)
-#define QUANTIZE_COLORS              ((BITMASK)0b1 << 16)
-#define ARITH_CODE                   ((BITMASK)0b1 << 18)
-#define WRITE_JFIF_HEADER            ((BITMASK)0b1 << 20)
-#define WRITE_ADOBE_MARKER           ((BITMASK)0b1 << 22)
-#define CCIR601_SAMPLING             ((BITMASK)0b1 << 24)
-
+// === MARKERS ===
+// globals
+#define MAX_MARKER 20
+#define MAX_MARKER_NAME 20
+static unsigned mpos = 0;
+static char mark_name[MAX_MARKER][MAX_MARKER_NAME];
+static int mark_length[MAX_MARKER];
+static unsigned char * mark_data[MAX_MARKER];
+int set_marker_handlers(struct jpeg_decompress_struct * cinfo); // set up handlers
+int unset_marker_handlers(struct jpeg_decompress_struct * cinfo); // unset up handlers
+int jpeg_getc (j_decompress_ptr cinfo); // read next byte
+int jpeg_handle_marker (j_decompress_ptr cinfo); // async marker handler
 
 
 
@@ -79,7 +92,9 @@ int read_jpeg_info(
   int *image_dims,
   int *num_components,
   int *samp_factor,
-  int *jpeg_color_space
+  int *jpeg_color_space,
+  int *marker_lengths,
+  char *marker_names
 ) {
   // allocate
   struct jpeg_decompress_struct cinfo;
@@ -87,7 +102,23 @@ int read_jpeg_info(
 
   // read jpeg header
   FILE *fp;
-  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
+
+  // markers
+  if((marker_lengths != NULL) || (marker_names != NULL)) {
+    // setup
+    set_marker_handlers(&cinfo);
+    // read markers
+    (void) jpeg_read_header(&cinfo, TRUE);
+    // collect marker data
+    for(unsigned i = 0; i < mpos; i++) {
+      marker_lengths[i] = mark_length[i]; 
+      strncpy(marker_names + 20*i, mark_name[i], 20);
+    }
+    // cleanup
+    unset_marker_handlers(&cinfo);
+  }
+
   jpeg_calc_output_dimensions(&cinfo);
 
   (void)jpeg_read_coefficients(&cinfo);
@@ -108,7 +139,6 @@ int read_jpeg_info(
     //num_components[1] = cinfo.out_color_components;
     //num_components[2] = cinfo.output_components;
   }
-  //fprintf(stderr, "setting jpeg color space %d %d\n", cinfo.jpeg_color_space, cinfo.out_color_space);
   if(jpeg_color_space != NULL)
     jpeg_color_space[0] = cinfo.out_color_space;
 
@@ -118,6 +148,43 @@ int read_jpeg_info(
       *(samp_factor + comp*2 + 1) = cinfo.comp_info[comp].v_samp_factor;
     }
 
+  // cleanup
+  jpeg_destroy_decompress( &cinfo );
+  fclose(fp);
+
+  return 1;
+}
+
+int read_jpeg_markers(
+  const char *srcfile,
+  unsigned char *markers
+) {
+  // allocate
+  struct jpeg_decompress_struct cinfo;
+  struct jpeg_error_mgr jerr;
+
+  // read jpeg header
+  FILE *fp;
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
+
+  // markers
+  if(markers != NULL) {
+    // set marker handlers
+    set_marker_handlers(&cinfo);
+    // read markers
+    (void) jpeg_read_header(&cinfo, TRUE);
+    // collect marker data
+    int offset = 0;
+    for(int i = 0; i < mpos; i++) {
+      for(int j = 0; j < mark_length[i]; j++) {
+        markers[offset + j] = mark_data[i][j];
+      }
+      offset += mark_length[i];
+    }
+    unset_marker_handlers(&cinfo);
+  }
+
+  //(void)jpeg_read_coefficients(&cinfo);
   // cleanup
   jpeg_destroy_decompress( &cinfo );
   fclose(fp);
@@ -446,15 +513,11 @@ int read_jpeg_spatial(
 
   // read jpeg header
   FILE *fp;
-  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
-  // read markers
-  (void) jpeg_read_header(&cinfo, TRUE);
+  if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
 
-  // set parameters
+  // set parameterse
   if(out_color_space >= 0) cinfo.out_color_space = out_color_space;
   else cinfo.out_color_space = cinfo.jpeg_color_space;
-  //fprintf(stderr, "cjpeglib.c: out_color_space: %d %d\n", out_color_space, cinfo.out_color_space);
-  
   if(dither_mode >= 0) cinfo.dither_mode = dither_mode;
   if(dct_method >= 0) cinfo.dct_method = dct_method;
 
@@ -473,8 +536,6 @@ int read_jpeg_spatial(
   if(in_colormap != NULL)
     for(int i = 0; i < 256; i++) {
       cmap[i] = in_colormap + i*3;
-      //if(i < 3) fprintf(stderr, " %d %d |", i, cmap[i][0]);
-      //if(i == 255) fprintf(stderr, "\n");
     }
 
   if (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
@@ -482,29 +543,7 @@ int read_jpeg_spatial(
     cinfo.desired_number_of_colors = 256;
     if(in_colormap != NULL) cinfo.colormap = (char**)cmap;
   }
-  
-  //fprintf(stderr, "read PROGRESSIVE_MODE: owrt %d set %d\n", 
-  //  overwrite_flag(flags, PROGRESSIVE_MODE),
-  //  flag_is_set(flags, PROGRESSIVE_MODE)
-  //);fprintf(stderr, "ARITH_CODE: owrt %d set %d\n", 
-  //   overwrite_flag(flags, ARITH_CODE),
-  //   flag_is_set(flags, ARITH_CODE)
-  // );fprintf(stderr, "CCIR601_SAMPLING: owrt %d set %d\n", 
-  //   overwrite_flag(flags, CCIR601_SAMPLING),
-  //   flag_is_set(flags, CCIR601_SAMPLING)
-  // );fprintf(stderr, "TWO_PASS_QUANTIZE: owrt %d set %d\n", 
-  //   overwrite_flag(flags, TWO_PASS_QUANTIZE),
-  //   flag_is_set(flags, TWO_PASS_QUANTIZE)
-  // );fprintf(stderr, "ENABLE_1PASS_QUANT: owrt %d set %d\n", 
-  //   overwrite_flag(flags, ENABLE_1PASS_QUANT),
-  //   flag_is_set(flags, ENABLE_1PASS_QUANT)
-  // );fprintf(stderr, "ENABLE_EXTERNAL_QUANT: owrt %d set %d\n", 
-  //   overwrite_flag(flags, ENABLE_EXTERNAL_QUANT),
-  //   flag_is_set(flags, ENABLE_EXTERNAL_QUANT)
-  // );fprintf(stderr, "ENABLE_2PASS_QUANT: owrt %d set %d\n", 
-  //   overwrite_flag(flags, ENABLE_2PASS_QUANT),
-  //   flag_is_set(flags, ENABLE_2PASS_QUANT)
-  // );
+
   if (overwrite_flag(flags, PROGRESSIVE_MODE))
     cinfo.progressive_mode      = flag_is_set(flags, PROGRESSIVE_MODE);
   if (overwrite_flag(flags, ARITH_CODE))
@@ -619,7 +658,12 @@ int write_jpeg_spatial(
     cinfo.comp_info[2].component_id = 2;
     cinfo.comp_info[2].quant_tbl_no = 1;
   } else if(quality >= 0) {
-    jpeg_set_quality(&cinfo, quality, FALSE);
+    // force baseline (8bit quantization)
+    bool force_baseline = FALSE;
+    if (overwrite_flag(flags, FORCE_BASELINE))
+      force_baseline = flag_is_set(flags, FORCE_BASELINE);
+    // set quality
+    jpeg_set_quality(&cinfo, quality, force_baseline);
   }
 
   if(smoothing_factor >= 0) cinfo.smoothing_factor = smoothing_factor;
@@ -629,7 +673,7 @@ int write_jpeg_spatial(
   #if JPEG_LIB_VERSION >= 70
   if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
     cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
-    fprintf(stderr, "- write %s: DO_FANCY_UPSAMPLING %d min_DCT_h_scaled_size %d max_DCT_h_scaled_size %d\n", dstfile, cinfo.do_fancy_downsampling, cinfo.min_DCT_h_scaled_size, cinfo.min_DCT_v_scaled_size);
+    //fprintf(stderr, "- write %s: DO_FANCY_UPSAMPLING %d min_DCT_h_scaled_size %d max_DCT_h_scaled_size %d\n", dstfile, cinfo.do_fancy_downsampling, cinfo.min_DCT_h_scaled_size, cinfo.min_DCT_v_scaled_size);
   }
   #endif
   //fprintf(stderr, "write PROGRESSIVE_MODE owr %d set %d\n", overwrite_flag(flags, PROGRESSIVE_MODE), flag_is_set(flags, OPTIMIZE_CODING));
@@ -639,16 +683,16 @@ int write_jpeg_spatial(
     jpeg_simple_progression(&cinfo);
   if (overwrite_flag(flags, OPTIMIZE_CODING))
     cinfo.optimize_coding    = flag_is_set(flags, OPTIMIZE_CODING);
+  #ifdef C_ARITH_CODING_SUPPORTED
   if (overwrite_flag(flags, ARITH_CODE))
     cinfo.arith_code         = flag_is_set(flags, ARITH_CODE);
+  #endif
   if (overwrite_flag(flags, WRITE_JFIF_HEADER))
     cinfo.write_JFIF_header  = flag_is_set(flags, WRITE_JFIF_HEADER);
   if (overwrite_flag(flags, WRITE_ADOBE_MARKER))
     cinfo.write_Adobe_marker = flag_is_set(flags, WRITE_ADOBE_MARKER);
   if (overwrite_flag(flags, CCIR601_SAMPLING))
     cinfo.CCIR601_sampling   = flag_is_set(flags, CCIR601_SAMPLING);
-
-  // https://gist.github.com/kentakuramochi/f64e7646f1db8335c80f131be8359044
 
   //fprintf(stderr, "before reading!!!\n");
   //return 0;
@@ -736,6 +780,97 @@ int print_jpeg_params(const char *srcfile)
   }
 
   return 1;
+}
+
+int set_marker_handlers(struct jpeg_decompress_struct * cinfo) {
+  // jpeg globals
+  mpos = 0;
+  for(int i = 0; i < MAX_MARKER; i++) {
+    memset(mark_name[i], 0, sizeof(char) * MAX_MARKER_NAME);
+    mark_data[i] = NULL;
+    mark_length[i] = 0;
+  }
+  // set handlers
+  jpeg_set_marker_processor(cinfo, JPEG_COM, jpeg_handle_marker);
+  jpeg_set_marker_processor(cinfo, JPEG_APP0+15, jpeg_handle_marker);
+  for (int i=1; i<14; i++)
+    jpeg_set_marker_processor(cinfo, JPEG_APP0+i, jpeg_handle_marker);
+}
+
+int unset_marker_handlers(struct jpeg_decompress_struct * cinfo) {
+  // jpeg globals
+  mpos = 0;
+  for(int i = 0; i < mpos; i++) {
+    mark_length[i] = 0;
+    if(mark_data[i] != NULL)
+      free((void*)mark_data[i]);
+  }
+  
+  // set handlers
+  (void)cinfo;
+}
+
+/**
+ * Read next byte.
+ */
+int jpeg_getc (j_decompress_ptr cinfo)
+{
+  struct jpeg_source_mgr * datasrc = cinfo->src;
+  // no bytes in buffer
+  if (datasrc->bytes_in_buffer == 0) {
+    if (! (*datasrc->fill_input_buffer) (cinfo))
+      return -1; // return error
+  }
+  // read char
+  datasrc->bytes_in_buffer--;
+  return GETJOCTET(*datasrc->next_input_byte++);
+}
+
+/**
+ * Asynchronous marker handler.
+ */
+int jpeg_handle_marker (j_decompress_ptr cinfo)
+{
+  // get marker name
+  char mname[MAX_MARKER_NAME];
+  if (cinfo->unread_marker == JPEG_COM) sprintf(mname, "COM");
+  else sprintf(mname, "APP%d", cinfo->unread_marker - JPEG_APP0);
+
+  // get length
+  unsigned char * p = NULL;
+  int length = 0;
+  length = jpeg_getc(cinfo) << 8;
+  length += jpeg_getc(cinfo);
+  length -= 2; // discount the length word itself
+  mark_length[mpos] = length;
+
+  // allocate
+  if(mpos < MAX_MARKER) {
+    strcpy(mark_name[mpos], mname);
+    if((p = (unsigned char *)malloc(length*sizeof(unsigned char))) == NULL) {
+      fprintf(stderr, "Bad malloc!\n");
+      return FALSE;
+    }
+    mark_data[mpos] = p;
+    mpos += 1;
+
+  // too many markers
+  } else {
+    fprintf(stderr, "Too many markers - %s skipped\n", mname);
+  }
+
+  // iterate over data
+  while (--length >= 0) {
+    if((*(p) = jpeg_getc(cinfo)) == -1) {
+      fprintf(stderr, "Error parsing marker %s\n", mname);
+      return FALSE;
+    }
+    if (!p[0]) p[0] = 0x20; // replace 0x0 byte with 0x20
+    p++;
+  }
+  p[0] = 0; // set the last byte to 0
+  
+  return TRUE;
 }
 
 

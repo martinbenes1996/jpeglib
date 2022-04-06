@@ -13,9 +13,14 @@ class CJpegLib:
         return cls.get().jpeg_lib_version()
 
     @classmethod
-    def read_jpeg_info(cls, srcfile:str, block_dims, image_dims, num_components, samp_factor, jpeg_color_space):
-        status = cls.get().read_jpeg_info(cls.cstr(srcfile), block_dims, image_dims, num_components, samp_factor, jpeg_color_space)
-        if status == 0: raise IOError(f"reading of {srcfile} failed")
+    def read_jpeg_info(cls, srcfile:str, block_dims, image_dims, num_components, samp_factor, jpeg_color_space, marker_lengths, marker_names):
+        status = cls.get().read_jpeg_info(cls.cstr(srcfile), block_dims, image_dims, num_components, samp_factor, jpeg_color_space, marker_lengths, marker_names)
+        if status == 0: raise IOError(f"reading info of {srcfile} failed")
+    
+    @classmethod
+    def read_jpeg_markers(cls, srcfile:str, markers):
+        status = cls.get().read_jpeg_markers(cls.cstr(srcfile), markers)
+        if status == 0: raise IOError(f"reading markers of {srcfile} failed")
         
     @classmethod
     def read_jpeg_dct(cls, srcfile:str, Y, Cb, Cr, qt):
@@ -56,7 +61,8 @@ class CJpegLib:
         "ARITH_CODE": (0b1 << 18),
         "WRITE_JFIF_HEADER": (0b1 << 20),
         "WRITE_ADOBE_MARKER": (0b1 << 22),
-        "CCIR601_SAMPLING": (0b1 << 24)
+        "CCIR601_SAMPLING": (0b1 << 24),
+        "FORCE_BASELINE": (0b1 << 26),
     }
 
     @classmethod

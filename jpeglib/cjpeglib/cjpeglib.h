@@ -6,7 +6,14 @@ int read_jpeg_info(
     int *image_dims,
     int *num_components,
     int *samp_factor,
-    int *jpeg_color_space
+    int *jpeg_color_space,
+    int *marker_lengths,
+    char *marker_names
+);
+
+int read_jpeg_markers(
+    const char *srcfile,
+    unsigned char *markers
 );
 
 // ----------- DCT -------------

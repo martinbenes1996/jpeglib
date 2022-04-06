@@ -17,6 +17,9 @@ class JPEG:
     samp_factor: np.ndarray
     jpeg_color_space: Colorspace
     num_components: int
+    marker_lengths: np.ndarray
+    marker_names: list
+    markers: list 
     
     def height_in_blocks(self, component):
         return self.block_dims[component][0]
@@ -41,12 +44,15 @@ class JPEG:
 
 
 def load_jpeg_info(path: str):
+    """"""
     # allocate
     _block_dims = (ctypes.c_int*6)()
     _image_dims = (ctypes.c_int*2)()
     _num_components = (ctypes.c_int*1)()
     _samp_factor = (ctypes.c_int*6)()
     _jpeg_color_space = (ctypes.c_int*1)()
+    _marker_lengths = (ctypes.c_int*20)()
+    _marker_names = (ctypes.c_char*20*20)()
     # call
     CJpegLib.read_jpeg_info(
         srcfile             = str(path),
@@ -54,7 +60,9 @@ def load_jpeg_info(path: str):
         image_dims          = _image_dims,
         num_components      = _num_components,
         samp_factor         = _samp_factor,
-        jpeg_color_space    = _jpeg_color_space
+        jpeg_color_space    = _jpeg_color_space,
+        marker_lengths      = _marker_lengths,
+        marker_names        = _marker_names,
     )
     # process
     num_components = _num_components[0] # number of components in JPEG
@@ -66,6 +74,29 @@ def load_jpeg_info(path: str):
         np.array([_samp_factor[i] for i in range(2*num_components)], int)
         .reshape(num_components, 2)
     )
+    marker_lengths = np.array([_marker_lengths[i] for i in range(20)])
+    marker_lengths = marker_lengths[marker_lengths > 0]
+    num_markers = marker_lengths.shape[0]
+    marker_names = [_marker_names[i] for i in range(num_markers)]
+    marker_names = [
+        (''.join([name[i].decode('ascii') for i in range(len(name))])
+        .split('\x00')[0]
+        )
+        for name in marker_names
+    ]
+    
+    # allocate
+    _markers = (ctypes.c_ubyte * np.sum(marker_lengths))()
+    # call
+    CJpegLib.read_jpeg_markers(
+        srcfile             = str(path),
+        markers             = _markers,
+    )
+    # process
+    cumlens = np.cumsum([0] + marker_lengths.tolist())
+    markers = [bytes(_markers[cumlens[i]:cumlens[i+1]]) for i in range(num_markers)]
+    
+    # create jpeg
     return JPEG(
         path                = path,
         height              = _image_dims[0],
@@ -74,7 +105,10 @@ def load_jpeg_info(path: str):
         samp_factor         = samp_factor,
         num_components      = num_components,
         jpeg_color_space    = Colorspace.from_index(_jpeg_color_space[0]),
-        content             = None
+        content             = None,
+        marker_lengths      = marker_lengths,
+        marker_names        = marker_names,
+        markers             = markers,
     )
 
     
