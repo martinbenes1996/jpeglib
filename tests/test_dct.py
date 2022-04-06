@@ -92,13 +92,18 @@ class TestDCT(unittest.TestCase):
             return
         img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
         # process
-        YT = img['coef_arrays'][0]\
-            .reshape((1,int(img['image_height']/8),8,-1,8))
-        YT = np.einsum('abcde->adbec', YT)
-        CbT = img['coef_arrays'][1].reshape((int(img['image_height']/8/2),8,-1,8))
-        CbT = np.einsum('bcde->dbec', CbT)
-        CrT = img['coef_arrays'][2].reshape((int(img['image_height']/8/2),8,-1,8))
-        CrT = np.einsum('bcde->dbec', CrT)
+        YT = (
+            img['coef_arrays'][0]
+            .reshape((im.width_in_blocks(1),8,-1,8))
+            .tranpose((2,0,3,1)))
+        CbT = (
+            img['coef_arrays'][1]
+            .reshape((im.width_in_blocks(1),8,-1,8))
+            .tranpose((2,0,3,1)))
+        CrT = (
+            img['coef_arrays'][2]
+            .reshape((im.width_in_blocks(1),8,-1,8))
+            .tranpose((2,0,3,1)))
         qtT = np.stack([
             img['quant_tables'][0],
             img['quant_tables'][1],
