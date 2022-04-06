@@ -2,29 +2,44 @@
 // ---------- Meta -------------
 int read_jpeg_info(
     const char *srcfile,
-    int *dct_dims,
+    int *block_dims,
     int *image_dims,
     int *num_components,
     int *samp_factor,
-    int *jpeg_color_space
+    int *jpeg_color_space,
+    int *marker_lengths,
+    int *mark_types
+);
+
+int read_jpeg_markers(
+    const char *srcfile,
+    unsigned char *markers
 );
 
 // ----------- DCT -------------
 int read_jpeg_dct(
     const char *srcfile,
-    short *dct,
+    short *Y,
+    short *Cb,
+    short *Cr,
     unsigned short *qt
 );
 int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,
-    short *dct,
+    short *Y,
+    short *Cb,
+    short *Cr,
     int *image_dims,
+    int *block_dims,
     int in_color_space,
     int in_components,
-    int *samp_factor,
     unsigned short *qt,
-    short quality
+    short quality,
+    int num_markers,
+    int *marker_types,
+    int *marker_lengths,
+    unsigned char *markers
 );
 
 // ----------- RGB -------------
@@ -41,7 +56,6 @@ int read_jpeg_spatial(
 );
 
 int write_jpeg_spatial(
-    const char *srcfile,
     const char *dstfile,
     unsigned char *rgb,
     int *image_dims,
@@ -52,6 +66,10 @@ int write_jpeg_spatial(
     unsigned short *qt,
     short quality,
     short smoothing_factor,
+    int num_markers,
+    int *marker_types,
+    int *marker_lengths,
+    unsigned char *markers,
     BITMASK flags
 );
 

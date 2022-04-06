@@ -39,6 +39,10 @@ hmax and wmax (2 and 3) and normalizing factors with the respective maximum; now
 [[1,1],[1/2,2/3],[1,1/3]], which stands for how large are sides compared to a rectangle 2x3 pixels.
 Thus multiplied by the image size, Y has 300 x 300, Cb 150 x 200 and Cr 300 x 100.
 
+Discrete cosine transform
+"""""""""""""""""""""""""
+
+Description of discrete cosine transform
 
 References for libjpeg
 """"""""""""""""""""""
@@ -64,5 +68,8 @@ Glossary terms
 
     JPG
         Synonym to :term:`JPEG`.
+
+    spatial domain
+        Description of spatial domain
     
     

@@ -12,15 +12,15 @@ and quantization tables. All of this is possible with **jpeglib**.
 Getting the DCT coefficients with jpeglib is as simple as
 
 >>> import jpeglib
->>> with jpeglib.JPEG("input.jpeg") as im:
->>>     Y,CbCr,qt = im.read_dct()
+>>> im = jpeglib.read_dct("input.jpeg")
+>>> im.Y; im.Cb; im.Cr; im.qt
 
 With **jpeglib** you can choose a particular version of *libjpeg* to
-work with. Currently supported are *libjpeg 6b*, *8d*, *9d* and *libjpeg-turbo 2.1.0*.
+work with. Currently supported are all *libjpeg* versions from *6b* to *9e*, *libjpeg-turbo 2.1.0* and *mozjpeg 4.0.3*.
 
 >>> jpeglib.version.set('6b')
->>> with jpeglib.JPEG("input.jpeg") as im:
->>>     spatial = im.read_spatial()
+>>> im = jpeglib.read_spatial("input.jpeg")
+>>> im.spatial
 
 .. note::
 

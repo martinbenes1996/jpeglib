@@ -13,34 +13,56 @@ class CJpegLib:
         return cls.get().jpeg_lib_version()
 
     @classmethod
-    def read_jpeg_info(cls, srcfile, dct_dims, image_dims, num_components, samp_factor, jpeg_color_space):
-        status = cls.get().read_jpeg_info(cls.cstr(srcfile), dct_dims, image_dims, num_components, samp_factor, jpeg_color_space)
-        if status == 0: raise IOError(f"reading of {srcfile} failed")
+    def read_jpeg_info(cls,
+        srcfile:str, block_dims, image_dims, num_components,
+        samp_factor, jpeg_color_space, marker_lengths, marker_types):
+        status = cls.get().read_jpeg_info(cls.cstr(srcfile), block_dims, image_dims, num_components,
+                                          samp_factor, jpeg_color_space, marker_lengths, marker_types)
+        if status == 0: raise IOError(f"reading info of {srcfile} failed")
+    
+    @classmethod
+    def read_jpeg_markers(cls, srcfile:str, markers):
+        status = cls.get().read_jpeg_markers(cls.cstr(srcfile), markers)
+        if status == 0: raise IOError(f"reading markers of {srcfile} failed")
         
     @classmethod
-    def read_jpeg_dct(cls, srcfile, dct, qt):
-        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), dct, qt)
+    def read_jpeg_dct(cls, srcfile:str, Y, Cb, Cr, qt):
+        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt)
         if status == 0: raise IOError(f"reading of {srcfile} DCT failed")
 
     @classmethod
-    def write_jpeg_dct(cls, srcfile, dstfile, dct, image_dims, in_color_space, in_components, samp_factor, qt, quality):
-        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), dct, image_dims, in_color_space, in_components, samp_factor, qt, quality)
+    def write_jpeg_dct(cls,
+        srcfile:str, dstfile:str, Y, Cb, Cr,
+        image_dims, block_dims, in_color_space, in_components,
+        qt, quality, num_markers, marker_types, marker_lengths, markers):
+        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), Y, Cb, Cr,
+                                          image_dims, block_dims, in_color_space, in_components,
+                                          qt, quality, num_markers, marker_types, marker_lengths, markers)
         if status == 0: raise IOError(f"writing DCT to {dstfile} failed")
     @classmethod
-    def print_jpeg_params(cls, srcfile):
+    def print_jpeg_params(cls, srcfile:str):
         status = cls.get().print_jpeg_params(cls.cstr(srcfile))
         if status == 0: raise IOError(f"reading of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_spatial(cls, srcfile, rgb, colormap, in_colormap, out_color_space, dither_mode, dct_method, flags):
-        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), rgb, colormap, in_colormap,
+    def read_jpeg_spatial(cls,
+        srcfile:str, spatial, colormap, in_colormap, out_color_space,
+        dither_mode, dct_method, flags):
+        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), spatial, colormap, in_colormap,
                                              out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"reading of {srcfile} spatial failed")
     
     @classmethod
-    def write_jpeg_spatial(cls, srcfile, dstfile, rgb, image_dims, in_color_space, in_components, dct_method, samp_factor, qt, quality, smoothing_factor, flags):
-        status = cls.get().write_jpeg_spatial(cls.cstr(srcfile), cls.cstr(dstfile), rgb, image_dims, in_color_space, in_components,
-                                              dct_method, samp_factor, qt, cls.factor(quality), cls.factor(smoothing_factor), cls.flags_to_mask(flags))
+    def write_jpeg_spatial(cls,
+        dstfile:str, spatial, image_dims, in_color_space, in_components,
+        dct_method, samp_factor, qt, quality, smoothing_factor,
+        num_markers:int, marker_types, marker_lengths, markers,
+        flags
+    ):
+        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), spatial, image_dims, in_color_space, in_components,
+                                              dct_method, samp_factor, qt, cls.factor(quality), cls.factor(smoothing_factor),
+                                              num_markers, marker_types, marker_lengths, markers,
+                                              cls.flags_to_mask(flags))
         if status == 0: raise IOError(f"writing RGB to {dstfile} failed")
         
     MASKS = {
@@ -56,7 +78,8 @@ class CJpegLib:
         "ARITH_CODE": (0b1 << 18),
         "WRITE_JFIF_HEADER": (0b1 << 20),
         "WRITE_ADOBE_MARKER": (0b1 << 22),
-        "CCIR601_SAMPLING": (0b1 << 24)
+        "CCIR601_SAMPLING": (0b1 << 24),
+        "FORCE_BASELINE": (0b1 << 26),
     }
 
     @classmethod

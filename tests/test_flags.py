@@ -1,4 +1,5 @@
 
+import logging
 import numpy as np
 import os
 import shutil
@@ -10,12 +11,11 @@ sys.path.append('.')
 import jpeglib
 
 class TestFlags(unittest.TestCase):
+	logger = logging.getLogger(__name__)
 	def setUp(self):
-		try: shutil.rmtree("tmp")
-		except: pass
-		finally: os.mkdir("tmp")
+		self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
 	def tearDown(self):
-		shutil.rmtree("tmp")
+		del self.tmp
 	
 	# def test_fancy_upsampling(self):
 		
@@ -34,22 +34,23 @@ class TestFlags(unittest.TestCase):
 		jpeglib.version.set('8d')
 		with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
 			x = im.read_spatial(flags = ['-DO_FANCY_DOWNSAMPLING'])
+
 		# default flags
-		with tempfile.NamedTemporaryFile() as tmp:
-			with jpeglib.JPEG() as im:
-				im.write_spatial(tmp.name, x, flags = [])
-			with jpeglib.JPEG(tmp.name) as im:
-				Y_def, CbCr_def, qt_def = im.read_dct()
+		with jpeglib.JPEG() as im:
+			im.write_spatial(x, self.tmp.name, flags = [])
+		with jpeglib.JPEG(self.tmp.name) as im:
+			Y_def, CbCr_def, qt_def = im.read_dct()
+		
 		# fancy upsampling
 		with tempfile.NamedTemporaryFile() as tmp:
 			with jpeglib.JPEG() as im:
-				im.write_spatial(tmp.name, x, flags = ['+DO_FANCY_DOWNSAMPLING'])
+				im.write_spatial(x, tmp.name, flags = ['+DO_FANCY_DOWNSAMPLING'])
 			with jpeglib.JPEG(tmp.name) as im:
 				Y_fu, CbCr_fu, qt_fu = im.read_dct()
 		# simple scaling
 		with tempfile.NamedTemporaryFile() as tmp:
 			with jpeglib.JPEG() as im:
-				im.write_spatial(tmp.name, x, flags = ['-DO_FANCY_DOWNSAMPLING'])
+				im.write_spatial(x, tmp.name, flags = ['-DO_FANCY_DOWNSAMPLING'])
 			with jpeglib.JPEG(tmp.name) as im:
 				Y_ss, CbCr_ss, qt_ss = im.read_dct()
 		
