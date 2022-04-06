@@ -8,10 +8,8 @@ Working with jpegs
 ------------------
 
 .. autofunction:: jpeglib.read_dct
-   :members:
 
 .. autofunction:: jpeglib.read_spatial
-   :members:
 
 .. autoclass:: jpeglib.spatial_jpeg.SpatialJPEG
    :members:
