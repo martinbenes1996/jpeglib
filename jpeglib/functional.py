@@ -1,8 +1,12 @@
 
-from pathlib import Path
+import numpy as np
+#from pathlib import Path
 import tempfile
-from .jpeg import DCTJPEG,SpatialJPEG
+import typing
+from .dct_jpeg import DCTJPEG
+from .spatial_jpeg import SpatialJPEG
 from . import _jpeg
+from ._colorspace import Colorspace
 
 def read_dct(path: str):
     """Reads the DCT JPEG.
@@ -93,7 +97,54 @@ def read_spatial(
         flags               = flags,
     )
 
-
+def from_spatial(spatial: np.ndarray, in_color_space:typing.Union[str,Colorspace] = None):
+    """Factory of spatial JPEG from spatial representation.
+    
+    Does not set the source path, you have to specify dstfile when writing.
+        
+    :param spatial: Spatial representation.
+    :type spatial: np.ndarray
+    :param in_color_space: Color space of the input. If not given, infered from the shape.
+    :type in_color_space: str | Colorspace, optional
+    
+    :Example:
+    
+    >>> spatial = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
+    >>> jpeg = jpeglib.from_spatial(spatial)
+    """
+    # shape
+    height,width,num_components = spatial.shape
+    # parse colorspace
+    if in_color_space is not None:
+        try:
+            color_space = Colorspace(in_color_space)
+        except:
+            color_space = in_color_space
+    # infere colorspace
+    if color_space is None:
+        if num_components == 3:
+            color_space = Colorspace('JCS_RGB')
+        elif num_components == 1:
+            color_space = Colorspace('JCS_GRAYSCALE')
+        else:
+            raise IOError('failed to infere colorspace')
+    # create jpeg
+    return cls(
+        path                = None,
+        content             = None,
+        height              = height,
+        width               = width,
+        block_dims          = None,
+        samp_factor         = None,
+        jpeg_color_space    = None,
+        num_components      = num_components,
+        markers             = None,
+        spatial             = spatial,
+        color_space         = color_space,
+        dither_mode         = None,
+        dct_method          = None,
+        flags               = [],
+    )
     
     #with JPEG(srcfile) as im:
     #    Y,CbCr,qt = im.read_dct(*args, **kwargs)
