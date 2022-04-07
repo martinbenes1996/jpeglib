@@ -9,15 +9,18 @@ import jpeglib
 class TestInterface(unittest.TestCase):
 
     def test_read_dct(self):
+        print("test_read_dct")
         im = jpeglib.read_dct("examples/IMG_0791.jpeg")
         im.Y; im.Cb; im.Cr; im.qt
             
     def test_read_spatial(self):
+        print("test_read_spatial")
         im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
         im.spatial
     
     def test_with_version(self):
         """Test with statement for version."""
+        print("test_with_version")
         # default version
         jpeglib.version.set('6b')
         self.assertEqual(jpeglib.version.get(), '6b')
