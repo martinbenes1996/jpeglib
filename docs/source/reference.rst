@@ -7,8 +7,8 @@ Reference
 Working with jpegs
 ------------------
 
-DCT domain
-""""""""""
+Inside DCT domain
+"""""""""""""""""
 
 .. autofunction:: jpeglib.read_dct
 
@@ -16,8 +16,8 @@ DCT domain
    :members: Y, Cb, Cr, qt, write_dct
    :special-members:
 
-Spatial domain
-""""""""""""""
+Inside spatial domain
+"""""""""""""""""""""
 
 .. autofunction:: jpeglib.read_spatial
 
@@ -25,13 +25,13 @@ Spatial domain
    :members: spatial, write_spatial, color_space, dither_mode, dct_method, flags
    :special-members:
 
-jpegio interface
-""""""""""""""""
+Using jpegio interface
+""""""""""""""""""""""
 
 .. autofunction:: jpeglib.to_jpegio
 
-libjpeg structures
-""""""""""""""""""
+libjpeg-like structures
+"""""""""""""""""""""""
 
 .. autoclass:: jpeglib.Dithermode
    :members: from_index, name, index, name_to_index, index_to_name, J_DITHER_MODE, iJ_DITHER_MODE
