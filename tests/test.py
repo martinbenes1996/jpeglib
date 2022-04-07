@@ -19,6 +19,7 @@ from test_shapes import *
 # from test_version import *
 
 from test_marker import *
+from test_dctmethod import *
 # ==================
 
 
