@@ -14,9 +14,9 @@ class TestMarker(unittest.TestCase):
     def tearDown(self):
         del self.tmp
     
-    def test_marker_interface(self):
+    def test_marker_jpeg_app0(self):
         """Interface of marker."""
-        self.logger.info("test_with_version")
+        self.logger.info("test_marker_interface")
         # create marker
         name = 'JPEG_APP0'
         content = b'abcd1234eeee'
@@ -34,6 +34,27 @@ class TestMarker(unittest.TestCase):
         self.assertEqual(marker.length, len(content))
         self.assertIsInstance(marker.index, int)
         self.assertEqual(marker.index, 0xE0)
+    
+    def test_marker_jpeg_app5(self):
+        """Interface of marker."""
+        self.logger.info("test_marker_interface")
+        # create marker
+        name = 'JPEG_APP5'
+        content = b'abcd1234eeee'
+        marker = jpeglib.Marker(
+            name    = name,
+            content = content,
+            length  = len(content)
+        )
+        # attributes
+        self.assertIsInstance(marker.name, str)
+        self.assertEqual(marker.name, name)
+        self.assertIsInstance(marker.content, bytes)
+        self.assertEqual(marker.content, content)
+        self.assertIsInstance(marker.length, int)
+        self.assertEqual(marker.length, len(content))
+        self.assertIsInstance(marker.index, int)
+        self.assertEqual(marker.index, 0xE0 + 5)
     
     def test_image_marker(self):
         # read im
