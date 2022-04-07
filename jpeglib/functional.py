@@ -26,9 +26,7 @@ def read_dct(path: str):
     with open(path, "rb") as f:
         content = f.read()
     # load info
-    logging.error("_jpeg.load_jpeg_info")
     info = _jpeg.load_jpeg_info(path)
-    logging.error("constructing DCTJPEG")
     # create jpeg
     return DCTJPEG(
         path                = path,

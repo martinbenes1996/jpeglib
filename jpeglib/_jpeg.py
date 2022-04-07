@@ -2,6 +2,7 @@
 import ctypes
 from collections import namedtuple
 from dataclasses import dataclass
+import logging
 import numpy as np
 from ._bind import CJpegLib
 from ._colorspace import Colorspace
@@ -58,6 +59,7 @@ class JPEG:
 
 def load_jpeg_info(path: str):
     """"""
+    logging.error("CJpegLib.read_jpeg_info")
     # allocate
     _block_dims = (ctypes.c_int*6)()
     _image_dims = (ctypes.c_int*2)()
@@ -67,6 +69,7 @@ def load_jpeg_info(path: str):
     _marker_lengths = (ctypes.c_int*20)()
     _marker_types = (ctypes.c_uint32*20)()
     # call
+    #logging.error("CJpegLib.read_jpeg_info")
     CJpegLib.read_jpeg_info(
         srcfile             = str(path),
         block_dims          = _block_dims,
