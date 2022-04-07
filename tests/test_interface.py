@@ -16,18 +16,18 @@ class TestInterface(unittest.TestCase):
         del self.tmp
         
     def test_read_dct(self):
-        self.logger.debug("test_read_dct")
+        self.logger.info("test_read_dct")
         im = jpeglib.read_dct("examples/IMG_0791.jpeg")
         im.Y; im.Cb; im.Cr; im.qt
     
     def test_read_spatial(self):
-        self.logger.debug("test_read_spatial")
+        self.logger.info("test_read_spatial")
         im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
         im.spatial
     
     def test_with_version(self):
         """Test with statement for version."""
-        self.logger.debug("test_with_version")
+        self.logger.info("test_with_version")
         # default version
         jpeglib.version.set('6b')
         self.assertEqual(jpeglib.version.get(), '6b')
