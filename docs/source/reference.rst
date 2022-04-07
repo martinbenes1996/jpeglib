@@ -7,7 +7,17 @@ Reference
 Working with jpegs
 ------------------
 
+DCT domain
+""""""""""
+
 .. autofunction:: jpeglib.read_dct
+
+.. autoclass:: jpeglib.DCTJPEG
+   :members: Y, Cb, Cr, qt, write_dct
+   :special-members:
+
+Spatial domain
+""""""""""""""
 
 .. autofunction:: jpeglib.read_spatial
 
@@ -15,9 +25,13 @@ Working with jpegs
    :members: spatial, write_spatial, color_space, dither_mode, dct_method, flags
    :special-members:
 
-.. autoclass:: jpeglib.DCTJPEG
-   :members: Y, Cb, Cr, qt, write_dct
-   :special-members:
+jpegio interface
+""""""""""""""""
+
+.. autofunction:: jpeglib.to_jpegio
+
+libjpeg structures
+""""""""""""""""""
 
 .. autoclass:: jpeglib.Dithermode
    :members: from_index, name, index, name_to_index, index_to_name, J_DITHER_MODE, iJ_DITHER_MODE
@@ -35,7 +49,7 @@ Working with jpegs
    :members: from_index, name, index, name_to_index, index_to_name, J_MARKER_CODE, iJ_MARKER_CODE
    :special-members: __init__
 
-.. autofunction:: jpeglib.to_jpegio
+
 
 Manage libjpeg version
 ----------------------
