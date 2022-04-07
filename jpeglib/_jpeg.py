@@ -28,6 +28,8 @@ class JPEG:
     def has_chrominance(self):
         return self.num_components > 1
     def num_markers(self) -> int:
+        if self.markers is None:
+            return 0
         return len(self.markers)
     
     def c_image_dims(self):
@@ -38,22 +40,31 @@ class JPEG:
             self.block_dims[1][0], self.block_dims[1][1],
             self.block_dims[2][0], self.block_dims[2][1],)
     def c_samp_factor(self):
+        if self.samp_factor is None:
+            return self.samp_factor
         samp_factor = np.array(self.samp_factor, dtype=np.int32)
         return np.ctypeslib.as_ctypes(samp_factor)
     def c_marker_types(self):
+        if self.markers is None:
+            return None
         marker_types = [marker.index for marker in self.markers]
         return (ctypes.c_int32*self.num_markers())(*marker_types)
     def c_marker_lengths(self):
+        if self.markers is None:
+            return None
         marker_lengths = [marker.length for marker in self.markers]
         return (ctypes.c_int32*self.num_markers())(*marker_lengths)
     def c_markers(self):
+        if self.markers is None:
+            return None
         marker_lengths = [marker.length for marker in self.markers]
         marker_contents = []
         for marker in self.markers:
             marker_contents += [i for i in marker.content]
         return (ctypes.c_ubyte*np.sum(marker_lengths))(*marker_contents)
         
-    def _free(self):
+    def free(self):
+        """Free the allocated tensors."""
         raise NotImplementedError
 
 

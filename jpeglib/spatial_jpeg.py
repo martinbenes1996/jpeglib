@@ -36,7 +36,7 @@ class SpatialJPEG(JPEG):
 
         :Example:
         
-        >>> jpeg = jpeglib.read_jpeg_spatial("input.jpeg")
+        >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", qt=75)
         """
     
@@ -95,7 +95,7 @@ class SpatialJPEG(JPEG):
 
         :Example:
         
-        >>> jpeg = jpeglib.read_jpeg_spatial("input.jpeg")
+        >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", qt=75)
         """
         # colorspace
@@ -183,6 +183,7 @@ class SpatialJPEG(JPEG):
     def flags(self, flags: list):
         self._flags = flags
     
-    def _free(self):
+    def free(self):
+        """Free the allocated tensors."""
         del self._spatial
     

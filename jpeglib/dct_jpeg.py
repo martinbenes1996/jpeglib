@@ -10,9 +10,13 @@ from . import _jpeg
 class DCTJPEG(_jpeg.JPEG):
     """JPEG instance to work in DCT domain."""
     Y: np.ndarray
+    """luminance"""
     Cb: np.ndarray
+    """chrominance blue-difference"""
     Cr: np.ndarray
+    """chrominance red-difference"""
     qt: np.ndarray
+    """quantization"""
     
     def is_read(self) -> bool:
         has_Y = self.Y is not None
@@ -61,6 +65,18 @@ class DCTJPEG(_jpeg.JPEG):
         return self.Y,(self.Cb,self.Cr),self.qt
     
     def write_dct(self, path:str = None, quality:int=-1):
+        """Writes DCT to JPEG.
+        
+        :param path: Destination file name. If not given, source file is overwritten.
+        :type path: str, optional
+        :param quality: Compression quality, between 0 and 100.
+        :type quality: int, optional
+        
+        :Example:
+        
+        >>> jpeg = jpeglib.read_spatial("input.jpeg")
+        >>> jpeg.write_spatial("output.jpeg", quality=92)
+        """
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         tmp.write(self.content)
@@ -101,41 +117,50 @@ class DCTJPEG(_jpeg.JPEG):
     
     @property
     def Y(self) -> np.ndarray:
+        """Luminance tensor getter."""
         if self._Y is None:
             self.read_dct()
         return self._Y
     @Y.setter
     def Y(self, Y: np.ndarray):
+        """Luminance tensor setter."""
         self._Y = Y
     
     @property
     def Cb(self) -> np.ndarray:
+        """Chrominance blue-difference tensor getter."""
         if self.has_chrominance() and self._Cb is None:
             self.read_dct()
         return self._Cb
     @Cb.setter
     def Cb(self, Cb: np.ndarray):
+        """Chrominance blue-difference tensor setter."""
         self._Cb = Cb
     
     @property
     def Cr(self) -> np.ndarray:
+        """Chrominance red-difference tensor getter."""
         if self.has_chrominance() and self._Cr is None:
             self.read_dct()
         return self._Cr
     @Cr.setter
     def Cr(self, Cr: np.ndarray):
+        """Chrominance red-difference tensor setter."""
         self._Cr = Cr
     
     @property
     def qt(self) -> np.ndarray:
+        """Quantization table getter."""
         if self._qt is None:
             self.read_dct()
         return self._qt
     @qt.setter
     def qt(self, qt: np.ndarray):
+        """Quantization table setter."""
         self._qt = qt
     
-    def _free(self):
+    def free(self):
+        """Free the allocated tensors."""
         del self._Y
         del self._Cb
         del self._Cr
