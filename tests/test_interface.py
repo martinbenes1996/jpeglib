@@ -18,6 +18,7 @@ class TestInterface(unittest.TestCase):
     def test_read_dct(self):
         self.logger.error("test_read_dct")
         im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        self.logger.error("read_dct")
         im.Y; im.Cb; im.Cr; im.qt
             
     def test_read_spatial(self):
