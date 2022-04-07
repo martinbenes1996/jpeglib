@@ -59,7 +59,6 @@ class JPEG:
 
 def load_jpeg_info(path: str):
     """"""
-    logging.error("CJpegLib.read_jpeg_info")
     # allocate
     _block_dims = (ctypes.c_int*6)()
     _image_dims = (ctypes.c_int*2)()
