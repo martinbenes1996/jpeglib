@@ -20,10 +20,11 @@ Working with jpegs
    :special-members: __init__
 
 .. autoclass:: jpeglib.Dithermode
-   :members:
+   :special-members: _J_DITHER_MODE
 
 .. autoclass:: jpeglib.Colorspace
    :members:
+   :special-members: _J_DITHER_MODE
 
 .. autoclass:: jpeglib.DCTMethod
    :members:
