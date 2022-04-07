@@ -58,8 +58,8 @@ The output channels depend on the source file. You can explicitly request return
 For more parameters check out the documentation of the function `jpeglib.JPEG.read_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.functional.read_spatial>`_
 and the class of the returned object `jpeglib.spatial_jpeg.SpatialJPEG <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.spatial_jpeg.SpatialJPEG>`_
 
-Writing the pixel data
-^^^^^^^^^^^^^^^^^^^^^^
+Writing the spatial domain
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compression of a spatial domain to an output file ``output.jpeg`` is done with
 
