@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+"""Module with color space operations."""
 
 from dataclasses import dataclass,field
 from ._cstruct import CStruct
+
 @dataclass
 class Colorspace(CStruct):
     """Representation of color space.
