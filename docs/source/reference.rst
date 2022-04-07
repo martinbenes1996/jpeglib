@@ -13,11 +13,11 @@ Working with jpegs
 
 .. autoclass:: jpeglib.SpatialJPEG
    :members: spatial, write_spatial, color_space, dither_mode, dct_method, flags
-   :special-members: __init__
+   :special-members:
 
 .. autoclass:: jpeglib.DCTJPEG
    :members: Y, Cb, Cr, qt, write_dct
-   :special-members: __init__
+   :special-members:
 
 .. autoclass:: jpeglib.Dithermode
    :members: from_index, name, index, name_to_index, index_to_name, J_DITHER_MODE, iJ_DITHER_MODE

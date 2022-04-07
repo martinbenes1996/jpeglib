@@ -118,19 +118,19 @@ def from_spatial(spatial: np.ndarray, in_color_space:typing.Union[str,Colorspace
     # parse colorspace
     if in_color_space is not None:
         try:
-            color_space = Colorspace(in_color_space)
+            in_color_space = Colorspace(in_color_space)
         except:
-            color_space = in_color_space
+            in_color_space = in_color_space
     # infere colorspace
-    if color_space is None:
+    if in_color_space is None:
         if num_components == 3:
-            color_space = Colorspace('JCS_RGB')
+            in_color_space = Colorspace('JCS_RGB')
         elif num_components == 1:
-            color_space = Colorspace('JCS_GRAYSCALE')
+            in_color_space = Colorspace('JCS_GRAYSCALE')
         else:
             raise IOError('failed to infere colorspace')
     # create jpeg
-    return cls(
+    return SpatialJPEG(
         path                = None,
         content             = None,
         height              = height,
@@ -141,7 +141,7 @@ def from_spatial(spatial: np.ndarray, in_color_space:typing.Union[str,Colorspace
         num_components      = num_components,
         markers             = None,
         spatial             = spatial,
-        color_space         = color_space,
+        color_space         = in_color_space,
         dither_mode         = None,
         dct_method          = None,
         flags               = [],
