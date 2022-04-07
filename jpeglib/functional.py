@@ -15,7 +15,7 @@ def read_dct(path: str):
     :param path: Path to a source file in JPEG format.
     :type path: str
     :return: DCT JPEG object
-    :rtype: :class:`dct_jpeg.DCTJPEG`
+    :rtype: :class:`DCTJPEG`
     :raises [IOError]: When source file does not exist
     
     :Example:
@@ -68,7 +68,7 @@ def read_spatial(
     :param flags: Bool decompression parameters as str. If not given, using the libjpeg default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
     :type flags: list, optional
     :return: Spatial JPEG object
-    :rtype: :class:`spatial_jpeg.SpatialJPEG`
+    :rtype: :class:`SpatialJPEG`
     :raises [IOError]: When source file does not exist
 
     :Example:
