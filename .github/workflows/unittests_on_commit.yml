@@ -47,4 +47,8 @@ jobs:
     
     - name: Run unittests # run unittests
       run:
-        python tests/test.py; cat test.log
+        python tests/test.py
+    
+    - name: Print log # print log
+      run:
+        cat test.log
