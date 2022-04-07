@@ -12,26 +12,30 @@ Working with jpegs
 .. autofunction:: jpeglib.read_spatial
 
 .. autoclass:: jpeglib.SpatialJPEG
-   :members:
+   :members: spatial, write_spatial, color_space, dither_mode, dct_method, flags
    :special-members: __init__
 
 .. autoclass:: jpeglib.DCTJPEG
-   :members:
+   :members: Y, Cb, Cr, qt, write_dct
    :special-members: __init__
 
 .. autoclass:: jpeglib.Dithermode
-   :special-members: _J_DITHER_MODE
+   :members: from_index, name, index, name_to_index, index_to_name, J_DITHER_MODE, iJ_DITHER_MODE
+   :special-members: __init__
 
 .. autoclass:: jpeglib.Colorspace
-   :members:
-   :special-members: _J_DITHER_MODE
+   :members: from_index, name, index, name_to_index, index_to_name, J_COLOR_SPACE, iJ_COLOR_SPACE
+   :special-members: __init__
 
 .. autoclass:: jpeglib.DCTMethod
-   :members:
+   :members: from_index, name, index, name_to_index, index_to_name, J_DCT_METHOD, iJ_DCT_METHOD
+   :special-members: __init__
 
 .. autoclass:: jpeglib.Marker
-   :members:
+   :members: from_index, name, index, name_to_index, index_to_name, J_MARKER_CODE, iJ_MARKER_CODE
+   :special-members: __init__
 
+.. autofunction:: jpeglib.to_jpegio
 
 Manage libjpeg version
 ----------------------
