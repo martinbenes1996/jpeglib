@@ -1,7 +1,9 @@
 
+import logging
 import numpy as np
 from PIL import Image
 import sys
+import tempfile
 import unittest
 
 sys.path.append('.')
@@ -9,6 +11,12 @@ import jpeglib
 
 
 class TestShapes(unittest.TestCase):
+    logger = logging.getLogger(__name__)
+    def setUp(self):
+        self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+    def tearDown(self):
+        del self.tmp
+        
     def test_read_dct_color(self):
         print("test_read_dct_color")
         # read info
