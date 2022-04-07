@@ -27,6 +27,19 @@ class SpatialJPEG(JPEG):
             channels = self.num_components
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
     
+    @classmethod
+    def from_spatial(cls, spatial, ):
+        """Factory of spatial JPEG from spatial representation.
+        
+        :param spatial: Spatial representation.
+        :type spatial: np.ndarray
+
+        :Example:
+        
+        >>> jpeg = jpeglib.read_jpeg_spatial("input.jpeg")
+        >>> jpeg.write_spatial("output.jpeg", qt=75)
+        """
+    
     def read_spatial(self):
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
@@ -90,6 +103,8 @@ class SpatialJPEG(JPEG):
             self.color_space = self.jpeg_color_space
         # path
         dstfile = path if path is not None else self.path
+        if dstfile is None:
+            raise IOError('no destination file specified')
         # dct method
         if dct_method is not None:
             # str
