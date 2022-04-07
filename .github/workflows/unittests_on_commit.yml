@@ -50,5 +50,6 @@ jobs:
         python tests/test.py
     
     - name: Print log # print log
+      if: always()
       run:
         cat test.log
