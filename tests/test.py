@@ -12,8 +12,8 @@ sys.path.append(".")
 # === unit tests ===
 from test_dct import *
 # from test_flags import *
-# from test_interface import *
-# from test_shapes import *
+from test_interface import *
+from test_shapes import *
 # from test_spatial import *
 # from test_performance import *
 # from test_version import *

@@ -9,83 +9,132 @@ import jpeglib
 
 
 class TestShapes(unittest.TestCase):
-    def test_read_direct(self):
-
+    def test_read_dct_color(self):
         # read info
-        im = jpeglib.JPEG("examples/IMG_0791.jpeg")
-        # inner state
-        self.assertIsNotNone(jpeglib.JPEG.cjpeglib) # dylib object
-        self.assertEqual(im.srcfile, "examples/IMG_0791.jpeg") # source file
-        self.assertEqual(im.dct_channels, 3) # color channels
-        self.assertEqual(im.channels, 3) # color channels
-
-        # read image
-        Y,CbCr,qt = im.read_dct()
+        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        # inner state before reading
+        self.assertEqual(im.path, "examples/IMG_0791.jpeg") # source file
+        self.assertTrue(im.content is not None)
+        self.assertIsInstance(im.content, bytes)
+        self.assertEqual(im.height, 3024)
+        self.assertEqual(im.width, 4032)
+        self.assertIsInstance(im.block_dims, np.ndarray)
+        self.assertEqual(im.block_dims[0,0], im.height//8)
+        self.assertEqual(im.block_dims[0,1], im.width//8)
+        self.assertEqual(im.block_dims[1,0], im.height//8//2)
+        self.assertEqual(im.block_dims[1,1], im.width//8//2)
+        self.assertEqual(im.block_dims[2,0], im.height//8//2)
+        self.assertEqual(im.block_dims[2,1], im.width//8//2)
+        self.assertIsInstance(im.samp_factor, np.ndarray)
+        self.assertEqual(im.samp_factor[0,0], 2)
+        self.assertEqual(im.samp_factor[0,1], 2)
+        self.assertEqual(im.samp_factor[1,0], 1)
+        self.assertEqual(im.samp_factor[1,1], 1)
+        self.assertEqual(im.samp_factor[2,0], 1)
+        self.assertEqual(im.samp_factor[2,1], 1)
+        self.assertIsInstance(im.jpeg_color_space, jpeglib.Colorspace)
+        self.assertEqual(im.num_components, 3)
+        self.assertEqual(len(im.markers), 2)
+        # read dct
+        im.Y
+        # inner state after reading
+        self.assertIsInstance(im.Y, np.ndarray)
+        self.assertEqual(len(im.Y.shape), 4)
+        self.assertEqual(im.Y.shape[0], im.block_dims[0,0])
+        self.assertEqual(im.Y.shape[0], im.height_in_blocks(0))
+        self.assertEqual(im.Y.shape[1], im.block_dims[0,1])
+        self.assertEqual(im.Y.shape[1], im.width_in_blocks(0))
+        self.assertEqual(im.Y.shape[2], 8) # block size 8^2
+        self.assertEqual(im.Y.shape[3], 8)
+        self.assertIsInstance(im.Cb, np.ndarray)
+        self.assertEqual(len(im.Cb.shape), 4)
+        self.assertEqual(im.Cb.shape[0], im.block_dims[1,0])
+        self.assertEqual(im.Cb.shape[0], im.height_in_blocks(1))
+        self.assertEqual(im.Cb.shape[1], im.block_dims[1,1])
+        self.assertEqual(im.Cb.shape[1], im.width_in_blocks(1))
+        self.assertEqual(im.Cb.shape[2], 8) # block size 8^2
+        self.assertEqual(im.Cb.shape[3], 8)
+        self.assertIsInstance(im.Cr, np.ndarray)
+        self.assertEqual(len(im.Cr.shape), 4)
+        self.assertEqual(im.Cr.shape[0], im.block_dims[2,0])
+        self.assertEqual(im.Cr.shape[0], im.height_in_blocks(2))
+        self.assertEqual(im.Cr.shape[1], im.block_dims[2,1])
+        self.assertEqual(im.Cr.shape[1], im.width_in_blocks(2))
+        self.assertEqual(im.Cr.shape[2], 8) # block size 8^2
+        self.assertEqual(im.Cr.shape[3], 8)
+        self.assertIsInstance(im.qt, np.ndarray)
+        self.assertEqual(len(im.qt.shape), 3)
+        self.assertEqual(im.qt.shape[0], 3) # quantization tables for lumo and chroma channels
+        self.assertEqual(im.qt.shape[1], 8)
+        self.assertEqual(im.qt.shape[2], 8)
         
-        # test Y shapes
-        self.assertIsInstance(Y, np.ndarray)
-        self.assertEqual(len(Y.shape), 5)
-        self.assertEqual(Y.shape[0], 1) # Y contains one color channel
-        self.assertEqual(Y.shape[1], im.dct_shape[0][0])
-        self.assertEqual(Y.shape[2], im.dct_shape[0][1])
-        self.assertEqual(Y.shape[3], 8) # block size 8^2
-        self.assertEqual(Y.shape[4], 8)
-        # test CbCr
-        self.assertIsInstance(CbCr, np.ndarray)
-        self.assertEqual(len(CbCr.shape), 5)
-        self.assertEqual(CbCr.shape[0], 2) # CbCr contains two color channels
-        self.assertEqual(CbCr.shape[1], im.dct_shape[1][0])
-        self.assertEqual(CbCr.shape[2], im.dct_shape[1][1])
-        self.assertEqual(CbCr.shape[3], 8) # block size 8^2
-        self.assertEqual(CbCr.shape[4], 8)
-        # test qt
-        self.assertIsInstance(qt, np.ndarray)
-        self.assertEqual(len(qt.shape), 3)
-        self.assertEqual(qt.shape[0], 2) # quantization tables for lumo and chroma channels
-        self.assertEqual(qt.shape[1], 8)
-        self.assertEqual(qt.shape[2], 8)
 
-        # read image
-        data = im.read_spatial()
-        # test spatial
-        self.assertIsInstance(data, np.ndarray)
-        self.assertEqual(len(data.shape), 3)
-        self.assertEqual(data.shape[0], im.shape[1])
-        self.assertEqual(data.shape[1], im.shape[0])
-        self.assertEqual(data.shape[2], 3)
+    def test_read_spatial(self):
+        # read info
+        im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
+        # inner state before reading
+        self.assertEqual(im.path, "examples/IMG_0791.jpeg") # source file
+        self.assertTrue(im.content is not None)
+        self.assertIsInstance(im.content, bytes)
+        self.assertEqual(im.height, 3024)
+        self.assertEqual(im.width, 4032)
+        self.assertIsInstance(im.block_dims, np.ndarray)
+        self.assertEqual(im.block_dims[0,0], im.height//8)
+        self.assertEqual(im.block_dims[0,1], im.width//8)
+        self.assertEqual(im.block_dims[1,0], im.height//8//2)
+        self.assertEqual(im.block_dims[1,1], im.width//8//2)
+        self.assertEqual(im.block_dims[2,0], im.height//8//2)
+        self.assertEqual(im.block_dims[2,1], im.width//8//2)
+        self.assertIsInstance(im.samp_factor, np.ndarray)
+        self.assertEqual(im.samp_factor[0,0], 2)
+        self.assertEqual(im.samp_factor[0,1], 2)
+        self.assertEqual(im.samp_factor[1,0], 1)
+        self.assertEqual(im.samp_factor[1,1], 1)
+        self.assertEqual(im.samp_factor[2,0], 1)
+        self.assertEqual(im.samp_factor[2,1], 1)
+        self.assertIsInstance(im.jpeg_color_space, jpeglib.Colorspace)
+        self.assertEqual(im.num_components, 3)
+        self.assertEqual(len(im.markers), 2)
+        # read spatial
+        im.spatial
+        # inner state after reading
+        self.assertIsInstance(im.spatial, np.ndarray)
+        self.assertEqual(len(im.spatial.shape), 3)
+        self.assertEqual(im.spatial.shape[0], im.height)
+        self.assertEqual(im.spatial.shape[1], im.width)
+        self.assertEqual(im.spatial.shape[2], im.num_components)
 
-        # cleanup
-        im.close()
-
-        
     def test_read_pil(self):
         
         # read with PIL
         with Image.open("examples/IMG_0791.jpeg") as im:
             pilnpshape = np.array(im).shape
             pilsize = im.size
-        # read image
-        im = jpeglib.JPEG("examples/IMG_0791.jpeg")
-        Y,CbCr,qt = im.read_dct()
-        data = im.read_spatial()
-
+        # read spatial
+        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
         # Y
-        self.assertEqual(Y.shape[1], pilsize[0]/8)
-        self.assertEqual(Y.shape[2], pilsize[1]/8)
-        self.assertEqual(Y.shape[1], pilnpshape[1]/8)
-        self.assertEqual(Y.shape[2], pilnpshape[0]/8)
-        # CbCr
-        self.assertEqual(CbCr.shape[1], pilsize[0]/8/2)
-        self.assertEqual(CbCr.shape[2], pilsize[1]/8/2)
-        self.assertEqual(CbCr.shape[1], pilnpshape[1]/8/2)
-        self.assertEqual(CbCr.shape[2], pilnpshape[0]/8/2)
+        self.assertEqual(im.Y.shape[0], pilsize[1]//8)
+        self.assertEqual(im.Y.shape[1], pilsize[0]//8)
+        self.assertEqual(im.Y.shape[0], pilnpshape[0]//8)
+        self.assertEqual(im.Y.shape[1], pilnpshape[1]//8)
+        # Cb
+        self.assertEqual(im.Cb.shape[0], pilsize[1]//8//2)
+        self.assertEqual(im.Cb.shape[1], pilsize[0]//8//2)
+        self.assertEqual(im.Cb.shape[0], pilnpshape[0]//8//2)
+        self.assertEqual(im.Cb.shape[1], pilnpshape[1]//8//2)
+        # Cr
+        self.assertEqual(im.Cr.shape[0], pilsize[1]//8//2)
+        self.assertEqual(im.Cr.shape[1], pilsize[0]//8//2)
+        self.assertEqual(im.Cr.shape[0], pilnpshape[0]//8//2)
+        self.assertEqual(im.Cr.shape[1], pilnpshape[1]//8//2)
+        # read dct
+        im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
         # spatial
-        self.assertEqual(data.shape[0], pilsize[1])
-        self.assertEqual(data.shape[1], pilsize[0])
-        self.assertEqual(data.shape[0], pilnpshape[0])
-        self.assertEqual(data.shape[1], pilnpshape[1])
-        # cleanup
-        im.close()
+        self.assertEqual(im.spatial.shape[0], pilsize[1])
+        self.assertEqual(im.spatial.shape[1], pilsize[0])
+        self.assertEqual(im.spatial.shape[0], pilnpshape[0])
+        self.assertEqual(im.spatial.shape[1], pilnpshape[1])
+
 
 
             
