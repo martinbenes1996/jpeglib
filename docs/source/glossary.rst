@@ -44,6 +44,17 @@ Discrete cosine transform
 
 Description of discrete cosine transform
 
+Forward DCT (also called DCT II)
+
+.. math::
+    Y_{uv}=\sqrt{\frac{2}{N}}\sqrt{\frac{2}{M}}\Lambda(u)\Lambda(v)\sum_{i=0}^{N-1}\sum_{j=0}^{M-1}\text{cos}\Big[\frac{\pi}{N}(i+.5)u\Big]\text{cos}\Big[\frac{\pi}{M}(j+.5)v\Big]X_{ij}
+
+Inverse DCT (also called DCT III)
+
+.. math::
+    X_{ij}=\sqrt{\frac{2}{N}}\sqrt{\frac{2}{M}}\sum_{u=0}^{N-1}\sum_{v=0}^{M-1}\Lambda(u)\Lambda(v)\text{cos}\Big[\frac{\pi}{N}(i+.5)u\Big]\text{cos}\Big[\frac{\pi}{M}(j+.5)v\Big]Y_{uv}
+
+
 References for libjpeg
 """"""""""""""""""""""
 
