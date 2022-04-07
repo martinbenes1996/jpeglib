@@ -79,7 +79,6 @@ def load_jpeg_info(path: str):
     _marker_lengths = (ctypes.c_int*20)()
     _marker_types = (ctypes.c_uint32*20)()
     # call
-    #logging.error("CJpegLib.read_jpeg_info")
     CJpegLib.read_jpeg_info(
         srcfile             = str(path),
         block_dims          = _block_dims,
