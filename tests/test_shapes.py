@@ -18,7 +18,7 @@ class TestShapes(unittest.TestCase):
         del self.tmp
         
     def test_read_dct_color(self):
-        print("test_read_dct_color")
+        self.logger.debug("test_read_dct_color")
         # read info
         im = jpeglib.read_dct("examples/IMG_0791.jpeg")
         # inner state before reading
@@ -79,7 +79,7 @@ class TestShapes(unittest.TestCase):
         
 
     def test_read_spatial(self):
-        print("test_read_spatial")
+        self.logger.debug("test_read_spatial")
         # read info
         im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
         # inner state before reading
@@ -115,7 +115,7 @@ class TestShapes(unittest.TestCase):
         self.assertEqual(im.spatial.shape[2], im.num_components)
 
     def test_read_pil(self):
-        print("test_read_pil")
+        self.logger.debug("test_read_pil")
         
         # read with PIL
         with Image.open("examples/IMG_0791.jpeg") as im:
