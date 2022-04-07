@@ -148,9 +148,14 @@ class DCTJPEGio(DCTJPEG):
     quant_tables: list
     def _convert_dct_jpegio(self, dct):
         return (dct
-            .transpose((1,3,0,2))
+            .transpose((0,3,1,2))
             .reshape((dct.shape[0]*dct.shape[2], dct.shape[1]*dct.shape[3]))
-        )
+        ).astype(np.int32)
+    def _convert_jpegio_dct(self, dct):
+        return (dct
+            .reshape((-1,8,dct.shape[1]//8,8))
+            .transpose((0,2,3,1))
+        ).astype(np.int16)
     
     @property
     def coef_arrays(self):
@@ -174,14 +179,21 @@ class DCTJPEGio(DCTJPEG):
         """Convertor of quantization tables to jpegio format."""
         if not self.is_read():
             self.read_dct()
-        # TODO: qt need to be converted?
-        self._quant_tables = [self.qt[i] for i in range(self.qt.shape[0])]
+        self._quant_tables = [
+            self.qt[0].astype(np.int32),
+            self.qt[1].astype(np.int32)
+        ]
         return self._quant_tables
-
     @quant_tables.setter
     def quant_tables(self, quant_tables):
         self._quant_tables = quant_tables
+    
+    def write(self, path:str = None, quality:int=-1):
+        pass
+        
+        
 
 def to_jpegio(jpeg: DCTJPEG):
     vals = {field.name: getattr(jpeg,field.name) for field in fields(jpeg)}
     return DCTJPEGio(**vals)
+

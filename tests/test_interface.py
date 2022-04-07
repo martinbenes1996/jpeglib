@@ -8,14 +8,13 @@ import jpeglib
 
 class TestInterface(unittest.TestCase):
 
-    def test_read_with(self):
-        with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-            Y,CbCr,qt = im.read_dct()
+    def test_read_dct(self):
+        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        im.Y; im.Cb; im.Cr; im.qt
             
-    def test_rgb(self):
-        im = jpeglib.JPEG("examples/IMG_0791.jpeg")
-        Y,CbCr,qt = im.read_dct()
-        im.close()
+    def test_read_spatial(self):
+        im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
+        im.spatial
     
     def test_with_version(self):
         """Test with statement for version."""
@@ -32,6 +31,5 @@ class TestInterface(unittest.TestCase):
             self.assertEqual(jpeglib.version.get(), '8d')
         # back to 6b
         self.assertEqual(jpeglib.version.get(), '6b')
-            
 
 __all__ = ["TestInterface"]
