@@ -868,7 +868,7 @@ int jpeg_handle_marker (j_decompress_ptr cinfo)
   if(gpos < MAX_MARKER) {
     gmarker_types[gpos] = cinfo->unread_marker;
     //strcpy(mark_name[gpos], mname);
-    if((p = (unsigned char *)malloc(length*sizeof(char))) == NULL) {
+    if((p = malloc((length + 1)*sizeof(char))) == NULL) {
       fprintf(stderr, "Bad malloc!\n");
       return FALSE;
     }
