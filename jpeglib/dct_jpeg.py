@@ -211,8 +211,6 @@ class DCTJPEGio(DCTJPEG):
     @property
     def coef_arrays(self) -> list:
         """Convertor of DCT coefficients to jpegio format."""
-        if not self.is_read():
-            self.read_dct()
         # collect dct
         self._coef_arrays = [
             self._convert_dct_jpegio(self.Y),
@@ -229,8 +227,6 @@ class DCTJPEGio(DCTJPEG):
     @property
     def quant_tables(self) -> list:
         """Convertor of quantization tables to jpegio format."""
-        if not self.is_read():
-            self.read_dct()
         self._quant_tables = [
             self.qt[0].astype(np.int32),
             self.qt[1].astype(np.int32)
