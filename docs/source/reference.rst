@@ -21,6 +21,8 @@ Inside spatial domain
 
 .. autofunction:: jpeglib.read_spatial
 
+.. autofunction:: jpeglib.from_spatial
+
 .. autoclass:: jpeglib.SpatialJPEG
    :members: spatial, write_spatial, color_space, dither_mode, dct_method, flags
    :special-members:

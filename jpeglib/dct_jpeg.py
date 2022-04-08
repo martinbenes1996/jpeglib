@@ -8,15 +8,15 @@ from . import _jpeg
 
 @dataclass
 class DCTJPEG(_jpeg.JPEG):
-    """JPEG instance to work in DCT domain."""
+    """JPEG instance to work with DCT domain."""
     Y: np.ndarray
-    """luminance"""
+    """luminance tensor"""
     Cb: np.ndarray
-    """chrominance blue-difference"""
+    """chrominance blue-difference tensor"""
     Cr: np.ndarray
-    """chrominance red-difference"""
+    """chrominance red-difference tensor"""
     qt: np.ndarray
-    """quantization"""
+    """quantization tensor"""
     
     def is_read(self) -> bool:
         has_Y = self.Y is not None
@@ -32,8 +32,9 @@ class DCTJPEG(_jpeg.JPEG):
         return (((ctypes.c_short * 64) * self.width_in_blocks(i)) * self.height_in_blocks(i))()
     def read_dct(self):
         # write content into temporary file
-        tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+        tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
         tmp.write(self.content)
+        tmp.flush()
         # allocate DCT components
         Y = self._alloc_dct_component(0)
         Cb,Cr = None,None
@@ -47,7 +48,7 @@ class DCTJPEG(_jpeg.JPEG):
             Y           = Y,
             Cb          = Cb,
             Cr          = Cr,
-            qt          = qt
+            qt          = qt,
         )
         # close temporary file
         # process
@@ -69,7 +70,7 @@ class DCTJPEG(_jpeg.JPEG):
         
         :param path: Destination file name. If not given, source file is overwritten.
         :type path: str, optional
-        :param quality: Compression quality, between 0 and 100.
+        :param quality: Compression quality, between 0 and 100. Special value -1 stands for using qt inside the instance or keeping libjpeg default.
         :type quality: int, optional
         
         :Example:

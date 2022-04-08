@@ -6,7 +6,6 @@ import re
 
 from . import cjpeglib
 
-
 class CJpegLib:
 
     @classmethod
@@ -21,7 +20,6 @@ class CJpegLib:
                                           samp_factor, jpeg_color_space, marker_lengths, marker_types, flags)
         if status == 0:
             raise IOError(f"reading info of {srcfile} failed")
-        # 0100000000000000 Bit for progressive mode
 
     @classmethod
     def read_jpeg_markers(cls, srcfile: str, markers):
