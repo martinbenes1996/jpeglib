@@ -20,6 +20,9 @@ from ._marker import *
 # libjpeg versions
 from .version import *
 
+# DCT implementation
+from . import dct
+
 # for unit tests
 from ._timer import Timer
 

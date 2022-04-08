@@ -28,10 +28,11 @@ class CJpegLib:
             raise IOError(f"reading markers of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_dct(cls, srcfile: str, Y, Cb, Cr, qt):
+    def read_jpeg_dct(cls, srcfile: str, Y, Cb, Cr, qt, path=None):
+        if path is None: path = srcfile
         status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt)
         if status == 0:
-            raise IOError(f"reading of {srcfile} DCT failed")
+            raise IOError(f"reading of {path} DCT failed")
 
     @classmethod
     def write_jpeg_dct(cls,
@@ -53,11 +54,13 @@ class CJpegLib:
     @classmethod
     def read_jpeg_spatial(cls,
                           srcfile: str, spatial, colormap, in_colormap, out_color_space,
-                          dither_mode, dct_method, flags):
+                          dither_mode, dct_method, flags,
+                          path = None):
+        if path is None: path = srcfile
         status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), spatial, colormap, in_colormap,
                                              out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
         if status == 0:
-            raise IOError(f"reading of {srcfile} spatial failed")
+            raise IOError(f"reading of {path} spatial failed")
 
     @classmethod
     def write_jpeg_spatial(cls,

@@ -19,7 +19,7 @@ def read_dct(
     
     The file content is loaded once at the call. Then the operations are independent on the source file.
     
-    In some cases, libjpeg exits the program. We work on improving this and replace exit with "soft" Python exception.
+    Reading of DCT is a lossless operation, does not perform the JPEG file decompression.
     
     :param path: Path to a source file in JPEG format.
     :type path: str
@@ -32,6 +32,8 @@ def read_dct(
     >>> jpeg = jpeglib.read_dct("input.jpeg")
     >>> jpeg.Y; jpeg.Cb; jpeg.Cr; jpeg.qt
     
+    In some cases, libjpeg exits the program. We work on improving this and replace exit with "soft" Python exception.
+    
     >>> try:
     >>>     jpeg = jpeglib.read_dct("does_not_exist.jpeg")
     >>> except IOError: # raised, file does not exist
@@ -41,6 +43,7 @@ def read_dct(
     The allocation and reading of the data happens on the first query.
     
     >>> jpeg = jpeglib.read_dct("input.jpeg")
+    >>> 
     >>> # at this point, internally jpeg.Y is None
     >>> # however on first query, it is read
     >>> print(jpeg.Y) # read and returned
@@ -61,7 +64,7 @@ def read_dct(
         block_dims=info.block_dims,
         samp_factor=info.samp_factor,
         jpeg_color_space=info.jpeg_color_space,
-        num_components=info.num_components,
+        #num_components=info.num_components,
         markers=info.markers,
         Y=None,
         Cb=None,
@@ -122,23 +125,28 @@ def read_spatial(
         content = f.read()
     # load info
     info = _jpeg.load_jpeg_info(path)
+    # parse
+    num_components = info.jpeg_color_space
+    if out_color_space is not None:
+        out_color_space = Colorspace(out_color_space)
+        num_components = out_color_space.channels
     # create jpeg
     return SpatialJPEG(
-        path=path,
-        content=content,
-        height=info.height,
-        width=info.width,
-        block_dims=info.block_dims,
-        samp_factor=info.samp_factor,
-        jpeg_color_space=info.jpeg_color_space,
-        num_components=info.num_components,
-        markers=info.markers,
-        spatial=None,
-        color_space=out_color_space,
-        dither_mode=dither_mode,
-        dct_method=dct_method,
-        flags=flags,
-        progressive_mode=info.progressive_mode
+        path                = path,
+        content             = content,
+        height              = info.height,
+        width               = info.width,
+        block_dims          = info.block_dims,
+        samp_factor         = info.samp_factor,
+        jpeg_color_space    = info.jpeg_color_space,
+        num_components      = num_components,
+        markers             = info.markers,
+        spatial             = None,
+        color_space         = out_color_space,
+        dither_mode         = dither_mode,
+        dct_method          = dct_method,
+        flags               = flags,
+        progressive_mode    = info.progressive_mode
     )
 
 def from_spatial(
@@ -219,7 +227,6 @@ def from_spatial(
         block_dims=None,
         samp_factor=None,
         jpeg_color_space=None,
-        num_components=num_components,
         markers=None,
         spatial=spatial,
         color_space=in_color_space,
