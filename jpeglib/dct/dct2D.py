@@ -1,6 +1,4 @@
 
-from math import cos,pi,sqrt
-import matplotlib.pyplot as plt
 import numpy as np
 
 from ._base import *

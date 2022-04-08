@@ -55,13 +55,14 @@ Inverse DCT (also called DCT III)
     X_{ij}=\sqrt{\frac{2}{N}}\sqrt{\frac{2}{M}}\sum_{u=0}^{N-1}\sum_{v=0}^{M-1}\Lambda(u)\Lambda(v)\text{cos}\Big[\frac{\pi}{N}(i+.5)u\Big]\text{cos}\Big[\frac{\pi}{M}(j+.5)v\Big]Y_{uv}
 
 
-References for libjpeg
-""""""""""""""""""""""
+References
+""""""""""
 
 * `Using the IJG JPEG library <https://freedesktop.org/wiki/Software/libjpeg/>`_
 * `Interface Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpegman.html>`_
 * `Data Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpeg-ddefs.html>`_
 * `Chroma subsampling and JPEG sampling factors <https://zpl.fi/chroma-subsampling-and-jpeg-sampling-factors/>`_
+* `The Discrete Cosine Transform (DCT) <https://users.cs.cf.ac.uk/Dave.Marshall/Multimedia/node231.html>`_
 
 Glossary terms
 --------------
