@@ -42,6 +42,11 @@ class JPEG:
         :return: chroma component height
         :rtype: int
         :raises [IndexError]: When component index is not one of 0,1,2
+        
+        :Example:
+        
+        >>> spatial = np.random.randint(0,255,(32,32))
+        >>> im = jpeglib.from_spatial()
         """
         return self.block_dims[component][0]
 
