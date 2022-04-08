@@ -159,7 +159,7 @@ def from_spatial(
     For single channel, grayscale is assumed. For three channels, rgb is assumed.
     
     .. warning::
-        Parameter :attr:`SpatialJPEG.path` is not initialized.
+        Parameter :obj:`SpatialJPEG.path` is not initialized.
         When calling :meth:`SpatialJPEG.write_spatial`, you have to specify `path`,
         otherwise an error is raised.
         
