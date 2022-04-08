@@ -159,9 +159,9 @@ def from_spatial(
     For single channel, grayscale is assumed. For three channels, rgb is assumed.
     
     .. warning::
-        Parameter :attribute:`SpatialJPEG.path` is not initialized.
-        When calling :method:`SpatialJPEG.write_spatial`, you have to specify `path`,
-        otherwise an error is raised. 
+        Parameter :attr:`SpatialJPEG.path` is not initialized.
+        When calling :meth:`SpatialJPEG.write_spatial`, you have to specify `path`,
+        otherwise an error is raised.
         
     :param spatial: Spatial representation.
     :type spatial: np.ndarray
