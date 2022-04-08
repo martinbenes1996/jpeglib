@@ -167,12 +167,12 @@ class JPEG:
         if self.markers is None:
             return None
         marker_types = [marker.index for marker in self.markers]
-        return (ctypes.c_int32*self.num_markers())(*marker_types)
+        return (ctypes.c_int32*self.num_markers)(*marker_types)
     def c_marker_lengths(self):
         if self.markers is None:
             return None
         marker_lengths = [marker.length for marker in self.markers]
-        return (ctypes.c_int32*self.num_markers())(*marker_lengths)
+        return (ctypes.c_int32*self.num_markers)(*marker_lengths)
     def c_markers(self):
         if self.markers is None:
             return None

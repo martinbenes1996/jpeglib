@@ -139,7 +139,7 @@ def read_spatial(
         block_dims          = info.block_dims,
         samp_factor         = info.samp_factor,
         jpeg_color_space    = info.jpeg_color_space,
-        num_components      = num_components,
+        #num_components      = num_components,
         markers             = info.markers,
         spatial             = None,
         color_space         = out_color_space,

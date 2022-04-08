@@ -165,6 +165,12 @@ class SpatialJPEG(JPEG):
         self._color_space = color_space
     
     @property
+    def channels(self) -> int:
+        if self._color_space is None:
+            return None
+        return self._color_space.channels
+    
+    @property
     def dither_mode(self) -> np.ndarray:
         return self._dither_mode
     @dither_mode.setter
