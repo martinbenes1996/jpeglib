@@ -113,14 +113,43 @@ class TestShapes(unittest.TestCase):
         self.assertEqual(im.spatial.shape[0], im.height)
         self.assertEqual(im.spatial.shape[1], im.width)
         self.assertEqual(im.spatial.shape[2], im.num_components)
+    
+    def test_read_spatial_grayscale(self):
+        self.logger.info("test_read_spatial_grayscale")
+        # read info
+        im = jpeglib.read_spatial("examples/IMG_0791.jpeg", 'JCS_GRAYSCALE')
+        # inner state before reading
+        self.assertEqual(im.path, "examples/IMG_0791.jpeg") # source file
+        self.assertTrue(im.content is not None)
+        self.assertIsInstance(im.content, bytes)
+        self.assertEqual(im.height, 3024)
+        self.assertEqual(im.width, 4032)
+        self.assertIsInstance(im.block_dims, np.ndarray)
+        self.assertEqual(im.block_dims[0,0], im.height//8)
+        self.assertEqual(im.block_dims[0,1], im.width//8)
+        self.assertIsInstance(im.samp_factor, np.ndarray)
+        self.assertEqual(im.samp_factor[0,0], 2)
+        self.assertEqual(im.samp_factor[0,1], 2)
+        self.assertIsInstance(im.jpeg_color_space, jpeglib.Colorspace)
+        self.assertEqual(im.num_components, 3)
+        self.assertEqual(im.channels, 1)
+        self.assertEqual(len(im.markers), 2)
+        # read spatial
+        im.spatial
+        # inner state after reading
+        self.assertIsInstance(im.spatial, np.ndarray)
+        self.assertEqual(len(im.spatial.shape), 3)
+        self.assertEqual(im.spatial.shape[0], im.height)
+        self.assertEqual(im.spatial.shape[1], im.width)
+        self.assertEqual(im.spatial.shape[2], im.channels)
 
     def test_read_pil(self):
         self.logger.info("test_read_pil")
         
         # read with PIL
-        with Image.open("examples/IMG_0791.jpeg") as im:
-            pilnpshape = np.array(im).shape
-            pilsize = im.size
+        im = Image.open("examples/IMG_0791.jpeg")
+        pilnpshape = np.array(im).shape
+        pilsize = im.size
         # read spatial
         im = jpeglib.read_dct("examples/IMG_0791.jpeg")
         # Y
