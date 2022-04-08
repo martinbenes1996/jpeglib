@@ -9,8 +9,14 @@ from .spatial_jpeg import SpatialJPEG
 from . import _jpeg
 from ._colorspace import Colorspace
 
-def read_dct(path: str):
-    """Reads the DCT JPEG.
+def read_dct(
+    path: str
+) -> DCTJPEG:
+    """Function for reading of the JPEG DCT coefficients.
+    
+    The file content is loaded once at the call. Then the operations are independent on the source file.
+    
+    In some cases, libjpeg exits the program. We work on improving this and replace exit with "soft" Python exception.
     
     :param path: Path to a source file in JPEG format.
     :type path: str
@@ -20,7 +26,23 @@ def read_dct(path: str):
     
     :Example:
     
-    >>> jpeg = jpeglib.read_jpeg_dct("input.jpeg")
+    >>> jpeg = jpeglib.read_dct("input.jpeg")
+    >>> jpeg.Y; jpeg.Cb; jpeg.Cr; jpeg.qt
+    
+    >>> try:
+    >>>     jpeg = jpeglib.read_dct("does_not_exist.jpeg")
+    >>> except IOError: # raised, file does not exist
+    >>>     pass
+    
+    After call, only the parameters of JPEG are read, so that it is known, how large buffers need to be allocated.
+    The allocation and reading of the data happens on the first query.
+    
+    >>> jpeg = jpeglib.read_dct("input.jpeg")
+    >>> # at this point, internally jpeg.Y is None
+    >>> # however on first query, it is read
+    >>> print(jpeg.Y) # read and returned
+    >>> print(jpeg.Y) # second time it is already stored in the object
+    >>> print(jpeg.Cb) # no reading, already stored in the object too
     """
     # load file content
     with open(path, "rb") as f:
@@ -45,17 +67,18 @@ def read_dct(path: str):
     )
 
 
-    samp_factor: np.ndarray
-    jpeg_color_space: Colorspace
-    num_components: int
-
 def read_spatial(
     path: str,
     out_color_space: str = None,
     dither_mode: str = None,
     dct_method: str = None,
-    flags:list = []):
-    """Decompresses the file into the spatial domain. 
+    flags:list = []
+) -> SpatialJPEG:
+    """Function for decompressing the JPEG as a pixel data (spatial domain).
+    
+    The file content is loaded once at the call. Then the operations are independent on the source file.
+    
+    In some cases, libjpeg exits the program. We work on improving this and replace exit with "soft" Python exception.
     
     :param path: Path to a source file in JPEG format.
     :type path: str
@@ -70,10 +93,25 @@ def read_spatial(
     :return: Spatial JPEG object
     :rtype: :class:`SpatialJPEG`
     :raises [IOError]: When source file does not exist
-
+    
     :Example:
     
-    >>> jpeg = jpeglib.read_jpeg_spatial("input.jpeg")
+    >>> im = jpeglib.read_spatial("input.jpeg")
+    >>> im.spatial
+    
+    >>> try:
+    >>>     im = jpeglib.read_spatial("does_not_exist.jpeg")
+    >>> except IOError: # raised, file does not exist
+    >>>     pass
+    
+    After call, only the parameters of JPEG are read, so that it is known, how large buffer needs to be allocated.
+    The allocation and reading of the data happens on the first query.
+    
+    >>> im = jpeglib.read_spatial("input.jpeg")
+    >>> # at this point, internally jpeg.spatial is None
+    >>> # however on first query, it is read
+    >>> print(im.spatial) # read and returned
+    >>> print(im.spatial) # second time it is already stored in the object 
     """
     # load file content
     with open(path, "rb") as f:
@@ -98,20 +136,58 @@ def read_spatial(
         flags               = flags,
     )
 
-def from_spatial(spatial: np.ndarray, in_color_space:typing.Union[str,Colorspace] = None):
-    """Factory of spatial JPEG from spatial representation.
+def from_spatial(
+    spatial: np.ndarray,
+    in_color_space:typing.Union[str,Colorspace] = None
+) -> SpatialJPEG:
+    """A factory of :class:`SpatialJPEG` from pixel data.
     
-    Does not set the source path, you have to specify dstfile when writing.
+    The color space inference is based on number of color channels.
+    For single channel, grayscale is assumed. For three channels, rgb is assumed.
+    
+    .. warning::
+        Parameter :attribute:`SpatialJPEG.path` is not initialized.
+        When calling :method:`SpatialJPEG.write_spatial`, you have to specify `path`,
+        otherwise an error is raised. 
         
     :param spatial: Spatial representation.
     :type spatial: np.ndarray
     :param in_color_space: Color space of the input. If not given, infered from the shape.
     :type in_color_space: str | Colorspace, optional
+    :raises [IOError]: When color space can't be infered.
     
     :Example:
     
+    When data has three color channels (in the dimension 2), rgb is infered.
+    
     >>> spatial = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
-    >>> jpeg = jpeglib.from_spatial(spatial)
+    >>> im = jpeglib.from_spatial(spatial) # 3 channels -> rgb infered
+    >>> print(im.color_space) # -> 'JCS_RGB'
+    >>> im.write_spatial("output.jpeg")
+    
+    When data has one color channels, grayscale is infered
+    
+    >>> spatial = np.random.randint(0,255,(16,16,1),dtype=np.uint8)
+    >>> im = jpeglib.from_spatial(spatial) # 1 channel -> grayscale infered
+    >>> print(im.color_space) # -> 'JCS_GRAYSCALE'
+    >>> im.write_spatial("output.jpeg")
+    
+    For other color channels, color space can't be infered. Error is raised.
+    
+    >>> spatial = np.random.randint(0,255,(16,16,7),dtype=np.uint8)
+    >>> try:
+    >>>     im = jpeglib.from_spatial(spatial)
+    >>> except IOError:
+    >>>     raised
+    
+    When output is not specified when writing, error is raised.
+    
+    >>> spatial = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
+    >>> im = jpeglib.from_spatial(spatial)
+    >>> try:
+    >>>     im.write_spatial()
+    >>> except IOError:
+    >>>     pass
     """
     # shape
     height,width,num_components = spatial.shape
