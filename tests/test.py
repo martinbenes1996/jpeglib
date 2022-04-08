@@ -1,10 +1,5 @@
 
-from test_dct import *
-from test_interface import *
-from test_shapes import *
-from test_marker import *
-from test_dctmethod import *
-from test_progressive import *
+
 import sys
 import unittest
 sys.path.append(".")
@@ -17,11 +12,16 @@ if __name__ == "__main__":
 
 
 # === unit tests ===
+from test_dct import *
+from test_dctmethod import *
 # from test_flags import *
-# from test_spatial import *
+from test_interface import *
+from test_marker import *
 # from test_performance import *
+from test_progressive import *
+from test_shapes import *
+# from test_spatial import *
 # from test_version import *
-
 # ==================
 
 

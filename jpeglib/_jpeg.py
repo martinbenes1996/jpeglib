@@ -14,17 +14,35 @@ from ._marker import Marker
 class JPEG:
     """JPEG abstract class."""
     path: str
+    """path to the jpeg file"""
     content: bytes
+    """cached binary content of the jpeg"""
     height: int
+    """image height"""
     width: int
+    """image width"""
     block_dims: np.ndarray
+    """DCT shapes in blocks; first is DCT component (0 Y,1 Cb,2 Cr), second is dimension (0 height, 1 width)"""
     samp_factor: np.ndarray
+    """sampling factor; first is DCT component, (0 Y,1 Cb,2 Cr), second is orientation (0 horizontal, 1 vertical)"""
     jpeg_color_space: Colorspace
+    """color space of the JPEG file"""
     num_components: int
+    """number of components in the JPEG file"""
     markers: list
+    """list of marker objects"""
     progressive_mode: bool
-
-    def height_in_blocks(self, component):
+    """indicator of progressive (True) or sequential (False) JPEG"""
+    
+    def height_in_blocks(self, component:int) -> int:
+        """Getter of height in blocks.
+        
+        :param component: chroma component index (0 Y, 1 Cb, 2 Cr)
+        :type component: int
+        :return: chroma component height
+        :rtype: int
+        :raises [IndexError]: When component index is not one of 0,1,2
+        """
         return self.block_dims[component][0]
 
     def width_in_blocks(self, component):
