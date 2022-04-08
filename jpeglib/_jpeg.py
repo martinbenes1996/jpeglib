@@ -30,16 +30,25 @@ class JPEG:
     second is orientation (0 horizontal, 1 vertical)"""
     jpeg_color_space: Colorspace
     """color space of the JPEG file"""
+    num_components: int
+    """number of components in the JPEG file"""
     markers: list
     """list of marker objects"""
     progressive_mode: bool
     """indicator of progressive (True) or sequential (False) JPEG"""
 
+<<<<<<< HEAD
     def height_in_blocks(self, component: int) -> int:
         """Getter of height in blocks.
 
         :param component:
         chroma component index (0 Y, 1 Cb, 2 Cr)
+=======
+    def height_in_blocks(self, component:int) -> int:
+        """Getter of height in blocks.
+
+        :param component: chroma component index (0 Y, 1 Cb, 2 Cr)
+>>>>>>> 3da0739 (documentation updated)
         :type component: int
         :return:
         chroma component height
