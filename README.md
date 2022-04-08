@@ -1,6 +1,7 @@
 [![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://pypi.org/project/jpeglib/)
 [![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/)
 [![GitHub](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg)](https://GitHub.com/martinbenes1996/jpeglib)
+[![PyPI downloads](https://img.shields.io/pypi/dm/jpeglib)](https://pypi.org/project/jpeglib/)
 [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
 ![Unittests](https://github.com/martinbenes1996/jpeglib/actions/workflows/unittests_on_commit.yml/badge.svg)
 
