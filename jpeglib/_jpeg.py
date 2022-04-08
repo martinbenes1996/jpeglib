@@ -109,7 +109,7 @@ def load_jpeg_info(path: str):
     _image_dims = (ctypes.c_int*2)()
     _num_components = (ctypes.c_int*1)()
     _samp_factor = (ctypes.c_int*6)()
-    _jpeg_color_space = (ctypes.c_int*1)()
+    _jpeg_color_space = (ctypes.c_int*2)()
     _marker_lengths = (ctypes.c_int*20)()
     _marker_types = (ctypes.c_uint32*20)()
     _flags = (ctypes.c_uint64*1)()
@@ -173,7 +173,8 @@ def load_jpeg_info(path: str):
         block_dims=block_dims,
         samp_factor=samp_factor,
         num_components=num_components,
-        jpeg_color_space=Colorspace.from_index(_jpeg_color_space[0]),
+        #out_color_space=Colorspace.from_index(_jpeg_color_space[0]), # out_color_space
+        jpeg_color_space=Colorspace.from_index(_jpeg_color_space[1]),
         content=None,
         markers=markers,
         progressive_mode="PROGRESSIVE_MODE" in flags

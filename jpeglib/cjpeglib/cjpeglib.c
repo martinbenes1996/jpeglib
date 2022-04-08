@@ -125,12 +125,12 @@ int read_jpeg_info(
   (void)jpeg_read_coefficients(&cinfo);
 
   // copy to caller
-  if (block_dims != NULL)
+  if (block_dims != NULL) {
     for (int i = 0; i < cinfo.num_components; i++) {
-        block_dims[2 * i] = cinfo.comp_info[i].height_in_blocks;
-        block_dims[2 * i + 1] = cinfo.comp_info[i].width_in_blocks;
-      }
+      block_dims[2 * i] = cinfo.comp_info[i].height_in_blocks;
+      block_dims[2 * i + 1] = cinfo.comp_info[i].width_in_blocks;
     }
+  }
   if (image_dims != NULL) {
     image_dims[0] = cinfo.output_height;
     image_dims[1] = cinfo.output_width;
@@ -140,8 +140,10 @@ int read_jpeg_info(
     // num_components[1] = cinfo.out_color_components;
     // num_components[2] = cinfo.output_components;
   }
-  if (jpeg_color_space != NULL)
+  if (jpeg_color_space != NULL) {
     jpeg_color_space[0] = cinfo.out_color_space;
+    jpeg_color_space[1] = cinfo.jpeg_color_space;
+  }
 
   if (samp_factor != NULL)
     for (int comp = 0; comp < cinfo.num_components; comp++) {
@@ -522,7 +524,7 @@ int read_jpeg_spatial(
   if(dct_method >= 0) cinfo.dct_method = dct_method;
 
 
-  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
     cinfo.do_fancy_upsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
   if (overwrite_flag(flags, DO_BLOCK_SMOOTHING))
     cinfo.do_block_smoothing = flag_is_set(flags, DO_BLOCK_SMOOTHING);
