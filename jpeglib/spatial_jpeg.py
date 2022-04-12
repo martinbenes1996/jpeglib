@@ -141,7 +141,7 @@ class SpatialJPEG(JPEG):
             qt                  = qt,
             quality             = quality,
             smoothing_factor    = smoothing_factor,
-            num_markers         = self.num_markers(),
+            num_markers         = self.num_markers,
             marker_types        = self.c_marker_types(),
             marker_lengths      = self.c_marker_lengths(),
             markers             = self.c_markers(),
