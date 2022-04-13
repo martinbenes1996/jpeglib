@@ -99,7 +99,6 @@ class SpatialJPEG(JPEG):
         >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", qt=75)
         """
-        print(self.color_space, self.jpeg_color_space)
         # colorspace
         if self.color_space is None:
             self.color_space = self.jpeg_color_space

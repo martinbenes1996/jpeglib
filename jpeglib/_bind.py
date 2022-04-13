@@ -28,9 +28,9 @@ class CJpegLib:
             raise IOError(f"reading markers of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_dct(cls, srcfile: str, Y, Cb, Cr, qt, path=None):
+    def read_jpeg_dct(cls, srcfile: str, Y, Cb, Cr, qt, quant_tbl_no, path=None):
         if path is None: path = srcfile
-        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt)
+        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt, quant_tbl_no)
         if status == 0:
             raise IOError(f"reading of {path} DCT failed")
 

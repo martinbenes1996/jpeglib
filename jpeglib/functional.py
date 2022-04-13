@@ -65,6 +65,7 @@ def read_dct(
         samp_factor=info.samp_factor,
         jpeg_color_space=info.jpeg_color_space,
         #num_components=info.num_components,
+        quant_tbl_no=None,
         markers=info.markers,
         Y=None,
         Cb=None,
