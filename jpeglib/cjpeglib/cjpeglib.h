@@ -23,7 +23,8 @@ int read_jpeg_dct(
     short *Y,
     short *Cb,
     short *Cr,
-    unsigned short *qt);
+    unsigned short *qt,
+    unsigned char *quant_tbl_no);
 int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,

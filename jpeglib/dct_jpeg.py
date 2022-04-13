@@ -18,6 +18,8 @@ class DCTJPEG(_jpeg.JPEG):
     """chrominance red-difference tensor"""
     qt: np.ndarray
     """quantization tensor"""
+    quant_tbl_no: np.ndarray
+    """assignment of quantization tables to components, (0 Y, 1 Cb, 1Cr) by default"""
     
     # def is_read(self) -> bool:
     #     has_Y = self.Y is not None
@@ -59,14 +61,16 @@ class DCTJPEG(_jpeg.JPEG):
             Cb = self._alloc_dct_component(1)
             Cr = self._alloc_dct_component(2)
         qt = ((ctypes.c_short * 64) * 4)()
+        _quant_tbl_no = (ctypes.c_ubyte*4)()
         # call
         CJpegLib.read_jpeg_dct(
-            path        = self.path,
-            srcfile     = tmp.name,
-            Y           = Y,
-            Cb          = Cb,
-            Cr          = Cr,
-            qt          = qt,
+            path            = self.path,
+            srcfile         = tmp.name,
+            Y               = Y,
+            Cb              = Cb,
+            Cr              = Cr,
+            qt              = qt,
+            quant_tbl_no    =_quant_tbl_no,
         )
         # close temporary file
         tmp.close()
@@ -79,6 +83,7 @@ class DCTJPEG(_jpeg.JPEG):
         if self.has_chrominance:
             self.Cb = process_component(Cb)
             self.Cr = process_component(Cr)
+        self.quant_tbl_no = np.array([_quant_tbl_no[i] for i in range(self.num_components)])
         # crop
         self.qt = qt[:self.num_components]
         # return
@@ -180,6 +185,44 @@ class DCTJPEG(_jpeg.JPEG):
     def qt(self, qt: np.ndarray):
         """Quantization table setter."""
         self._qt = qt
+    @property
+    def quant_tbl_no(self) -> list:
+        """Getter of assignment of quantization tables to components"""
+        if self._quant_tbl_no is None:
+            self.read_dct()
+        return self._quant_tbl_no
+    @quant_tbl_no.setter
+    def quant_tbl_no(self, quant_tbl_no:list):
+        """Setter of assignment of quantization tables to components"""
+        self._quant_tbl_no = quant_tbl_no
+    
+    def get_component_qt(self, idx:int) -> np.ndarray:
+        """Getter of the quantization table of a component, dependent on assignment.
+        
+        :param idx: Component index.
+        :type idx: int
+        :return: quantization table of the component
+        :rtype: np.ndarray
+        
+        :Examples:
+        
+        To retreive a component quantization table, simply type
+        
+        >>> jpeg = jpeglib.read_dct("input.jpeg")
+        >>> # retrieval of component QTs
+        >>> qtY = jpeg.get_component_qt(0)
+        >>> qtCb = jpeg.get_component_qt(1)
+        >>> qtCr = jpeg.get_component_qt(2)
+        
+        Usual assignment is Y having qt[0] and Cb and Cr sharing qt[1]. However it may differ.
+        
+        >>> # retrieval of QTs at index
+        >>> qt0 = jpeg.qt[0] # usually qtY
+        >>> qt1 = jpeg.qt[1] # usually qtCb, qtCr (shared)
+        
+        E.g. ffmpeg uses a single quantization matrix for all three channels.
+        """
+        return self.qt[self.quant_tbl_no[idx]]
     
     def free(self):
         """Free the allocated tensors."""
@@ -187,7 +230,8 @@ class DCTJPEG(_jpeg.JPEG):
         del self._Cb
         del self._Cr
         del self._qt
-    
+
+        
 @dataclass
 class DCTJPEGio(DCTJPEG):
     """Class for compatiblity with jpegio."""

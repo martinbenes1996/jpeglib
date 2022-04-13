@@ -220,6 +220,7 @@ def load_jpeg_info(path: str) -> JPEG:
     _num_components = (ctypes.c_int*1)()
     _samp_factor = (ctypes.c_int*6)()
     _jpeg_color_space = (ctypes.c_int*2)()
+    
     _marker_lengths = (ctypes.c_int*20)()
     _marker_types = (ctypes.c_uint32*20)()
     _flags = (ctypes.c_uint64*1)()
@@ -244,6 +245,7 @@ def load_jpeg_info(path: str) -> JPEG:
     samp_factor = (
         np.array([_samp_factor[i] for i in range(2*num_components)], int)
         .reshape(num_components, 2))
+    
     markers = []
     for i in range(20):
         # marker length

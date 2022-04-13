@@ -210,7 +210,8 @@ int read_jpeg_dct(
   short *Y,
   short *Cb,
   short *Cr,
-  unsigned short *qt
+  unsigned short *qt,
+  unsigned char *quant_tbl_no
 ) {
   // allocate
   struct jpeg_decompress_struct cinfo;
@@ -255,8 +256,9 @@ int read_jpeg_dct(
     //   }
     // }
     for (int ch = 0; ch < cinfo.num_components; ch++) {
+      int qt_i = cinfo.comp_info[ch].quant_tbl_no;
+      quant_tbl_no[ch] = qt_i; // copy quantization table assignment
       for (int i = 0; i < 64; i++) {
-        int qt_i = cinfo.comp_info[ch].quant_tbl_no;
         qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[qt_i]->quantval[i]; //[(i&7)*8+(i>>3)];
       }
       //(i&7)*8+(i>>3)
@@ -265,6 +267,7 @@ int read_jpeg_dct(
       // memcpy((void *)(qt + ch*64), (void*)tbl->quantval, sizeof(short)*64);
     }
   }
+
 
   // cleanup
   jpeg_finish_decompress(&cinfo);
@@ -679,8 +682,11 @@ int write_jpeg_spatial(
     cinfo.in_color_space = in_color_space;
 
   #if JPEG_LIB_VERSION >= 70
-  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
+  if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
     cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+    // cinfo.min_DCT_h_scaled_size = 5;
+    // cinfo.min_DCT_v_scaled_size = 5;
+  }
   #endif
   if (overwrite_flag(flags, PROGRESSIVE_MODE))
     cinfo.progressive_mode = flag_is_set(flags, PROGRESSIVE_MODE);
