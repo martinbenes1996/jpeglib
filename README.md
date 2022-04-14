@@ -43,8 +43,8 @@ Get *discrete cosine transform* (DCT) coefficients and quantization matrices as 
 
 
 ```python
-im = jpeglib.JPEG("input.jpeg") # load metadata
-Y,CbCr,qt = im.read_dct() # load data
+im = jpeglib.read_dct("input.jpeg")
+im.Y; im.Cb; im.Cr; im.qt
 ```
 
 You get luminance DCT, chrominance DCT and quantization tables.
@@ -52,16 +52,7 @@ You get luminance DCT, chrominance DCT and quantization tables.
 Write the DCT coefficients back to a file with
 
 ```python
-im.write_dct("output.jpeg", Y, CbCr) # write data
-```
-
-You can also write the read-write sequence using `with` statement
-
-```python
-with jpeglib.JPEG("input.jpeg") as im:
-  Y,CbCr,qt = im.read_dct()
-  # modify the DCT coefficients
-  im.write_dct("output.jpeg", Y, CbCr)
+im.write_dct("output.jpeg")
 ```
 
 ### Pixel data
@@ -69,8 +60,8 @@ with jpeglib.JPEG("input.jpeg") as im:
 Decompress the `input.jpeg` into spatial representation in numpy array with
 
 ```python
-im = jpeglib.JPEG("input.jpeg")
-rgb = im.read_spatial()
+im = jpeglib.read_spatial("input.jpeg")
+im.spatial
 ```
 
 You can specify parameters such as output color space, DCT method, dithering, etc.
@@ -78,10 +69,10 @@ You can specify parameters such as output color space, DCT method, dithering, et
 Write spatial representation in numpy arrray back to file with
 
 ```python
-im.write_spatial("output.jpeg", spatial)
+im.write_spatial("output.jpeg")
 ```
 
-Here you can specify input color space, DCT method, sampling factor, output quality, smoothing factor etc.
+You can specify input color space, DCT method, sampling factor, output quality, smoothing factor etc.
 
 You can find all the details in the [documentation](https://jpeglib.readthedocs.io/).
 
@@ -93,8 +84,8 @@ It is possible to choose, which version of libjpeg should be used.
 jpeglib.version.set('6b')
 ```
 
-Currently `jpeglib` supports the most popular versions 6b and 8d. Their source codes is baked inside the package
-and thus distributed with it, avoiding external dependency.
+Currently `jpeglib` supports all versions of libjpeg from 6b to 9e, libjpeg-turbo 2.1.0 and mozjpeg 4.0.3.
+Their source codes is baked inside the package and thus distributed with it, avoiding external dependency.
 
 Get currently used libjpeg version by
 
