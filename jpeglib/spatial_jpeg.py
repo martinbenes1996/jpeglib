@@ -18,27 +18,12 @@ class SpatialJPEG(JPEG):
     dither_mode: Dithermode
     dct_method: DCTMethod
     flags: list
-    
-    def is_read(self) -> bool:
-        return (rgb is not None) or (grayscale is not None)
+
     
     def _alloc_spatial(self, channels:int = None):
         if channels is None:
-            channels = self.num_components
+            channels = self.color_space.channels
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
-    
-    @classmethod
-    def from_spatial(cls, spatial, ):
-        """Factory of spatial JPEG from spatial representation.
-        
-        :param spatial: Spatial representation.
-        :type spatial: np.ndarray
-
-        :Example:
-        
-        >>> jpeg = jpeglib.read_spatial("input.jpeg")
-        >>> jpeg.write_spatial("output.jpeg", qt=75)
-        """
     
     def read_spatial(self):
         # write content into temporary file
@@ -47,7 +32,8 @@ class SpatialJPEG(JPEG):
         
         # colorspace
         if self.color_space is None:
-            self.color_space = self.jpeg_color_space
+            self.color_space = Colorspace('JCS_RGB')
+            #self.color_space = self.jpeg_color_space
         # dither mode
         dither_mode = None
         if self.dither_mode is not None:

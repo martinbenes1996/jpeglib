@@ -566,9 +566,9 @@ int read_jpeg_spatial(
   (void)jpeg_start_decompress(&cinfo);
   // read pixels
   char *rowptr = (char *)rgb;
-  unsigned short stride = 1;
+  unsigned short stride = cinfo.out_color_components;
   if(overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS))
-    stride = cinfo.out_color_components;
+    stride = 1;
 
   while (cinfo.output_scanline < cinfo.output_height) {
     jpeg_read_scanlines(&cinfo, &rowptr, 1);

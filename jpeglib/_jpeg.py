@@ -180,7 +180,7 @@ class JPEG:
         marker_contents = []
         for marker in self.markers:
             marker_contents += [i for i in marker.content]
-        return (ctypes.c_ubyte*np.sum(marker_lengths))(*marker_contents)
+        return (ctypes.c_ubyte*int(np.sum(marker_lengths)))(*marker_contents)
 
     def free(self):
         """Free the allocated tensors."""
