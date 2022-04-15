@@ -29,6 +29,7 @@ class SpatialJPEG(JPEG):
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         tmp.write(self.content)
+        tmp.flush()
         
         # colorspace
         if self.color_space is None:
