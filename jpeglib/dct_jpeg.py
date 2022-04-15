@@ -107,6 +107,7 @@ class DCTJPEG(_jpeg.JPEG):
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         tmp.write(self.content)
+        tmp.flush()
         # parameters
         dstfile = path if path is not None else self.path
         # convert dct
