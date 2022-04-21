@@ -521,10 +521,14 @@ int read_jpeg_spatial(
   if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
 
   // set parameters
-  if(out_color_space >= 0) cinfo.out_color_space = out_color_space;
-  else cinfo.out_color_space = cinfo.jpeg_color_space;
-  if(dither_mode >= 0) cinfo.dither_mode = dither_mode;
-  if(dct_method >= 0) cinfo.dct_method = dct_method;
+  if(out_color_space >= 0)
+    cinfo.out_color_space = out_color_space;
+  else
+    cinfo.out_color_space = cinfo.jpeg_color_space;
+  if(dither_mode >= 0)
+    cinfo.dither_mode = dither_mode;
+  if(dct_method >= 0)
+    cinfo.dct_method = dct_method;
 
 
   if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
