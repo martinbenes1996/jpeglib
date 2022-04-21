@@ -41,7 +41,7 @@ class SpatialJPEG(JPEG):
             dither_mode = self.dither_mode.index
         # dct method
         dct_method = None
-        if dct_method is not None:
+        if self.dct_method is not None:
             dct_method = self.dct_method.index
             
         # allocate spatial

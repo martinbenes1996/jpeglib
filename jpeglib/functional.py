@@ -11,6 +11,8 @@ from .dct_jpeg import DCTJPEG
 from .spatial_jpeg import SpatialJPEG
 from . import _jpeg
 from ._colorspace import Colorspace
+from ._dctmethod import DCTMethod
+from ._dithermode import Dithermode
 
 def read_dct(
     path: str
@@ -131,6 +133,10 @@ def read_spatial(
     if out_color_space is not None:
         out_color_space = Colorspace(out_color_space)
         num_components = out_color_space.channels
+    if dct_method is not None:
+        dct_method = DCTMethod(dct_method)
+    if dither_mode is not None:
+        dither_mode = Dithermode(dither_mode)
     # create jpeg
     return SpatialJPEG(
         path                = path,
