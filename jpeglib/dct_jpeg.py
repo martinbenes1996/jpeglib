@@ -242,6 +242,36 @@ class DCTJPEGio(DCTJPEG):
     quant_tables: list
     """quantization tables in jpegio format"""
     
+    def __post_init__(self):
+        self._jpeg_to_jpegio()
+    def _jpeg_to_jpegio(self):
+        # collect dct
+        self._coef_arrays = [
+            self._convert_dct_jpegio(self.Y),
+            self._convert_dct_jpegio(self.Cb),
+            self._convert_dct_jpegio(self.Cr)
+        ]
+        self._quant_tables = [
+            self.get_component_qt(0).astype(np.int32),
+            self.get_component_qt(1).astype(np.int32)
+        ]
+    def _jpegio_to_jpeg(self):
+        self.Y = self._convert_jpegio_dct(self.coef_arrays[0])
+        if self.has_chrominance:
+            self.Cb = self._convert_jpegio_dct(self.coef_arrays[1])
+            self.Cr = self._convert_jpegio_dct(self.coef_arrays[2])
+        if self.has_chrominance:
+            self.qt = np.array([
+                self.quant_tables[0],
+                self.quant_tables[1]
+            ], dtype=np.uint16)
+            self.quant_tbl_no = np.array([0,1,1])
+        else:
+            self.qt = np.array([
+                self.uant_tables[0]
+            ], dtype=np.uint16)
+            self.quant_tbl_no = np.array([0])
+    
     def _convert_dct_jpegio(self, dct:np.ndarray):
         return (dct
             .transpose((0,3,1,2))
@@ -256,12 +286,6 @@ class DCTJPEGio(DCTJPEG):
     @property
     def coef_arrays(self) -> list:
         """Convertor of DCT coefficients to jpegio format."""
-        # collect dct
-        self._coef_arrays = [
-            self._convert_dct_jpegio(self.Y),
-            self._convert_dct_jpegio(self.Cb),
-            self._convert_dct_jpegio(self.Cr)
-        ]
         return self._coef_arrays
 
     @coef_arrays.setter
@@ -272,10 +296,6 @@ class DCTJPEGio(DCTJPEG):
     @property
     def quant_tables(self) -> list:
         """Convertor of quantization tables to jpegio format."""
-        self._quant_tables = [
-            self.qt[0].astype(np.int32),
-            self.qt[1].astype(np.int32)
-        ]
         return self._quant_tables
     @quant_tables.setter
     def quant_tables(self, quant_tables:list):
@@ -298,11 +318,18 @@ class DCTJPEGio(DCTJPEG):
         >>> jpeg = jpeglib.to_jpegio(jpeg)
         >>> jpeg.write_spatial("output.jpeg", quality=92)
         """
-        raise NotImplementedError
+        # pass data from jpegio to jpeg
+        self._jpegio_to_jpeg()
+        # write 
+        self.write_dct(path=path, quality=quality)
         
         
 def to_jpegio(jpeg: DCTJPEG):
     """Convertor of object of :class:`DCTJPEG` to :class:`DCTJPEGio`.
+    
+    When :class:`DCTJPEG` is converted to :class:`DCTJPEGio`,
+    the data objects :class:`DCTJPEG` are not updated until writing.
+    This behavior will be changed in the future.
     
     :param jpeg: JPEG object to convert
     :type jpeg: :class:`DCTJPEG`
