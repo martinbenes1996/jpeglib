@@ -141,6 +141,26 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.coef_arrays[1], im.coef_arrays[1])
         np.testing.assert_array_equal(jpeg.coef_arrays[2], im.coef_arrays[2])
     
+    def test_jpegio_write(self):
+        self.logger.info("test_jpegio_write")
+        # jpeglib
+        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.to_jpegio(im)
+        # change quantization table in JPEGio
+        im.qt[0,0,0] = 2
+        self.assertEqual(im.qt[0,0,0], 2)
+        # change quantization table in JPEG
+        im.quant_tables[0][0,0] = 1
+        self.assertEqual(im.quant_tables[0][0,0], 1)
+        # write JPEGio and reload
+        im.write(self.tmp.name)
+        im2 = jpeglib.read_dct(self.tmp.name)
+        im2 = jpeglib.to_jpegio(im2)
+        # check quantization table
+        self.assertEqual(im.qt[0,0,0], 1)
+        self.assertEqual(im.quant_tables[0][0,0], 1)
+        
+    
     # def test_jpegio(self):
     #     print("test_jpegio")
     #     pass
