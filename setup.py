@@ -7,7 +7,7 @@ import ctypes
 import setuptools
 import codecs
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.10.5')
+__version__ = os.environ.get('VERSION_NEW', '0.10.6')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
@@ -63,7 +63,7 @@ for v in libjpeg_versions:
                             'cjpegalt', 'djpegalt',
                             # 'jerror',
                             # turbo
-                            'jccolext', 'jdcolext', 'jdcol565', #'jstdhuff',
+                            'jccolext', 'jdcolext', 'jdcol565', 'jstdhuff',
                             'jdmrg565', 'jdmrgext', "jcstest", "tjunittest", "tjbench",
                             'turbojpeg-jni', 'turbojpeg']:
         lim = -2 - len(excluded_module)
