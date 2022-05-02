@@ -12,8 +12,6 @@
  * not already set.
  */
 
-#include "jmorecfg.h"
-
 /*
  * Huffman table setup routines
  */
