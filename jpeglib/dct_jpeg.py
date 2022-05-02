@@ -302,27 +302,30 @@ class DCTJPEGio(DCTJPEG):
         """Setter of quantization tables in jpegio format."""
         self._quant_tables = quant_tables
     
-    def write(self, path:str = None, quality:int=-1):
+    def write(self, fpath:str, flags:int=-1, quality:int=-1):
         """Function to write DCT coefficients in jpegio format to JPEG file.
-        
+    
         Does not perform JPEG compression, writing DCT is lossless.
-        
-        :param path: Destination file name. If not given, source file is overwritten.
-        :type path: str, optional
+    
+        :param obj:
+        :type obj: str
+        :param fpath: Destination file name. If not given, source file is overwritten.
+        :type fpath: str, optional
+        :param flags: Flags. For backward compatibility, does not make a difference.
+        :type flags: int
         :param quality: Compression quality, between 0 and 100. Special value -1 stands for using qt inside the instance or keeping libjpeg default.
         :type quality: int, optional
-        
+    
         :Example:
-        
+    
         >>> jpeg = jpeglib.read_dct("input.jpeg")
         >>> jpeg = jpeglib.to_jpegio(jpeg)
-        >>> jpeg.write_spatial("output.jpeg", quality=92)
+        >>> jpeg.write("output.jpeg", quality=92)
         """
         # pass data from jpegio to jpeg
         self._jpegio_to_jpeg()
         # write 
-        self.write_dct(path=path, quality=quality)
-        
+        self.write_dct(path=fpath, quality=quality)
         
 def to_jpegio(jpeg: DCTJPEG):
     """Convertor of object of :class:`DCTJPEG` to :class:`DCTJPEGio`.
@@ -344,5 +347,3 @@ def to_jpegio(jpeg: DCTJPEG):
     """
     vals = {field.name: getattr(jpeg,field.name) for field in fields(jpeg)}
     return DCTJPEGio(**vals)
-
-    
