@@ -7,11 +7,7 @@ import ctypes
 import setuptools
 import codecs
 import os
-<<<<<<< HEAD
 __version__ = os.environ.get('VERSION_NEW', '0.10.7')
-=======
-__version__ = os.environ.get('VERSION_NEW', '0.10.4')
->>>>>>> 147356f (release 0.10.4, updated readme)
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
