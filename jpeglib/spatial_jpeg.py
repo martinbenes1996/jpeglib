@@ -87,8 +87,10 @@ class SpatialJPEG(JPEG):
         >>> jpeg.write_spatial("output.jpeg", qt=75)
         """
         # colorspace
-        if self.color_space is None:
-            self.color_space = self.jpeg_color_space
+        if self.jpeg_color_space is None:
+            self.jpeg_color_space = self.color_space
+        jpeg_color_space = (ctypes.c_int*2)(self.color_space.index, self.jpeg_color_space.index)
+        num_components = (ctypes.c_int*2)(self.color_space.channels, self.jpeg_color_space.channels)
         # path
         dstfile = path if path is not None else self.path
         if dstfile is None:
@@ -120,8 +122,8 @@ class SpatialJPEG(JPEG):
             dstfile             = dstfile,
             spatial             = spatial,
             image_dims          = self.c_image_dims(),
-            in_color_space      = self.color_space.index,
-            in_components       = self.color_space.channels,
+            jpeg_color_space    = jpeg_color_space,
+            num_components      = num_components,
             dct_method          = dct_method,
             samp_factor         = self.c_samp_factor(),
             qt                  = qt,

@@ -64,12 +64,12 @@ class CJpegLib:
 
     @classmethod
     def write_jpeg_spatial(cls,
-                           dstfile: str, spatial, image_dims, in_color_space, in_components,
+                           dstfile: str, spatial, image_dims, jpeg_color_space, num_components,
                            dct_method, samp_factor, qt, quality, smoothing_factor,
                            num_markers: int, marker_types, marker_lengths, markers,
                            flags
                            ):
-        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), spatial, image_dims, in_color_space, in_components,
+        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), spatial, image_dims, jpeg_color_space, num_components,
                                               dct_method, samp_factor, qt, cls.factor(
                                                   quality), cls.factor(smoothing_factor),
                                               num_markers, marker_types, marker_lengths, markers,

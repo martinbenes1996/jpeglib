@@ -1,9 +1,6 @@
 
 import logging
-from multiprocessing import Process
 import numpy as np
-import os
-import shutil
 import sys
 import tempfile
 import unittest
@@ -259,6 +256,21 @@ class TestDCT(unittest.TestCase):
         self.logger.info("test_qt1")
         im = jpeglib.read_dct("examples/qt1.jpeg")
         np.testing.assert_array_equal(im.qt[0], im.qt[1])
+
+    def test_from_dct(self):
+        self.logger.info("test_from_dct")
+        # generate random DCT
+        Y = np.random.randint(-127, 127,(2,2,8,8),dtype=np.int16)
+        Cb = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
+        Cr = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
+        im = jpeglib.from_dct(Y, Cb, Cr)
+        im.write_dct(self.tmp.name)
+        # reopen and compare
+        im2 = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(im.Y, im2.Y)
+        np.testing.assert_array_equal(im.Cb, im2.Cb)
+        np.testing.assert_array_equal(im.Cr, im2.Cr)
+        
 
 
 
