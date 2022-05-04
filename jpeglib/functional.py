@@ -243,6 +243,146 @@ def from_spatial(
         progressive_mode=False
     )
 
+def from_dct(
+    Y: np.ndarray,
+    Cb: np.ndarray = None,
+    Cr: np.ndarray = None,
+    qt: np.ndarray = None,
+    quant_tbl_no: list = None,
+) -> DCTJPEG:
+    """A factory of :class:`DCTJPEG` from DCT data.
+    
+    The color space inference is based on number of color channels.
+    If chrominance is not given, grayscale JPEG is assumed. For three channels, YCbCr JPEG is assumed.
+
+    The quantization table assigment is infered based on components and number of quantization tables given.
+    If you wish a custom assignment, use :obj:`DCTJPEG.qt`.
+
+    .. warning::
+        Parameter :obj:`DCTJPEG.path` is not initialized.
+        When calling :meth:`DCTJPEG.write_dct`, you have to specify `path`,
+        otherwise an error is raised.
+        
+    :param Y: Luminance tensor.
+    :type Y: np.ndarray
+    :param Cb: Blue chrominance tensor.
+    :type Cb: np.ndarray
+    :param Cr: Red chrominance tensor.
+    :type Cr: np.ndarray
+    :param qt: Quantization table tensor.
+    :type qt: np.ndarray
+    
+    :Example:
+    
+    >>> Y = np.random.randint(-127, 127,(2,2,8,8),dtype=np.int16)
+    >>> Cb = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
+    >>> Cr = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
+    >>> im = jpeglib.from_dct(Y, Cb, Cr, qt=75) # chrominance -> YCbCr infered
+
+    When data has one color channels, grayscale is infered
+    
+    >>> Y = np.random.randint(-127, 127,(2,2,8,8),dtype=np.int16)
+    >>> im = jpeglib.from_dct(Y) # chrominance -> YCbCr infered
+    
+    For other color channels, color space can't be infered. Error is raised.
+    
+    >>> Y = np.random.randint(-127, 127,(2,2,8,8),dtype=np.int16)
+    >>> X = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
+    >>> try:
+    >>>     im = jpeglib.from_dct(Y, X)
+    >>> except IOError:
+    >>>     raised
+    
+    When output is not specified when writing, error is raised.
+    
+    >>> Y = np.random.randint(-127, 127,(2,2,8,8),dtype=np.int16)
+    >>> im = jpeglib.from_dct(Y)
+    >>> try:
+    >>>     im.write_dct()
+    >>> except IOError:
+    >>>     pass
+    """
+    # infere colorspace
+    if Cb is not None and Cr is not None:
+        jpeg_color_space = Colorspace('JCS_YCbCr')
+    elif Cb is None and Cr is None:
+        jpeg_color_space = Colorspace('JCS_YCbCr') # only Y
+        #jpeg_color_space = Colorspace('JCS_GRAYSCALE')
+    else:
+        raise IOError('failed to infere colorspace')
+    # infere quant_tbl_no
+    if quant_tbl_no is None and qt is not None:
+        quant_tbl_no = np.array([0,0,0,0])
+        if Cb is not None and Cr is not None:
+            if qt.shape[0] == 2:
+                quant_tbl_no = np.array([0,1,1,0])
+            elif qt.shape[0] == 3:
+                quant_tbl_no = np.array([0,1,2,0])
+    # infere samp_factor
+    # TODO
+    samp_factor = ((1,1),(1,1),(1,1))
+    # block dims
+    block_dims = [[Y.shape[0],Y.shape[1]]]
+    if Cb is not None and Cr is not None:
+        block_dims.append([Cb.shape[0],Cb.shape[1]])
+        block_dims.append([Cr.shape[0],Cr.shape[1]])
+    block_dims = np.array(block_dims)
+
+    # create jpeg
+    return DCTJPEG(
+        path=None,
+        content=None,
+        height=Y.shape[0]*Y.shape[2],
+        width=Y.shape[1]*Y.shape[3],
+        block_dims=block_dims,
+        samp_factor=samp_factor,
+        jpeg_color_space=jpeg_color_space,
+        #num_components=info.num_components,
+        quant_tbl_no=quant_tbl_no,
+        markers=None,
+        Y=Y,
+        Cb=Cb,
+        Cr=Cr,
+        qt=qt,
+        progressive_mode=None,
+    )
+
+
+
+    # shape
+    height, width, num_components = spatial.shape
+    # parse colorspace
+    if in_color_space is not None:
+        try:
+            in_color_space = Colorspace(in_color_space)
+        except:
+            in_color_space = in_color_space
+    # infere colorspace
+    if in_color_space is None:
+        if num_components == 3:
+            in_color_space = Colorspace('JCS_RGB')
+        elif num_components == 1:
+            in_color_space = Colorspace('JCS_GRAYSCALE')
+        else:
+            raise IOError('failed to infere colorspace')
+    # create jpeg
+    return SpatialJPEG(
+        path=None,
+        content=None,
+        height=height,
+        width=width,
+        block_dims=None,
+        samp_factor=None,
+        jpeg_color_space=None,
+        markers=None,
+        spatial=spatial,
+        color_space=in_color_space,
+        dither_mode=None,
+        dct_method=None,
+        flags=[],
+        progressive_mode=False
+    )
+
     # with JPEG(srcfile) as im:
     #    Y,CbCr,qt = im.read_dct(*args, **kwargs)
 

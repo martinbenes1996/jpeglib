@@ -118,6 +118,8 @@ int read_jpeg_info(
       marker_types[i] = gmarker_types[i];
     }
     unset_marker_handlers(&cinfo);
+  } else {
+    (void) jpeg_read_header(&cinfo, TRUE);
   }
 
   jpeg_calc_output_dimensions(&cinfo);
@@ -314,10 +316,10 @@ int write_jpeg_dct(
     fprintf(stderr, "you must specify dstfile\n");
     return 0;
   }
-  if ((qt == NULL) && (quality < 0)) {
-    fprintf(stderr, "you must specify either qt or quality\n");
-    return 0;
-  }
+  // if ((qt == NULL) && (quality < 0)) {
+  //   fprintf(stderr, "you must specify either qt or quality\n");
+  //   return 0;
+  // }
   if (Y == NULL) {
     fprintf(stderr, "you must specify Y\n");
     return 0;
@@ -362,6 +364,7 @@ int write_jpeg_dct(
   cinfo_out.image_height = image_dims[0];
   cinfo_out.image_width = image_dims[1];
   cinfo_out.in_color_space = in_color_space;
+  cinfo_out.jpeg_color_space = in_color_space;
   if (in_components >= 0)
     cinfo_out.input_components = in_components;
   cinfo_out.num_components = cinfo_out.input_components;
@@ -601,8 +604,8 @@ int write_jpeg_spatial(
   const char *dstfile,
   unsigned char *rgb,
   int *image_dims,
-  int in_color_space,
-  int in_components,
+  int *jpeg_color_space,
+  int *num_components,
   int dct_method,
   int *samp_factor,
   unsigned short *qt,
@@ -631,10 +634,18 @@ int write_jpeg_spatial(
   // set basic parameters
   cinfo.image_height = image_dims[0];
   cinfo.image_width = image_dims[1];
-  if (in_color_space >= 0)
-    cinfo.in_color_space = in_color_space;
-  if (in_components >= 0)
-    cinfo.input_components = in_components;
+  if (jpeg_color_space != NULL) {
+    cinfo.in_color_space = jpeg_color_space[0];
+    cinfo.jpeg_color_space = jpeg_color_space[1];
+  }
+  // if (in_color_space != NULL)
+  //   cinfo.in_color_space = in_color_space;
+  // if (in_components >= 0)
+  //   cinfo.input_components = in_components;
+  if (num_components != NULL && num_components[0] >= 0)
+    cinfo.input_components = num_components[0];
+  if (num_components != NULL && num_components[1] >= 0)
+    cinfo.num_components = num_components[1];
   cinfo.num_components = cinfo.input_components;
   jpeg_set_defaults(&cinfo);
 
@@ -682,8 +693,8 @@ int write_jpeg_spatial(
 
   if (smoothing_factor >= 0)
     cinfo.smoothing_factor = smoothing_factor;
-  if (in_color_space >= 0)
-    cinfo.in_color_space = in_color_space;
+  // if (in_color_space >= 0)
+  //   cinfo.in_color_space = in_color_space;
 
   #if JPEG_LIB_VERSION >= 70
   if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {

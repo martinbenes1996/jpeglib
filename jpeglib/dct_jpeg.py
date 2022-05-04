@@ -50,6 +50,9 @@ class DCTJPEG(_jpeg.JPEG):
         >>> jpeg = jpeglib,read_dct("input.jpeg")
         >>> jpeg.Y # jpeg.read_dct() called internally
         """
+        # no content
+        if self.content is None:
+            return None,(None,None),None
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
         tmp.write(self.content)
@@ -104,36 +107,40 @@ class DCTJPEG(_jpeg.JPEG):
         >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", quality=92)
         """
-        # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
-        tmp.write(self.content)
-        tmp.flush()
-        # parameters
+        if self.content is not None:
+            # write content into temporary file
+            tmp.write(self.content)
+            tmp.flush()
+        # path
         dstfile = path if path is not None else self.path
+        if dstfile is None:
+            raise IOError('no destination file specified')
         # convert dct
         def process_component(comp):
+            if comp is None:
+                return None
             comp = comp.reshape((*comp.shape[:-2],64))
             return np.ctypeslib.as_ctypes(comp.astype(np.int16))
         qt = process_component(self.qt)
         Y = process_component(self.Y)
-        if self.has_chrominance:
-            Cb = process_component(self.Cb)
-            Cr = process_component(self.Cr)
-        else: Cb,Cr = None,None
-        # convert qt
+        Cb = process_component(self.Cb)
+        Cr = process_component(self.Cr)
+        # quality and quantization table
         assert(quality in set(range(-1,101)))
         if quality != -1:
             qt = None
+            
         # call
         CJpegLib.write_jpeg_dct(
-            srcfile         = tmp.name,
+            srcfile         = tmp.name if self.content is not None else None,
             dstfile         = dstfile,
             Y               = Y,
             Cb              = Cb,
             Cr              = Cr,
             image_dims      = self.c_image_dims(),
             block_dims      = self.c_block_dims(),
-            in_color_space  = self.jpeg_color_space.name,
+            in_color_space  = self.jpeg_color_space.index,
             in_components   = self.num_components,
             qt              = qt,
             quality         = quality,

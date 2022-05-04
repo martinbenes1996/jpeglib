@@ -45,6 +45,7 @@ class TestSpatial(unittest.TestCase):
         Y_in = (np.random.rand(1,32,32,8,8)*255).astype(np.int16)
         CbCr_in = (np.random.rand(2,16,16,8,8)*255).astype(np.int16)
         # compress
+        
         im = jpeglib.JPEG()
         im.write_dct(Y_in, CbCr_in, self.tmp.name, samp_factor=((2,2),(1,1),(1,1)))
         # decompress
