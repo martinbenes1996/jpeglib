@@ -233,7 +233,7 @@ def from_spatial(
         width=width,
         block_dims=None,
         samp_factor=None,
-        jpeg_color_space=None,
+        jpeg_color_space=Colorspace('JCS_YCbCr'),
         markers=None,
         spatial=spatial,
         color_space=in_color_space,

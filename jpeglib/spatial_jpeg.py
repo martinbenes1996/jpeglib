@@ -91,10 +91,12 @@ class SpatialJPEG(JPEG):
         >>> jpeg.write_spatial("output.jpeg", qt=75)
         """
         # colorspace
-        if self.jpeg_color_space is None:
-            self.jpeg_color_space = self.color_space
-        jpeg_color_space = (ctypes.c_int*2)(self.color_space.index, self.jpeg_color_space.index)
-        num_components = (ctypes.c_int*2)(self.color_space.channels, self.jpeg_color_space.channels)
+        if self.jpeg_color_space is not None:
+            jpeg_color_space = self.jpeg_color_space
+        else:
+            jpeg_color_space = self.color_space
+        num_components = (ctypes.c_int*2)(self.color_space.channels, jpeg_color_space.channels)
+        jpeg_color_space = (ctypes.c_int*2)(self.color_space.index, jpeg_color_space.index)
         # path
         dstfile = path if path is not None else self.path
         if dstfile is None:
