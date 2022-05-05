@@ -13,12 +13,15 @@ from ._dctmethod import DCTMethod
 @dataclass
 class SpatialJPEG(JPEG):
     """JPEG instance to work in spatial domain."""
+    
     spatial: np.ndarray
+    """pixel data tensor"""
     color_space: Colorspace
+    """color space of the pixel data"""
+    # needed for compression, not actual props
     dither_mode: Dithermode
     dct_method: DCTMethod
     flags: list
-
     
     def _alloc_spatial(self, channels:int = None):
         if channels is None:
@@ -67,7 +70,8 @@ class SpatialJPEG(JPEG):
         )
         return self.spatial
 
-    def write_spatial(self, path:str = None, qt:typing.Union[int,np.ndarray] = None, dct_method:typing.Union[str,DCTMethod] = None, smoothing_factor:int = None, flags:list = []):
+    def write_spatial(self, path:str = None, qt:typing.Union[int,np.ndarray] = None, dct_method:typing.Union[str,DCTMethod] = None, #dither_mode: Dithermode = None,
+                      smoothing_factor:int = None, flags:list = []):
         """Writes a spatial image representation (i.e. RGB) to a file.
         
         :param path: Destination file name. If not given, source file is overwritten.
