@@ -221,8 +221,10 @@ def from_spatial(
     if in_color_space is None:
         if num_components == 3:
             in_color_space = Colorspace('JCS_RGB')
+            jpeg_color_space = Colorspace('JCS_YCbCr')
         elif num_components == 1:
             in_color_space = Colorspace('JCS_GRAYSCALE')
+            jpeg_color_space = Colorspace('JCS_GRAYSCALE')
         else:
             raise IOError('failed to infere colorspace')
     # create jpeg
@@ -233,7 +235,7 @@ def from_spatial(
         width=width,
         block_dims=None,
         samp_factor=None,
-        jpeg_color_space=Colorspace('JCS_YCbCr'),
+        jpeg_color_space=jpeg_color_space,
         markers=None,
         spatial=spatial,
         color_space=in_color_space,
