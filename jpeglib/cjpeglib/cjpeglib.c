@@ -634,20 +634,13 @@ int write_jpeg_spatial(
   // set basic parameters
   cinfo.image_height = image_dims[0];
   cinfo.image_width = image_dims[1];
-  if (jpeg_color_space != NULL) {
+  if (jpeg_color_space != NULL)
     cinfo.in_color_space = jpeg_color_space[0];
-    cinfo.jpeg_color_space = jpeg_color_space[1];
-  }
-  // if (in_color_space != NULL)
-  //   cinfo.in_color_space = in_color_space;
-  // if (in_components >= 0)
-  //   cinfo.input_components = in_components;
-  if (num_components != NULL && num_components[0] >= 0)
+  if (num_components != NULL)
     cinfo.input_components = num_components[0];
-  if (num_components != NULL && num_components[1] >= 0)
-    cinfo.num_components = num_components[1];
-  cinfo.num_components = cinfo.input_components;
+
   jpeg_set_defaults(&cinfo);
+  jpeg_set_colorspace(&cinfo, jpeg_color_space[1]);
 
   // set advanced parameters
   if (dct_method >= 0)

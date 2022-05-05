@@ -121,3 +121,11 @@ class Colorspace(CStruct):
         """
         name = cls.iJ_COLOR_SPACE()[index]
         return cls(name=name)
+    
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.name == other
+        elif isinstance(other, int):
+            return self.index == other
+        else:
+            return self.index == other.index
