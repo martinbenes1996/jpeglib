@@ -85,6 +85,13 @@ class SpatialJPEG(JPEG):
         
         >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", qt=75)
+
+        To create a grayscale JPEG (only with luminance channel) using libjpeg color conversions
+
+        >>> x = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
+        >>> im = jpeglib.from_spatial(x)
+        >>> im.jpeg_color_space = jpeglib.Colorspace('JCS_GRAYSCALE')
+        >>> im.write_spatial("hello.jpeg")
         """
         # colorspace
         if self.jpeg_color_space is not None:
