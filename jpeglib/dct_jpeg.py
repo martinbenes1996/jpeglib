@@ -252,16 +252,23 @@ class DCTJPEGio(DCTJPEG):
     def __post_init__(self):
         self._jpeg_to_jpegio()
     def _jpeg_to_jpegio(self):
-        # collect dct
-        self._coef_arrays = [
-            self._convert_dct_jpegio(self.Y),
-            self._convert_dct_jpegio(self.Cb),
-            self._convert_dct_jpegio(self.Cr)
-        ]
-        self._quant_tables = [
-            self.get_component_qt(0).astype(np.int32),
-            self.get_component_qt(1).astype(np.int32)
-        ]
+        # colored image
+        if self.has_chrominance:
+            self._coef_arrays = [
+                self._convert_dct_jpegio(self.Y),
+                self._convert_dct_jpegio(self.Cb),
+                self._convert_dct_jpegio(self.Cr)
+            ]
+            self._quant_tables = [
+                self.get_component_qt(0).astype(np.int32),
+                self.get_component_qt(1).astype(np.int32)
+            ]
+        # grayscale
+        else:
+            self._coef_arrays = [self._convert_dct_jpegio(self.Y)]
+            self._quant_tables = [self.get_component_qt(0).astype(np.int32)]
+
+            
     def _jpegio_to_jpeg(self):
         self.Y = self._convert_jpegio_dct(self.coef_arrays[0])
         if self.has_chrominance:
@@ -275,7 +282,7 @@ class DCTJPEGio(DCTJPEG):
             self.quant_tbl_no = np.array([0,1,1])
         else:
             self.qt = np.array([
-                self.uant_tables[0]
+                self.quant_tables[0]
             ], dtype=np.uint16)
             self.quant_tbl_no = np.array([0])
     

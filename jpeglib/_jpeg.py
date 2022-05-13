@@ -154,10 +154,14 @@ class JPEG:
     def c_image_dims(self):
         return (ctypes.c_int * 2)(self.height, self.width)
     def c_block_dims(self):
-        return (ctypes.c_int * 6)(
-            self.block_dims[0][0], self.block_dims[0][1],
-            self.block_dims[1][0], self.block_dims[1][1],
-            self.block_dims[2][0], self.block_dims[2][1],)
+        if self.has_chrominance:
+            return (ctypes.c_int * 6)(
+                self.block_dims[0][0], self.block_dims[0][1],
+                self.block_dims[1][0], self.block_dims[1][1],
+                self.block_dims[2][0], self.block_dims[2][1],)
+        else:
+            return (ctypes.c_int * 6)(
+                self.block_dims[0][0], self.block_dims[0][1],)
     def c_samp_factor(self):
         if self.samp_factor is None:
             return self.samp_factor
