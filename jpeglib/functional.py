@@ -129,10 +129,15 @@ def read_spatial(
     # load info
     info = _jpeg.load_jpeg_info(path)
     # parse
-    num_components = info.jpeg_color_space
+    jpeg_color_space = info.jpeg_color_space
     if out_color_space is not None:
         out_color_space = Colorspace(out_color_space)
-        num_components = out_color_space.channels
+        jpeg_color_space = out_color_space
+    else:
+        out_color_space = Colorspace(
+            'JCS_RGB' if info.has_chrominance else 'JCS_GRAYSCALE'
+        )
+
     if dct_method is not None:
         dct_method = DCTMethod(dct_method)
     if dither_mode is not None:
@@ -145,7 +150,7 @@ def read_spatial(
         width               = info.width,
         block_dims          = info.block_dims,
         samp_factor         = info.samp_factor,
-        jpeg_color_space    = info.jpeg_color_space,
+        jpeg_color_space    = jpeg_color_space,
         #num_components      = num_components,
         markers             = info.markers,
         spatial             = None,
