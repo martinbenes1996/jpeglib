@@ -131,7 +131,7 @@ class TestShapes(unittest.TestCase):
         self.assertEqual(im.samp_factor[0,0], 2)
         self.assertEqual(im.samp_factor[0,1], 2)
         self.assertIsInstance(im.jpeg_color_space, jpeglib.Colorspace)
-        self.assertEqual(im.num_components, 3)
+        self.assertEqual(im.num_components, 1)
         self.assertEqual(im.channels, 1)
         self.assertEqual(len(im.markers), 2)
         # read spatial

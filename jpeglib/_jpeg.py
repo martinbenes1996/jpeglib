@@ -212,8 +212,6 @@ class JPEG:
     def __exit__(self, exception_type, exception_val, trace):
         """Method for using ``with`` statement together with :class:`JPEG`."""
         self.close()
-        
-    
 
 
 def load_jpeg_info(path: str) -> JPEG:
