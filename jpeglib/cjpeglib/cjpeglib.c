@@ -713,7 +713,42 @@ int write_jpeg_spatial(
   if (overwrite_flag(flags, CCIR601_SAMPLING))
     cinfo.CCIR601_sampling = flag_is_set(flags, CCIR601_SAMPLING);
 
+  fprintf(stderr, "number of scans: %d\n", cinfo.num_scans);
+  fprintf(stderr, "components in scan: %d\n", cinfo.comps_in_scan);
+  fprintf(stderr, "Ss: %d\n", cinfo.Ss);
+  fprintf(stderr, "Se: %d\n", cinfo.Se);
+  fprintf(stderr, "Ah: %d\n", cinfo.Ah);
+  fprintf(stderr, "Al: %d\n", cinfo.Al);
+
+  // jpeg_scan_info
+  // vtruct jpeg_error_mgr *err;
+  // struct jpeg_memory_mgr *mem;
+  // struct jpeg_progress_mgr *progress;
+  // JDIMENSION next_scanline;
   // start compression
+  // boolean progressive_mode;
+  // int comps_in_scan;
+  // jpeg_component_info *cur_comp_info[4];
+  // JDIMENSION MCUs_per_row;
+  // JDIMENSION MCU_rows_in_scan;
+  // int blocks_in_MCU;
+  // int MCU_membership[10];
+  // int Ss;
+  // int Se;
+  // int Ah;
+  // int Al;
+
+
+  // The SS, SE, AH, and AL parameters are for the SCAN. A frame is made up of multiple scans.
+  // The SS and SE parameters indicate the range of DCT coefficients that are encoded. 
+  // The AH and AL parameters can range from 0-13. Thus, in theory you can have 14 * 64 = 896 scans for a single component.
+
+  // Looking in the LIBJPEG manual, it looks like this is done through setting up sequences of scans in a "j_compress_ptr" structure. 
+  // They also mention a function "jpeg_simple_progression()" for setting this up.
+
+
+  // jpeg_scan_info *script_space;
+  // int script_space_size;
   jpeg_start_compress(&cinfo, TRUE);
 
   // write markers
