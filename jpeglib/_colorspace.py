@@ -108,7 +108,7 @@ class Colorspace(CStruct):
         return '<Colorspace %s>' % self.name
     
     @classmethod
-    def from_index(cls, index:int) -> Colorspace:
+    def from_index(cls, index:int):
         """Construct from index.
         
         :param index: Color space index.
