@@ -7,23 +7,27 @@ import ctypes
 import setuptools
 import codecs
 import os
-__version__ = os.environ.get('VERSION_NEW', '0.10.11')
+__version__ = os.environ.get('VERSION_NEW', '0.10.12')
 libjpeg_versions = {
-    '6b': (None, 60),
-    '7': (None, 70),
-    '8': (None, 80),
-    '8a': (None, 80),
-    '8b': (None, 80),
-    '8c': (None, 80),
-    '8d': (None, 80),
-    '9': (None, 90),
-    '9a': (None, 90),
-    '9b': (None, 90),
-    '9c': (None, 90),
-    '9d': (None, 90),
-    '9e': (None, 90),
-    'turbo210': ('2.1.0', 210),
-    'mozjpeg403': ('4.0.3', 403)
+     '6b': (None, 60),
+    # '7': (None, 70),
+    # '8': (None, 80),
+    # '8a': (None, 80),
+    # '8b': (None, 80),
+    # '8c': (None, 80),
+    # '8d': (None, 80),
+    # '9': (None, 90),
+    # '9a': (None, 90),
+    # '9b': (None, 90),
+    # '9c': (None, 90),
+    # '9d': (None, 90),
+    # '9e': (None, 90),
+     'turbo210': ('2.1.0', 210),
+     'mozjpeg101': ('1.0.1', 101),
+     'mozjpeg201': ('2.0.1', 201),
+     'mozjpeg300': ('3.0.0', 300),
+     'mozjpeg403': ('4.0.3', 403)
+
 }
 
 # requirements
@@ -53,6 +57,8 @@ for v in libjpeg_versions:
     if is_turbo:
         package_name += '-turbo'
         (Path(clib) / 'jconfigint.h').touch()
+    if is_moz:
+        (Path(clib) / 'config.h').touch()
 
     files = [
         f'{clib}/{f}' for f in os.listdir(clib) if re.fullmatch(f'.*\.(c|h)', f)]
@@ -65,7 +71,8 @@ for v in libjpeg_versions:
                             # turbo
                             'jccolext', 'jdcolext', 'jdcol565', 'jstdhuff',
                             'jdmrg565', 'jdmrgext', "jcstest", "tjunittest", "tjbench",
-                            'turbojpeg-jni', 'turbojpeg']:
+                            'turbojpeg-jni', 'turbojpeg',
+                            'bmp', 'jpegyuv']:
         lim = -2 - len(excluded_module)
         files = [f for f in files if f[lim:-2] != excluded_module]
     #
@@ -81,7 +88,6 @@ for v in libjpeg_versions:
     ]
     if is_turbo:
         macros += [
-            ("JPEG_LIB_VERSION", 80),  # 70),
             ("INLINE", "__inline__"),
             ("PACKAGE_NAME", f"\"{package_name}\""),
             ("BUILD", f"\"unknown\""),
@@ -89,9 +95,15 @@ for v in libjpeg_versions:
             ("SIZEOF_SIZE_T", int(ctypes.sizeof(ctypes.c_size_t))),
             ("THREAD_LOCAL", "__thread")
         ]
+        if not is_moz:
+            macros += [
+                ("JPEG_LIB_VERSION", 80),  # 70),
+            ]
     if is_moz:
         macros += [
-            ('C_ARITH_CODING_SUPPORTED', 1)
+            ("JPEG_LIB_VERSION", 69),  
+            ('C_ARITH_CODING_SUPPORTED', 1),
+            ('MEM_SRCDST_SUPPORTED', 1)
         ]
 
     cjpeglib[v] = setuptools.Extension(

@@ -247,7 +247,7 @@ def from_spatial(
         dither_mode=None,
         dct_method=None,
         flags=[],
-        progressive_mode=False
+        progressive_mode=None
     )
 
 def from_dct(
