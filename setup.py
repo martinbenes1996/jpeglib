@@ -22,11 +22,11 @@ libjpeg_versions = {
     # '9c': (None, 90),
     # '9d': (None, 90),
     # '9e': (None, 90),
-    # 'turbo210': ('2.1.0', 210),
+     'turbo210': ('2.1.0', 210),
      'mozjpeg101': ('1.0.1', 101),
      'mozjpeg201': ('2.0.1', 201),
      'mozjpeg300': ('3.0.0', 300),
-    # 'mozjpeg403': ('4.0.3', 403)
+     'mozjpeg403': ('4.0.3', 403)
 
 }
 
@@ -104,7 +104,6 @@ for v in libjpeg_versions:
             ("JPEG_LIB_VERSION", 69),  
             ('C_ARITH_CODING_SUPPORTED', 1),
             ('MEM_SRCDST_SUPPORTED', 1)
-
         ]
 
     cjpeglib[v] = setuptools.Extension(
