@@ -24,7 +24,7 @@ jobs:
           architecture: "x64" # architecture
 
       - name: Run unittests
-        uses: ./.github/common/unit_tests.yml
+        uses: ./.github/common/unit_tests
 
       - name: Build wheels
         uses: actions/upload-artifact@v2

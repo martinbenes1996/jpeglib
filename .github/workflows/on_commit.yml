@@ -19,7 +19,7 @@ jobs:
           architecture: "x64" # architecture
 
       - name: Run unit tests # run unittests
-        uses: ./.github/common/unit_tests.yml
+        uses: ./.github/common/unit_tests
 
 
   # === coding style ===
@@ -36,4 +36,4 @@ jobs:
           architecture: "x64" # architecture
 
       - name: Run code analysis
-        uses: ./.github/common/code_quality.yml
+        uses: ./.github/common/code_quality
