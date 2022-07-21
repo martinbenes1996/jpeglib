@@ -19,6 +19,7 @@ class DCTJPEG(_jpeg.JPEG):
     """chrominance red-difference tensor"""
     qt: np.ndarray
     """quantization tensor"""
+
     quant_tbl_no: np.ndarray
     """assignment of quantization tables to components,
     (0 Y, 1 Cb, 1Cr) by default"""
