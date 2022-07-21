@@ -11,10 +11,22 @@ on: # trigger
 # parallel jobs to perform
 jobs:
   # === unittest execution ===
-  unittest:
+  build_wheel:
     runs-on: ubuntu-latest # runner
+
+    - name: Run unittests
+      uses: .github/workflows/unittests_on_commit.yml
+    
+    
+    - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+
     steps:
-      - uses: martinbenes1996/jpeglib@unittest
+      - name: Run unittests
+        uses: .github/workflows/unittests_on_commit.yml
   wheels:
     runs-on: ubuntu-latest # runner
 

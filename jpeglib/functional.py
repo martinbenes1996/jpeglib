@@ -356,39 +356,39 @@ def from_dct(
 
 
 
-    # shape
-    height, width, num_components = spatial.shape
-    # parse colorspace
-    if in_color_space is not None:
-        try:
-            in_color_space = Colorspace(in_color_space)
-        except:
-            in_color_space = in_color_space
-    # infere colorspace
-    if in_color_space is None:
-        if num_components == 3:
-            in_color_space = Colorspace('JCS_RGB')
-        elif num_components == 1:
-            in_color_space = Colorspace('JCS_GRAYSCALE')
-        else:
-            raise IOError('failed to infere colorspace')
-    # create jpeg
-    return SpatialJPEG(
-        path=None,
-        content=None,
-        height=height,
-        width=width,
-        block_dims=None,
-        samp_factor=None,
-        jpeg_color_space=None,
-        markers=None,
-        spatial=spatial,
-        color_space=in_color_space,
-        dither_mode=None,
-        dct_method=None,
-        flags=[],
-        progressive_mode=False
-    )
+    # # shape
+    # height, width, num_components = spatial.shape
+    # # parse colorspace
+    # if in_color_space is not None:
+    #     try:
+    #         in_color_space = Colorspace(in_color_space)
+    #     except:
+    #         in_color_space = in_color_space
+    # # infere colorspace
+    # if in_color_space is None:
+    #     if num_components == 3:
+    #         in_color_space = Colorspace('JCS_RGB')
+    #     elif num_components == 1:
+    #         in_color_space = Colorspace('JCS_GRAYSCALE')
+    #     else:
+    #         raise IOError('failed to infere colorspace')
+    # # create jpeg
+    # return SpatialJPEG(
+    #     path=None,
+    #     content=None,
+    #     height=height,
+    #     width=width,
+    #     block_dims=None,
+    #     samp_factor=None,
+    #     jpeg_color_space=None,
+    #     markers=None,
+    #     spatial=spatial,
+    #     color_space=in_color_space,
+    #     dither_mode=None,
+    #     dct_method=None,
+    #     flags=[],
+    #     progressive_mode=False
+    # )
 
     # with JPEG(srcfile) as im:
     #    Y,CbCr,qt = im.read_dct(*args, **kwargs)
