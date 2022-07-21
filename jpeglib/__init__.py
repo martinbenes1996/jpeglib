@@ -9,7 +9,7 @@ and exposes DCT coefficients and quantization tables.
 from .functional import read_dct, read_spatial, from_spatial, from_dct
 
 # jpeg objects
-from .dct_jpeg import DCTJPEG, DCTJPEGio
+from .dct_jpeg import DCTJPEG, DCTJPEGio, to_jpegio
 from .spatial_jpeg import SpatialJPEG
 
 # cstructs
@@ -38,7 +38,7 @@ except pkg_resources.DistributionNotFound:
 version.set('6b')
 
 __all__ = [
-    'read_dct', 'read_spatial', 'from_spatial', 'from_dct',
+    'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
     'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
     'Colorspace', 'DCTMethod', 'Dithermode', 'Marker',
     'version',
