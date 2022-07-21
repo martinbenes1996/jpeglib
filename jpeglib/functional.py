@@ -177,6 +177,7 @@ def read_spatial(
         progressive_mode=info.progressive_mode
     )
 
+
 def from_spatial(
     spatial: np.ndarray,
     in_color_space: typing.Union[str, Colorspace] = None
@@ -195,7 +196,6 @@ def from_spatial(
 
     :param spatial:
     Spatial representation.
-
     :type spatial: np.ndarray
     :param in_color_space:
     Color space of the input.
