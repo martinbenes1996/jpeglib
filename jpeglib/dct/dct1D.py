@@ -45,7 +45,7 @@ def _dct_iii(Y: np.ndarray, i: int) -> float:
             Lambda(u) *
             Y[u] *
             np.cos(np.pi/N*(i+.5)*u)
-            for u in range(N()
+            for u in range(N)
         )
     )
     return Xi
