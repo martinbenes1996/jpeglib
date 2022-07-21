@@ -1,4 +1,4 @@
-name: Unit tests # workflow name
+name: CI # workflow name
 on: # trigger
   push:
     branches: [master, dev, progressive]

@@ -1,4 +1,4 @@
-name: Release # workflow name
+name: CD # workflow name
 on: # trigger
   release:
     branches: [master]
