@@ -1,4 +1,5 @@
 
+import ctypes
 from typing import List
 from ._bind import CJpegLib
 
