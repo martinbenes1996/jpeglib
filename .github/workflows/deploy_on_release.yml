@@ -1,0 +1,32 @@
+name: Release # workflow name
+on: # trigger
+  release:
+    branches: [master]
+  push:
+    branches: [dev]
+
+
+# parallel jobs to perform
+jobs:
+  # === unittest execution ===
+  unittest:
+    uses: martinbenes1996/jpeglib/.github/workflows/unittests_on_commit.yml@master
+  wheels:
+    runs-on: ubuntu-latest # runner
+
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+      - name: Install dependencies # dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Build wheels
+        with:
+          name: dist
+          path: dist
