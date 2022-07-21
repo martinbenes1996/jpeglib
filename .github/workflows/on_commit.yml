@@ -18,14 +18,8 @@ jobs:
           python-version: "3.x"
           architecture: "x64" # architecture
 
-      - name: Install test dependencies
-        uses: ./.github/common/install_test_dependencies
-
-      - name: Build library
-        uses: ./.github/common/build_from_source
-
-      - name: Run unittests # run unittests
-        uses: ./.github/common/run_unittests
+      - name: Run unit tests # run unittests
+        uses: ./.github/common/unit_tests
 
 
   # === coding style ===
@@ -41,10 +35,5 @@ jobs:
           python-version: "3.x"
           architecture: "x64" # architecture
 
-      - name: Install dependencies # dependencies
-        uses: ./.github/common/install_dependencies
-
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+      - name: Run code analysis
+        uses: ./.github/common/code_quality
