@@ -16,8 +16,8 @@ jobs:
 
     steps:
       - name: Run unittests
-        uses: martinbenes1996/jpeglib@run_unittests
-
+        uses: ./.github/workflows/unittests_on_commit
+        
       # - name: Set Github Workspace # access Github Workspace
       #   uses: actions/checkout@v2
       # - name: Set up Python 3.x # set architecture and Python3
