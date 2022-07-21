@@ -15,9 +15,18 @@ jobs:
     runs-on: ubuntu-latest # runner
 
     steps:
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+        
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+
       - name: Run unittests
         uses: ./.github/workflows/unittests_on_commit
-        
+
       # - name: Set Github Workspace # access Github Workspace
       #   uses: actions/checkout@v2
       # - name: Set up Python 3.x # set architecture and Python3

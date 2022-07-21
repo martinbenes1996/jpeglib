@@ -1,0 +1,50 @@
+name: Unit tests # workflow name
+on: # trigger
+  push:
+    branches: [master] #, dev, progressive]
+
+# parallel jobs to perform
+jobs:
+  # === unittest execution ===
+  unit_tests:
+    runs-on: ubuntu-latest # runner
+
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+
+      - name: Install test dependencies
+        uses: ./.github/common/install_test_dependencies
+
+      - name: Build library
+        uses: ./.github/common/build_from_source
+
+      - name: Run unittests # run unittests
+        uses: ./.github/common/run_unittests
+
+
+  # === coding style ===
+  code_analysis:
+    runs-on: ubuntu-latest # runner
+
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+
+      - name: Install dependencies # dependencies
+        uses: ./.github/common/install_dependencies
+
+      - name: Lint with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics

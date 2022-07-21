@@ -1,0 +1,34 @@
+name: Install test dependencies # workflow name
+
+on: # trigger
+  workflow_call
+
+# parallel jobs to perform
+jobs:
+  # === unittest execution ===
+  install_test_dependencies:
+    runs-on: ubuntu-latest # runner
+
+    steps: # tasks
+
+      - name: Install dependencies
+        uses: ./.github/common/install_dependencies
+
+      - name: Install test dependencies # dependencies
+        run: |
+          if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+          git clone https://github.com/btlorch/dct-coefficient-decoder
+          cd dct-coefficient-decoder
+          cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
+          python setup.py install
+          cd ..
+          sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
+          git clone https://github.com/dwgoon/jpegio
+          cd jpegio
+          cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
+          mv setup2.py setup.py
+          python3 setup.py install; true
+          python3 setup.py install
+          cd ..
+          pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox
+
