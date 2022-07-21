@@ -2,6 +2,8 @@ name: Release # workflow name
 on: # trigger
   release:
     branches: [master]
+    types:
+      - created
   push:
     branches: [dev]
 
@@ -10,7 +12,9 @@ on: # trigger
 jobs:
   # === unittest execution ===
   unittest:
-    uses: martinbenes1996/jpeglib/.github/workflows/unittests_on_commit.yml@master
+    runs-on: ubuntu-latest # runner
+    steps:
+      - uses: martinbenes1996/jpeglib/.github/workflows/unittests_on_commit.yml
   wheels:
     runs-on: ubuntu-latest # runner
 
