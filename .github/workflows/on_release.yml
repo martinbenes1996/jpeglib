@@ -7,10 +7,7 @@ on: # trigger
   # push:
   #   branches: [dev]
 
-
-# parallel jobs to perform
 jobs:
-  # === unittest execution ===
   build_wheel:
     runs-on: ubuntu-latest # runner
 
