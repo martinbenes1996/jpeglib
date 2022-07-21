@@ -15,6 +15,7 @@ runs:
     #     architecture: "x64" # architecture
 
     - name: Install test dependencies # dependencies
+      shell: bash
       run: |
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
@@ -35,14 +36,17 @@ runs:
         pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox
 
     - name: Build library # build CJpegLib
+      shell: bash
       run: |
         python setup.py bdist
         cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
 
     - name: Run unittests # run unittests
+      shell: bash
       run: python tests/test.py
 
     - name: Print log # print log
+      shell: bash
       if: always()
       run: |
         if [ -f test.log ]; then cat test.log; fi
