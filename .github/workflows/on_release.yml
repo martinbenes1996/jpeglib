@@ -4,8 +4,8 @@ on: # trigger
     branches: [master]
     types:
       - created
-  push:
-    branches: [dev]
+  # push:
+  #   branches: [dev]
 
 
 # parallel jobs to perform
@@ -25,7 +25,7 @@ jobs:
           architecture: "x64" # architecture
 
       - name: Run unittests
-        uses: ./.github/workflows/unittests_on_commit
+        uses: ./.github/common/unittests_on_commit
 
       # - name: Set Github Workspace # access Github Workspace
       #   uses: actions/checkout@v2

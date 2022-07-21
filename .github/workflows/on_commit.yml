@@ -1,7 +1,7 @@
 name: Unit tests # workflow name
 on: # trigger
   push:
-    branches: [master] #, dev, progressive]
+    branches: [master, dev, progressive]
 
 # parallel jobs to perform
 jobs:
