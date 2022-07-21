@@ -35,6 +35,7 @@ except pkg_resources.DistributionNotFound:
     __version__ = None
 
 # set default version
+<<<<<<< HEAD
 version.set('6b')
 
 __all__ = [
@@ -45,3 +46,6 @@ __all__ = [
     'Timer', 'dct',
     '__version__',
 ]
+=======
+version.set('mozjpeg300')
+>>>>>>> a95fed1 (Dev (#1))

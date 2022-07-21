@@ -713,7 +713,13 @@ int write_jpeg_spatial(
   if (overwrite_flag(flags, CCIR601_SAMPLING))
     cinfo.CCIR601_sampling = flag_is_set(flags, CCIR601_SAMPLING);
 
-  // start compression
+  fprintf(stderr, "number of scans: %d\n", cinfo.num_scans);
+  fprintf(stderr, "components in scan: %d\n", cinfo.comps_in_scan);
+  fprintf(stderr, "Ss: %d\n", cinfo.Ss);
+  fprintf(stderr, "Se: %d\n", cinfo.Se);
+  fprintf(stderr, "Ah: %d\n", cinfo.Ah);
+  fprintf(stderr, "Al: %d\n", cinfo.Al);
+  fprintf(stderr, " %d\n", cinfo.Al);
   jpeg_start_compress(&cinfo, TRUE);
 
   // write markers

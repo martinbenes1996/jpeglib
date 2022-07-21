@@ -31,9 +31,9 @@ class version:
         }:
             CJpegLib.set_version(version='turbo210')
         elif version in {
-            'mozjpeg4.0.3', 'mozjpeg4', 'mozjpeg403', 'mozjpeg'
+            'mozjpeg101', 'mozjpeg201', 'mozjpeg300', 'mozjpeg403'
         }:
-            CJpegLib.set_version(version='mozjpeg403')
+            CJpegLib.set_version(version=version)
         else:
             raise NotImplementedError(
                 f'Unsupported libjpeg version: {version}')
