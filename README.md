@@ -20,6 +20,10 @@ Simply install the package with pip3
 pip install jpeglib
 ```
 
+
+> :warning: This will install `jpeglib` together with every integrated version of libjpeg, libjpeg-turbo and mozjpeg. It takes longer to install than the package.
+
+
 ## Usage
 
 Import the library in Python 3
@@ -27,15 +31,6 @@ Import the library in Python 3
 ```python
 import jpeglib
 ```
-
-To install the dev version with *all the libjpeg versions inside*, type
-
-```bash
-pip uninstall jpeglib
-pip install -U --no-cache-dir git+https://www.github.com/martinbenes1996/jpeglib.git@versions
-```
-
-> :warning: Branch *versions* is dev so it is less stable and takes longer to install than the package.
 
 ### DCT
 
@@ -91,6 +86,16 @@ Get currently used libjpeg version by
 
 ```python
 version = jpeglib.version.get()
+```
+
+You can also set a libjpeg version for a scope only.
+
+```python
+jpeglib.version.set('6b')
+im = jpeglib.read_spatial('image.jpeg') # using 6b
+with jpeglib.version('9e'):
+    im = jpeglib.read_spatial('image.jpeg') # using 9e
+im = jpeglib.read_spatial('image.jpeg') # using 6b again
 ```
 
 

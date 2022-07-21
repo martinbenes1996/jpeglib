@@ -103,6 +103,7 @@ for v in libjpeg_versions:
         define_macros=macros,
         extra_compile_args=["-fPIC", "-g"],
         language="c",
+        py_limited_api=True,
     )
 
 
@@ -161,9 +162,18 @@ setuptools.setup(
         'Programming Language :: C',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3 :: Only',
         'Topic :: Education',
         'Topic :: Multimedia',
+        'Topic :: Multimedia :: Graphics',
         'Topic :: Multimedia :: Graphics :: Graphics Conversion',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Image Processing',
@@ -172,6 +182,6 @@ setuptools.setup(
         'Topic :: Security',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
-        'Topic :: Utilities'
+        'Topic :: Utilities',
     ],
 )

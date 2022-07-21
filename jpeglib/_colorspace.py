@@ -63,7 +63,7 @@ class Colorspace(CStruct):
         """
         return cls.J_COLOR_SPACE()[name]
     @classmethod
-    def index_to_name(cls, index:int):
+    def index_to_name(cls, index:int) -> str:
         """Map index onto color space name.
         
         :param index: Index.
@@ -104,11 +104,11 @@ class Colorspace(CStruct):
             raise Exception("can't get number of channels for JCS_UNKNOWN colorspace")
         return channel_no[self.name]
     
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Colorspace %s>' % self.name
     
     @classmethod
-    def from_index(cls, index:int):
+    def from_index(cls, index:int) -> Colorspace:
         """Construct from index.
         
         :param index: Color space index.
@@ -122,7 +122,7 @@ class Colorspace(CStruct):
         name = cls.iJ_COLOR_SPACE()[index]
         return cls(name=name)
     
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         if isinstance(other, str):
             return self.name == other
         elif isinstance(other, int):

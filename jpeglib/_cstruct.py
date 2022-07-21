@@ -37,7 +37,7 @@ class CStruct:
         return self.index
     
     @classmethod
-    def from_index(cls, index):
+    def from_index(cls, index) -> CStruct:
         """Constructs the class from index. Uses the reverse mapping onto name."""
         name = cls.index_to_name(index)
         return cls(name=name)

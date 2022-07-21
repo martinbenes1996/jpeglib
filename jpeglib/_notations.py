@@ -1,7 +1,8 @@
 
 import math
+from typing import List
 
-def GCD(*args):
+def GCD(*args) -> float:
     """Computes greatest common divider (gcd) of the positional arguments."""
     # replace 0s with 1s
     args = [a if a != 0 else 1 for a in args]
@@ -11,7 +12,7 @@ def GCD(*args):
     gcd = max(divisors)
     return gcd
 
-def Jab_to_factors(Jab):
+def Jab_to_factors(Jab) -> List:
     """Converts J:a:b notation to the 6 factors, used by libjpeg.
     
     Read more about the notations in `Tuomas Siipola's article <https://zpl.fi/chroma-subsampling-and-jpeg-sampling-factors/>`_

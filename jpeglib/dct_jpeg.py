@@ -286,12 +286,12 @@ class DCTJPEGio(DCTJPEG):
             ], dtype=np.uint16)
             self.quant_tbl_no = np.array([0])
     
-    def _convert_dct_jpegio(self, dct:np.ndarray):
+    def _convert_dct_jpegio(self, dct:np.ndarray) -> np.ndarray:
         return (dct
             .transpose((0,3,1,2))
             .reshape((dct.shape[0]*dct.shape[2], dct.shape[1]*dct.shape[3]))
         ).astype(np.int32)
-    def _convert_jpegio_dct(self, dct:np.ndarray):
+    def _convert_jpegio_dct(self, dct:np.ndarray) -> np.ndarray:
         return (dct
             .reshape((-1,8,dct.shape[1]//8,8))
             .transpose((0,2,3,1))
@@ -341,7 +341,7 @@ class DCTJPEGio(DCTJPEG):
         # write 
         self.write_dct(path=fpath, quality=quality)
         
-def to_jpegio(jpeg: DCTJPEG):
+def to_jpegio(jpeg: DCTJPEG) -> DCTJPEGio:
     """Convertor of object of :class:`DCTJPEG` to :class:`DCTJPEGio`.
     
     When :class:`DCTJPEG` is converted to :class:`DCTJPEGio`,

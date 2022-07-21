@@ -1,10 +1,11 @@
 
+from typing import List
 from ._bind import CJpegLib
 
 class version:
     """Class grouping functions for controlling libjpeg method."""
     @staticmethod
-    def set(version):
+    def set(version:str):
         """Sets the version of libjpeg to use. Loads the library.
         
         :param version: libjpeg version, one of 6b, 8d, 9d, turbo210.
@@ -27,7 +28,7 @@ class version:
         else:
             raise NotImplementedError(f'Unsupported libjpeg version')
     @staticmethod
-    def get():
+    def get() -> str:
         """Gets the currently used version of libjpeg. 
         
         :return: libjpeg version or None if not been loaded yet.
@@ -42,11 +43,11 @@ class version:
         """
         return CJpegLib.get_version()
     @staticmethod
-    def _jpeg_lib_version():
+    def _jpeg_lib_version() -> str:
         """Returns value of jpeg_lib_version macro."""
         return CJpegLib.jpeg_lib_version()
     @staticmethod
-    def _get_lib():
+    def _get_lib() -> ctypes.CDLL:
         """Low-level getter of the dynamic library.
         
         :return: Dynamic library object or None if not loaded yet.
@@ -54,7 +55,7 @@ class version:
         """
         return CJpegLib.get()
     @staticmethod
-    def versions():
+    def versions() -> List[str]:
         """Lists present DLLs of versions."""
         return CJpegLib.versions()
     def __init__(self, version):

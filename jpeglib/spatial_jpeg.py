@@ -28,7 +28,7 @@ class SpatialJPEG(JPEG):
             channels = self.color_space.channels
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
     
-    def read_spatial(self):
+    def read_spatial(self) -> np.ndarray:
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         tmp.write(self.content)
