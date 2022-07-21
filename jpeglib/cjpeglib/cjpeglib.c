@@ -719,6 +719,7 @@ int write_jpeg_spatial(
   fprintf(stderr, "Se: %d\n", cinfo.Se);
   fprintf(stderr, "Ah: %d\n", cinfo.Ah);
   fprintf(stderr, "Al: %d\n", cinfo.Al);
+  fprintf(stderr, " %d\n", cinfo.Al);
 
   // jpeg_scan_info
   // vtruct jpeg_error_mgr *err;

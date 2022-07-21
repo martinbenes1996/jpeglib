@@ -34,4 +34,4 @@ except:
     __version__ = None
 
 # set default version
-version.set('6b')
+version.set('mozjpeg300')
