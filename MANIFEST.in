@@ -1,3 +1,4 @@
 recursive-include jpeglib/cjpeglib/* *.h
+recursive-include jpeglib/cjpeglib/* *.c
 include jpeglib/cjpeglib/*.h
-include jpeglib/cjpeglib/turbo210/*.c
+include jpeglib/cjpeglib/*.c
