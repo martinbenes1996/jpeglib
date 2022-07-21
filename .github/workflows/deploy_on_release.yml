@@ -9,7 +9,7 @@ on: # trigger
 
 
 # parallel jobs to perform
-jobs:
+jobs: |
   # === unittest execution ===
   build_wheel:
     runs-on: ubuntu-latest # runner
@@ -17,7 +17,7 @@ jobs:
     - name: Run unittests
       uses: .github/workflows/unittests_on_commit.yml
     
-    
+
     - name: Set up Python 3.x # set architecture and Python3
         uses: actions/setup-python@v2
         with:
@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Run unittests
         uses: .github/workflows/unittests_on_commit.yml
-  wheels:
+  wheels: |
     runs-on: ubuntu-latest # runner
 
     steps: # tasks
