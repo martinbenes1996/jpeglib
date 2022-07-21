@@ -58,8 +58,8 @@ def _dct_iii(Y, i, j):
                 Lambda(u) *
                 Lambda(v) *
                 Y[u, v] *
-                np.cos(np.pi/N*(i+.5)*u) *
-                np.cos(np.pi/N*(j+.5)*v)
+                np.cos(np.pi/N*(i + .5)*u) *
+                np.cos(np.pi/N*(j + .5)*v)
             )
             for u in range(N) for v in range(M)
         )

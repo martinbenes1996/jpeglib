@@ -1,0 +1,14 @@
+name: Build from source # workflow name
+description: Workflow for building the library from the source
+
+runs:
+  using: composite
+  
+  steps: # tasks
+
+    - name: Build library # build CJpegLib
+      shell: bash
+      run: |
+        python setup.py bdist
+        cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
+

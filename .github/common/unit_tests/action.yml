@@ -1,51 +1,16 @@
 name: Unit tests # workflow name
 description: Workflow for unit tests
 
-# === unittest execution ===
 runs:
   using: composite
   
   steps: # tasks
-    # - name: Set Github Workspace # access Github Workspace
-    #   uses: actions/checkout@v2
-    # - name: Set up Python 3.x # set architecture and Python3
-    #   uses: actions/setup-python@v2
-    #   with:
-    #     python-version: "3.x"
-    #     architecture: "x64" # architecture
 
-    - name: Install test dependencies # dependencies
-      shell: bash
-      run: |
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
-        git clone https://github.com/btlorch/dct-coefficient-decoder
-        cd dct-coefficient-decoder
-        cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
-        python setup.py install
-        cd ..
-        sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
-        git clone https://github.com/dwgoon/jpegio
-        cd jpegio
-        cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
-        mv setup2.py setup.py
-        python3 setup.py install; true
-        python3 setup.py install
-        cd ..
-        pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox
-
-    - name: Build library # build CJpegLib
-      shell: bash
-      run: |
-        python setup.py bdist
-        cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
-
-    - name: Run unittests # run unittests
+    - name: Run unittests
       shell: bash
       run: python tests/test.py
 
-    - name: Print log # print log
+    - name: Print log
       shell: bash
       if: always()
       run: |

@@ -1,5 +1,4 @@
 
-from math import cos,pi
 import numpy as np
 
 from ._common import Lambda
@@ -19,8 +18,16 @@ def _dct_ii(X: np.ndarray, u: int) -> float:
 
     >>> _dct_ii([1,2,1], 1) # -> 2.72e-16
     """
-    N = len(x)
-    Yu = np.sqrt(2/N) * Lambda(u) * sum(X[i] * np.cos(np.pi/N*(i+.5)*u) for i in range(N))
+    N = len(X)
+    Yu = (
+        np.sqrt(2/N) *
+        Lambda(u) *
+        sum(
+            X[i] *
+            np.cos(np.pi/N*(i+.5)*u)
+            for i in range(N)
+        )
+    )
     return Yu
 
 
@@ -38,7 +45,7 @@ def _dct_iii(Y: np.ndarray, i: int) -> float:
 
     >>> _dct_iii([2,1,-1], 1) # -> 1.97
     """
-    N = len(x)
+    N = len(Y)
     Xi = (
         np.sqrt(2/N) *
         sum(

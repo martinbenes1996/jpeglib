@@ -91,7 +91,7 @@ class SpatialJPEG(JPEG):
         :type smoothing_factor: int, optional
         :param flags: Bool compression parameters as str.
             If not given, using the libjpeg default.
-            Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
+Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
         :type flags: list, optional
 
         :Example:
