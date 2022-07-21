@@ -57,6 +57,8 @@ for v in libjpeg_versions:
     if is_turbo:
         package_name += '-turbo'
         (Path(clib) / 'jconfigint.h').touch()
+    if is_moz:
+        (Path(clib) / 'config.h').touch()
 
     files = [
         f'{clib}/{f}' for f in os.listdir(clib) if re.fullmatch(f'.*\.(c|h)', f)]
@@ -70,7 +72,7 @@ for v in libjpeg_versions:
                             'jccolext', 'jdcolext', 'jdcol565', 'jstdhuff',
                             'jdmrg565', 'jdmrgext', "jcstest", "tjunittest", "tjbench",
                             'turbojpeg-jni', 'turbojpeg',
-                            'bmp']:
+                            'bmp', 'jpegyuv']:
         lim = -2 - len(excluded_module)
         files = [f for f in files if f[lim:-2] != excluded_module]
     #
