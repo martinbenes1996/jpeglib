@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Run unittests
-        uses: .github/workflows/unittests_on_commit.yml
+        uses: martinbenes1996/jpeglib@run_unittests
 
       # - name: Set Github Workspace # access Github Workspace
       #   uses: actions/checkout@v2
