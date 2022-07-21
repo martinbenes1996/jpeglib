@@ -10,10 +10,11 @@ from ._colorspace import Colorspace
 from ._dithermode import Dithermode
 from ._dctmethod import DCTMethod
 
+
 @dataclass
 class SpatialJPEG(JPEG):
     """JPEG instance to work in spatial domain."""
-    
+
     spatial: np.ndarray
     """pixel data tensor"""
     color_space: Colorspace
@@ -22,22 +23,22 @@ class SpatialJPEG(JPEG):
     dither_mode: Dithermode
     dct_method: DCTMethod
     flags: list
-    
-    def _alloc_spatial(self, channels:int = None):
+
+    def _alloc_spatial(self, channels: int = None):
         if channels is None:
             channels = self.color_space.channels
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
-    
+
     def read_spatial(self) -> np.ndarray:
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         tmp.write(self.content)
         tmp.flush()
-        
+
         # colorspace
         if self.color_space is None:
             self.color_space = Colorspace('JCS_RGB')
-            #self.color_space = self.jpeg_color_space
+            # self.color_space = self.jpeg_color_space
         # dither mode
         dither_mode = None
         if self.dither_mode is not None:
@@ -46,17 +47,17 @@ class SpatialJPEG(JPEG):
         dct_method = None
         if self.dct_method is not None:
             dct_method = self.dct_method.index
-            
+
         # allocate spatial
         spatial = self._alloc_spatial(self.color_space.channels)
 
         # call
         CJpegLib.read_jpeg_spatial(
-            path= self.path,
+            path=self.path,
             srcfile=tmp.name,
             spatial=spatial,
             colormap=self.jpeg_color_space.index,
-            in_colormap=None, # support of color quantization
+            in_colormap=None,  # support of color quantization
             out_color_space=self.color_space.index,
             dither_mode=dither_mode,
             dct_method=dct_method,
@@ -72,26 +73,33 @@ class SpatialJPEG(JPEG):
 
     def write_spatial(self,
                       path: str = None,
-                      qt: typing.Union[int,np.ndarray] = None,
-                      dct_method: typing.Union[str,DCTMethod] = None,
-                      #dither_mode: Dithermode = None,
+                      qt: typing.Union[int, np.ndarray] = None,
+                      dct_method: typing.Union[str, DCTMethod] = None,
+                      # dither_mode: Dithermode = None,
                       smoothing_factor: int = None,
                       flags: list = []):
         """Writes a spatial image representation (i.e. RGB) to a file.
 
-        :param path: Destination file name. If not given, source file is overwritten.
+        :param path:
+        Destination file name. If not given, source file is overwritten.
         :type path: str, optional
-        :param qt: Compression quality, between 0 and 100 or a tensor with quantization tables.
-            Defaultly -1 (default factor kept).
+        :param qt:
+        Compression quality, can be integer 0-100
+        or a tensor with quantization tables.
+        Defaultly -1 (default factor kept).
         :type qt: int | numpy.ndarray, optional
-        :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`.
-            If not given, using the libjpeg default.
+        :param dct_method:
+        DCT method, must be accepted by :class:`_dctmethod.DCTMethod`.
+        If not given, using the libjpeg default.
         :type dct_method: str | :class:`_dctmethod.DCTMethod`, optional
-        :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
+        :param smoothing_factor:
+        Smoothing factor, between 0 and 100.
+        Using default from libjpeg by default.
         :type smoothing_factor: int, optional
-        :param flags: Bool compression parameters as str.
-            If not given, using the libjpeg default.
-Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
+        :param flags:
+        Bool compression parameters as str.
+        If not given, using the libjpeg default.
+        More at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
         :type flags: list, optional
 
         :Example:
@@ -105,7 +113,7 @@ Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#f
         >>> im = jpeglib.from_spatial(x)
         >>> im.jpeg_color_space = jpeglib.Colorspace('JCS_GRAYSCALE')
         >>> im.write_spatial("hello.jpeg")
-        """
+        """  # noqa: E501
         # colorspace
         if self.jpeg_color_space is not None:
             jpeg_color_space = self.jpeg_color_space
@@ -125,7 +133,7 @@ Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#f
             try:
                 dct_method = DCTMethod(dct_method).index
             # DCTMethod
-            except:
+            except KeyError:
                 dct_method = dct_method.index
         # quality
         # use default of library
@@ -136,7 +144,7 @@ Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#f
             try:
                 quality, qt = int(qt), None
             # quantization table
-            except:
+            except TypeError:
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
         # process
         spatial = np.ctypeslib.as_ctypes(

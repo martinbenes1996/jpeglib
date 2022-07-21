@@ -1,24 +1,25 @@
 """
 Python envelope for the popular C library libjpeg for handling JPEG files.
 
-It offers full control over compression and decompression and exposes DCT coefficients and quantization tables.
+It offers full control over compression and decompression
+and exposes DCT coefficients and quantization tables.
 """
 
 # functions
-from .functional import *
+from .functional import read_dct, read_spatial, from_spatial, from_dct
 
 # jpeg objects
-from .dct_jpeg import *
-from .spatial_jpeg import *
+from .dct_jpeg import DCTJPEG, DCTJPEGio
+from .spatial_jpeg import SpatialJPEG
 
 # cstructs
-from ._colorspace import *
-from ._dctmethod import *
-from ._dithermode import *
-from ._marker import *
+from ._colorspace import Colorspace
+from ._dctmethod import DCTMethod
+from ._dithermode import Dithermode
+from ._marker import Marker
 
 # libjpeg versions
-from .version import *
+from .version import version
 
 # DCT implementation
 from . import dct
@@ -30,8 +31,17 @@ from ._timer import Timer
 import pkg_resources
 try:
     __version__ = pkg_resources.get_distribution("jpeglib").version
-except:
+except pkg_resources.DistributionNotFound:
     __version__ = None
 
 # set default version
 version.set('6b')
+
+__all__ = [
+    'read_dct', 'read_spatial', 'from_spatial', 'from_dct',
+    'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
+    'Colorspace', 'DCTMethod', 'Dithermode', 'Marker',
+    'version',
+    'Timer', 'dct',
+    '__version__',
+]

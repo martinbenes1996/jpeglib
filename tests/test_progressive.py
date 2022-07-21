@@ -1,13 +1,11 @@
 import unittest
 import tempfile
 import logging
-import sys
 
-sys.path.append('.')
+import jpeglib
 
 
 class TestProgressive(unittest.TestCase):
-
     logger = logging.getLogger(__name__)
 
     def setUp(self):
@@ -17,8 +15,6 @@ class TestProgressive(unittest.TestCase):
         del self.tmp
 
     def test_read_progressive_flag(self):
-        import jpeglib
-
         self.logger.info("test_read_progressive_flag")
 
         im = jpeglib.read_spatial("examples/images-6b/testprog.jpg")

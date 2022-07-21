@@ -6,6 +6,7 @@ import re
 
 from . import cjpeglib
 
+
 class CJpegLib:
 
     @classmethod
@@ -13,11 +14,29 @@ class CJpegLib:
         return cls.get().jpeg_lib_version()
 
     @classmethod
-    def read_jpeg_info(cls,
-                       srcfile: str, block_dims, image_dims, num_components,
-                       samp_factor, jpeg_color_space, marker_lengths, marker_types, flags):
-        status = cls.get().read_jpeg_info(cls.cstr(srcfile), block_dims, image_dims, num_components,
-                                          samp_factor, jpeg_color_space, marker_lengths, marker_types, flags)
+    def read_jpeg_info(
+        cls,
+        srcfile: str,
+        block_dims,
+        image_dims,
+        num_components,
+        samp_factor,
+        jpeg_color_space,
+        marker_lengths,
+        marker_types,
+        flags
+    ):
+        status = cls.get().read_jpeg_info(
+            cls.cstr(srcfile),
+            block_dims,
+            image_dims,
+            num_components,
+            samp_factor,
+            jpeg_color_space,
+            marker_lengths,
+            marker_types,
+            flags
+        )
         if status == 0:
             raise IOError(f"reading info of {srcfile} failed")
 
@@ -28,20 +47,65 @@ class CJpegLib:
             raise IOError(f"reading markers of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_dct(cls, srcfile: str, Y, Cb, Cr, qt, quant_tbl_no, path=None):
-        if path is None: path = srcfile
-        status = cls.get().read_jpeg_dct(cls.cstr(srcfile), Y, Cb, Cr, qt, quant_tbl_no)
+    def read_jpeg_dct(
+        cls,
+        srcfile: str,
+        Y,
+        Cb,
+        Cr,
+        qt,
+        quant_tbl_no,
+        path=None
+    ):
+        if path is None:
+            path = srcfile
+        status = cls.get().read_jpeg_dct(
+            cls.cstr(srcfile),
+            Y,
+            Cb,
+            Cr,
+            qt,
+            quant_tbl_no
+        )
         if status == 0:
             raise IOError(f"reading of {path} DCT failed")
 
     @classmethod
-    def write_jpeg_dct(cls,
-                       srcfile: str, dstfile: str, Y, Cb, Cr,
-                       image_dims, block_dims, in_color_space, in_components,
-                       qt, quality, num_markers, marker_types, marker_lengths, markers):
-        status = cls.get().write_jpeg_dct(cls.cstr(srcfile), cls.cstr(dstfile), Y, Cb, Cr,
-                                          image_dims, block_dims, in_color_space, in_components,
-                                          qt, quality, num_markers, marker_types, marker_lengths, markers)
+    def write_jpeg_dct(
+        cls,
+        srcfile: str,
+        dstfile: str,
+        Y,
+        Cb,
+        Cr,
+        image_dims,
+        block_dims,
+        in_color_space,
+        in_components,
+        qt,
+        quality,
+        num_markers,
+        marker_types,
+        marker_lengths,
+        markers
+    ):
+        status = cls.get().write_jpeg_dct(
+            cls.cstr(srcfile),
+            cls.cstr(dstfile),
+            Y,
+            Cb,
+            Cr,
+            image_dims,
+            block_dims,
+            in_color_space,
+            in_components,
+            qt,
+            quality,
+            num_markers,
+            marker_types,
+            marker_lengths,
+            markers
+        )
         if status == 0:
             raise IOError(f"writing DCT to {dstfile} failed")
 
@@ -52,33 +116,75 @@ class CJpegLib:
             raise IOError(f"reading of {srcfile} failed")
 
     @classmethod
-    def read_jpeg_spatial(cls,
-                          srcfile: str, spatial, colormap, in_colormap, out_color_space,
-                          dither_mode, dct_method, flags,
-                          path = None):
-        if path is None: path = srcfile
-        status = cls.get().read_jpeg_spatial(cls.cstr(srcfile), spatial, colormap, in_colormap,
-                                             out_color_space, dither_mode, dct_method, cls.flags_to_mask(flags))
+    def read_jpeg_spatial(
+        cls,
+        srcfile: str,
+        spatial,
+        colormap,
+        in_colormap,
+        out_color_space,
+        dither_mode,
+        dct_method,
+        flags,
+        path=None,
+    ):
+        if path is None:
+            path = srcfile
+        status = cls.get().read_jpeg_spatial(
+            cls.cstr(srcfile),
+            spatial,
+            colormap,
+            in_colormap,
+            out_color_space,
+            dither_mode,
+            dct_method,
+            cls.flags_to_mask(flags)
+        )
         if status == 0:
             raise IOError(f"reading of {path} spatial failed")
 
     @classmethod
-    def write_jpeg_spatial(cls,
-                           dstfile: str, spatial, image_dims, jpeg_color_space, num_components,
-                           dct_method, samp_factor, qt, quality, smoothing_factor,
-                           num_markers: int, marker_types, marker_lengths, markers,
-                           flags
-                           ):
-        status = cls.get().write_jpeg_spatial(cls.cstr(dstfile), spatial, image_dims, jpeg_color_space, num_components,
-                                              dct_method, samp_factor, qt, cls.factor(
-                                                  quality), cls.factor(smoothing_factor),
-                                              num_markers, marker_types, marker_lengths, markers,
-                                              cls.flags_to_mask(flags))
+    def write_jpeg_spatial(
+        cls,
+        dstfile: str,
+        spatial,
+        image_dims,
+        jpeg_color_space,
+        num_components,
+        dct_method,
+        samp_factor,
+        qt, quality,
+        smoothing_factor,
+        num_markers: int,
+        marker_types,
+        marker_lengths,
+        markers,
+        flags
+    ):
+        status = cls.get().write_jpeg_spatial(
+            cls.cstr(dstfile),
+            spatial,
+            image_dims,
+            jpeg_color_space,
+            num_components,
+            dct_method,
+            samp_factor,
+            qt,
+            cls.factor(quality),
+            cls.factor(smoothing_factor),
+            num_markers,
+            marker_types,
+            marker_lengths,
+            markers,
+            cls.flags_to_mask(flags)
+        )
         if status == 0:
             raise IOError(f"writing RGB to {dstfile} failed")
 
     MASKS = {
-        "DO_FANCY_SAMPLING": (0b1 << 0), "DO_FANCY_UPSAMPLING": (0b1 << 0), "DO_FANCY_DOWNSAMPLING": (0b1 << 0),
+        "DO_FANCY_SAMPLING": (0b1 << 0),
+        "DO_FANCY_UPSAMPLING": (0b1 << 0),
+        "DO_FANCY_DOWNSAMPLING": (0b1 << 0),
         "DO_BLOCK_SMOOTHING": (0b1 << 2),
         "TWO_PASS_QUANTIZE": (0b1 << 4),
         "ENABLE_1PASS_QUANT": (0b1 << 6),
@@ -153,13 +259,16 @@ class CJpegLib:
 
     @classmethod
     def _versions(cls):
-        so_files = [f for f in os.listdir(
-            list(cjpeglib.__path__)[0]) if re.fullmatch(f'cjpeglib_.*\..*\.so', f)]
+        so_files = [
+            f
+            for f in os.listdir(list(cjpeglib.__path__)[0])
+            if re.fullmatch(r'cjpeglib_.*\..*\.so', f)
+        ]
         return so_files
 
     @classmethod
     def versions(cls):
-        vs = [re.search(f'cjpeglib_[^.]*\..*\.so', f) for f in cls._versions()]
+        vs = [re.search(r'cjpeglib_[^.]*\..*\.so', f) for f in cls._versions()]
         vs = [v[0] for v in vs if v]
         return vs
 
@@ -167,11 +276,11 @@ class CJpegLib:
     def _bind_lib(cls, version='6b'):
         # path of the library
         so_files = [f for f in cls._versions() if re.fullmatch(
-            f'cjpeglib_{version}\..*\.so', f)]
+            f'cjpeglib_{version}' + r'\..*\.so', f)]
         try:
             so_file = so_files[0]
-        except:
-            raise Exception(f"dynamic library not found")
+        except IndexError:
+            raise Exception("dynamic library not found")
         libname = pathlib.Path(list(cjpeglib.__path__)[0]) / so_file
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)

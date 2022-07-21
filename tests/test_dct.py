@@ -1,45 +1,46 @@
 
 import logging
 import numpy as np
-import sys
 import tempfile
 import unittest
 
-sys.path.append('.')
 import jpeglib
 
 # https://www.sciencedirect.com/topics/computer-science/quantization-matrix
 qt50_standard = np.array([
-    [[16,11,10,16,24,40,51,61],
-     [12,12,14,19,26,58,60,55],
-     [14,13,16,24,40,57,69,56],
-     [14,17,22,29,51,87,80,62],
-     [18,22,37,56,68,109,103,77],
-     [24,35,55,64,81,104,113,92],
-     [49,64,78,87,103,121,120,101],
-     [72,92,95,98,112,100,103,99]],
-    [[17,18,24,47,99,99,99,99],
-     [18,21,26,66,99,99,99,99],
-     [24,26,56,99,99,99,99,99],
-     [47,66,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99]],
-    [[17,18,24,47,99,99,99,99],
-     [18,21,26,66,99,99,99,99],
-     [24,26,56,99,99,99,99,99],
-     [47,66,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99],
-     [99,99,99,99,99,99,99,99]]
+    [[16, 11, 10, 16, 24, 40, 51, 61],
+     [12, 12, 14, 19, 26, 58, 60, 55],
+     [14, 13, 16, 24, 40, 57, 69, 56],
+     [14, 17, 22, 29, 51, 87, 80, 62],
+     [18, 22, 37, 56, 68, 109, 103, 77],
+     [24, 35, 55, 64, 81, 104, 113, 92],
+     [49, 64, 78, 87, 103, 121, 120, 101],
+     [72, 92, 95, 98, 112, 100, 103, 99]],
+    [[17, 18, 24, 47, 99, 99, 99, 99],
+     [18, 21, 26, 66, 99, 99, 99, 99],
+     [24, 26, 56, 99, 99, 99, 99, 99],
+     [47, 66, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99]],
+    [[17, 18, 24, 47, 99, 99, 99, 99],
+     [18, 21, 26, 66, 99, 99, 99, 99],
+     [24, 26, 56, 99, 99, 99, 99, 99],
+     [47, 66, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99],
+     [99, 99, 99, 99, 99, 99, 99, 99]]
     ])
+
 
 class TestDCT(unittest.TestCase):
     logger = logging.getLogger(__name__)
+
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+
     def tearDown(self):
         del self.tmp
 
@@ -49,9 +50,11 @@ class TestDCT(unittest.TestCase):
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
         # dct-coefficient-decoder
         try:
-            from decoder import PyCoefficientDecoder 
-        except Exception as e: # error loading
-            logging.info(f"invalid installation of dct-coefficient-decoder: {e}")
+            from decoder import PyCoefficientDecoder
+        except Exception as e:  # error loading
+            logging.info(
+                f"invalid installation of dct-coefficient-decoder: {e}"
+            )
             return
         d = PyCoefficientDecoder('examples/IMG_0311.jpeg')
         # process
@@ -62,23 +65,23 @@ class TestDCT(unittest.TestCase):
         ])
         YT = (
             d.get_dct_coefficients(0)
-            .reshape((im.width_in_blocks(0),-1,8,8), order='F')
-            .transpose((1,0,2,3)))
+            .reshape((im.width_in_blocks(0), -1, 8, 8), order='F')
+            .transpose((1, 0, 2, 3)))
         CbT = (
             d.get_dct_coefficients(1)
-            .reshape((im.width_in_blocks(1),-1,8,8), order='F')
-            .transpose((1,0,2,3)))
+            .reshape((im.width_in_blocks(1), -1, 8, 8), order='F')
+            .transpose((1, 0, 2, 3)))
         CrT = (
             d.get_dct_coefficients(2)
-            .reshape((im.width_in_blocks(2),-1,8,8), order='F')
-            .transpose((1,0,2,3)))
+            .reshape((im.width_in_blocks(2), -1, 8, 8), order='F')
+            .transpose((1, 0, 2, 3)))
         # test DCT coefficients
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
         np.testing.assert_array_equal(im.Cr, CrT)
         # test quantization
         np.testing.assert_array_equal(im.qt, qtT)
-        
+
     def test_python_jpeg_toolbox(self):
         self.logger.info("test_python_jpeg_toolbox")
         # jpeglib
@@ -93,16 +96,16 @@ class TestDCT(unittest.TestCase):
         # process
         YT = (
             img['coef_arrays'][0]
-            .reshape((im.height_in_blocks(0),8,-1,8))
-            .transpose((0,2,3,1)))
+            .reshape((im.height_in_blocks(0), 8, -1, 8))
+            .transpose((0, 2, 3, 1)))
         CbT = (
             img['coef_arrays'][1]
-            .reshape((im.height_in_blocks(1),8,-1,8))
-            .transpose((0,2,3,1)))
+            .reshape((im.height_in_blocks(1), 8, -1, 8))
+            .transpose((0, 2, 3, 1)))
         CrT = (
             img['coef_arrays'][2]
-            .reshape((im.height_in_blocks(2),8,-1,8))
-            .transpose((0,2,3,1)))
+            .reshape((im.height_in_blocks(2), 8, -1, 8))
+            .transpose((0, 2, 3, 1)))
         qtT = np.stack([
             img['quant_tables'][0],
             img['quant_tables'][1],
@@ -115,7 +118,7 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
         np.testing.assert_array_equal(im.Cr, CrT)
-    
+
     def test_to_jpegio(self):
         self.logger.info("test_to_jpegio")
         # jpeglib
@@ -137,44 +140,43 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.coef_arrays[0], im.coef_arrays[0])
         np.testing.assert_array_equal(jpeg.coef_arrays[1], im.coef_arrays[1])
         np.testing.assert_array_equal(jpeg.coef_arrays[2], im.coef_arrays[2])
-    
+
     def test_jpegio_write(self):
         self.logger.info("test_jpegio_write")
         # jpeglib
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
         im = jpeglib.to_jpegio(im)
         # change quantization table in JPEGio
-        im.qt[0,0,0] = 2
-        self.assertEqual(im.qt[0,0,0], 2)
+        im.qt[0, 0, 0] = 2
+        self.assertEqual(im.qt[0, 0, 0], 2)
         # change quantization table in JPEG
-        im.quant_tables[0][0,0] = 1
-        self.assertEqual(im.quant_tables[0][0,0], 1)
+        im.quant_tables[0][0, 0] = 1
+        self.assertEqual(im.quant_tables[0][0, 0], 1)
         # write JPEGio and reload
         im.write(self.tmp.name)
         im2 = jpeglib.read_dct(self.tmp.name)
         im2 = jpeglib.to_jpegio(im2)
         # check quantization table
-        self.assertEqual(im.qt[0,0,0], 1)
-        self.assertEqual(im.quant_tables[0][0,0], 1)
-        
-    
+        self.assertEqual(im.qt[0, 0, 0], 1)
+        self.assertEqual(im.quant_tables[0][0, 0], 1)
+
     # def test_jpegio(self):
     #     print("test_jpegio")
     #     pass
-        
+
     #     YT = np.array(jpeg.coef_arrays[0])
     #     CbCrT = np.array(jpeg.coef_arrays[1])
     #     qtT = np.array(jpeg.quant_tables)
     #     # process
     #     YT = YT.reshape((-1,8,int(YT.shape[2]/8),8)).transpose((3,1,4,2))
-    #     CbCrT = CbCrT.reshape((-1,8,int(CbCrT.shape[2]/8),8)).transpose((3,1,4,2))
+    #     CbCrT = CbCrT.reshape((-1,8,int(CbCrT.shape[2]/8),8)).transpose((3,1,4,2))  # noqa: E501
 
     # # test quantization
     # np.testing.assert_array_equal(qt, qtT)
     # # test DCT coefficients
     # np.testing.assert_array_equal(Y, YT)
     # np.testing.assert_array_equal(CbCr, CbCrT)
-    
+
     def test_dct(self):
         self.logger.info("test_dct")
         # pass qt through
@@ -182,11 +184,11 @@ class TestDCT(unittest.TestCase):
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_dct(self.tmp.name)
         # test matrix
-        np.testing.assert_array_equal(im.Y,  im2.Y)
+        np.testing.assert_array_equal(im.Y, im2.Y)
         np.testing.assert_array_equal(im.Cb, im2.Cb)
         np.testing.assert_array_equal(im.Cr, im2.Cr)
         np.testing.assert_array_equal(im.qt, im2.qt)
-    
+
     def test_dct_qt(self):
         self.logger.info("test_dct_qt")
         # pass qt through
@@ -195,7 +197,7 @@ class TestDCT(unittest.TestCase):
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_dct(self.tmp.name)
         # test matrix
-        np.testing.assert_array_equal(im.Y,  im2.Y)
+        np.testing.assert_array_equal(im.Y, im2.Y)
         np.testing.assert_array_equal(im.Cb, im2.Cb)
         np.testing.assert_array_equal(im.Cr, im2.Cr)
         np.testing.assert_array_equal(im.qt, im2.qt)
@@ -210,24 +212,21 @@ class TestDCT(unittest.TestCase):
         im2 = jpeglib.read_dct(self.tmp.name)
         # test matrix
         np.testing.assert_array_equal(im2.qt, qt50_standard)
-    
+
     def test_dct_qt_edit(self):
         self.logger.info("test_dct_qt_edit")
         # write with different qt
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
         qt = (im.qt).copy()
-        qt[0,4,4] = 1 # change qt
+        qt[0, 4, 4] = 1  # change qt
         im.qt = qt
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_dct(self.tmp.name)
         # test matrix
-        np.testing.assert_array_equal(im.Y,  im2.Y)
+        np.testing.assert_array_equal(im.Y, im2.Y)
         np.testing.assert_array_equal(im.Cb, im2.Cb)
         np.testing.assert_array_equal(im.Cr, im2.Cr)
         np.testing.assert_array_equal(im.qt, im2.qt)
-
-
-
 
     # def test_dct_quantized(self):
     #     print('test_dct_quantized')
@@ -250,8 +249,7 @@ class TestDCT(unittest.TestCase):
     #     np.testing.assert_array_equal(Y1, Y2)
     #     np.testing.assert_array_equal(CbCr1, CbCr2)
     #     np.testing.assert_array_equal(qt1, qt2)
-    
-    
+
     def test_qt1(self):
         self.logger.info("test_qt1")
         im = jpeglib.read_dct("examples/qt1.jpeg")
@@ -260,9 +258,9 @@ class TestDCT(unittest.TestCase):
     def test_from_dct(self):
         self.logger.info("test_from_dct")
         # generate random DCT
-        Y = np.random.randint(-127, 127,(2,2,8,8),dtype=np.int16)
-        Cb = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
-        Cr = np.random.randint(-127, 127,(1,1,8,8),dtype=np.int16)
+        Y = np.random.randint(-127, 127, (2, 2, 8, 8), dtype=np.int16)
+        Cb = np.random.randint(-127, 127, (1, 1, 8, 8), dtype=np.int16)
+        Cr = np.random.randint(-127, 127, (1, 1, 8, 8), dtype=np.int16)
         im = jpeglib.from_dct(Y, Cb, Cr)
         im.write_dct(self.tmp.name)
         # reopen and compare
@@ -270,25 +268,22 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im.Y, im2.Y)
         np.testing.assert_array_equal(im.Cb, im2.Cb)
         np.testing.assert_array_equal(im.Cr, im2.Cr)
-        
-
-
 
     # def test_torchjpeg(self):
     #     # read image
     #     im = jpeglib.JPEG("examples/IMG_0791.jpeg")
     #     Y,CbCr,qt = im.read_dct()
     #     # read by torchjpeg
-    #     shapeT,qtT,YT,CbCrT = torchjpeg.codec.read_coefficients("examples/IMG_0791.jpeg")
+    #     shapeT,qtT,YT,CbCrT = torchjpeg.codec.read_coefficients("examples/IMG_0791.jpeg")  # noqa: E501
 
     #     # compare
     #     np.testing.assert_array_equal(im.shape, shapeT.numpy()[0,::-1])
     #     np.testing.assert_array_equal(im.shape, shapeT.numpy()[1,::-1] * 2)
     #     np.testing.assert_array_equal(im.shape, shapeT.numpy()[2,::-1] * 2)
     #     np.testing.assert_array_equal(qt, qtT.numpy()[:2])
-    #     np.testing.assert_array_equal(Y, np.einsum('abcde->acbed', YT.numpy()))
-    #     np.testing.assert_array_equal(CbCr[0], np.einsum('bcde->cbed', CbCrT[0].numpy()))
-    #     np.testing.assert_array_equal(CbCr[1], np.einsum('bcde->cbed', CbCrT[1].numpy()))
+    #     np.testing.assert_array_equal(Y, np.einsum('abcde->acbed', YT.numpy()))  # noqa: E501
+    #     np.testing.assert_array_equal(CbCr[0], np.einsum('bcde->cbed', CbCrT[0].numpy()))  # noqa: E501
+    #     np.testing.assert_array_equal(CbCr[1], np.einsum('bcde->cbed', CbCrT[1].numpy()))  # noqa: E501
 
     # def _rainer_qt(self, outchannel, qt):
     #     # test quantization tables
@@ -325,10 +320,9 @@ class TestDCT(unittest.TestCase):
     #     # change shape
     #     dctRainer = np.array(np.split(dctRainer, dct.shape[0], 0))
     #     dctRainer = dctRainer.reshape(*dctRainer.shape[:-1], 8, 8)
-        
+
     #     # compare DCT coefficient matrices
     #     np.testing.assert_equal(dctRainer, dct)
-
 
     # def test_rainer_dct_Y(self):
     #     # read images
@@ -337,7 +331,6 @@ class TestDCT(unittest.TestCase):
     #         # call test
     #         self._rainer_dct('Y', Y[0])
 
-    
     # def test_rainer_dct_Cb(self):
     #     # read image
     #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
@@ -358,7 +351,7 @@ class TestDCT(unittest.TestCase):
     #         _,_,qt = im.read_dct()
     #         # call test
     #         self._rainer_qt('Y', qt[0])
-    
+
     # def test_rainer_qt_Cb(self):
     #     # read image
     #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
@@ -372,5 +365,6 @@ class TestDCT(unittest.TestCase):
     #         _,_,qt = im.read_dct()
     #         # call test
     #         self._rainer_qt('Cr', qt[1])
+
 
 __all__ = ["TestDCT"]
