@@ -6,16 +6,13 @@ runs:
   using: composite
   
   steps: # tasks
-    - name: Set Github Workspace # access Github Workspace
-      uses: actions/checkout@v2
-    - name: Set up Python 3.x # set architecture and Python3
-      uses: actions/setup-python@v2
-      with:
-        python-version: "3.x"
-        architecture: "x64" # architecture
-
-    - name: Install dependencies
-      uses: ./.github/common/install_dependencies
+    # - name: Set Github Workspace # access Github Workspace
+    #   uses: actions/checkout@v2
+    # - name: Set up Python 3.x # set architecture and Python3
+    #   uses: actions/setup-python@v2
+    #   with:
+    #     python-version: "3.x"
+    #     architecture: "x64" # architecture
 
     - name: Install test dependencies # dependencies
       run: |
