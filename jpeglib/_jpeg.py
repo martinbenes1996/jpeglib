@@ -36,7 +36,6 @@ class JPEG:
     progressive_mode: bool
     """indicator of progressive (True) or sequential (False) JPEG"""
 
-
     def height_in_blocks(self, component: int) -> int:
         """Getter of height in blocks.
 
