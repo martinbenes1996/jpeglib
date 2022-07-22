@@ -161,13 +161,23 @@ for v in libjpeg_versions:
     )
 
 
+
+
 class custom_build_ext(build_ext):
+    def get_export_symbols(self, ext):
+        parts = ext.name.split(".")
+        if parts[-1] == "__init__":
+            initfunc_name = "PyInit_" + parts[-2]
+        else:
+            initfunc_name = "PyInit_" + parts[-1]
+        
     def build_extensions(self):
         # self.compiler.set_executable("compiler_so", "g++")
         # self.compiler.set_executable("compiler_cxx", "g++")
         # self.compiler.set_executable("linker_so", "g++")
         # print("==========", self.compiler.library_dirs)
         build_ext.build_extensions(self)
+        build_ext.get_export_symbols = self.get_export_symbols
 
 
 setuptools.setup(
@@ -206,15 +216,6 @@ setuptools.setup(
         'Programming Language :: C',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12',
-        'Programming Language :: Python :: 3 :: Only',
         'Topic :: Education',
         'Topic :: Multimedia',
         'Topic :: Multimedia :: Graphics',
