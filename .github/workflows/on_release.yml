@@ -1,4 +1,4 @@
-name: CD # workflow name
+name: Release CI/CD # workflow name
 on: # trigger
   release:
     branches: [master]
@@ -8,12 +8,34 @@ on: # trigger
     branches: [release]
 
 jobs:
+  unit_tests:
+    runs-on: ubuntu-latest # runner
+
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+
+      - name: Install test dependencies
+        uses: ./.github/common/install_test_dependencies
+
+      - name: Build from source
+        uses: ./.github/common/build_from_source
+
+      - name: Run unit tests # run unittests
+        uses: ./.github/common/unit_tests
+
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-20.04, windows-2019, macOS-11]
+    needs: unit_tests
 
     steps:
       - name: Set Github Workspace

@@ -1,13 +1,12 @@
-name: CI # workflow name
+name: Commit CI/CD # workflow name
 on: # trigger
   push:
-    branches: [master, release, dev]
+    branches: [master, dev]
   pull_request:
     types: [opened, reopened, edited]
 
 # parallel jobs to perform
 jobs:
-  # === unittest execution ===
   unit_tests:
     runs-on: ubuntu-latest # runner
 
