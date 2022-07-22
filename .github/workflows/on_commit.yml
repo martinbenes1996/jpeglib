@@ -1,7 +1,7 @@
 name: CI # workflow name
 on: # trigger
   push:
-    branches: [master, dev]
+    branches: [master, release, dev]
   pull_request:
     types: [opened, reopened, edited]
 
