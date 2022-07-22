@@ -2,6 +2,7 @@
 import ctypes
 from dataclasses import dataclass
 import numpy as np
+from typing import List
 
 from ._bind import CJpegLib
 from ._colorspace import Colorspace
@@ -28,14 +29,13 @@ class JPEG:
     """sampling factor;
     first is DCT component, (0 Y,1 Cb,2 Cr),
     second is orientation (0 horizontal, 1 vertical)"""
+    markers: List[Marker]
+    """list of marker objects"""
     jpeg_color_space: Colorspace
     """color space of the JPEG file"""
-    num_components: int
-    """number of components in the JPEG file"""
-    markers: list
-    """list of marker objects"""
     progressive_mode: bool
     """indicator of progressive (True) or sequential (False) JPEG"""
+
 
     def height_in_blocks(self, component: int) -> int:
         """Getter of height in blocks.

@@ -3,6 +3,8 @@ import ctypes
 from dataclasses import dataclass, fields
 import numpy as np
 import tempfile
+from typing import List
+
 from ._bind import CJpegLib
 from . import _jpeg
 
@@ -269,9 +271,9 @@ class DCTJPEG(_jpeg.JPEG):
 class DCTJPEGio(DCTJPEG):
     """Class for compatiblity with jpegio."""
 
-    coef_arrays: list
+    coef_arrays: List
     """DCT coefficient arrays in jpegio format"""
-    quant_tables: list
+    quant_tables: List
     """quantization tables in jpegio format"""
 
     def __post_init__(self):

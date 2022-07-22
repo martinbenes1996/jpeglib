@@ -3,6 +3,7 @@ import ctypes
 import os
 import pathlib
 import re
+from typing import List
 
 from . import cjpeglib
 
@@ -21,10 +22,10 @@ class CJpegLib:
         image_dims,
         num_components,
         samp_factor,
-        jpeg_color_space,
+        jpeg_color_space: int,
         marker_lengths,
         marker_types,
-        flags
+        flags: List[str],
     ):
         status = cls.get().read_jpeg_info(
             cls.cstr(srcfile),
@@ -55,7 +56,7 @@ class CJpegLib:
         Cr,
         qt,
         quant_tbl_no,
-        path=None
+        path=None,
     ):
         if path is None:
             path = srcfile
@@ -87,7 +88,7 @@ class CJpegLib:
         num_markers,
         marker_types,
         marker_lengths,
-        markers
+        markers,
     ):
         status = cls.get().write_jpeg_dct(
             cls.cstr(srcfile),
@@ -153,13 +154,14 @@ class CJpegLib:
         num_components,
         dct_method,
         samp_factor,
-        qt, quality,
+        qt,
+        quality,
         smoothing_factor,
         num_markers: int,
         marker_types,
         marker_lengths,
         markers,
-        flags
+        flags: List[str],
     ):
         status = cls.get().write_jpeg_spatial(
             cls.cstr(dstfile),
@@ -201,7 +203,7 @@ class CJpegLib:
     }
 
     @classmethod
-    def flags_to_mask(cls, flags):
+    def flags_to_mask(cls, flags: List[str]):
         mask = 0xFFFFFFFF
         if flags is None:
             return mask
@@ -222,7 +224,7 @@ class CJpegLib:
         return ctypes.c_ulonglong(mask)
 
     @classmethod
-    def mask_to_flags(cls, mask):
+    def mask_to_flags(cls, mask: int):
         flags = []
         bitmask = mask[0]
         # PROGRESSIVE_MODE = 0b00100

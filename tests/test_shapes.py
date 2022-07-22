@@ -130,6 +130,7 @@ class TestShapes(unittest.TestCase):
         self.assertIsInstance(im.samp_factor, np.ndarray)
         self.assertEqual(im.samp_factor[0, 0], 2)
         self.assertEqual(im.samp_factor[0, 1], 2)
+        # print(im.jpeg_color_space, im.jpeg_color_space.channels, im.num_components)
         self.assertIsInstance(im.jpeg_color_space, jpeglib.Colorspace)
         self.assertEqual(im.num_components, 1)
         self.assertEqual(im.channels, 1)

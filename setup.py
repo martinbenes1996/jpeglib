@@ -143,7 +143,7 @@ for v in libjpeg_versions:
             ]
     if is_moz:
         macros += [
-            ("JPEG_LIB_VERSION", 69),  
+            ("JPEG_LIB_VERSION", 69),
             ('C_ARITH_CODING_SUPPORTED', 1),
             ('MEM_SRCDST_SUPPORTED', 1)
         ]
