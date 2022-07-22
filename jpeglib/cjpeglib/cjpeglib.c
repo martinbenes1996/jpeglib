@@ -11,11 +11,6 @@ extern "C"
 #include <stdlib.h>
 #include <string.h>
 
-// for compilation under Windows
-#if defined(_MSC_VER)
-#define inline __inline
-#endif
-
 // this is envelope for jpeglib.h
 // trying to avoid naming the same as system library
 #include "vjpeglib.h"

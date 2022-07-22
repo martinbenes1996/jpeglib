@@ -7,6 +7,7 @@ import ctypes
 import setuptools
 import codecs
 import os
+import sys
 __version__ = os.environ.get('VERSION_NEW', '0.10.12')
 libjpeg_versions = {
     '6b': (None, 60),
@@ -128,9 +129,10 @@ for v in libjpeg_versions:
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
     ]
+    
     if is_turbo:
         macros += [
-            ("INLINE", "__inline__"),
+            ("INLINE", "__inline__" if not sys.platform.startswith("win") else "__inline"),
             ("PACKAGE_NAME", f"\"{package_name}\""),
             ("BUILD", "\"unknown\""),
             ("VERSION", f"\"{libjpeg_versions[v][0]}\""),
