@@ -16,7 +16,6 @@ runs:
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
-        cat decoder.cpp | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.cpp
         python setup.py install
         cd ..
         sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
