@@ -36,7 +36,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Sources:
           # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
+          # https://cibuildwheel.readthedocs.io/en/stable/options/
+          
           # Linux 64 bit manylinux2014
           - os: ubuntu-latest
             python: 38
