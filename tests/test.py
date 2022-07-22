@@ -21,7 +21,7 @@ from test_marker import TestMarker  # noqa: F401,E402
 from test_progressive import TestProgressive  # noqa: F401,E402
 from test_shapes import TestShapes  # noqa: F401,E402
 # from test_spatial import *
-# from test_version import *
+# from test_version import TestVersion  # noqa: F401,E402
 # ==================
 
 
