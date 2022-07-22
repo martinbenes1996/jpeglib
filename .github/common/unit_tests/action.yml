@@ -1,0 +1,17 @@
+name: Unit tests # workflow name
+description: Workflow for unit tests
+
+runs:
+  using: composite
+  
+  steps: # tasks
+
+    - name: Run unittests
+      shell: bash
+      run: python tests/test.py
+
+    - name: Print log
+      shell: bash
+      if: always()
+      run: |
+        if [ -f test.log ]; then cat test.log; fi

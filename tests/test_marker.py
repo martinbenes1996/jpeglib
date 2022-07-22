@@ -1,19 +1,20 @@
 
 import logging
-import sys
 import tempfile
 import unittest
 
-sys.path.append('.')
 import jpeglib
+
 
 class TestMarker(unittest.TestCase):
     logger = logging.getLogger()
+
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+
     def tearDown(self):
         del self.tmp
-    
+
     def test_marker_jpeg_app0(self):
         """Interface of marker."""
         self.logger.info("test_marker_interface")
@@ -21,9 +22,9 @@ class TestMarker(unittest.TestCase):
         name = 'JPEG_APP0'
         content = b'abcd1234eeee'
         marker = jpeglib.Marker(
-            name    = name,
-            content = content,
-            length  = len(content)
+            name=name,
+            content=content,
+            length=len(content)
         )
         # attributes
         self.assertIsInstance(marker.name, str)
@@ -34,7 +35,7 @@ class TestMarker(unittest.TestCase):
         self.assertEqual(marker.length, len(content))
         self.assertIsInstance(marker.index, int)
         self.assertEqual(marker.index, 0xE0)
-    
+
     def test_marker_jpeg_app5(self):
         """Interface of marker."""
         self.logger.info("test_marker_interface")
@@ -42,9 +43,9 @@ class TestMarker(unittest.TestCase):
         name = 'JPEG_APP5'
         content = b'abcd1234eeee'
         marker = jpeglib.Marker(
-            name    = name,
-            content = content,
-            length  = len(content)
+            name=name,
+            content=content,
+            length=len(content)
         )
         # attributes
         self.assertIsInstance(marker.name, str)
@@ -55,7 +56,7 @@ class TestMarker(unittest.TestCase):
         self.assertEqual(marker.length, len(content))
         self.assertIsInstance(marker.index, int)
         self.assertEqual(marker.index, 0xE0 + 5)
-    
+
     def test_image_marker(self):
         # read im
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
@@ -70,5 +71,6 @@ class TestMarker(unittest.TestCase):
         self.assertEqual(im.markers[1].name, "JPEG_APP2")
         self.assertEqual(im.markers[1].length, 562)
         self.assertEqual(len(im.markers[1].content), 562)
+
 
 __all__ = ["TestMarker"]
