@@ -5,7 +5,7 @@ on: # trigger
     types:
       - created
   push:
-    branches: [release]
+    branches: [release,dev]
 
 jobs:
   unit_tests:
