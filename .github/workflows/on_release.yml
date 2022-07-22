@@ -4,25 +4,25 @@ on: # trigger
     branches: [master]
     types:
       - created
+  push:
+    branches: [release]
 
 jobs:
-  build_wheel:
-    runs-on: ubuntu-latest # runner
+  build_wheels:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, windows-2019, macOS-11]
 
     steps:
-      - name: Set Github Workspace # access Github Workspace
+      - name: Set Github Workspace
         uses: actions/checkout@v2
       - name: Set up Python 3.x # set architecture and Python3
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64" # architecture
+        uses: actions/setup-python@v3
 
-      - name: Run unittests
-        uses: ./.github/common/unit_tests
+      - name: Install dependencies
+        uses: ./.github/common/install_dependencies
 
       - name: Build wheels
-        uses: actions/upload-artifact@v2
-        with:
-          name: dist
-          path: dist
+        uses: ./.github/common/build_wheels
