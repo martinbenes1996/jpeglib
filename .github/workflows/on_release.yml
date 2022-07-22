@@ -61,32 +61,32 @@ jobs:
           platform_id: win_amd64
         
         # MacOS x86_64
-          - os: macos-latest
-            bitness: 64
-            python: 38
-            platform_id: macosx_x86_64
-          # - os: macos-latest
-          #   bitness: 64
-          #   python: 39
-          #   platform_id: macosx_x86_64
-          # - os: macos-latest
-          #   bitness: 64
-          #   python: 310
-          #   platform_id: macosx_x86_64
+        - os: macos-latest
+          bitness: 64
+          python: 38
+          platform_id: macosx_x86_64
+        # - os: macos-latest
+        #   bitness: 64
+        #   python: 39
+        #   platform_id: macosx_x86_64
+        # - os: macos-latest
+        #   bitness: 64
+        #   python: 310
+        #   platform_id: macosx_x86_64
 
-          # MacOS arm64
-          - os: macos-latest
-            bitness: 64
-            python: 38
-            platform_id: macosx_arm64
-          # - os: macos-latest
-          #   bitness: 64
-          #   python: 39
-          #   platform_id: macosx_arm64
-          # - os: macos-latest
-          #   bitness: 64
-          #   python: 310
-          #   platform_id: macosx_arm64
+        # MacOS arm64
+        - os: macos-latest
+          bitness: 64
+          python: 38
+          platform_id: macosx_arm64
+        # - os: macos-latest
+        #   bitness: 64
+        #   python: 39
+        #   platform_id: macosx_arm64
+        # - os: macos-latest
+        #   bitness: 64
+        #   python: 310
+        #   platform_id: macosx_arm64
 
     # needs: unit_tests
 
