@@ -1,7 +1,6 @@
 
 import ctypes
 from dataclasses import dataclass
-import logging
 import numpy as np
 from typing import List
 
@@ -214,29 +213,6 @@ class JPEG:
     def free(self):
         """Free the allocated tensors."""
         raise NotImplementedError
-    def close(self):
-        """Closes the object. Defined for interface compatibility with PIL.
-        
-        :Example:
-
-        >>> im = jpeglib.read_dct("input.jpeg")
-        >>> # work with im
-        >>> im.close()
-        """
-        pass
-    
-    def __enter__(self):
-        """Method for using ``with`` statement together with :class:`JPEG`.
-        
-        :Example:
-        
-        >>> with jpeglib.read_dct("input.jpeg") as im:
-        >>>     im.Y; im.Cb; im.Cr; im.qt
-        """
-        return self
-    def __exit__(self, exception_type, exception_val, trace):
-        """Method for using ``with`` statement together with :class:`JPEG`."""
-        self.close()
 
     def close(self):
         """Closes the object. Defined for interface compatibility with PIL.

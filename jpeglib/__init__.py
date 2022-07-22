@@ -24,9 +24,6 @@ from .version import version
 # DCT implementation
 from . import dct
 
-# DCT implementation
-from . import dct
-
 # for unit tests
 from ._timer import Timer
 

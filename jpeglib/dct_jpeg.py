@@ -134,6 +134,7 @@ class DCTJPEG(_jpeg.JPEG):
         dstfile = path if path is not None else self.path
         if dstfile is None:
             raise IOError('no destination file specified')
+
         # convert dct
         def process_component(comp):
             if comp is None:
