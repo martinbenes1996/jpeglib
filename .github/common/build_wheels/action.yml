@@ -17,8 +17,3 @@ runs:
       # env:
       #   CIBW_SOME_OPTION: value
 
-    - name: Upload artifact
-      shell: bash
-      uses: actions/upload-artifact@v3
-      with:
-        path: ./wheelhouse/*.whl
