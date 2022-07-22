@@ -536,13 +536,6 @@ int read_jpeg_spatial(
 
   if (overwrite_flag(flags, DO_FANCY_UPSAMPLING))
     cinfo.do_fancy_upsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
-<<<<<<< HEAD
-=======
-    // #if JPEG_LIB_VERSION >= 70
-    // fprintf(stderr, "- read %s: DO_FANCY_UPSAMPLING %d min_DCT_h_scaled_size %d max_DCT_h_scaled_size %d\n", srcfile, cinfo.do_fancy_upsampling, cinfo.min_DCT_h_scaled_size, cinfo.min_DCT_h_scaled_size);
-    // #endif
-  }
->>>>>>> e5898b1 (documentation updated)
   if (overwrite_flag(flags, DO_BLOCK_SMOOTHING))
     cinfo.do_block_smoothing = flag_is_set(flags, DO_BLOCK_SMOOTHING);
   if (overwrite_flag(flags, QUANTIZE_COLORS))
