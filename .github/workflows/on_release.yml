@@ -4,8 +4,6 @@ on: # trigger
     branches: [master]
     types:
       - created
-  push:
-    branches: [release,dev]
 
 jobs:
   # unit_tests:
