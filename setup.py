@@ -1,12 +1,14 @@
 
-# versions
-from setuptools.command.build_ext import build_ext
-import re
-from pathlib import Path
-import ctypes
-import setuptools
+
 import codecs
+import ctypes
 import os
+from pathlib import Path
+import re
+import setuptools
+import sys
+
+# versions
 __version__ = os.environ.get('VERSION_NEW', '0.10.11')
 libjpeg_versions = {
     '6b': (None, 60),
@@ -164,7 +166,7 @@ for v in libjpeg_versions:
 
 
 
-class custom_build_ext(build_ext):
+class custom_build_ext(setuptools.command.build_ext.build_ext):
     def get_export_symbols(self, ext):
         parts = ext.name.split(".")
         if parts[-1] == "__init__":
@@ -177,8 +179,8 @@ class custom_build_ext(build_ext):
         # self.compiler.set_executable("compiler_cxx", "g++")
         # self.compiler.set_executable("linker_so", "g++")
         # print("==========", self.compiler.library_dirs)
-        build_ext.build_extensions(self)
-        build_ext.get_export_symbols = self.get_export_symbols
+        setuptools.command.build_ext.build_ext.build_extensions(self)
+        setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
 
 setuptools.setup(
