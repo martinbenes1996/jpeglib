@@ -1,5 +1,4 @@
 
-import copy
 import ctypes
 import dataclasses
 import numpy as np

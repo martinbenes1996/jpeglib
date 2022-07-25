@@ -165,16 +165,7 @@ for v in libjpeg_versions:
     )
 
 
-
-
 class custom_build_ext(setuptools.command.build_ext.build_ext):
-    def get_export_symbols(self, ext):
-        parts = ext.name.split(".")
-        if parts[-1] == "__init__":
-            initfunc_name = "PyInit_" + parts[-2]
-        else:
-            initfunc_name = "PyInit_" + parts[-1]
-
     def build_extensions(self):
         # self.compiler.set_executable("compiler_so", "g++")
         # self.compiler.set_executable("compiler_cxx", "g++")
@@ -189,7 +180,7 @@ setuptools.setup(
     version=__version__,
     author=u'Martin Beneš',
     author_email='martinbenes1996@gmail.com',
-    description="Python envelope for the popular C library"+
+    description="Python envelope for the popular C library" +
                 "libjpeg for handling JPEG files.",
     long_description=long_description,
     long_description_content_type="text/markdown",

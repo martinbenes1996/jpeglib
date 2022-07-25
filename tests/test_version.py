@@ -146,11 +146,11 @@ class TestVersion(unittest.TestCase):
                 '+DO_BLOCK_SMOOTHING'
             ]
         )
-        rgb_pil = np.array(Image.open(
-        #_ = np.array(Image.open(
+        # rgb_pil = np.array(Image.open(
+        _ = np.array(Image.open(
             f'examples/images-{version}/testprog.jpg'
         ))
-        # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
+        # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil)  # TODO: Nora
 
         # load dct - to fix
         im = jpeglib.read_dct(f'examples/images-{version}/testprog.jpg')

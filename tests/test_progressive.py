@@ -30,7 +30,8 @@ class TestProgressive(unittest.TestCase):
         """Test on test images from libjpeg."""
         jpeglib.version.set(version)
 
-        im_prog = jpeglib.read_spatial(
+        # im_prog = jpeglib.read_spatial(
+        _ = jpeglib.read_spatial(
             f'examples/images-{version}/testprog.jpg',
             flags=[
                 '+PROGRESSIVE_MODE',
@@ -38,7 +39,8 @@ class TestProgressive(unittest.TestCase):
                 '+DO_BLOCK_SMOOTHING'
             ]
         )
-        rgb_pil = np.array(Image.open(
+        # im_prog = jpeglib.read_spatial(
+        _ = np.array(Image.open(
             f'examples/images-{version}/testprog.jpg'
         ))
         # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
