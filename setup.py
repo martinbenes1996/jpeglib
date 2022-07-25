@@ -10,7 +10,7 @@ import setuptools.command.build_ext
 import sys
 
 # versions
-__version__ = os.environ.get('VERSION_NEW', '0.10.12')
+__version__ = os.environ.get('VERSION_NEW', '0.10.13')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
