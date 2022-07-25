@@ -1,6 +1,7 @@
 
+import copy
 import ctypes
-from dataclasses import dataclass
+import dataclasses
 import numpy as np
 from typing import List
 
@@ -9,7 +10,7 @@ from ._colorspace import Colorspace
 from ._marker import Marker
 
 
-@dataclass
+@dataclasses.dataclass
 class JPEG:
     """JPEG abstract class."""
     path: str

@@ -7,8 +7,7 @@ import ctypes
 import setuptools
 import codecs
 import os
-import sys
-__version__ = os.environ.get('VERSION_NEW', '0.10.12')
+__version__ = os.environ.get('VERSION_NEW', '0.10.11')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
@@ -129,7 +128,7 @@ for v in libjpeg_versions:
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
     ]
-    
+
     if is_turbo:
         macros += [
             ("INLINE", "__inline__" if not sys.platform.startswith("win") else "__inline"),
@@ -172,7 +171,7 @@ class custom_build_ext(build_ext):
             initfunc_name = "PyInit_" + parts[-2]
         else:
             initfunc_name = "PyInit_" + parts[-1]
-        
+
     def build_extensions(self):
         # self.compiler.set_executable("compiler_so", "g++")
         # self.compiler.set_executable("compiler_cxx", "g++")
@@ -187,8 +186,8 @@ setuptools.setup(
     version=__version__,
     author=u'Martin Beneš',
     author_email='martinbenes1996@gmail.com',
-    description="""Python envelope for the popular C library
-                    libjpeg for handling JPEG files.""",
+    description="Python envelope for the popular C library"+
+                "libjpeg for handling JPEG files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),

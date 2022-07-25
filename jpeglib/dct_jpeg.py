@@ -1,6 +1,6 @@
 
 import ctypes
-from dataclasses import dataclass, fields
+import dataclasses
 import numpy as np
 import tempfile
 from typing import List
@@ -9,7 +9,7 @@ from ._bind import CJpegLib
 from . import _jpeg
 
 
-@dataclass
+@dataclasses.dataclass
 class DCTJPEG(_jpeg.JPEG):
     """JPEG instance to work with DCT domain."""
 
@@ -266,7 +266,7 @@ class DCTJPEG(_jpeg.JPEG):
         del self._qt
 
 
-@dataclass
+@dataclasses.dataclass
 class DCTJPEGio(DCTJPEG):
     """Class for compatiblity with jpegio."""
 
@@ -393,5 +393,5 @@ def to_jpegio(jpeg: DCTJPEG) -> DCTJPEGio:
     >>> jpeg = jpeglib.to_jpegio(jpeg)
     >>> jpeg.coef_arrays; jpeg.quant_tables
     """
-    vals = {field.name: getattr(jpeg, field.name) for field in fields(jpeg)}
+    vals = {field.name: getattr(jpeg, field.name) for field in dataclasses.fields(jpeg)}
     return DCTJPEGio(**vals)
