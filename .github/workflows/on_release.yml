@@ -145,13 +145,14 @@ jobs:
       - name: Publish on TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          user: __token__
           password: ${{ secrets.TEST_PYPI_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
         # if: ${{ github.event.inputs.pypi_repo == 'testpypi' }}
 
       - name: Publish on PyPi
         run: |
-          echo "TODO Uploading to PyPi!"
+          echo "TODO Uploading to PyPi"
 
     # - uses: pypa/gh-action-pypi-publish@v1.5.0
     #   with:
