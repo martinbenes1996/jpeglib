@@ -65,7 +65,7 @@ FILE *_read_jpeg(const char *filename,
     fprintf(stderr, "not possible to open\n");
     return NULL;
   }
-  
+
   // check file size
   fseek(fp, 0L, SEEK_END);
   size_t fsize = ftell(fp);
@@ -74,7 +74,7 @@ FILE *_read_jpeg(const char *filename,
 
   // zero the structures
   memset(cinfo,0x00,sizeof(struct jpeg_decompress_struct));
-  memset(jerr,0x00,sizeof(struct jpeg_error_mgr)); 
+  memset(jerr,0x00,sizeof(struct jpeg_error_mgr));
 
   //load image
   cinfo->err = jpeg_std_error(jerr);
@@ -193,9 +193,9 @@ int read_jpeg_markers(
     }
     unset_marker_handlers(&cinfo);
   }
-  
+
   //(void)jpeg_read_coefficients(&cinfo);
-  
+
   // cleanup
   jpeg_destroy_decompress(&cinfo);
   fclose(fp);
@@ -713,13 +713,13 @@ int write_jpeg_spatial(
   if (overwrite_flag(flags, CCIR601_SAMPLING))
     cinfo.CCIR601_sampling = flag_is_set(flags, CCIR601_SAMPLING);
 
-  fprintf(stderr, "number of scans: %d\n", cinfo.num_scans);
-  fprintf(stderr, "components in scan: %d\n", cinfo.comps_in_scan);
-  fprintf(stderr, "Ss: %d\n", cinfo.Ss);
-  fprintf(stderr, "Se: %d\n", cinfo.Se);
-  fprintf(stderr, "Ah: %d\n", cinfo.Ah);
-  fprintf(stderr, "Al: %d\n", cinfo.Al);
-  fprintf(stderr, " %d\n", cinfo.Al);
+  // fprintf(stderr, "number of scans: %d\n", cinfo.num_scans);
+  // fprintf(stderr, "components in scan: %d\n", cinfo.comps_in_scan);
+  // fprintf(stderr, "Ss: %d\n", cinfo.Ss);
+  // fprintf(stderr, "Se: %d\n", cinfo.Se);
+  // fprintf(stderr, "Ah: %d\n", cinfo.Ah);
+  // fprintf(stderr, "Al: %d\n", cinfo.Al);
+  // fprintf(stderr, " %d\n", cinfo.Al);
   jpeg_start_compress(&cinfo, TRUE);
 
   // write markers

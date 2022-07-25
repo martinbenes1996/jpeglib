@@ -143,7 +143,7 @@ jobs:
           path: dist
 
       - name: Publish on TestPyPI
-        uses: pypa/gh-action-pypi-publish@v1.4.1
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.TEST_PYPI_TOKEN }}
