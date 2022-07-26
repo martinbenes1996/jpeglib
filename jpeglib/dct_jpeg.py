@@ -347,16 +347,11 @@ class DCTJPEGio(DCTJPEG):
 
         Does not perform JPEG compression, writing DCT is lossless.
 
-        :param fpath:
-        Destination file name. If not given, source file is overwritten.
+        :param fpath: Destination file name. If not given, source file is overwritten.
         :type fpath: str, optional
-        :param flags:
-        Flags. For backward compatibility, does not make a difference.
+        :param flags: Flags. For backward compatibility, does not make a difference.
         :type flags: int
-        :param quality:
-        Compression quality, between 0 and 100.
-        Special value -1 stands for using qt inside the instance
-        or keeping libjpeg default.
+        :param quality: Compression quality, between 0 and 100. Special value -1 stands for using qt inside the instance or keeping libjpeg default.
         :type quality: int, optional
 
         :Example:
