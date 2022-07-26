@@ -111,20 +111,16 @@ class DCTJPEG(_jpeg.JPEG):
 
         Does not perform JPEG compression, writing DCT is lossless.
 
-        :param path:
-        Destination file name. If not given, source file is overwritten.
+        :param path: Destination file name. If not given, source file is overwritten.
         :type path: str, optional
-        :param quality:
-        Compression quality, between 0 and 100.
-        Special value -1 stands for using qt
-        inside the instance or keeping libjpeg default.
+        :param quality: Compression quality, between 0 and 100. Special value -1 stands for using qt inside the instance or keeping libjpeg default.
         :type quality: int, optional
 
         :Example:
 
         >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", quality=92)
-        """
+        """  # noqa: E501
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         if self.content is not None:
             # write content into temporary file

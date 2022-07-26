@@ -71,11 +71,9 @@ class Colorspace(CStruct):
     def index_to_name(cls, index: int) -> str:
         """Map index onto color space name.
 
-        :param index:
-        Index.
+        :param index: Index.
         :type name: int
-        :return:
-        Color space name
+        :return: Color space name
         :rtype: str
 
         :Example:

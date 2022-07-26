@@ -92,32 +92,19 @@ def read_spatial(
     In some cases, libjpeg exits the program.
     We work on improving this and replace exit with "soft" Python exception.
 
-    :param path:
-    Path to a source file in JPEG format.
+    :param path: Path to a source file in JPEG format.
     :type path: str
-    :param out_color_space:
-    Output color space, must be accepted by :class:`_colorspace.Colorspace`.
-    If not given, using the libjpeg default.
+    :param out_color_space: Output color space, must be accepted by :class:`_colorspace.Colorspace`. If not given, using the libjpeg default.
     :type out_color_space: str, optional
-    :param dither_mode:
-    Dither mode, must be accepted by :class:`_dithermode.Dithermode`.
-    If not given, using the libjpeg default.
+    :param dither_mode: Dither mode, must be accepted by :class:`_dithermode.Dithermode`. If not given, using the libjpeg default.
     :type dither_mode: str, optional
-    :param dct_method:
-    DCT method, must be accepted by :class:`_dctmethod.DCTMethod`.
-    If not given, using the libjpeg default.
+    :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`. If not given, using the libjpeg default.
     :type dct_method: str, optional
-    :param flags:
-    Bool decompression parameters as str.
-    If not given, using the libjpeg default.
-    Read more at
-    `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
+    :param flags: Bool decompression parameters as str. If not given, using the libjpeg default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
     :type flags: list, optional
-    :return:
-    Spatial JPEG object
+    :return: Spatial JPEG object
     :rtype: :class:`SpatialJPEG`
-    :raises [IOError]:
-    When source file does not exist
+    :raises [IOError]: When source file does not exist
 
     :Example:
 
@@ -138,7 +125,7 @@ def read_spatial(
     >>> # however on first query, it is read
     >>> print(im.spatial) # read and returned
     >>> print(im.spatial) # second time it is already stored in the object
-    """
+    """  # noqa: E501
     # load file content
     with open(path, "rb") as f:
         content = f.read()
@@ -194,15 +181,11 @@ def from_spatial(
         you have to specify `path`,
         otherwise an error is raised.
 
-    :param spatial:
-    Spatial representation.
+    :param spatial: Spatial representation.
     :type spatial: np.ndarray
-    :param in_color_space:
-    Color space of the input.
-    If not given, infered from the shape.
+    :param in_color_space: Color space of the input. If not given, infered from the shape.
     :type in_color_space: str | Colorspace, optional
-    :raises [IOError]:
-    When color space can't be infered.
+    :raises [IOError]: When color space can't be infered.
 
     :Example:
 

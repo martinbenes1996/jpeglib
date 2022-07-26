@@ -79,26 +79,15 @@ class SpatialJPEG(JPEG):
                       flags: list = []):
         """Writes a spatial image representation (i.e. RGB) to a file.
 
-        :param path:
-        Destination file name. If not given, source file is overwritten.
+        :param path: Destination file name. If not given, source file is overwritten.
         :type path: str, optional
-        :param qt:
-        Compression quality, can be integer 0-100
-        or a tensor with quantization tables.
-        Defaultly -1 (default factor kept).
+        :param qt: Compression quality, can be integer 0-100 or a tensor with quantization tables. Defaultly -1 (default factor kept).
         :type qt: int | numpy.ndarray, optional
-        :param dct_method:
-        DCT method, must be accepted by :class:`_dctmethod.DCTMethod`.
-        If not given, using the libjpeg default.
+        :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`. If not given, using the libjpeg default.
         :type dct_method: str | :class:`_dctmethod.DCTMethod`, optional
-        :param smoothing_factor:
-        Smoothing factor, between 0 and 100.
-        Using default from libjpeg by default.
+        :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
         :type smoothing_factor: int, optional
-        :param flags:
-        Bool compression parameters as str.
-        If not given, using the libjpeg default.
-        More at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
+        :param flags: Bool compression parameters as str. If not given, using the libjpeg default. More at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
         :type flags: list, optional
 
         :Example:

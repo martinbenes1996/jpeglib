@@ -42,8 +42,7 @@ class version:
     def get() -> str:
         """Gets the currently used version of libjpeg.
 
-        :return:
-        libjpeg version or None if not been loaded yet.
+        :return: libjpeg version or None if not been loaded yet.
         :rtype: str, None
 
         :Example:
@@ -64,8 +63,7 @@ class version:
     def _get_lib() -> ctypes.CDLL:
         """Low-level getter of the dynamic library.
 
-        :return:
-        Dynamic library object or None if not loaded yet.
+        :return: Dynamic library object or None if not loaded yet.
         :rtype: ctypes.CDLL, None
         """
         return CJpegLib.get()
