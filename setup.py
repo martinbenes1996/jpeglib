@@ -8,7 +8,18 @@ import re
 import setuptools
 import setuptools.command.build_ext
 import sys
-from wheel.bdist_wheel import bdist_wheel
+try:
+    from wheel.bdist_wheel import bdist_wheel
+    class bdist_wheel_abi3(bdist_wheel):
+        def get_tag(self):
+            python, abi, plat = super().get_tag()
+            if python.startswith("cp"):
+                return "cp38", "abi3", plat
+            return python, abi, plat
+
+    custom_bdist_wheel['bdist_wheel'] = bdist_wheel_abi3
+except:
+    custom_bdist_wheel = {}
 
 # versions
 __version__ = os.environ.get('VERSION_NEW', '0.10.15')
@@ -184,14 +195,6 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
 
-class bdist_wheel_abi3(bdist_wheel):
-    def get_tag(self):
-        python, abi, plat = super().get_tag()
-        if python.startswith("cp"):
-            return "cp38", "abi3", plat
-        return python, abi, plat
-
-
 setuptools.setup(
     name='jpeglib',
     version=__version__,
@@ -206,6 +209,7 @@ setuptools.setup(
     # test_suite = 'setup.test_suite',
     #url=,
     project_urls={
+        "Homepage": "https://pypi.org/project/jpeglib/",
         "Documentation": 'https://jpeglib.readthedocs.io/en/latest/',
         "Source": "https://github.com/martinbenes1996/jpeglib/",
     },
@@ -218,7 +222,7 @@ setuptools.setup(
     package_data={'': ['data/*']},
     include_package_data=True,
     ext_modules=[cjpeglib[v] for v in libjpeg_versions],
-    cmdclass={"build_ext": custom_build_ext, "bdist_wheel": bdist_wheel_abi3},
+    cmdclass={"build_ext": custom_build_ext, **custom_bdist_wheel},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
