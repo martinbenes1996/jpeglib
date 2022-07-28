@@ -35,86 +35,122 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ubuntu-20.04, windows-2019, macos-10.15]
-        # python: ['3.6']
-
         include:
           # Sources:
           # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
           # https://cibuildwheel.readthedocs.io/en/stable/options/
 
-          # Linux 64 bit manylinux2014
-          - os: ubuntu-latest
-            python: 3.8
-            arch:
-            # bitness: 64
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-        #   # - os: ubuntu-latest
-        #   #   python: 39
-        #   #   bitness: 64
-        #   #   platform_id: manylinux_x86_64
-        #   #   manylinux_image: manylinux2014
-        #   # # NumPy on Python 3.10 only supports 64bit and is only available with manylinux2014
-        #   # - os: ubuntu-latest
-        #   #   python: 310
-        #   #   bitness: 64
-        #   #   platform_id: manylinux_x86_64
-        #   #   manylinux_image: manylinux2014
-
-        #  # Window 64 bit
-        #   # Note: windows-2019 is needed for older Python versions:
-        #   # https://github.com/scikit-learn/scikit-learn/issues/22530
+          # Windows
           - os: windows-2019
-            python: 3.8
-            bitness: 64
-            platform_id: win_amd64
-        #   # - os: windows-latest
-        #   #   python: 39
-        #   #   bitness: 64
-        #   #   platform_id: win_amd64
-        #   # - os: windows-latest
-        #   #   python: 310
-        #   #   bitness: 64
-        #   #   platform_id: win_amd64
+            arch: win32
+          - os: windows-2019
+            arch: win_amd64
 
-        #   # Window 32 bit
-        #   # - os: windows-latest
-        #   #   python: 38
-        #   #   bitness: 32
-        #   #   platform_id: win32
-        #   # - os: windows-latest
-        #   #   python: 39
-        #   #   bitness: 32
-        #   #   platform_id: win32
+          # MacOS
+          - os: macos-10.15
+            arch: x86_64
+          - os: macos-10.15
+            arch: arm64
+          - os: macos-10.15
+            arch: universal2
 
-          # MacOS x86_64
-          - os: macos-latest
-            bitness: 64
-            python: 3.8
-            platform_id: macosx_x86_64
-        #   # - os: macos-latest
-        #   #   bitness: 64
-        #   #   python: 39
-        #   #   platform_id: macosx_x86_64
-        #   # - os: macos-latest
-        #   #   bitness: 64
-        #   #   python: 310
-        #   #   platform_id: macosx_x86_64
+          # Linux
+          - os: ubuntu-20.04
+            arch: x86_64
+          - os: ubuntu-20.04
+            arch: i686
+          - os: ubuntu-20.04
+            arch: aarch64
+          - os: ubuntu-20.04
+            arch: ppc64
+          - os: ubuntu-20.04
+            arch: ppc64le
+          - os: ubuntu-20.04
+            arch: s390x
 
-        #   # MacOS arm64
-          - os: macos-latest
-            bitness: 64
-            python: 3.8
-            platform_id: macosx_arm64
-        #   # - os: macos-latest
-        #   #   bitness: 64
-        #   #   python: 39
-        #   #   platform_id: macosx_arm64
-        #   # - os: macos-latest
-        #   #   bitness: 64
-        #   #   python: 310
-        #   #   platform_id: macosx_arm64
+
+
+        # os: [ubuntu-20.04, windows-2019, macos-10.15]
+        # arch: []
+        # # python: ['3.6']
+
+        # include:
+        #   # Sources:
+        #   # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
+        #   # https://cibuildwheel.readthedocs.io/en/stable/options/
+
+        #   # Linux 64 bit manylinux2014
+        #   - os: ubuntu-latest
+        #     # python: 3.8
+        #     # arch:
+        #     # # bitness: 64
+        #     # platform_id: manylinux_x86_64
+        #     manylinux_image: manylinux2014
+        # #   # - os: ubuntu-latest
+        # #   #   python: 39
+        # #   #   bitness: 64
+        # #   #   platform_id: manylinux_x86_64
+        # #   #   manylinux_image: manylinux2014
+        # #   # # NumPy on Python 3.10 only supports 64bit and is only available with manylinux2014
+        # #   # - os: ubuntu-latest
+        # #   #   python: 310
+        # #   #   bitness: 64
+        # #   #   platform_id: manylinux_x86_64
+        # #   #   manylinux_image: manylinux2014
+
+        # #  # Window 64 bit
+        # #   # Note: windows-2019 is needed for older Python versions:
+        # #   # https://github.com/scikit-learn/scikit-learn/issues/22530
+        #   - os: windows-2019
+        #     # python: 3.8
+        #     # bitness: 64
+        #     platform_id: win_amd64
+        # #   # - os: windows-latest
+        # #   #   python: 39
+        # #   #   bitness: 64
+        # #   #   platform_id: win_amd64
+        # #   # - os: windows-latest
+        # #   #   python: 310
+        # #   #   bitness: 64
+        # #   #   platform_id: win_amd64
+
+        # #   # Window 32 bit
+        # #   # - os: windows-latest
+        # #   #   python: 38
+        # #   #   bitness: 32
+        # #   #   platform_id: win32
+        # #   # - os: windows-latest
+        # #   #   python: 39
+        # #   #   bitness: 32
+        # #   #   platform_id: win32
+
+        #   # MacOS x86_64
+        #   - os: macos-latest
+        #     # bitness: 64
+        #     # python: 3.8
+        #     platform_id: macosx_x86_64
+        # #   # - os: macos-latest
+        # #   #   bitness: 64
+        # #   #   python: 39
+        # #   #   platform_id: macosx_x86_64
+        # #   # - os: macos-latest
+        # #   #   bitness: 64
+        # #   #   python: 310
+        # #   #   platform_id: macosx_x86_64
+
+        # # #   # MacOS arm64
+        # #   - os: macos-latest
+        # #     bitness: 64
+        # #     python: 3.8
+        # #     platform_id: macosx_arm64
+        # #   # - os: macos-latest
+        # #   #   bitness: 64
+        # #   #   python: 39
+        # #   #   platform_id: macosx_arm64
+        # #   # - os: macos-latest
+        # #   #   bitness: 64
+        # #   #   python: 310
+        # #   #   platform_id: macosx_arm64
 
     # needs: unit_tests
 
@@ -124,24 +160,18 @@ jobs:
       - name: Set up Python 3.x # set architecture and Python3
         uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.8
 
       - name: Install dependencies
         uses: ./.github/common/install_dependencies
 
-      # - name: Build wheels
-      #   uses: pypa/cibuildwheel@v2.8.1
-
       - name: Build wheels
         uses: ./.github/common/build_wheels
-
-      # - name: Build wheels
-      #   run: python3 setup.py bdist_wheel
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          path: ./dist/*.whl
+          path: ./wheelhouse/*.whl
 
   make_sdist:
     name: Make source distribution
