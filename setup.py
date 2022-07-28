@@ -207,7 +207,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     license='MPL',
     # test_suite = 'setup.test_suite',
-    url='https://jpeglib.readthedocs.io/en/latest/',
+    #url=,
+    project_urls={
+        "Documentation": 'https://jpeglib.readthedocs.io/en/latest/',
+        "Source": "https://github.com/martinbenes1996/jpeglib/",
+    },
     # download_url =
     # 'https://github.com/martinbenes1996/jpeglib/archive/0.1.0.tar.gz',
     keywords=['jpeglib', 'jpeg', 'jpg', 'libjpeg', 'compression',

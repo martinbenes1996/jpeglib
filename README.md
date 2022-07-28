@@ -3,7 +3,7 @@
 [![GitHub](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg)](https://GitHub.com/martinbenes1996/jpeglib)
 [![PyPI downloads](https://img.shields.io/pypi/dm/jpeglib)](https://pypi.org/project/jpeglib/)
 [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
-![Unittests](https://github.com/martinbenes1996/jpeglib/actions/workflows/unittests_on_commit.yml/badge.svg)
+[![Commit CI/CD](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_commit.yml/badge.svg?branch=master&event=push)](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_commit.yml)
 
 # jpeglib
 
