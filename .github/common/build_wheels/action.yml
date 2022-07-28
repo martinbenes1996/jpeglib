@@ -17,6 +17,6 @@ runs:
       env:
         CIBW_BUILD: cp38-* # pp* #cp${{ matrix.python }}-abi3-${{ matrix.platform_id }}
         CIBW_ARCHS: ${{ matrix.arch }}
-        CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
-        CIBW_MANYLINUX_I686_IMAGE: manylinux2014
+        # CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+        # CIBW_MANYLINUX_I686_IMAGE: manylinux2014
 

@@ -42,9 +42,9 @@ jobs:
 
           # Windows
           - os: windows-2019
-            arch: win32
+            arch: AMD64
           - os: windows-2019
-            arch: win_amd64
+            arch: x86
 
           # MacOS
           - os: macos-10.15
@@ -61,8 +61,6 @@ jobs:
             arch: i686
           - os: ubuntu-20.04
             arch: aarch64
-          - os: ubuntu-20.04
-            arch: ppc64
           - os: ubuntu-20.04
             arch: ppc64le
           - os: ubuntu-20.04
