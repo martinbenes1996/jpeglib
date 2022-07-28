@@ -118,8 +118,8 @@ jobs:
     steps:
       - name: Set Github Workspace
         uses: actions/checkout@v2
-      - name: Set up Python 3.x # set architecture and Python3
-        uses: actions/setup-python@v3
+      # - name: Set up Python 3.x # set architecture and Python3
+      #   uses: actions/setup-python@v3
 
       - name: Install dependencies
         uses: ./.github/common/install_dependencies
