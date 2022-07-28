@@ -8,6 +8,7 @@ import re
 import setuptools
 import setuptools.command.build_ext
 import sys
+from wheel.bdist_wheel import bdist_wheel
 
 # versions
 __version__ = os.environ.get('VERSION_NEW', '0.10.14')
@@ -182,6 +183,19 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
         setuptools.command.build_ext.build_ext.build_extensions(self)
         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
+from wheel.bdist_wheel import bdist_wheel
+
+
+class bdist_wheel_abi3(bdist_wheel):
+    def get_tag(self):
+        python, abi, plat = super().get_tag()
+
+        if python.startswith("cp"):
+            # on CPython, our wheels are abi3 and compatible back to 3.6
+            return "cp36", "abi3", plat
+
+        return python, abi, plat
+
 
 setuptools.setup(
     name='jpeglib',
@@ -205,7 +219,7 @@ setuptools.setup(
     package_data={'': ['data/*']},
     include_package_data=True,
     ext_modules=[cjpeglib[v] for v in libjpeg_versions],
-    cmdclass={"build_ext": custom_build_ext},
+    cmdclass={"build_ext": custom_build_ext, "bdist_wheel": bdist_wheel_abi3},
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',
