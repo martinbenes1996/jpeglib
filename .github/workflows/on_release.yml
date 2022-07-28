@@ -1,4 +1,4 @@
-name: Test Release CI/CD # workflow name
+name: Release CI/CD # workflow name
 on: # trigger
   push:
     branches: [release]
@@ -32,6 +32,7 @@ jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    needs: unit_tests
     strategy:
       fail-fast: false
       matrix:
@@ -65,8 +66,6 @@ jobs:
           #   arch: ppc64le
           # - os: ubuntu-20.04
           #   arch: s390x
-
-    needs: unit_tests
 
     steps:
       - name: Set Github Workspace
@@ -115,7 +114,6 @@ jobs:
         with:
           name: artifact
           path: dist
-            - name: Downloads artifact
       - name: Publish on TestPyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
         with:
