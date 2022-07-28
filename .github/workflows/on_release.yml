@@ -35,19 +35,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-10.15]
-        python-version: ['3.6']
-        # include:
-        #   # Sources:
-        #   # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
-        #   # https://cibuildwheel.readthedocs.io/en/stable/options/
+        # os: [ubuntu-20.04, windows-2019, macos-10.15]
+        # python: ['3.6']
+        include:
+          # Sources:
+          # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
+          # https://cibuildwheel.readthedocs.io/en/stable/options/
 
-        #   # Linux 64 bit manylinux2014
-        #   - os: ubuntu-latest
-        #     # python: 38
-        #     # bitness: 64
-        #     platform_id: manylinux_x86_64
-        #     manylinux_image: manylinux2014
+          # Linux 64 bit manylinux2014
+          - os: ubuntu-latest
+            python: 36
+            bitness: 64
+            platform_id: manylinux_x86_64
+            manylinux_image: manylinux2014
         #   # - os: ubuntu-latest
         #   #   python: 39
         #   #   bitness: 64
@@ -63,10 +63,10 @@ jobs:
         #  # Window 64 bit
         #   # Note: windows-2019 is needed for older Python versions:
         #   # https://github.com/scikit-learn/scikit-learn/issues/22530
-        #   - os: windows-2019
-        #     # python: 38
-        #     # bitness: 64
-        #     # platform_id: win_amd64
+          - os: windows-2019
+            python: 36
+            bitness: 64
+            platform_id: win_amd64
         #   # - os: windows-latest
         #   #   python: 39
         #   #   bitness: 64
@@ -86,11 +86,11 @@ jobs:
         #   #   bitness: 32
         #   #   platform_id: win32
 
-        #   # MacOS x86_64
-        #   - os: macos-latest
-        #     # bitness: 64
-        #     # python: 38
-        #     platform_id: macosx_x86_64
+          # MacOS x86_64
+          - os: macos-latest
+            bitness: 64
+            python: 36
+            platform_id: macosx_x86_64
         #   # - os: macos-latest
         #   #   bitness: 64
         #   #   python: 39
@@ -122,7 +122,7 @@ jobs:
       - name: Set up Python 3.x # set architecture and Python3
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python }}
 
       - name: Install dependencies
         uses: ./.github/common/install_dependencies
@@ -130,13 +130,16 @@ jobs:
       # - name: Build wheels
       #   uses: pypa/cibuildwheel@v2.8.1
 
+      # - name: Build wheels
+      #   uses: ./.github/common/build_wheels
+
       - name: Build wheels
-        uses: ./.github/common/build_wheels
+        run: python3 setup.py bdist_wheel
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          path: ./wheelhouse/*.whl
+          path: ./dist/*.whl
 
   make_sdist:
     name: Make source distribution
