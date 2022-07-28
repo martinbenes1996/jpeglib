@@ -11,7 +11,7 @@ import sys
 from wheel.bdist_wheel import bdist_wheel
 
 # versions
-__version__ = os.environ.get('VERSION_NEW', '0.10.14')
+__version__ = os.environ.get('VERSION_NEW', '0.10.13')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
