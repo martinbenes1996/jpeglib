@@ -131,7 +131,7 @@ for v in libjpeg_versions:
         ("HAVE_STDLIB_H", 1),
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
-        ("Py_LIMITED_API", "0x03020000"),
+        ("Py_LIMITED_API", "0x03060000"),
     ]
 
     if is_turbo:
@@ -182,9 +182,6 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
         # print("==========", self.compiler.library_dirs)
         setuptools.command.build_ext.build_ext.build_extensions(self)
         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
-
-from wheel.bdist_wheel import bdist_wheel
-
 
 class bdist_wheel_abi3(bdist_wheel):
     def get_tag(self):
