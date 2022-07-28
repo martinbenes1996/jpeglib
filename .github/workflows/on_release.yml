@@ -37,6 +37,7 @@ jobs:
       matrix:
         # os: [ubuntu-20.04, windows-2019, macos-10.15]
         # python: ['3.6']
+
         include:
           # Sources:
           # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
@@ -45,7 +46,8 @@ jobs:
           # Linux 64 bit manylinux2014
           - os: ubuntu-latest
             python: 3.6
-            bitness: 64
+            arch:
+            # bitness: 64
             platform_id: manylinux_x86_64
             manylinux_image: manylinux2014
         #   # - os: ubuntu-latest
@@ -64,7 +66,7 @@ jobs:
         #   # Note: windows-2019 is needed for older Python versions:
         #   # https://github.com/scikit-learn/scikit-learn/issues/22530
           - os: windows-2019
-            python: 3.6
+            python: 3.8
             bitness: 64
             platform_id: win_amd64
         #   # - os: windows-latest
@@ -101,10 +103,10 @@ jobs:
         #   #   platform_id: macosx_x86_64
 
         #   # MacOS arm64
-        #   - os: macos-latest
-        #     # bitness: 64
-        #     # python: 38
-        #     platform_id: macosx_arm64
+          - os: macos-latest
+            bitness: 64
+            python: 3.6
+            platform_id: macosx_arm64
         #   # - os: macos-latest
         #   #   bitness: 64
         #   #   python: 39
