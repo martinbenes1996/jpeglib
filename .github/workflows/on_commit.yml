@@ -9,7 +9,6 @@ on: # trigger
 jobs:
   unit_tests:
     runs-on: ubuntu-latest # runner
-
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2
@@ -18,21 +17,15 @@ jobs:
         with:
           python-version: "3.x"
           architecture: "x64" # architecture
-
       - name: Install test dependencies
         uses: ./.github/common/install_test_dependencies
-
       - name: Build from source
         uses: ./.github/common/build_from_source
-
       - name: Run unit tests # run unittests
         uses: ./.github/common/unit_tests
 
-
-  # === coding style ===
   code_analysis:
     runs-on: ubuntu-latest # runner
-
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2
@@ -41,10 +34,8 @@ jobs:
         with:
           python-version: "3.x"
           architecture: "x64" # architecture
-
-
       - name: Install dependencies
         uses: ./.github/common/install_dependencies
-
       - name: Run code analysis
         uses: ./.github/common/code_quality
+
