@@ -45,7 +45,7 @@ jobs:
 
           # Linux 64 bit manylinux2014
           - os: ubuntu-latest
-            python: 3.6
+            python: 3.8
             arch:
             # bitness: 64
             platform_id: manylinux_x86_64
@@ -91,7 +91,7 @@ jobs:
           # MacOS x86_64
           - os: macos-latest
             bitness: 64
-            python: 3.6
+            python: 3.8
             platform_id: macosx_x86_64
         #   # - os: macos-latest
         #   #   bitness: 64
@@ -105,7 +105,7 @@ jobs:
         #   # MacOS arm64
           - os: macos-latest
             bitness: 64
-            python: 3.6
+            python: 3.8
             platform_id: macosx_arm64
         #   # - os: macos-latest
         #   #   bitness: 64

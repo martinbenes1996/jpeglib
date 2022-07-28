@@ -131,7 +131,7 @@ for v in libjpeg_versions:
         ("HAVE_STDLIB_H", 1),
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
-        ("Py_LIMITED_API", "0x03060000"),
+        ("Py_LIMITED_API", "0x03080000"),
     ]
 
     if is_turbo:
