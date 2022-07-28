@@ -13,9 +13,9 @@ runs:
     - name: Build wheels
       shell: bash
       run: python -m cibuildwheel --output-dir wheelhouse
-      env:
-        CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
-        CIBW_ARCHS: all
-        CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-        CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
+      # env:
+      #   CIBW_BUILD: cp${{ matrix.python-version }}-${{ matrix.platform_id }}
+      #   CIBW_ARCHS: all
+      #   CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
+      #   CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
 
