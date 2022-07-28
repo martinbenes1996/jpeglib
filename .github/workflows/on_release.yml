@@ -89,6 +89,7 @@ jobs:
   make_sdist:
     name: Make source distribution
     runs-on: ubuntu-latest
+    needs: unit_tests
     steps:
       - uses: actions/checkout@v3
         with:
