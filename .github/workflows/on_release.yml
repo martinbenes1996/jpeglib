@@ -4,8 +4,8 @@ on: # trigger
     branches: [master]
     types:
       - created
-  # push:
-  #   branches: [dev]
+  push:
+    branches: [dev]
 
 jobs:
   # unit_tests:
@@ -42,75 +42,75 @@ jobs:
 
           # Linux 64 bit manylinux2014
           - os: ubuntu-latest
-            python: 38
-            bitness: 64
+            # python: 38
+            # bitness: 64
             platform_id: manylinux_x86_64
             manylinux_image: manylinux2014
-          - os: ubuntu-latest
-            python: 39
-            bitness: 64
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-          # NumPy on Python 3.10 only supports 64bit and is only available with manylinux2014
-          - os: ubuntu-latest
-            python: 310
-            bitness: 64
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
+          # - os: ubuntu-latest
+          #   python: 39
+          #   bitness: 64
+          #   platform_id: manylinux_x86_64
+          #   manylinux_image: manylinux2014
+          # # NumPy on Python 3.10 only supports 64bit and is only available with manylinux2014
+          # - os: ubuntu-latest
+          #   python: 310
+          #   bitness: 64
+          #   platform_id: manylinux_x86_64
+          #   manylinux_image: manylinux2014
 
          # Window 64 bit
           # Note: windows-2019 is needed for older Python versions:
           # https://github.com/scikit-learn/scikit-learn/issues/22530
           - os: windows-2019
-            python: 38
+            # python: 38
             bitness: 64
             platform_id: win_amd64
-          - os: windows-latest
-            python: 39
-            bitness: 64
-            platform_id: win_amd64
-          - os: windows-latest
-            python: 310
-            bitness: 64
-            platform_id: win_amd64
+          # - os: windows-latest
+          #   python: 39
+          #   bitness: 64
+          #   platform_id: win_amd64
+          # - os: windows-latest
+          #   python: 310
+          #   bitness: 64
+          #   platform_id: win_amd64
 
           # Window 32 bit
           - os: windows-latest
-            python: 38
+            # python: 38
             bitness: 32
             platform_id: win32
-          - os: windows-latest
-            python: 39
-            bitness: 32
-            platform_id: win32
+          # - os: windows-latest
+          #   python: 39
+          #   bitness: 32
+          #   platform_id: win32
 
           # MacOS x86_64
           - os: macos-latest
-            bitness: 64
-            python: 38
+            # bitness: 64
+            # python: 38
             platform_id: macosx_x86_64
-          - os: macos-latest
-            bitness: 64
-            python: 39
-            platform_id: macosx_x86_64
-          - os: macos-latest
-            bitness: 64
-            python: 310
-            platform_id: macosx_x86_64
+          # - os: macos-latest
+          #   bitness: 64
+          #   python: 39
+          #   platform_id: macosx_x86_64
+          # - os: macos-latest
+          #   bitness: 64
+          #   python: 310
+          #   platform_id: macosx_x86_64
 
           # MacOS arm64
           - os: macos-latest
-            bitness: 64
-            python: 38
+            # bitness: 64
+            # python: 38
             platform_id: macosx_arm64
-          - os: macos-latest
-            bitness: 64
-            python: 39
-            platform_id: macosx_arm64
-          - os: macos-latest
-            bitness: 64
-            python: 310
-            platform_id: macosx_arm64
+          # - os: macos-latest
+          #   bitness: 64
+          #   python: 39
+          #   platform_id: macosx_arm64
+          # - os: macos-latest
+          #   bitness: 64
+          #   python: 310
+          #   platform_id: macosx_arm64
 
     # needs: unit_tests
 
@@ -124,7 +124,10 @@ jobs:
         uses: ./.github/common/install_dependencies
 
       - name: Build wheels
-        uses: ./.github/common/build_wheels
+        uses: pypa/cibuildwheel@v2.8.1
+
+      # - name: Build wheels
+      #   uses: ./.github/common/build_wheels
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -160,21 +163,20 @@ jobs:
           name: artifact
           path: dist
 
-      # - name: Publish on TestPyPI
-      #   uses: pypa/gh-action-pypi-publish@v1.4.1
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.TEST_PYPI_TOKEN }}
-      #     repository_url: https://test.pypi.org/legacy/
-      #     verbose: true
-      #   # if: ${{ github.event.inputs.pypi_repo == 'testpypi' }}
-
-      - name: Publish on PyPI
+      - name: Publish on TestPyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_TOKEN }}
+          password: ${{ secrets.TEST_PYPI_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
           verbose: true
+
+      # - name: Publish on PyPI
+      #   uses: pypa/gh-action-pypi-publish@v1.4.1
+      #   with:
+      #     user: __token__
+      #     password: ${{ secrets.PYPI_TOKEN }}
+      #     verbose: true
 
       # - name: Publish on PyPi
       #   run: |
