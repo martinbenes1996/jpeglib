@@ -132,11 +132,11 @@ jobs:
       # - name: Build wheels
       #   uses: pypa/cibuildwheel@v2.8.1
 
-      # - name: Build wheels
-      #   uses: ./.github/common/build_wheels
-
       - name: Build wheels
-        run: python3 setup.py bdist_wheel
+        uses: ./.github/common/build_wheels
+
+      # - name: Build wheels
+      #   run: python3 setup.py bdist_wheel
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
