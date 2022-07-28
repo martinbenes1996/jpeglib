@@ -17,7 +17,7 @@ try:
                 return "cp38", "abi3", plat
             return python, abi, plat
 
-    custom_bdist_wheel['bdist_wheel'] = bdist_wheel_abi3
+    custom_bdist_wheel = {'bdist_wheel': bdist_wheel_abi3}
 except:
     custom_bdist_wheel = {}
 
