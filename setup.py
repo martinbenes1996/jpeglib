@@ -187,11 +187,8 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
 class bdist_wheel_abi3(bdist_wheel):
     def get_tag(self):
         python, abi, plat = super().get_tag()
-
         if python.startswith("cp"):
-            # on CPython, our wheels are abi3 and compatible back to 3.6
-            return "cp36", "abi3", plat
-
+            return "cp38", "abi3", plat
         return python, abi, plat
 
 
