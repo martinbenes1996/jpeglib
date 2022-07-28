@@ -359,7 +359,7 @@ class DCTJPEGio(DCTJPEG):
         >>> jpeg = jpeglib.read_dct("input.jpeg")
         >>> jpeg = jpeglib.to_jpegio(jpeg)
         >>> jpeg.write("output.jpeg", quality=92)
-        """
+        """  # noqa: E501
         # pass data from jpegio to jpeg
         self._jpegio_to_jpeg()
         # write
