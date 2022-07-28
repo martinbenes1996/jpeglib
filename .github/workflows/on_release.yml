@@ -1,33 +1,33 @@
-name: Release CI/CD # workflow name
+name: Test Release CI/CD # workflow name
 on: # trigger
+  push:
+    branches: [release]
   release:
     branches: [master]
     types:
       - created
-  # push:
-  #   branches: [dev]
 
 jobs:
-  # unit_tests:
-  #   runs-on: ubuntu-latest # runner
+  unit_tests:
+    runs-on: ubuntu-latest # runner
 
-  #   steps: # tasks
-  #     - name: Set Github Workspace # access Github Workspace
-  #       uses: actions/checkout@v2
-  #     - name: Set up Python 3.x # set architecture and Python3
-  #       uses: actions/setup-python@v2
-  #       with:
-  #         python-version: "3.x"
-  #         architecture: "x64" # architecture
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
 
-  #     - name: Install test dependencies
-  #       uses: ./.github/common/install_test_dependencies
+      - name: Install test dependencies
+        uses: ./.github/common/install_test_dependencies
 
-  #     - name: Build from source
-  #       uses: ./.github/common/build_from_source
+      - name: Build from source
+        uses: ./.github/common/build_from_source
 
-  #     - name: Run unit tests # run unittests
-  #       uses: ./.github/common/unit_tests
+      - name: Run unit tests # run unittests
+        uses: ./.github/common/unit_tests
 
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -66,91 +66,7 @@ jobs:
           # - os: ubuntu-20.04
           #   arch: s390x
 
-
-
-        # os: [ubuntu-20.04, windows-2019, macos-10.15]
-        # arch: []
-        # # python: ['3.6']
-
-        # include:
-        #   # Sources:
-        #   # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
-        #   # https://cibuildwheel.readthedocs.io/en/stable/options/
-
-        #   # Linux 64 bit manylinux2014
-        #   - os: ubuntu-latest
-        #     # python: 3.8
-        #     # arch:
-        #     # # bitness: 64
-        #     # platform_id: manylinux_x86_64
-        #     manylinux_image: manylinux2014
-        # #   # - os: ubuntu-latest
-        # #   #   python: 39
-        # #   #   bitness: 64
-        # #   #   platform_id: manylinux_x86_64
-        # #   #   manylinux_image: manylinux2014
-        # #   # # NumPy on Python 3.10 only supports 64bit and is only available with manylinux2014
-        # #   # - os: ubuntu-latest
-        # #   #   python: 310
-        # #   #   bitness: 64
-        # #   #   platform_id: manylinux_x86_64
-        # #   #   manylinux_image: manylinux2014
-
-        # #  # Window 64 bit
-        # #   # Note: windows-2019 is needed for older Python versions:
-        # #   # https://github.com/scikit-learn/scikit-learn/issues/22530
-        #   - os: windows-2019
-        #     # python: 3.8
-        #     # bitness: 64
-        #     platform_id: win_amd64
-        # #   # - os: windows-latest
-        # #   #   python: 39
-        # #   #   bitness: 64
-        # #   #   platform_id: win_amd64
-        # #   # - os: windows-latest
-        # #   #   python: 310
-        # #   #   bitness: 64
-        # #   #   platform_id: win_amd64
-
-        # #   # Window 32 bit
-        # #   # - os: windows-latest
-        # #   #   python: 38
-        # #   #   bitness: 32
-        # #   #   platform_id: win32
-        # #   # - os: windows-latest
-        # #   #   python: 39
-        # #   #   bitness: 32
-        # #   #   platform_id: win32
-
-        #   # MacOS x86_64
-        #   - os: macos-latest
-        #     # bitness: 64
-        #     # python: 3.8
-        #     platform_id: macosx_x86_64
-        # #   # - os: macos-latest
-        # #   #   bitness: 64
-        # #   #   python: 39
-        # #   #   platform_id: macosx_x86_64
-        # #   # - os: macos-latest
-        # #   #   bitness: 64
-        # #   #   python: 310
-        # #   #   platform_id: macosx_x86_64
-
-        # # #   # MacOS arm64
-        # #   - os: macos-latest
-        # #     bitness: 64
-        # #     python: 3.8
-        # #     platform_id: macosx_arm64
-        # #   # - os: macos-latest
-        # #   #   bitness: 64
-        # #   #   python: 39
-        # #   #   platform_id: macosx_arm64
-        # #   # - os: macos-latest
-        # #   #   bitness: 64
-        # #   #   python: 310
-        # #   #   platform_id: macosx_arm64
-
-    # needs: unit_tests
+    needs: unit_tests
 
     steps:
       - name: Set Github Workspace
@@ -188,26 +104,37 @@ jobs:
           path: dist/*.tar.gz
 
 
-  upload_to_pypi:
+  upload_to_test_pypi:
     name: Upload to PyPi index
     needs: [build_wheels, make_sdist]
     runs-on: ubuntu-latest
-    # if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.ref == 'refs/heads/master'
     steps:
       - name: Downloads artifact
         uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
+            - name: Downloads artifact
+      - name: Publish on TestPyPI
+        uses: pypa/gh-action-pypi-publish@v1.4.1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
+          verbose: true
 
-      # - name: Publish on TestPyPI
-      #   uses: pypa/gh-action-pypi-publish@v1.4.1
-      #   with:
-      #     user: __token__
-      #     password: ${{ secrets.TEST_PYPI_TOKEN }}
-      #     repository_url: https://test.pypi.org/legacy/
-      #     verbose: true
-
+  upload_to_pypi:
+    name: Upload to PyPi index
+    needs: [build_wheels, make_sdist]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/release'
+    steps:
+      - name: Downloads artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+          path: dist
       - name: Publish on PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
         with:
@@ -215,11 +142,3 @@ jobs:
           password: ${{ secrets.PYPI_TOKEN }}
           verbose: true
 
-      # - name: Publish on PyPi
-      #   run: |
-      #     echo "TODO Uploading to PyPi"
-
-    # - uses: pypa/gh-action-pypi-publish@v1.5.0
-    #   with:
-    #     user: __token__
-    #     password: ${{ secrets.pypi_password }}

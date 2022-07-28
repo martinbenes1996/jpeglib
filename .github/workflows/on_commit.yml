@@ -1,7 +1,7 @@
 name: Commit CI/CD # workflow name
 on: # trigger
   push:
-    branches: [master, release, dev]
+    branches: [dev, release, master]
   pull_request:
     types: [opened, reopened, edited]
 
