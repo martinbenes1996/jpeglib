@@ -9,7 +9,7 @@ on: # trigger
 jobs:
   unit_tests:
     runs-on: ubuntu-latest # runner
-    if: ${{ !contains(github.event.head_commit.message, '#notest') }}
+    if: ${{ !contains(github.event.head_commit.message, '#notest') && github.ref != 'refs/heads/master' }}
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2

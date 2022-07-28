@@ -107,7 +107,7 @@ jobs:
           path: dist/*.tar.gz
 
   upload_to_test_pypi:
-    name: Upload to PyPi index
+    name: Upload to TestPyPi
     needs: [build_wheels, make_sdist]
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/release' }}
@@ -126,10 +126,10 @@ jobs:
           verbose: true
 
   upload_to_pypi:
-    name: Upload to PyPi index
+    name: Upload to PyPi
     needs: [build_wheels, make_sdist]
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
+    if: ${{github.event_name == 'release' && github.event.action == 'created'}}
     steps:
       - name: Downloads artifact
         uses: actions/download-artifact@v3
