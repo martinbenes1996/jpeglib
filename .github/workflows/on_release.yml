@@ -111,6 +111,7 @@ jobs:
     needs: [build_wheels, make_sdist]
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/release'
+    if: ${{ !contains(github.event.head_commit.message, '#notestrelease') }}
     steps:
       - name: Downloads artifact
         uses: actions/download-artifact@v3
