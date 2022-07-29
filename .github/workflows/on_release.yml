@@ -93,7 +93,6 @@ jobs:
         uses: ./.github/common/install_test_dependencies
       - name: Install wheel
         run: pip install --find-links ./dist jpeglib --no-index
-        uses: ./.github/common/build_from_source
       - name: Run unit tests # run unittests
         uses: ./.github/common/unit_tests
 
