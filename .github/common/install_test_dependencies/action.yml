@@ -4,7 +4,7 @@ description: Workflow for installing test dependencies
 # === install test dependencies ===
 runs:
   using: composite
-  
+
   steps: # tasks
 
     - name: Install package dependencies
@@ -16,10 +16,10 @@ runs:
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
-        cat decoder.pyx | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.pyx
+        # cat decoder.pyx | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.pyx
         python setup.py install
         cd ..
-        sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62 
+        sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62
         git clone https://github.com/dwgoon/jpegio
         cd jpegio
         cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
