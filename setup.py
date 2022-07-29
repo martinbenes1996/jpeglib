@@ -10,6 +10,7 @@ import setuptools.command.build_ext
 import sys
 try:
     from wheel.bdist_wheel import bdist_wheel
+
     class bdist_wheel_abi3(bdist_wheel):
         def get_tag(self):
             python, abi, plat = super().get_tag()
@@ -18,7 +19,7 @@ try:
             return python, abi, plat
 
     custom_bdist_wheel = {'bdist_wheel': bdist_wheel_abi3}
-except:
+except ModuleNotFoundError:
     custom_bdist_wheel = {}
 
 # versions
@@ -207,7 +208,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     license='MPL',
     # test_suite = 'setup.test_suite',
-    #url=,
+    # url=,
     project_urls={
         "Homepage": "https://pypi.org/project/jpeglib/",
         "Documentation": 'https://jpeglib.readthedocs.io/en/latest/',
