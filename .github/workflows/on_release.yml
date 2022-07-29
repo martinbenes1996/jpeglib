@@ -9,42 +9,9 @@ on: # trigger
 
 jobs:
 
-  unit_tests:
-    runs-on: ubuntu-latest # runner
-    steps: # tasks
-      - name: Set Github Workspace # access Github Workspace
-        uses: actions/checkout@v2
-      - name: Set up Python 3.x # set architecture and Python3
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64" # architecture
-      - name: Install test dependencies
-        uses: ./.github/common/install_test_dependencies
-      - name: Build from source
-        uses: ./.github/common/build_from_source
-      - name: Run unit tests # run unittests
-        uses: ./.github/common/unit_tests
-
-  code_analysis:
-    runs-on: ubuntu-latest # runner
-    steps: # tasks
-      - name: Set Github Workspace # access Github Workspace
-        uses: actions/checkout@v2
-      - name: Set up Python 3.x # set architecture and Python3
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.x"
-          architecture: "x64" # architecture
-      - name: Install dependencies
-        uses: ./.github/common/install_dependencies
-      - name: Run code analysis
-        uses: ./.github/common/code_quality
-
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    needs: [unit_tests, code_analysis]
     strategy:
       fail-fast: false
       matrix:
@@ -67,10 +34,8 @@ jobs:
           # Linux
           - os: ubuntu-20.04
             arch: x86_64
-            platform: manylinux2014
           - os: ubuntu-20.04
             arch: i686
-            platform: manylinux2014
           # - os: ubuntu-20.04
           #   arch: aarch64
           # - os: ubuntu-20.04
@@ -96,7 +61,6 @@ jobs:
   make_sdist:
     name: Make source distribution
     runs-on: ubuntu-latest
-    needs: [unit_tests, code_analysis]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -108,9 +72,52 @@ jobs:
         with:
           path: dist/*.tar.gz
 
+  unit_tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest # runner
+    needs: [build_wheels, make_sdist]
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+      - name: Downloads artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+          path: dist
+      - name: Install test dependencies
+        uses: ./.github/common/install_test_dependencies
+      - name: Install wheel
+        run: pip install --find-links ./dist jpeglib --no-index
+        uses: ./.github/common/build_from_source
+      - name: Run unit tests # run unittests
+        uses: ./.github/common/unit_tests
+
+
+  code_analysis:
+    name: Run code analysis
+    runs-on: ubuntu-latest # runner
+    needs: [build_wheels, make_sdist]
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.x # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+          architecture: "x64" # architecture
+      - name: Install dependencies
+        uses: ./.github/common/install_dependencies
+      - name: Run code analysis
+        uses: ./.github/common/code_quality
+
   upload_to_test_pypi:
     name: Upload to TestPyPi
-    needs: [build_wheels, make_sdist]
+    needs: [build_wheels, make_sdist, unit_tests, code_analysis]
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/release' }}
     steps:
@@ -129,7 +136,7 @@ jobs:
 
   upload_to_pypi:
     name: Upload to PyPi
-    needs: [build_wheels, make_sdist]
+    needs: [build_wheels, make_sdist, unit_tests, code_analysis]
     runs-on: ubuntu-latest
     if: ${{github.event_name == 'release' && github.event.action == 'created'}}
     steps:
