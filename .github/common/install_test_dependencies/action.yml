@@ -16,6 +16,7 @@ runs:
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
+        git checkout 8f05ed58ff95a2475defa117f9eeccdcee795dc2
         cat decoder.pyx | sed -E 's/([^_]JCS_)BG_RGB/\1EXT_RGB/g' | sed -E 's/([^_]JCS_)BG_YCC/\1YCCK/g' > decoder.pyx
         python setup.py install
         cd ..
