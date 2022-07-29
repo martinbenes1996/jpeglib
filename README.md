@@ -1,9 +1,15 @@
 [![PyPI version](https://badge.fury.io/py/jpeglib.svg)](https://pypi.org/project/jpeglib/)
+[![Commit CI/CD](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_commit.yml/badge.svg?branch=master)](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_commit.yml)
+[![Release CI/CD](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_release.yml/badge.svg)](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_release.yml)
 [![Documentation Status](https://readthedocs.org/projects/jpeglib/badge/?version=latest)](https://jpeglib.readthedocs.io/)
-[![GitHub](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg)](https://GitHub.com/martinbenes1996/jpeglib)
 [![PyPI downloads](https://img.shields.io/pypi/dm/jpeglib)](https://pypi.org/project/jpeglib/)
+[![Stars](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg)](https://GitHub.com/martinbenes1996/jpeglib)
+[![Contributors](https://img.shields.io/github/contributors/martinbenes1996/jpeglib)](https://GitHub.com/martinbenes1996/jpeglib)
+[![Wheel](https://img.shields.io/pypi/wheel/jpeglib)](https://pypi.org/project/jpeglib/)
+[![Status](https://img.shields.io/pypi/status/jpeglib)](https://pypi.com/project/jpeglib/)
 [![PyPi license](https://badgen.net/pypi/license/pip/)](https://pypi.com/project/jpeglib/)
-[![Commit CI/CD](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_commit.yml/badge.svg?branch=master&event=push)](https://github.com/martinbenes1996/jpeglib/actions/workflows/on_commit.yml)
+[![Last commit](https://img.shields.io/github/last-commit/martinbenes1996/jpeglib)](https://GitHub.com/martinbenes1996/jpeglib)
+
 
 # jpeglib
 
