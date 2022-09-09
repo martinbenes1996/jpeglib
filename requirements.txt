@@ -1,2 +1,2 @@
-wheel
-numpy
+wheel>0.30.0
+numpy>=1.21.0
