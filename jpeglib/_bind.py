@@ -200,6 +200,7 @@ class CJpegLib:
         "WRITE_ADOBE_MARKER": (0b1 << 22),
         "CCIR601_SAMPLING": (0b1 << 24),
         "FORCE_BASELINE": (0b1 << 26),
+        "COMPRESS_UNQUANTIZED": (0b1 << 28),
     }
 
     @classmethod

@@ -13,9 +13,11 @@ extern "C"
 
 // this is envelope for jpeglib.h
 // trying to avoid naming the same as system library
+#define PROPAGATE_PUBLIC_API
 #include "vjpeglib.h"
 
 #include "cjpeglib.h"
+#include "my_jcdctmgr.h"
 
 // #ifdef USE_TURBO
 // #include "jmorecfg.h"
@@ -38,6 +40,7 @@ char overwrite_flag(BITMASK flags, BITMASK mask) { return (flags & (mask << 1)) 
 #define WRITE_ADOBE_MARKER ((BITMASK)0b1 << 22)
 #define CCIR601_SAMPLING ((BITMASK)0b1 << 24)
 #define FORCE_BASELINE ((BITMASK)0b1 << 26)
+#define COMPRESS_UNQUANTIZED ((BITMASK)0b1 << 28)
 
 // === MARKERS ===
 // globals
@@ -721,6 +724,12 @@ int write_jpeg_spatial(
   // fprintf(stderr, "Al: %d\n", cinfo.Al);
   // fprintf(stderr, " %d\n", cinfo.Al);
   jpeg_start_compress(&cinfo, TRUE);
+
+  // store unquantized DCT
+  if (overwrite_flag(flags, COMPRESS_UNQUANTIZED)) {
+    fprintf(stderr, "setting unquantized coefficients\n");
+    set_dct_callback(&cinfo);
+  }
 
   // write markers
   int offset = 0;

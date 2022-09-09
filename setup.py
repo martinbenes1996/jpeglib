@@ -27,22 +27,22 @@ __version__ = os.environ.get('VERSION_NEW', '0.11.0')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
-    '8': (None, 80),
-    '8a': (None, 80),
-    '8b': (None, 80),
-    '8c': (None, 80),
-    '8d': (None, 80),
-    '9': (None, 90),
-    '9a': (None, 90),
-    '9b': (None, 90),
-    '9c': (None, 90),
-    '9d': (None, 90),
-    '9e': (None, 90),
-    'turbo210': ('2.1.0', 210),
-    'mozjpeg101': ('1.0.1', 101),
-    'mozjpeg201': ('2.0.1', 201),
-    'mozjpeg300': ('3.0.0', 300),
-    'mozjpeg403': ('4.0.3', 403)
+    # '8': (None, 80),
+    # '8a': (None, 80),
+    # '8b': (None, 80),
+    # '8c': (None, 80),
+    # '8d': (None, 80),
+    # '9': (None, 90),
+    # '9a': (None, 90),
+    # '9b': (None, 90),
+    # '9c': (None, 90),
+    # '9d': (None, 90),
+    # '9e': (None, 90),
+    # 'turbo210': ('2.1.0', 210),
+    # 'mozjpeg101': ('1.0.1', 101),
+    # 'mozjpeg201': ('2.0.1', 201),
+    # 'mozjpeg300': ('3.0.0', 300),
+    # 'mozjpeg403': ('4.0.3', 403)
 
 }
 
@@ -136,7 +136,7 @@ for v in libjpeg_versions:
     #
     cfiles[v] = [f for f in files if f[-2:] == '.c']
     hfiles[v] = [f for f in files if f[-2:] == '.h']
-    sources = ['jpeglib/cjpeglib/cjpeglib.c', *cfiles[v]]
+    sources = ['jpeglib/cjpeglib/my_jcdctmgr.c', 'jpeglib/cjpeglib/cjpeglib.c', *cfiles[v]]
 
     macros = [
         ("BITS_IN_JSAMPLE", 8),

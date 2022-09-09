@@ -455,6 +455,7 @@ start_pass_fdctmgr (j_compress_ptr cinfo)
   }
 }
 
+#ifndef PROPAGATE_PUBLIC_API
 
 /*
  * Initialize FDCT manager.
@@ -480,3 +481,5 @@ jinit_forward_dct (j_compress_ptr cinfo)
 #endif
   }
 }
+
+#endif

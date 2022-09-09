@@ -337,6 +337,8 @@ forward_DCT_float (j_compress_ptr cinfo, jpeg_component_info * compptr,
 #endif /* DCT_FLOAT_SUPPORTED */
 
 
+#ifndef PROPAGATE_PUBLIC_API
+
 /*
  * Initialize FDCT manager.
  */
@@ -385,3 +387,5 @@ jinit_forward_dct (j_compress_ptr cinfo)
 #endif
   }
 }
+
+#endif

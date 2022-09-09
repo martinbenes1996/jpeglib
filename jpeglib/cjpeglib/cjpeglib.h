@@ -1,3 +1,5 @@
+#ifndef CJPEGLIB_H
+#define CJPEGLIB_H
 
 // ---------- Meta -------------
 typedef unsigned long BITMASK;
@@ -72,3 +74,5 @@ int write_jpeg_spatial(
 
 // int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }
 int print_jpeg_params(const char *srcfile);
+
+#endif // CJPEGLIB_H
