@@ -1,8 +1,9 @@
 
+from numba import jit
 import numpy as np
 from typing import Union
 
-
+@jit(nopython=True, fastmath=True, nogil=True, cache=True, parallel=True)
 def Lambda(x: Union[float, int, list, np.ndarray]) -> np.array:
     """DCT scaling function.
 
@@ -21,7 +22,11 @@ def Lambda(x: Union[float, int, list, np.ndarray]) -> np.array:
 
     >>> Lambda([-1,0,1]) # -> [1. 0.70710678 1.]
     """
-    y = np.array(x, dtype=np.float64)
-    y[y != 0] = 1.
-    y[y == 0] = 1/np.sqrt(2)
-    return y
+    if x != 0:
+        return 1
+    else:
+        return 1/np.sqrt(2)
+    # y = np.array(x, dtype=np.float64)
+    # y[y != 0] = 1.
+    # y[y == 0] = 1/np.sqrt(2)
+    # return y
