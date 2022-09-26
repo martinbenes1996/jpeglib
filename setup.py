@@ -37,15 +37,15 @@ libjpeg_versions = {
     # '9b': (None, 90),
     # '9c': (None, 90),
     # '9d': (None, 90),
-    '9e': (None, 90),
+    # '9e': (None, 90),
     # 'turbo100': ('1.0.0', 100),
     # 'turbo110': ('1.1.0', 110),
-    # 'turbo120': ('1.2.0', 120),
-    # 'turbo130': ('1.3.0', 130),
-    # 'turbo140': ('1.4.0', 140),
-    # 'turbo150': ('1.5.0', 150),
+    'turbo120': ('1.2.0', 120),
+    'turbo130': ('1.3.0', 130),
+    'turbo140': ('1.4.0', 140),
+    'turbo150': ('1.5.0', 150),
     'turbo200': ('2.0.0', 200),
-    # 'turbo210': ('2.1.0', 210),
+    'turbo210': ('2.1.0', 210),
     # 'mozjpeg101': ('1.0.1', 101),
     # 'mozjpeg201': ('2.0.1', 201),
     # 'mozjpeg300': ('3.0.0', 300),
@@ -70,7 +70,6 @@ cjpeglib = {}
 for v in libjpeg_versions:
     is_moz = v[:3] == "moz"
     is_turbo = v[:5] == "turbo" or is_moz
-    is_turbo1 = is_turbo and v[5:7] in {"10","11","12","13"}
 
 
     clib = f'jpeglib/cjpeglib/{v}'
@@ -78,6 +77,7 @@ for v in libjpeg_versions:
     # create missing
     package_name = 'libjpeg'
     (Path(clib) / 'jconfig.h').touch()
+    (Path(clib) / 'config.h').touch()
     if not (Path(clib) / 'vjpeglib.h').exists():
     # (Path(clib) / 'vjpeglib.h').touch()
         with open(Path(clib) / 'vjpeglib.h','w') as f:
@@ -126,7 +126,6 @@ for v in libjpeg_versions:
         #
         'cjpegalt',
         'djpegalt',
-        # 'jerror',
         # turbo
         'jccolext',
         'jdcolext',
@@ -142,9 +141,8 @@ for v in libjpeg_versions:
         'turbojpegl',
         'jpegut',
         'jpgtest',
+        # 'jdtrans',
 
-        # 'jchuff',
-        # 'jcphuff'
         # mozjpeg
         'bmp',
         'jpegyuv',
@@ -162,6 +160,8 @@ for v in libjpeg_versions:
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
         ("Py_LIMITED_API", "0x03080000"),
+        ("C_ARITH_CODING_SUPPORTED", 1),
+        ("D_ARITH_CODING_SUPPORTED", 1),
     ]
 
     if is_turbo:
@@ -171,17 +171,12 @@ for v in libjpeg_versions:
             ("BUILD", "\"unknown\""),
             ("VERSION", f"\"{libjpeg_versions[v][0]}\""),
             ("SIZEOF_SIZE_T", int(ctypes.sizeof(ctypes.c_size_t))),
-            ("THREAD_LOCAL", "__thread")
+            ("THREAD_LOCAL", "__thread"),
+            ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
         ]
-        if not is_moz and not is_turbo1:
-            macros += [
-                ("JCS_EXTENSIONS", 1),  # erroring
-                ("JPEG_LIB_VERSION", 80),  # 70), # turbo 2.1.0
-            ]
     if is_moz:
         macros += [
             ("JPEG_LIB_VERSION", 69),
-            ('C_ARITH_CODING_SUPPORTED', 1),
             ('MEM_SRCDST_SUPPORTED', 1)
         ]
 
@@ -210,7 +205,14 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
         # self.compiler.set_executable("compiler_so", "g++")
         # self.compiler.set_executable("compiler_cxx", "g++")
         # self.compiler.set_executable("linker_so", "g++")
-        # print("==========", self.compiler.library_dirs)
+        print("==========")
+        import sysconfig
+        print(f"{sysconfig.get_config_var('CFLAGS')=}")
+        # print(f"{sysconfig.get_config_vars('CFLAGS', 'CCSHARED', 'LDSHARED')}")
+        print(f"{self.compiler.library_dirs=}")
+        print(f"{self.compiler.add_include_dir=}")
+        print(f"{self.compiler.include_dirs=}")
+        # print(f"{dir(self.compiler)=}")
         setuptools.command.build_ext.build_ext.build_extensions(self)
         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
