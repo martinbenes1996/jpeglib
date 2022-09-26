@@ -26,7 +26,7 @@ except ModuleNotFoundError:
 __version__ = os.environ.get('VERSION_NEW', '0.11.1')
 libjpeg_versions = {
     '6b': (None, 60),
-    # '7': (None, 70),
+    '7': (None, 70),
     # '8': (None, 80),
     # '8a': (None, 80),
     # '8b': (None, 80),
@@ -37,9 +37,7 @@ libjpeg_versions = {
     # '9b': (None, 90),
     # '9c': (None, 90),
     # '9d': (None, 90),
-    # '9e': (None, 90),
-    # 'turbo100': ('1.0.0', 100),
-    # 'turbo110': ('1.1.0', 110),
+    '9e': (None, 90),
     'turbo120': ('1.2.0', 120),
     'turbo130': ('1.3.0', 130),
     'turbo140': ('1.4.0', 140),
