@@ -28,5 +28,5 @@ runs:
         python3 setup.py install; true
         python3 setup.py install
         cd ..
-        pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox
+        pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox@829dbb9c50d0c885d228fc087de1c104160eee33
 
