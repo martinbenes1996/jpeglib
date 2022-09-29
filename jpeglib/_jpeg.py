@@ -38,15 +38,11 @@ class JPEG:
     def height_in_blocks(self, component: int) -> int:
         """Getter of height in blocks.
 
-        :param component:
-        chroma component index (0 Y, 1 Cb, 2 Cr)
+        :param component: chroma component index (0 Y, 1 Cb, 2 Cr)
         :type component: int
-        :return:
-        chroma component height
+        :return: chroma component height
         :rtype: int
-        :raises [IndexError]:
-        when component index is out of range,
-        dependent on number of components
+        :raises [IndexError]: when component index is out of range, dependent on number of components
 
         :Example:
 
@@ -76,15 +72,11 @@ class JPEG:
     def width_in_blocks(self, component: int) -> int:
         """Getter of width in blocks.
 
-        :param component:
-        chroma component index (0 Y, 1 Cb, 2 Cr)
+        :param component: chroma component index (0 Y, 1 Cb, 2 Cr)
         :type component: int
-        :return:
-        chroma component width
+        :return: chroma component width
         :rtype: int
-        :raises [IndexError]:
-        when component index is out of range,
-        dependent on number of components
+        :raises [IndexError]: when component index is out of range, dependent on number of components
 
         :Example:
 
