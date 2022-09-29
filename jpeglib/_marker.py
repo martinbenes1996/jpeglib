@@ -73,6 +73,7 @@ class Marker(CStruct):
 
     @property
     def content(self) -> bytes:
+        """Marker content."""
         return self._content
 
     @content.setter

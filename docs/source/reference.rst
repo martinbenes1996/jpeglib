@@ -13,7 +13,10 @@ Inside DCT domain
 .. autofunction:: jpeglib.read_dct
 
 .. autoclass:: jpeglib.DCTJPEG
-   :members: Y, Cb, Cr, qt, write_dct
+   :members: path, Y, Cb, Cr, qt, write_dct, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance, quant_tbl_no, get_component_qt
+
+
+.. autofunction:: jpeglib.from_dct
 
 Inside spatial domain
 """""""""""""""""""""
@@ -23,7 +26,7 @@ Inside spatial domain
 .. autofunction:: jpeglib.from_spatial
 
 .. autoclass:: jpeglib.SpatialJPEG
-   :members: spatial, write_spatial, color_space, dither_mode, dct_method, flags
+   :members: path, spatial, write_spatial, color_space, dither_mode, dct_method, flags, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance
 
 Using jpegio interface
 """"""""""""""""""""""
@@ -40,13 +43,13 @@ libjpeg-like structures
    :members: from_index, name, index, name_to_index, index_to_name, J_DITHER_MODE, iJ_DITHER_MODE
 
 .. autoclass:: jpeglib.Colorspace
-   :members: from_index, name, index, name_to_index, index_to_name, J_COLOR_SPACE, iJ_COLOR_SPACE
+   :members: from_index, name, index, name_to_index, index_to_name, J_COLOR_SPACE, iJ_COLOR_SPACE, channels
 
 .. autoclass:: jpeglib.DCTMethod
    :members: from_index, name, index, name_to_index, index_to_name, J_DCT_METHOD, iJ_DCT_METHOD
 
 .. autoclass:: jpeglib.Marker
-   :members: from_index, name, index, name_to_index, index_to_name, J_MARKER_CODE, iJ_MARKER_CODE
+   :members: from_index, name, index, name_to_index, index_to_name, J_MARKER_CODE, iJ_MARKER_CODE, content, length
 
 
 
@@ -58,20 +61,20 @@ Manage libjpeg version
    :special-members: __enter__, __exit__
 
 
+Miscellaneous operations with images
+------------------------------------
+
 DCT implementation
-------------------
+""""""""""""""""""
 
-DCT implementation in 2 dimensions
-""""""""""""""""""""""""""""""""""
+.. autofunction:: jpeglib.dct.forward_dct
 
-.. autofunction:: jpeglib.dct.DCT2D
-
-.. autofunction:: jpeglib.dct.iDCT2D
+.. autofunction:: jpeglib.dct.backward_dct
 
 
-DCT implementation in 1 dimensions
-""""""""""""""""""""""""""""""""""
+JPEG compression primitives
+"""""""""""""""""""""""""""
 
-.. autofunction:: jpeglib.dct.DCT1D
+.. autofunction:: jpeglib.dct.blockify_8x8
 
-.. autofunction:: jpeglib.dct.iDCT1D
+.. autofunction:: jpeglib.dct.grayscale
