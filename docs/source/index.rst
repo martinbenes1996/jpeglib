@@ -16,7 +16,8 @@ Getting the DCT coefficients with jpeglib is as simple as
 >>> im.Y; im.Cb; im.Cr; im.qt
 
 With **jpeglib** you can choose a particular version of *libjpeg* to
-work with. Currently supported are all *libjpeg* versions from *6b* to *9e*, *libjpeg-turbo 2.1.0* and *mozjpeg 4.0.3*.
+work with. Currently supported are all *libjpeg* versions from *6b* to *9e*,
+and newest major and minor releases of *libjpeg-turbo* and *mozjpeg*.
 
 >>> jpeglib.version.set('6b')
 >>> im = jpeglib.read_spatial("input.jpeg")
@@ -31,7 +32,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   
+
    usage
    reference
    glossary

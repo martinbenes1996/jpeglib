@@ -38,6 +38,16 @@ Currently supported are
 * libjpeg-turbo versions ``"turbo120"``, ``"turbo130"``, ``"turbo140"``, ``"turbo150"``, ``"turbo200"``, ``"turbo210"``, and
 * mozjpeg versions ``"mozjpeg101"``, ``"mozjpeg201"``, ``"mozjpeg300"``, and ``"mozjpeg403"``.
 
+.. note::
+
+   Feel free to switch to supported libjpeg-turbo versions, but do not rely that all SIMD extensions,
+   supported by libjpeg-turbo, are used.
+   An effort has been made to integrate libjpeg-turbo, but SIMD configuration is rather complex,
+   so I cannot guarrantee full support at this moment.
+
+   To see that SIMD is used at all, I measured the time of execution and compared it to libjpeg.
+   Via jpeglib on M1 Chip (Neon), libjpeg-turbo is significantly faster both in compression and decompression.
+
 Spatial domain
 --------------
 
