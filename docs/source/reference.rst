@@ -67,14 +67,14 @@ Miscellaneous operations with images
 DCT implementation
 """"""""""""""""""
 
-.. autofunction:: jpeglib.dct.forward_dct
+.. autofunction:: jpeglib.ops.forward_dct
 
-.. autofunction:: jpeglib.dct.backward_dct
+.. autofunction:: jpeglib.ops.backward_dct
 
 
 JPEG compression primitives
 """""""""""""""""""""""""""
 
-.. autofunction:: jpeglib.dct.blockify_8x8
+.. autofunction:: jpeglib.ops.blockify_8x8
 
-.. autofunction:: jpeglib.dct.grayscale
+.. autofunction:: jpeglib.ops.grayscale
