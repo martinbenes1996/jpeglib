@@ -19,7 +19,7 @@ Import the package with
 >>> import jpeglib
 
 .. warning::
-   
+
    Compression comes with loss and thus different jpeg implementations might
    produce slightly different results. The library *jpeglib* brings
    solution as being able to select the library in runtime.
@@ -33,7 +33,10 @@ You can specify a particular :term:`libjpeg` version to use with
 
 >>> jpeglib.version.set('6b')
 
-Currently supported versions are ``"6b"``, ``"7"``, ``"8"``, ``"8a"``, ``"8b"``, ``"8c"``, ``"8d"``, ``"9"``, ``"9a"``, ``"9b"``, ``"9c"``, ``"9d"`` , ``"9e"``, ``"turbo210"`` and ``"mozjpeg403"``. 
+Currently supported are
+* libjpeg versions ``"6b"``, ``"7"``, ``"8"``, ``"8a"``, ``"8b"``, ``"8c"``, ``"8d"``, ``"9"``, ``"9a"``, ``"9b"``, ``"9c"``, ``"9d"`` , ``"9e"``,
+* libjpeg-turbo versions ``"turbo120"``, ``"turbo130"``, ``"turbo140"``, ``"turbo150"``, ``"turbo200"``, ``"turbo210"``, and
+* mozjpeg versions ``"mozjpeg101"``, ``"mozjpeg201"``, ``"mozjpeg300"``, and ``"mozjpeg403"``.
 
 Spatial domain
 --------------
@@ -108,7 +111,7 @@ Write the quantized coefficients to an output file ``output.jpeg`` with
 
 >>> im.write_dct("output.jpeg")
 
-The function reference can be found in the `jpeglib.dct_jpeg.DCTJPEG.write_dct <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.dct_jpeg.DCTJPEG.write_dct>`_ 
+The function reference can be found in the `jpeglib.dct_jpeg.DCTJPEG.write_dct <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.dct_jpeg.DCTJPEG.write_dct>`_
 documentation.
 
 jpegio format

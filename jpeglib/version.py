@@ -20,21 +20,21 @@ class version:
         >>> import jpeglib
         >>> jpeglib.version.set('8d')
         """
-        if version in {'6', '6b'}:
-            CJpegLib.set_version(version='6b')
-        elif version in {
-            '7', #'8', '8a', '8b', '8c', '8d', '9', '9a', '9b', '9c', '9d',
-            '9e'
+        # libjpeg
+        if version in {
+            '6b', '7', '8', '8a', '8b', '8c', '8d', '9', '9a', '9b', '9c', '9d', '9e'
         }:
             CJpegLib.set_version(version=version)
+        # libjpeg-turbo
         elif version in {
-            'turbo100', 'turbo110', 'turbo120', 'turbo130', 'turbo140', 'turbo150', 'turbo200', 'turbo210'
+            'turbo120', 'turbo130', 'turbo140', 'turbo150', 'turbo200', 'turbo210'
         }:
             CJpegLib.set_version(version=version)
-        # elif version in {
-        #     'mozjpeg101', 'mozjpeg201', 'mozjpeg300', 'mozjpeg403'
-        # }:
-        #     CJpegLib.set_version(version=version)
+        # mozjpeg
+        elif version in {
+            'mozjpeg101', 'mozjpeg201', 'mozjpeg300', 'mozjpeg403'
+        }:
+            CJpegLib.set_version(version=version)
         else:
             raise NotImplementedError(
                 f'Unsupported libjpeg version: {version}')

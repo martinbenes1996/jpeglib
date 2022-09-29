@@ -8,6 +8,8 @@ import re
 import setuptools
 import setuptools.command.build_ext
 import sys
+
+# wheel builder
 try:
     from wheel.bdist_wheel import bdist_wheel
 
@@ -23,20 +25,20 @@ except ModuleNotFoundError:
     custom_bdist_wheel = {}
 
 # versions
-__version__ = os.environ.get('VERSION_NEW', '0.11.1')
+__version__ = os.environ.get('VERSION_NEW', '0.11.2')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
-    # '8': (None, 80),
-    # '8a': (None, 80),
-    # '8b': (None, 80),
-    # '8c': (None, 80),
-    # '8d': (None, 80),
-    # '9': (None, 90),
-    # '9a': (None, 90),
-    # '9b': (None, 90),
-    # '9c': (None, 90),
-    # '9d': (None, 90),
+    '8': (None, 80),
+    '8a': (None, 80),
+    '8b': (None, 80),
+    '8c': (None, 80),
+    '8d': (None, 80),
+    '9': (None, 90),
+    '9a': (None, 90),
+    '9b': (None, 90),
+    '9c': (None, 90),
+    '9d': (None, 90),
     '9e': (None, 90),
     'turbo120': ('1.2.0', 120),
     'turbo130': ('1.3.0', 130),
@@ -44,11 +46,10 @@ libjpeg_versions = {
     'turbo150': ('1.5.0', 150),
     'turbo200': ('2.0.0', 200),
     'turbo210': ('2.1.0', 210),
-    # 'mozjpeg101': ('1.0.1', 101),
-    # 'mozjpeg201': ('2.0.1', 201),
-    # 'mozjpeg300': ('3.0.0', 300),
-    # 'mozjpeg403': ('4.0.3', 403)
-
+    'mozjpeg101': ('1.0.1', 101),
+    'mozjpeg201': ('2.0.1', 201),
+    'mozjpeg300': ('3.0.0', 300),
+    'mozjpeg403': ('4.0.3', 403),
 }
 
 # requirements
@@ -58,18 +59,20 @@ try:
 except FileNotFoundError:
     reqs = ['numpy']
 
+# description
 with codecs.open("README.md", "r", encoding="UTF-8") as fh:
     long_description = fh.read()
 
 # create version dependent extensions
-cfiles = {}
-hfiles = {}
+cfiles, hfiles = {}, {}
 cjpeglib = {}
 for v in libjpeg_versions:
+
+    # library-dependent
     is_moz = v[:3] == "moz"
-    is_turbo = v[:5] == "turbo" or is_moz
+    is_turbo_moz = v[:5] == "turbo" or is_moz
 
-
+    # name of C library
     clib = f'jpeglib/cjpeglib/{v}'
 
     # create missing
@@ -77,92 +80,64 @@ for v in libjpeg_versions:
     (Path(clib) / 'jconfig.h').touch()
     (Path(clib) / 'config.h').touch()
     if not (Path(clib) / 'vjpeglib.h').exists():
-    # (Path(clib) / 'vjpeglib.h').touch()
         with open(Path(clib) / 'vjpeglib.h','w') as f:
             f.write('\n#include "jpeglib.h"\n')
-    if is_turbo:
+    if is_turbo_moz:
         package_name += '-turbo'
         (Path(clib) / 'jconfigint.h').touch()
-    if is_moz:
-        (Path(clib) / 'config.h').touch()
+        if is_moz:
+            package_name = 'mozjpeg'
+            (Path(clib) / 'config.h').touch()
 
+    # get all files
     files = [
         f'{clib}/{f}'
         for f in os.listdir(clib)
         if re.fullmatch(r'.*\.(c|h)', f)
     ]
+    # exclude files
     for excluded_module in [
         # platform dependents
-        'jmemdos',
-        'jmemmac',
-        'jmemansi',
-        'ansi2knr',
-        'ckconfig',
-        'jmemname',
+        'jmemdos', 'jmemmac', 'jmemansi',
+        'ansi2knr', 'ckconfig', 'jmemname',
         # executables
-        'djpeg',
-        'cjpeg',
-        'rdjpgcom',
-        'wrjpgcom',
-        'cdjpeg',
-        'jpegtran',
+        'djpeg', 'cjpeg', 'rdjpgcom',
+        'wrjpgcom', 'cdjpeg', 'jpegtran',
         # others
-        'rdbmp',
-        'wrbmp',
-        'rdcolmap',
-        'rdppm',
-        'wrppm',
-        'rdtarga',
-        'wrtarga',
-        'rdrle',
-        'wrrle',
-        'rdgif',
-        'wrgif',
-        'rdswitch',
+        'rdbmp', 'wrbmp', 'rdcolmap',
+        'rdppm', 'wrppm', 'rdtarga',
+        'wrtarga', 'rdrle', 'wrrle',
+        'rdgif', 'wrgif', 'rdswitch',
         # example
         'example',
         #
-        'cjpegalt',
-        'djpegalt',
+        'cjpegalt', 'djpegalt',
         # turbo
-        'jccolext',
-        'jdcolext',
-        'jdcol565',
-        'jstdhuff',
-        'jdmrg565',
-        'jdmrgext',
-        "jcstest",
-        "tjunittest",
-        "tjbench",
-        'turbojpeg-jni',
-        'turbojpeg',
-        'turbojpegl',
-        'jpegut',
-        'jpgtest',
-        # 'jdtrans',
-
+        'jccolext', 'jdcolext', 'jdcol565',
+        'jstdhuff', 'jdmrg565', 'jdmrgext',
+        'jcstest', 'tjunittest', 'tjbench',
+        'turbojpeg-jni', 'turbojpeg', 'turbojpegl',
+        'jpegut', 'jpgtest',
         # mozjpeg
-        'bmp',
-        'jpegyuv',
+        'bmp', 'jpegyuv',
     ]:
         lim = -2 - len(excluded_module)
         files = [f for f in files if f[lim:-2] != excluded_module]
-    #
+    # split to sources and headers
     cfiles[v] = [f for f in files if f[-2:] == '.c']
     hfiles[v] = [f for f in files if f[-2:] == '.h']
     sources = ['jpeglib/cjpeglib/cjpeglib.c', *cfiles[v]]
 
+    # define macros
     macros = [
         ("BITS_IN_JSAMPLE", 8),
         ("HAVE_STDLIB_H", 1),
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
         ("Py_LIMITED_API", "0x03080000"),
-        ("C_ARITH_CODING_SUPPORTED", 1),
-        ("D_ARITH_CODING_SUPPORTED", 1),
     ]
-
-    if is_turbo:
+    # turbo/moz-only macros
+    if is_turbo_moz:
         macros += [
             ("INLINE", "__inline__" if not sys.platform.startswith("win") else "__inline"),
             ("PACKAGE_NAME", f"\"{package_name}\""),
@@ -171,17 +146,21 @@ for v in libjpeg_versions:
             ("SIZEOF_SIZE_T", int(ctypes.sizeof(ctypes.c_size_t))),
             ("THREAD_LOCAL", "__thread"),
             ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
+            ("C_ARITH_CODING_SUPPORTED", 1),
+            ("D_ARITH_CODING_SUPPORTED", 1),
         ]
-    if is_moz:
-        macros += [
-            ("JPEG_LIB_VERSION", 69),
-            ('MEM_SRCDST_SUPPORTED', 1)
-        ]
+        # moz-only macros
+        if is_moz:
+            macros += [
+                ("JPEG_LIB_VERSION", 69),
+                ('MEM_SRCDST_SUPPORTED', 1)
+            ]
 
+    # define the extension
     cjpeglib[v] = setuptools.Extension(
         name=f"jpeglib/cjpeglib/cjpeglib_{v}",
-        library_dirs=['./jpeglib/cjpeglib', f'./{clib}'],  # [f'./{clib}'],
-        include_dirs=['./jpeglib/cjpeglib', f'./{clib}'],  # [f'./{clib}'],
+        library_dirs=['./jpeglib/cjpeglib', f'./{clib}'],
+        include_dirs=['./jpeglib/cjpeglib', f'./{clib}'],
         sources=sources,
         headers=hfiles[v],
         define_macros=macros,
@@ -190,7 +169,7 @@ for v in libjpeg_versions:
         py_limited_api=True,
     )
 
-
+# extension builder
 class custom_build_ext(setuptools.command.build_ext.build_ext):
     def get_export_symbols(self, ext):
         parts = ext.name.split(".")
@@ -200,21 +179,10 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
             initfunc_name = "PyInit_" + parts[-1]
 
     def build_extensions(self):
-        # self.compiler.set_executable("compiler_so", "g++")
-        # self.compiler.set_executable("compiler_cxx", "g++")
-        # self.compiler.set_executable("linker_so", "g++")
-        print("==========")
-        import sysconfig
-        print(f"{sysconfig.get_config_var('CFLAGS')=}")
-        # print(f"{sysconfig.get_config_vars('CFLAGS', 'CCSHARED', 'LDSHARED')}")
-        print(f"{self.compiler.library_dirs=}")
-        print(f"{self.compiler.add_include_dir=}")
-        print(f"{self.compiler.include_dirs=}")
-        # print(f"{dir(self.compiler)=}")
         setuptools.command.build_ext.build_ext.build_extensions(self)
         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
-
+# define package
 setuptools.setup(
     name='jpeglib',
     version=__version__,
@@ -226,15 +194,11 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
     license='MPL',
-    # test_suite = 'setup.test_suite',
-    # url=,
     project_urls={
         "Homepage": "https://pypi.org/project/jpeglib/",
         "Documentation": 'https://jpeglib.readthedocs.io/en/latest/',
         "Source": "https://github.com/martinbenes1996/jpeglib/",
     },
-    # download_url =
-    # 'https://github.com/martinbenes1996/jpeglib/archive/0.1.0.tar.gz',
     keywords=['jpeglib', 'jpeg', 'jpg', 'libjpeg', 'compression',
               'decompression', 'dct-coefficients', 'dct'],
     install_requires=reqs,

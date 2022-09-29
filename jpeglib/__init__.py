@@ -22,7 +22,7 @@ from ._marker import Marker
 from .version import version
 
 # DCT implementation
-from . import dct
+from . import ops
 
 # for unit tests
 from ._timer import Timer
