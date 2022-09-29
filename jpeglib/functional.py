@@ -324,8 +324,8 @@ def from_dct(
     if Cb is not None and Cr is not None:
         jpeg_color_space = Colorspace('JCS_YCbCr')
     elif Cb is None and Cr is None:
-        jpeg_color_space = Colorspace('JCS_YCbCr')  # only Y
-        # jpeg_color_space = Colorspace('JCS_GRAYSCALE')
+        # jpeg_color_space = Colorspace('JCS_YCbCr')  # only Y
+        jpeg_color_space = Colorspace('JCS_GRAYSCALE')
     else:
         raise IOError('failed to infere colorspace')
     # infere quant_tbl_no
