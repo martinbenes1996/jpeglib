@@ -51,6 +51,13 @@ int unset_marker_handlers(struct jpeg_decompress_struct * cinfo); // unset up ha
 int jpeg_getc (j_decompress_ptr cinfo); // read next byte
 int jpeg_handle_marker (j_decompress_ptr cinfo); // async marker handler
 
+// === COMMON ===
+void write_qt(
+  struct jpeg_compress_struct * cinfo,
+  unsigned short *qt,
+  short *quant_tbl_no,
+  unsigned char only_create
+); // add qts
 
 
 long jround_up (long a, long b);
@@ -306,6 +313,7 @@ int write_jpeg_dct(
   int in_components,
   unsigned short *qt,
   short quality,
+  short *quant_tbl_no,
   int num_markers,
   int *marker_types,
   int *marker_lengths,
@@ -416,16 +424,12 @@ int write_jpeg_dct(
   // }
 
   // write qt
-  if (qt != NULL)
-    for (int ch = 0; ch < 2; ch++)
-      for (int i = 0; i < 64; i++)
-        cinfo_out.quant_tbl_ptrs[ch]->quantval[i] /*(i&7)*8+(i>>3)*/ = qt[ch * 64 + i];
-      // qt[ch*64 + i] = cinfo_out.quant_tbl_ptrs[ch]->quantval[(i&7)*8+(i>>3)];
-    // memcpy((void *)cinfo_out.quant_tbl_ptrs[ch]->quantval, (void *)(qt + ch*64), sizeof(short)*64);
+  if(qt != NULL)
+    write_qt(&cinfo_out, qt, quant_tbl_no, 0);
   // write quality
-  else if (quality > 0)
+  else if (quality > 0) {
     jpeg_set_quality(&cinfo_out, quality, TRUE);
-
+  }
   // DCT coefficients
   jvirt_barray_ptr *coeffs_array;
   if (srcfile != NULL) { // copy from source
@@ -610,6 +614,7 @@ int write_jpeg_spatial(
   int *samp_factor,
   unsigned short *qt,
   short quality,
+  short *quant_tbl_no,
   short smoothing_factor,
   int num_markers,
   int *marker_types,
@@ -658,31 +663,46 @@ int write_jpeg_spatial(
     chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
   }
 
-  if (qt != NULL) {
-    unsigned qt_u[64];
-    // component 0
-    for (int i = 0; i < 64; i++)
-      qt_u[i] = qt[i]; // (i&7)*8+(i>>3)
-    jpeg_add_quant_table(&cinfo, 0, qt_u, 100, FALSE);
-    cinfo.comp_info[0].component_id = 0;
-    cinfo.comp_info[0].quant_tbl_no = 0;
-    // component 1
-    for (int i = 0; i < 64; i++)
-      qt_u[i] = qt[64 + i]; // (i&7)*8+(i>>3)
-    jpeg_add_quant_table(&cinfo, 1, qt_u, 100, FALSE);
-    cinfo.comp_info[1].component_id = 1;
-    cinfo.comp_info[1].quant_tbl_no = 1;
-    // component 2
-    cinfo.comp_info[2].component_id = 2;
-    cinfo.comp_info[2].quant_tbl_no = 1;
-  } else if (quality >= 0) {
+  // write qt
+  if(qt != NULL) {
+    fprintf(stderr, "write_jpeg_spatial before write_qt\n");
+    write_qt(&cinfo, qt, quant_tbl_no, 1);
+    fprintf(stderr, "write_jpeg_spatial after write_qt\n");
+  // write quality
+  } else if (quality > 0) {
     // force baseline (8bit quantization)
     bool force_baseline = FALSE;
     if (overwrite_flag(flags, FORCE_BASELINE))
       force_baseline = flag_is_set(flags, FORCE_BASELINE);
-    // set quality
     jpeg_set_quality(&cinfo, quality, force_baseline);
   }
+
+  // if (qt != NULL) {
+  //   // add quant_tbl_no association
+  //   unsigned qt_u[64];
+  //   // component 0
+  //   for (int i = 0; i < 64; i++)
+  //     qt_u[i] = qt[i]; // (i&7)*8+(i>>3)
+  //   jpeg_add_quant_table(&cinfo, 0, qt_u, 100, FALSE);
+  //   cinfo.comp_info[0].component_id = 0;
+  //   cinfo.comp_info[0].quant_tbl_no = 0;
+  //   // component 1
+  //   for (int i = 0; i < 64; i++)
+  //     qt_u[i] = qt[64 + i]; // (i&7)*8+(i>>3)
+  //   jpeg_add_quant_table(&cinfo, 1, qt_u, 100, FALSE);
+  //   cinfo.comp_info[1].component_id = 1;
+  //   cinfo.comp_info[1].quant_tbl_no = 1;
+  //   // component 2
+  //   cinfo.comp_info[2].component_id = 2;
+  //   cinfo.comp_info[2].quant_tbl_no = 1;
+  // } else if (quality >= 0) {
+  //   // force baseline (8bit quantization)
+  //   bool force_baseline = FALSE;
+  //   if (overwrite_flag(flags, FORCE_BASELINE))
+  //     force_baseline = flag_is_set(flags, FORCE_BASELINE);
+  //   // set quality
+  //   jpeg_set_quality(&cinfo, quality, force_baseline);
+  // }
 
   if (smoothing_factor >= 0)
     cinfo.smoothing_factor = smoothing_factor;
@@ -899,6 +919,59 @@ int jpeg_handle_marker(j_decompress_ptr cinfo) {
   p[0] = 0; // set the last byte to 0
 
   return TRUE;
+}
+
+void write_qt(
+  struct jpeg_compress_struct * cinfo,
+  unsigned short *qt,
+  short *quant_tbl_no,
+  unsigned char only_create
+) {
+  if (qt != NULL) {
+    unsigned qt_u[64];
+    unsigned char qt_slot_seen = 0;
+    for(int ch = 0; ch < 4; ch++) {
+      // get qt slot for component
+      int qt_ch = ch;
+      if(quant_tbl_no != NULL) {
+        qt_ch = quant_tbl_no[ch];
+        if(qt_ch < 0)
+          continue;
+      }
+      cinfo->comp_info[ch].component_id = ch;
+      cinfo->comp_info[ch].quant_tbl_no = qt_ch;
+      if(!(qt_slot_seen & (0x1 << qt_ch))) {
+        qt_slot_seen |= 0x1 << qt_ch;
+
+        // allocate slot
+        if(only_create || (cinfo->quant_tbl_ptrs[qt_ch] == NULL)) {
+
+          for (int i = 0; i < 64; i++)
+            qt_u[i] = qt[ch * 64 + i];
+          jpeg_add_quant_table(cinfo, qt_ch, qt_u, 100, FALSE);
+
+          if(!cinfo->ac_huff_tbl_ptrs[qt_ch]) {
+            int i = qt_ch;
+            while((i >= 0) && !cinfo->ac_huff_tbl_ptrs[--i]) ;
+            cinfo->ac_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table(cinfo);
+            memcpy(cinfo->ac_huff_tbl_ptrs[qt_ch], cinfo->ac_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
+          }
+          if(!cinfo->dc_huff_tbl_ptrs[qt_ch]) {
+            int i = qt_ch;
+            while((i >= 0) && !cinfo->dc_huff_tbl_ptrs[--i]) {}
+            cinfo->dc_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table(cinfo);
+            memcpy(cinfo->dc_huff_tbl_ptrs[qt_ch], cinfo->dc_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
+          }
+
+        // just change
+        } else {
+          for (int i = 0; i < 64; i++)
+            cinfo->quant_tbl_ptrs[qt_ch]->quantval[i] = qt[qt_ch * 64 + i];
+
+        }
+      }
+    }
+  }
 }
 
 #ifdef __cplusplus

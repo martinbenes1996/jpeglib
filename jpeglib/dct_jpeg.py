@@ -143,6 +143,13 @@ class DCTJPEG(_jpeg.JPEG):
             comp = comp.reshape((*comp.shape[:-2], 64))
             return np.ctypeslib.as_ctypes(comp.astype(np.int16))
         qt = process_component(self.qt)
+        quant_tbl_no = np.array([-1]*4)
+        if self.quant_tbl_no is not None:
+            for i, q in enumerate(self.quant_tbl_no):
+                quant_tbl_no[i] = q
+            quant_tbl_no = np.ctypeslib.as_ctypes(quant_tbl_no.astype(np.int16))
+        else:
+            quant_tbl_no = None
         Y = process_component(self.Y)
         Cb = process_component(self.Cb)
         Cr = process_component(self.Cr)
@@ -164,6 +171,7 @@ class DCTJPEG(_jpeg.JPEG):
             in_components=self.num_components,
             qt=qt,
             quality=quality,
+            quant_tbl_no=quant_tbl_no,
             num_markers=self.num_markers,
             marker_types=self.c_marker_types(),
             marker_lengths=self.c_marker_lengths(),

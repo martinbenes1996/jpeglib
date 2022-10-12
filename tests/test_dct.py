@@ -1,4 +1,5 @@
 
+from ast import Mod
 import logging
 import numpy as np
 import tempfile
@@ -51,8 +52,8 @@ class TestDCT(unittest.TestCase):
         # dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder
-        except Exception as e:  # error loading
-            logging.info(
+        except ModuleNotFoundError as e:  # error loading
+            logging.error(
                 f"invalid installation of dct-coefficient-decoder: {e}"
             )
             return
@@ -89,8 +90,8 @@ class TestDCT(unittest.TestCase):
         # jpeg-toolbox
         try:
             import jpeg_toolbox
-        except Exception as e:
-            logging.info(f"invalid installation of python-jpeg-toolbox: {e}")
+        except ModuleNotFoundError as e:
+            logging.error(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
         # process
@@ -127,8 +128,8 @@ class TestDCT(unittest.TestCase):
         # jpegio
         try:
             import jpegio
-        except Exception as e:
-            logging.info(f"invalid installation of jpegio: {e}")
+        except ModuleNotFoundError as e:
+            logging.error(f"invalid installation of jpegio: {e}")
             return 1
         jpeg = jpegio.read('examples/IMG_0311.jpeg')
         # test quantization
@@ -159,23 +160,6 @@ class TestDCT(unittest.TestCase):
         # check quantization table
         self.assertEqual(im.qt[0, 0, 0], 1)
         self.assertEqual(im.quant_tables[0][0, 0], 1)
-
-    # def test_jpegio(self):
-    #     print("test_jpegio")
-    #     pass
-
-    #     YT = np.array(jpeg.coef_arrays[0])
-    #     CbCrT = np.array(jpeg.coef_arrays[1])
-    #     qtT = np.array(jpeg.quant_tables)
-    #     # process
-    #     YT = YT.reshape((-1,8,int(YT.shape[2]/8),8)).transpose((3,1,4,2))
-    #     CbCrT = CbCrT.reshape((-1,8,int(CbCrT.shape[2]/8),8)).transpose((3,1,4,2))  # noqa: E501
-
-    # # test quantization
-    # np.testing.assert_array_equal(qt, qtT)
-    # # test DCT coefficients
-    # np.testing.assert_array_equal(Y, YT)
-    # np.testing.assert_array_equal(CbCr, CbCrT)
 
     def test_dct(self):
         self.logger.info("test_dct")
@@ -228,28 +212,6 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(im.Cr, im2.Cr)
         np.testing.assert_array_equal(im.qt, im2.qt)
 
-    # def test_dct_quantized(self):
-    #     print('test_dct_quantized')
-    #     # pass quantized qt
-    #     im = jpeglib.JPEG("examples/IMG_0791.jpeg")
-    #     Y_q,CbCr_q,qt_q = im.read_dct(quantized=True)
-    #     im.write_dct(Y_q, CbCr_q, self.tmp.name, qt=qt_q, quantized=True)
-    #     # compare quantization
-    #     Y,CbCr,qt = im.read_dct(quantized=False)
-    #     # check quantized output
-    #     np.testing.assert_array_equal(Y_q / qt_q[0], Y)
-    #     np.testing.assert_array_equal(CbCr_q / qt_q[1], CbCr)
-    #     np.testing.assert_array_equal(qt_q, qt)
-    #     # compare quantization tables
-    #     im1 = jpeglib.JPEG("examples/IMG_0791.jpeg")
-    #     Y1,CbCr1,qt1 = im1.read_dct()
-    #     im2 = jpeglib.JPEG(self.tmp.name)
-    #     Y2,CbCr2,qt2 = im2.read_dct()
-    #     # test matrix
-    #     np.testing.assert_array_equal(Y1, Y2)
-    #     np.testing.assert_array_equal(CbCr1, CbCr2)
-    #     np.testing.assert_array_equal(qt1, qt2)
-
     def test_qt1(self):
         self.logger.info("test_qt1")
         im = jpeglib.read_dct("examples/qt1.jpeg")
@@ -274,10 +236,16 @@ class TestDCT(unittest.TestCase):
         # read image
         jpeg = jpeglib.read_dct("examples/IMG_0791.jpeg")
         # read by torchjpeg
-        import torchjpeg.codec
-        shape, qt, Y, CbCr = torchjpeg.codec.read_coefficients(  # noqa: E501
-            "examples/IMG_0791.jpeg"
-        )
+        try:
+            import torchjpeg.codec
+            shape, qt, Y, CbCr = torchjpeg.codec.read_coefficients(  # noqa: E501
+                "examples/IMG_0791.jpeg"
+            )
+        except ModuleNotFoundError as e:  # error loading
+            logging.error(
+                f"invalid installation of torchjpeg: {e}"
+            )
+            return
 
         # compare
         get_full_shape = lambda c: (

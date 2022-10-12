@@ -79,6 +79,7 @@ class SpatialJPEG(JPEG):
     def write_spatial(self,
                       path: str = None,
                       qt: typing.Union[int, np.ndarray] = None,
+                      quant_tbl_no: np.ndarray = None,
                       dct_method: typing.Union[str, DCTMethod] = None,
                       # dither_mode: Dithermode = None,
                       smoothing_factor: int = None,
@@ -89,6 +90,8 @@ class SpatialJPEG(JPEG):
         :type path: str, optional
         :param qt: Compression quality, can be integer 0-100 or a tensor with quantization tables. Defaultly -1 (default factor kept).
         :type qt: int | numpy.ndarray, optional
+        :param quant_tbl_no: assignment of quantization tables to components, (0 Y, 1 Cb, 1Cr) by default
+        :type quant_tbl_no: numpy.ndarray, optional
         :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`. If not given, using the libjpeg default.
         :type dct_method: str | :class:`_dctmethod.DCTMethod`, optional
         :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
@@ -140,6 +143,10 @@ class SpatialJPEG(JPEG):
             # quantization table
             except TypeError:
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
+                if self.quant_tbl_no is not None:
+                    quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
+                else:
+                    quant_tbl_no = None
         # process
         spatial = np.ctypeslib.as_ctypes(
             self.spatial.reshape(
@@ -159,6 +166,7 @@ class SpatialJPEG(JPEG):
             samp_factor=self.c_samp_factor(),
             qt=qt,
             quality=quality,
+            quant_tbl_no=quant_tbl_no,
             smoothing_factor=smoothing_factor,
             num_markers=self.num_markers,
             marker_types=self.c_marker_types(),

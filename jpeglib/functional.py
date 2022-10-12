@@ -332,12 +332,17 @@ def from_dct(
         raise IOError('failed to infere colorspace')
     # infere quant_tbl_no
     if quant_tbl_no is None and qt is not None:
-        quant_tbl_no = np.array([0, 0, 0, 0])
         if Cb is not None and Cr is not None:
             if qt.shape[0] == 2:
-                quant_tbl_no = np.array([0, 1, 1, 0])
+                quant_tbl_no = np.array([0, 1, 1])
             elif qt.shape[0] == 3:
-                quant_tbl_no = np.array([0, 1, 2, 0])
+                quant_tbl_no = np.array([0, 1, 2])
+            elif qt.shape[0] == 4:
+                quant_tbl_no = np.array([0, 1, 2, 3])
+            else:
+                raise Exception('failed to infere quant_tbl_no')
+        else:
+            quant_tbl_no = np.array([0])
     # infere samp_factor
     # TODO
     samp_factor = ((1, 1), (1, 1), (1, 1))

@@ -22,6 +22,7 @@ class TestPerformance(unittest.TestCase):
 
     def test_reading(self):
         # load and time jpeglib 50 times
+        jpeglib.version.set('turbo210')
         res_jpeglib = timeit.repeat(
             lambda: jpeglib.read_spatial(
                 "examples/IMG_0791.jpeg",
@@ -40,6 +41,7 @@ class TestPerformance(unittest.TestCase):
 
     def test_writing(self):
         x = jpeglib.read_spatial("examples/IMG_0791.jpeg").spatial
+        jpeglib.version.set('turbo210')
         # load and time jpeglib 50 times
         res_jpeglib = timeit.repeat(
             lambda: jpeglib.from_spatial(x).write_spatial(
