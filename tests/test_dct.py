@@ -261,29 +261,53 @@ class TestDCT(unittest.TestCase):
         Y = np.random.randint(-127, 127, (2, 2, 8, 8), dtype=np.int16)
         Cb = np.random.randint(-127, 127, (1, 1, 8, 8), dtype=np.int16)
         Cr = np.random.randint(-127, 127, (1, 1, 8, 8), dtype=np.int16)
-        im = jpeglib.from_dct(Y, Cb, Cr)
-        im.write_dct(self.tmp.name)
+        jpeg = jpeglib.from_dct(Y, Cb, Cr)
+        jpeg.write_dct(self.tmp.name)
         # reopen and compare
-        im2 = jpeglib.read_dct(self.tmp.name)
-        np.testing.assert_array_equal(im.Y, im2.Y)
-        np.testing.assert_array_equal(im.Cb, im2.Cb)
-        np.testing.assert_array_equal(im.Cr, im2.Cr)
+        jpeg2 = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
+        np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
+        np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
 
-    # def test_torchjpeg(self):
-    #     # read image
-    #     im = jpeglib.JPEG("examples/IMG_0791.jpeg")
-    #     Y,CbCr,qt = im.read_dct()
-    #     # read by torchjpeg
-    #     shapeT,qtT,YT,CbCrT = torchjpeg.codec.read_coefficients("examples/IMG_0791.jpeg")  # noqa: E501
+    def test_torchjpeg(self):
+        self.logger.info("test_torchjpeg")
+        # read image
+        jpeg = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        # read by torchjpeg
+        import torchjpeg.codec
+        shape, qt, Y, CbCr = torchjpeg.codec.read_coefficients(  # noqa: E501
+            "examples/IMG_0791.jpeg"
+        )
 
-    #     # compare
-    #     np.testing.assert_array_equal(im.shape, shapeT.numpy()[0,::-1])
-    #     np.testing.assert_array_equal(im.shape, shapeT.numpy()[1,::-1] * 2)
-    #     np.testing.assert_array_equal(im.shape, shapeT.numpy()[2,::-1] * 2)
-    #     np.testing.assert_array_equal(qt, qtT.numpy()[:2])
-    #     np.testing.assert_array_equal(Y, np.einsum('abcde->acbed', YT.numpy()))  # noqa: E501
-    #     np.testing.assert_array_equal(CbCr[0], np.einsum('bcde->cbed', CbCrT[0].numpy()))  # noqa: E501
-    #     np.testing.assert_array_equal(CbCr[1], np.einsum('bcde->cbed', CbCrT[1].numpy()))  # noqa: E501
+        # compare
+        get_full_shape = lambda c: (
+            np.array([np.prod(c.shape[i::2]) for i in range(2)])
+        )
+        np.testing.assert_array_equal(
+            get_full_shape(jpeg.Y),
+            shape.numpy()[0,::]
+        )
+        np.testing.assert_array_equal(
+            get_full_shape(jpeg.Cb),
+            shape.numpy()[1,::]
+        )
+        np.testing.assert_array_equal(
+            get_full_shape(jpeg.Cr),
+            shape.numpy()[2,::]
+        )
+        np.testing.assert_array_equal(jpeg.qt, qt.numpy())
+        np.testing.assert_array_equal(
+            jpeg.Y,
+            np.einsum('abcde->bced', Y.numpy())
+        )  # noqa: E501
+        np.testing.assert_array_equal(  # noqa: E501
+            jpeg.Cb,
+            np.einsum('bcde->bced', CbCr[0].numpy())
+        )
+        np.testing.assert_array_equal(  # noqa: E501
+            jpeg.Cr,
+            np.einsum('bcde->bced', CbCr[1].numpy())
+        )
 
     # def _rainer_qt(self, outchannel, qt):
     #     # test quantization tables
