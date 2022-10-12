@@ -29,14 +29,14 @@ class TestPerformance(unittest.TestCase):
             ).spatial,
             repeat=50, number=1,
         )
-        # test in reading, jpeglin is faster than 300ms
-        faster_than_300ms = ttest_1samp(res_jpeglib, .3, alternative='less')
+        # test in reading, jpeglin is faster than 400ms
+        faster_than_400ms = ttest_1samp(res_jpeglib, .4, alternative='less')
         logging.info(
             "performance of reading: %.2fs" % (
                 np.mean(res_jpeglib)
             )
         )
-        self.assertLess(faster_than_300ms.pvalue, .05)
+        self.assertLess(faster_than_400ms.pvalue, .05)
 
     def test_writing(self):
         x = jpeglib.read_spatial("examples/IMG_0791.jpeg").spatial
@@ -54,7 +54,7 @@ class TestPerformance(unittest.TestCase):
                 np.mean(res_jpeglib)
             )
         )
-        self.assertLess(faster_than_300ms.pvalue, .05)
+        self.assertLess(faster_than_400ms.pvalue, .05)
 
 
 
