@@ -28,62 +28,57 @@ class TestVersion(unittest.TestCase):
 
     def test_version_set_6b(self):
         self._test_version_set('6b')
-
     def test_version_set_7(self):
         self._test_version_set('7')
-
     def test_version_set_8(self):
         self._test_version_set('8')
-
     def test_version_set_8a(self):
         self._test_version_set('8a')
-
     def test_version_set_8b(self):
         self._test_version_set('8b')
-
     def test_version_set_8c(self):
         self._test_version_set('8c')
-
     def test_version_set_8d(self):
         self._test_version_set('8d')
-
     def test_version_set_9(self):
         self._test_version_set('9')
-
     def test_version_set_9a(self):
         self._test_version_set('9a')
-
     def test_version_set_9b(self):
         self._test_version_set('9b')
-
     def test_version_set_9c(self):
         self._test_version_set('9c')
-
     def test_version_set_9d(self):
         self._test_version_set('9d')
-
     def test_version_set_9e(self):
         self._test_version_set('9e')
 
+    def test_version_set_turbo120(self):
+        self._test_version_set('turbo120')
+    def test_version_set_turbo130(self):
+        self._test_version_set('turbo130')
+    def test_version_set_turbo140(self):
+        self._test_version_set('turbo140')
+    def test_version_set_turbo150(self):
+        self._test_version_set('turbo150')
+    def test_version_set_turbo200(self):
+        self._test_version_set('turbo200')
     def test_version_set_turbo210(self):
         self._test_version_set('turbo210')
 
     def test_version_set_mozjpeg101(self):
         self._test_version_set('mozjpeg101')
-
     def test_version_set_mozjpeg201(self):
         self._test_version_set('mozjpeg201')
-
     def test_version_set_mozjpeg300(self):
         self._test_version_set('mozjpeg300')
-
     def test_version_set_mozjpeg403(self):
         self._test_version_set('mozjpeg403')
 
     def test_default_version(self):
         # reload jpeglib
         sys.modules.pop('jpeglib._bind')
-        sys.modules.pop('jpeglib.jpeg')
+        # sys.modules.pop('jpeglib.jpeg')
         sys.modules.pop('jpeglib')
         sys.modules.pop('jpeglib.version')
         import jpeglib
@@ -91,8 +86,8 @@ class TestVersion(unittest.TestCase):
         # check that library is not loaded
         self.assertEqual(jpeglib.version.get(), '6b')
         # read
-        im = jpeglib.JPEG('examples/IMG_0791.jpeg')
-        Y, CbCr, qt = im.read_dct()
+        im = jpeglib.read_dct('examples/IMG_0791.jpeg')
+        im.load()
         # check default version
         self.assertEqual(jpeglib.version.get(), '6b')
 

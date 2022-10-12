@@ -47,8 +47,8 @@ class TestPerformance(unittest.TestCase):
             ),
             repeat=50, number=1,
         )
-        # test in writing, jpeglib is faster than 300ms
-        faster_than_300ms = ttest_1samp(res_jpeglib, .3, alternative='less')
+        # test in writing, jpeglib is faster than 400ms
+        faster_than_400ms = ttest_1samp(res_jpeglib, .4, alternative='less')
         logging.info(
             "performance of writing: %.2fs" % (
                 np.mean(res_jpeglib)
