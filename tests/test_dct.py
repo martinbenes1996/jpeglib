@@ -1,5 +1,4 @@
 
-from ast import Mod
 import logging
 import numpy as np
 import tempfile
@@ -52,7 +51,7 @@ class TestDCT(unittest.TestCase):
         # dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder
-        except ModuleNotFoundError as e:  # error loading
+        except (ModuleNotFoundError,ImportError) as e:  # error loading
             logging.error(
                 f"invalid installation of dct-coefficient-decoder: {e}"
             )
@@ -90,7 +89,7 @@ class TestDCT(unittest.TestCase):
         # jpeg-toolbox
         try:
             import jpeg_toolbox
-        except ModuleNotFoundError as e:
+        except (ModuleNotFoundError,ImportError) as e:
             logging.error(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
@@ -128,7 +127,7 @@ class TestDCT(unittest.TestCase):
         # jpegio
         try:
             import jpegio
-        except ModuleNotFoundError as e:
+        except (ModuleNotFoundError,ImportError) as e:
             logging.error(f"invalid installation of jpegio: {e}")
             return 1
         jpeg = jpegio.read('examples/IMG_0311.jpeg')
