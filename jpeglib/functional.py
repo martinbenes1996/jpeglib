@@ -53,6 +53,7 @@ def read_dct(
     >>> print(jpeg.Cb) # no reading, already stored in the object too
     """
     # load file content
+    path = str(path)
     with open(path, "rb") as f:
         content = f.read()
     # load info
@@ -127,6 +128,7 @@ def read_spatial(
     >>> print(im.spatial) # second time it is already stored in the object
     """  # noqa: E501
     # load file content
+    path = str(path)
     with open(path, "rb") as f:
         content = f.read()
     # load info

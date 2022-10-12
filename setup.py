@@ -145,16 +145,20 @@ for v in libjpeg_versions:
             ("VERSION", f"\"{libjpeg_versions[v][0]}\""),
             ("SIZEOF_SIZE_T", int(ctypes.sizeof(ctypes.c_size_t))),
             ("THREAD_LOCAL", "__thread"),
-            ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
             ("C_ARITH_CODING_SUPPORTED", 1),
             ("D_ARITH_CODING_SUPPORTED", 1),
+            ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
         ]
         # moz-only macros
         if is_moz:
             macros += [
-                ("JPEG_LIB_VERSION", 69),
-                ('MEM_SRCDST_SUPPORTED', 1)
+                # ("JPEG_LIB_VERSION", 69),
+                ('MEM_SRCDST_SUPPORTED', 1),
             ]
+        # if not is_moz or libjpeg_versions[v][1] <= 403:
+        #     macros += [
+        #         ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
+        #     ]
 
     # define the extension
     cjpeglib[v] = setuptools.Extension(

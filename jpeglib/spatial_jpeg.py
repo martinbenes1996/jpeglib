@@ -4,6 +4,8 @@ from dataclasses import dataclass
 import numpy as np
 import tempfile
 import typing
+import warnings
+
 from ._bind import CJpegLib
 from ._jpeg import JPEG
 from ._colorspace import Colorspace
@@ -28,7 +30,7 @@ class SpatialJPEG(JPEG):
             channels = self.color_space.channels
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
 
-    def read_spatial(self) -> np.ndarray:
+    def load(self) -> np.ndarray:
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
         tmp.write(self.content)
@@ -52,7 +54,7 @@ class SpatialJPEG(JPEG):
 
         # call
         CJpegLib.read_jpeg_spatial(
-            path=self.path,
+            path=str(self.path),
             srcfile=tmp.name,
             spatial=spatial,
             colormap=self.jpeg_color_space.index,
@@ -69,6 +71,10 @@ class SpatialJPEG(JPEG):
             .reshape(self.height, -1, self.color_space.channels)
         )
         return self.spatial
+
+    def read_spatial(self) -> np.ndarray:
+        warnings.warn('read_spatial() is obsolete, use load()')
+        return self.load()
 
     def write_spatial(self,
                       path: str = None,
@@ -144,7 +150,7 @@ class SpatialJPEG(JPEG):
         )
         # call
         CJpegLib.write_jpeg_spatial(
-            dstfile=dstfile,
+            dstfile=str(dstfile),
             spatial=spatial,
             image_dims=self.c_image_dims(),
             jpeg_color_space=jpeg_color_space,
@@ -164,7 +170,7 @@ class SpatialJPEG(JPEG):
     @property
     def spatial(self) -> np.ndarray:
         if self._spatial is None:
-            self.read_spatial()
+            self.load()
         return self._spatial
 
     @spatial.setter

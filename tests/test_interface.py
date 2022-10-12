@@ -1,5 +1,6 @@
 
 import logging
+from pathlib import Path
 import tempfile
 import unittest
 
@@ -44,6 +45,18 @@ class TestInterface(unittest.TestCase):
             self.assertEqual(jpeglib.version.get(), '8d')
         # back to 6b
         self.assertEqual(jpeglib.version.get(), '6b')
+
+    def test_pathlib(self):
+        """Test path as pathlib.Path."""
+        # open
+        path = Path('examples/IMG_0311.jpeg')
+        im = jpeglib.read_spatial(path)
+        jpeg = jpeglib.read_dct(path)
+        # load
+        im.load()
+        jpeg.load()
+        im.write_spatial(Path(self.tmp.name))
+        jpeg.write_dct(Path(self.tmp.name))
 
 
 __all__ = ["TestInterface"]

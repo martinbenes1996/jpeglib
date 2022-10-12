@@ -297,7 +297,7 @@ def load_jpeg_info(path: str) -> JPEG:
         markers[i].content = bytes(_markers[cumlens[i]:cumlens[i+1]])
     # create jpeg
     return JPEG(
-        path=path,
+        path=str(path),
         height=_image_dims[0],
         width=_image_dims[1],
         block_dims=block_dims,

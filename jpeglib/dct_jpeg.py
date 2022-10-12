@@ -4,6 +4,7 @@ import dataclasses
 import numpy as np
 import tempfile
 from typing import List
+import warnings
 
 from ._bind import CJpegLib
 from . import _jpeg
@@ -42,7 +43,7 @@ class DCTJPEG(_jpeg.JPEG):
             self.height_in_blocks(i)
         )()
 
-    def read_dct(self) -> tuple:
+    def load(self) -> tuple:
         """Function to allocate the buffer and read the image data.
 
         :return:
@@ -53,12 +54,12 @@ class DCTJPEG(_jpeg.JPEG):
         :Example:
 
         >>> jpeg = jpeglib.read_dct("input.jpeg")
-        >>> Y,(Cb,Cr),qt = jpeg.read_dct()
+        >>> Y,(Cb,Cr),qt = jpeg.load()
 
         Function is internally called when
 
-        >>> jpeg = jpeglib,read_dct("input.jpeg")
-        >>> jpeg.Y # jpeg.read_dct() called internally
+        >>> jpeg = jpeglib.read_dct("input.jpeg")
+        >>> jpeg.Y # jpeg.load() called internally
         """
         # no content
         if self.content is None:
@@ -77,7 +78,7 @@ class DCTJPEG(_jpeg.JPEG):
         _quant_tbl_no = (ctypes.c_ubyte*4)()
         # call
         CJpegLib.read_jpeg_dct(
-            path=self.path,
+            path=str(self.path),
             srcfile=tmp.name,
             Y=Y,
             Cb=Cb,
@@ -105,6 +106,10 @@ class DCTJPEG(_jpeg.JPEG):
         self.qt = qt[:self.num_components]
         # return
         return self.Y, (self.Cb, self.Cr), self.qt
+
+    def read_dct(self) -> tuple:
+        warnings.warn('read_dct() is obsolete, use load()')
+        return self.load()
 
     def write_dct(self, path: str = None, quality: int = -1):
         """Function to write DCT coefficients to JPEG file.
@@ -149,7 +154,7 @@ class DCTJPEG(_jpeg.JPEG):
         # call
         CJpegLib.write_jpeg_dct(
             srcfile=tmp.name if self.content is not None else None,
-            dstfile=dstfile,
+            dstfile=str(dstfile),
             Y=Y,
             Cb=Cb,
             Cr=Cr,
@@ -169,7 +174,7 @@ class DCTJPEG(_jpeg.JPEG):
     def Y(self) -> np.ndarray:
         """Luminance tensor getter."""
         if self._Y is None:
-            self.read_dct()
+            self.load()
         return self._Y
 
     @Y.setter
@@ -181,7 +186,7 @@ class DCTJPEG(_jpeg.JPEG):
     def Cb(self) -> np.ndarray:
         """Chrominance blue-difference tensor getter."""
         if self.has_chrominance and self._Cb is None:
-            self.read_dct()
+            self.load()
         return self._Cb
 
     @Cb.setter
@@ -193,7 +198,7 @@ class DCTJPEG(_jpeg.JPEG):
     def Cr(self) -> np.ndarray:
         """Chrominance red-difference tensor getter."""
         if self.has_chrominance and self._Cr is None:
-            self.read_dct()
+            self.load()
         return self._Cr
 
     @Cr.setter
@@ -205,7 +210,7 @@ class DCTJPEG(_jpeg.JPEG):
     def qt(self) -> np.ndarray:
         """Quantization table getter."""
         if self._qt is None:
-            self.read_dct()
+            self.load()
         return self._qt
 
     @qt.setter
@@ -217,7 +222,7 @@ class DCTJPEG(_jpeg.JPEG):
     def quant_tbl_no(self) -> list:
         """Getter of assignment of quantization tables to components"""
         if self._quant_tbl_no is None:
-            self.read_dct()
+            self.load()
         return self._quant_tbl_no
 
     @quant_tbl_no.setter
