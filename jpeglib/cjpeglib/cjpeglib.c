@@ -41,7 +41,7 @@ char overwrite_flag(BITMASK flags, BITMASK mask) { return (flags & (mask << 1)) 
 
 // === MARKERS ===
 // globals
-#define MAX_MARKER 20
+#define MAX_MARKER 50
 static int gpos = 0;
 static int gmarker_types[MAX_MARKER];
 static int gmarker_lengths[MAX_MARKER];
@@ -902,7 +902,8 @@ int jpeg_handle_marker(j_decompress_ptr cinfo) {
 
   // too many markers
   } else {
-    fprintf(stderr, "Too many markers - %s skipped\n", mname);
+    fprintf(stderr, "Too many markers - %s [%d] skipped\n", mname, gpos);
+    return FALSE;
   }
 
   // iterate over data

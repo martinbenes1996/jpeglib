@@ -8,6 +8,7 @@ from ._bind import CJpegLib
 from ._colorspace import Colorspace
 from ._marker import Marker
 
+MAX_MARKER:int = 50
 
 @dataclasses.dataclass
 class JPEG:
@@ -240,8 +241,8 @@ def load_jpeg_info(path: str) -> JPEG:
     _num_components = (ctypes.c_int*1)()
     _samp_factor = (ctypes.c_int*6)()
     _jpeg_color_space = (ctypes.c_int*2)()
-    _marker_lengths = (ctypes.c_int*20)()
-    _marker_types = (ctypes.c_uint32*20)()
+    _marker_lengths = (ctypes.c_int*MAX_MARKER)()
+    _marker_types = (ctypes.c_uint32*MAX_MARKER)()
     _flags = (ctypes.c_uint64*1)()
 
     # call
@@ -265,7 +266,7 @@ def load_jpeg_info(path: str) -> JPEG:
         np.array([_samp_factor[i] for i in range(2*num_components)], int)
         .reshape(num_components, 2))
     markers = []
-    for i in range(20):
+    for i in range(MAX_MARKER):
         # marker length
         marker_length = _marker_lengths[i]
         if marker_length == 0:
