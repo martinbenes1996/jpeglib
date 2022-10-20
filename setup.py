@@ -25,7 +25,7 @@ except ModuleNotFoundError:
     custom_bdist_wheel = {}
 
 # versions
-__version__ = os.environ.get('VERSION_NEW', '0.11.2')
+__version__ = os.environ.get('VERSION_NEW', '0.11.3')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
