@@ -143,10 +143,9 @@ class SpatialJPEG(JPEG):
             # quantization table
             except TypeError:
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
-                if self.quant_tbl_no is not None:  # TODO fix
+                if quant_tbl_no is not None:
                     quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
-                else:
-                    quant_tbl_no = None
+
         # process
         spatial = np.ctypeslib.as_ctypes(
             self.spatial.reshape(
