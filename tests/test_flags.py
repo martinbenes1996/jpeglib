@@ -17,6 +17,7 @@ class TestFlags(unittest.TestCase):
         del self.tmp
 
     def test_fancy_upsampling(self):
+        self.logger.info("test_fancy_upsampling")
         jpeglib.version.set('8')
         fname = 'examples/IMG_0791.jpeg'
         im_def = jpeglib.read_spatial(fname, flags=[])
@@ -26,6 +27,7 @@ class TestFlags(unittest.TestCase):
         self.assertTrue((im_def.spatial != im_ss.spatial).any())
 
     def test_fancy_downsampling(self):
+        self.logger.info("test_fancy_downsampling")
         jpeglib.version.set('9')
         im = jpeglib.read_spatial('examples/IMG_0311.jpeg')
 

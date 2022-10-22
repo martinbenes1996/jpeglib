@@ -22,6 +22,7 @@ class TestVersion(unittest.TestCase):
         jpeglib.read_spatial('examples/IMG_0791.jpeg').spatial
 
     def _test_version_set(self, version):
+        self.logger.info(f"test_version_set_{version}")
         jpeglib.version.set(version)
         self._read_image()
         self.assertEqual(jpeglib.version.get(), version)
@@ -76,6 +77,7 @@ class TestVersion(unittest.TestCase):
         self._test_version_set('mozjpeg403')
 
     def test_default_version(self):
+        self.logger.info("test_default_version")
         # reload jpeglib
         sys.modules.pop('jpeglib._bind')
         # sys.modules.pop('jpeglib.jpeg')
@@ -93,6 +95,7 @@ class TestVersion(unittest.TestCase):
 
     def _test_libjpeg_testimages(self, version):
         """Test on test images from libjpeg."""
+        self.logger.info(f"test_libjpeg_testimages_{version}")
         jpeglib.version.set(version)
         # test original
         im_ppm = Image.open(f'examples/images-{version}/testimg.ppm')

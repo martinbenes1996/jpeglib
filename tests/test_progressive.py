@@ -28,6 +28,7 @@ class TestProgressive(unittest.TestCase):
 
     def _test_progressive_decompress_vs_pil(self, version):
         """Test on test images from libjpeg."""
+        self.logger.info(f"test_progressive_decompress_vs_pil_{version}")
         jpeglib.version.set(version)
 
         # im_prog = jpeglib.read_spatial(
@@ -46,6 +47,7 @@ class TestProgressive(unittest.TestCase):
         # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
 
     def _test_progressive_dct(self, version):
+        self.logger.info(f"test_progressive_dct_{version}")
         # load dct - to fix
         im = jpeglib.read_dct(f'examples/images-{version}/testprog.jpg')
         im.write_dct(self.tmp.name)
@@ -57,6 +59,7 @@ class TestProgressive(unittest.TestCase):
         np.testing.assert_array_equal(im.qt, im2.qt)
 
     def _test_progressive_sequential(self, version):
+        self.logger.info(f"test_progressive_sequential_{version}")
 
         # load progressive image
         im_seq = jpeglib.read_spatial(

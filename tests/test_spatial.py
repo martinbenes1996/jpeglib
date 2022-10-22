@@ -37,6 +37,7 @@ qt50_standard = np.array([
 
 
 class TestSpatial(unittest.TestCase):
+    logger = logging.getLogger(__name__)
 
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
@@ -48,6 +49,7 @@ class TestSpatial(unittest.TestCase):
 
     def test_synthetic(self):
         global qt50_standard
+        self.logger.info("test_synthetic")
         # create synthetic JPEG
         Y = (np.random.rand(32, 32, 8, 8)*255-128).astype(np.int16)
         Cb = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
@@ -83,6 +85,7 @@ class TestSpatial(unittest.TestCase):
         np.testing.assert_array_equal(qt1, qt2)
 
     def test_6b_quality(self):
+        self.logger.info("test_6b_quality")
         self._test_default_quality('6b', 75)
 
     # def test_7_quality(self):

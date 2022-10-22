@@ -48,6 +48,7 @@ class TestInterface(unittest.TestCase):
 
     def test_pathlib(self):
         """Test path as pathlib.Path."""
+        self.logger.info("test_pathlib")
         # open
         path = Path('examples/IMG_0311.jpeg')
         im = jpeglib.read_spatial(path)

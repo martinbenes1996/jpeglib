@@ -21,6 +21,7 @@ class TestPerformance(unittest.TestCase):
         del self.tmp
 
     def test_reading(self):
+        self.logger.info("test_reading")
         # load and time jpeglib 50 times
         jpeglib.version.set('turbo210')
         res_jpeglib = timeit.repeat(
@@ -40,6 +41,7 @@ class TestPerformance(unittest.TestCase):
         self.assertLess(faster_than_300ms.pvalue, .05)
 
     def test_writing(self):
+        self.logger.info("test_writing")
         x = jpeglib.read_spatial("examples/IMG_0791.jpeg").spatial
         jpeglib.version.set('turbo210')
         # load and time jpeglib 50 times
