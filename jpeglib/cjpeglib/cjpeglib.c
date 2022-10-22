@@ -52,7 +52,7 @@ int jpeg_getc (j_decompress_ptr cinfo); // read next byte
 int jpeg_handle_marker (j_decompress_ptr cinfo); // async marker handler
 
 // === COMMON ===
-void write_qt(
+void _write_qt(
   struct jpeg_compress_struct * cinfo,
   unsigned short *qt,
   short *quant_tbl_no,
@@ -437,7 +437,7 @@ int write_jpeg_dct(
 
   // write qt
   if(qt != NULL)
-    write_qt(&cinfo_out, qt, quant_tbl_no, 0);
+    _write_qt(&cinfo_out, qt, quant_tbl_no, 0);
   // write quality
   else if (quality > 0) {
     jpeg_set_quality(&cinfo_out, quality, TRUE);
@@ -677,9 +677,7 @@ int write_jpeg_spatial(
 
   // write qt
   if(qt != NULL) {
-    fprintf(stderr, "write_jpeg_spatial before write_qt\n");
-    write_qt(&cinfo, qt, quant_tbl_no, 1);
-    fprintf(stderr, "write_jpeg_spatial after write_qt\n");
+    _write_qt(&cinfo, qt, quant_tbl_no, 1);
   // write quality
   } else if (quality > 0) {
     // force baseline (8bit quantization)
@@ -934,7 +932,7 @@ int jpeg_handle_marker(j_decompress_ptr cinfo) {
   return TRUE;
 }
 
-void write_qt(
+void _write_qt(
   struct jpeg_compress_struct * cinfo,
   unsigned short *qt,
   short *quant_tbl_no,

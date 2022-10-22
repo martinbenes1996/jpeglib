@@ -58,6 +58,7 @@ def read_dct(
         content = f.read()
     # load info
     info = _jpeg.load_jpeg_info(path)
+    print("received info")
     # create jpeg
     return DCTJPEG(
         path=path,
