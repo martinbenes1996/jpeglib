@@ -1,9 +1,22 @@
 
+#include <cstdio>
+#include <cstdlib>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "cjpeglib_common_markers.h"
+
+/**
+ * Because processing of markers is asynchronous,
+ * information about markers have to be temporarily stored in global variables.
+ *
+ */
+int gpos = 0;
+int gmarker_types[MAX_MARKER];
+int gmarker_lengths[MAX_MARKER];
+unsigned char * gmarker_data[MAX_MARKER];
 
 FILE *_read_jpeg(
 	const char *filename,
@@ -11,7 +24,6 @@ FILE *_read_jpeg(
     struct jpeg_error_mgr *jerr,
     bool read_header
 );
-
 
 int read_jpeg_markers(
   const char *srcfile,
@@ -38,10 +50,10 @@ int read_jpeg_markers(
 			// collect marker data
 			int offset = 0;
 			for (int i = 0; i < gpos; i++) {
-			for (int j = 0; j < gmarker_lengths[i]; j++) {
-				markers[offset + j] = gmarker_data[i][j];
-			}
-			offset += gmarker_lengths[i];
+				for (int j = 0; j < gmarker_lengths[i]; j++) {
+					markers[offset + j] = gmarker_data[i][j];
+				}
+				offset += gmarker_lengths[i];
 			}
 			unset_marker_handlers(&cinfo);
 		}
@@ -58,7 +70,6 @@ int read_jpeg_markers(
 	} catch(...) {
 		return 0;
 	}
-
 }
 
 
@@ -81,7 +92,8 @@ boolean jpeg_handle_marker(
 ) {
 	// get marker name
 	char mname[20];
-	if (cinfo->unread_marker == JPEG_COM) sprintf(mname, "COM");
+	if (cinfo->unread_marker == JPEG_COM)
+		sprintf(mname, "COM");
 	else sprintf(mname, "APP%d", cinfo->unread_marker - JPEG_APP0);
 
 	// get length
@@ -96,10 +108,11 @@ boolean jpeg_handle_marker(
 	if (gpos < MAX_MARKER) {
 		gmarker_types[gpos] = cinfo->unread_marker;
 		// strcpy(mark_name[gpos], mname);
-		if ((p = (unsigned char *)malloc((length + 1) * sizeof(char))) == NULL) {
-		fprintf(stderr, "Bad malloc!\n");
-		return FALSE;
-		}
+		p = new unsigned char[length + 1];
+		// if ((p = malloc((length + 1) * sizeof(char))) == NULL) {
+		// 	fprintf(stderr, "Bad malloc!\n");
+		// 	return FALSE;
+		// }
 		gmarker_data[gpos] = p;
 		gpos += 1;
 
@@ -113,8 +126,8 @@ boolean jpeg_handle_marker(
 	int c;
 	while (--length >= 0) {
 		if ((c = jpeg_getc(cinfo)) == -1) {
-		fprintf(stderr, "Error parsing marker %s\n", mname);
-		return FALSE;
+			fprintf(stderr, "Error parsing marker %s\n", mname);
+			return FALSE;
 		}
 		*(p) = (unsigned char)c;
 		// if (!p[0]) p[0] = 0x20; // replace 0x0 byte with 0x20
@@ -164,7 +177,8 @@ int unset_marker_handlers(
 		gmarker_lengths[i] = 0;
 		gmarker_types[i] = 0;
 		if (gmarker_data[i] != NULL)
-		free((void *)gmarker_data[i]);
+			delete [] gmarker_data[i];
+			// free((void *)gmarker_data[i]);
 	}
 	gpos = 0;
 

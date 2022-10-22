@@ -1,9 +1,10 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // this is envelope for jpeglib.h
 // trying to avoid naming the same as system library

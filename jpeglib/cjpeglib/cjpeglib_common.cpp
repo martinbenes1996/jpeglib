@@ -4,6 +4,11 @@ extern "C" {
 
 #include "cjpeglib_common.h"
 
+extern int gpos;
+extern int gmarker_types[MAX_MARKER];
+extern int gmarker_lengths[MAX_MARKER];
+extern unsigned char * gmarker_data[MAX_MARKER];
+
 void my_custom_error_exit(
 	j_common_ptr cinfo
 ) {
@@ -79,8 +84,8 @@ int read_jpeg_info(
 			(void) jpeg_read_header(&cinfo, TRUE);
 			// collect marker data
 			for(int i = 0; i < gpos; i++) {
-			marker_lengths[i] = gmarker_lengths[i];
-			marker_types[i] = gmarker_types[i];
+				marker_lengths[i] = gmarker_lengths[i];
+				marker_types[i] = gmarker_types[i];
 			}
 			unset_marker_handlers(&cinfo);
 		} else {
