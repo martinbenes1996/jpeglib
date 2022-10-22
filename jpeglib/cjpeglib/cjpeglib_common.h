@@ -50,7 +50,10 @@ int read_jpeg_info(
 void my_custom_error_exit(
 	j_common_ptr cinfo
 );
-#define jpeg_std_error(jerr) ((jpeg_std_error(jerr)), ((jerr)->error_exit = my_custom_error_exit), (jerr))
+#define jpeg_std_error(jerr) ( \
+  (jpeg_std_error(jerr)), \
+  ((jerr)->error_exit = my_custom_error_exit), \
+  (jerr))
 
 void _write_qt(
 	struct jpeg_compress_struct * cinfo,

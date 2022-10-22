@@ -290,24 +290,15 @@ def load_jpeg_info(path: str) -> JPEG:
     # allocate
     _markers = (ctypes.c_ubyte * np.sum(marker_lengths))()
     # call
-    print("call CJpegLib.read_jpeg_markers")
     CJpegLib.read_jpeg_markers(
         srcfile=str(path),
         markers=_markers,
     )
-    print("CJpegLib.read_jpeg_markers called")
-    print(marker_lengths)
     # process
     cumlens = np.cumsum([0] + marker_lengths.tolist())
-    print("before loop")
     for i in range(num_markers):
         markers[i].content = bytes(_markers[cumlens[i]:cumlens[i+1]])
-    print("create JPEG and return")
-    print("block dims")
-    print(_block_dims[:])
-    print(block_dims)
-    print("samp_factor")
-    print(samp_factor)
+
 
     # create jpeg
     return JPEG(
