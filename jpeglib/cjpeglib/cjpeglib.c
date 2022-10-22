@@ -62,6 +62,18 @@ void write_qt(
 
 long jround_up (long a, long b);
 
+void my_custom_error_exit(j_common_ptr);
+
+#define read_jpeg_info read_jpeg_info_impl
+#define read_jpeg_markers read_jpeg_markers_impl
+#define read_jpeg_dct read_jpeg_dct_impl
+#define write_jpeg_dct write_jpeg_dct_impl
+#define read_jpeg_spatial read_jpeg_spatial_impl
+#define write_jpeg_spatial write_jpeg_spatial_impl
+#define print_jpeg_params print_jpeg_params_impl
+
+#define jpeg_std_error(jerr) ((jpeg_std_error(jerr)), ((jerr)->error_exit = my_custom_error_exit), (jerr))
+
 FILE *_read_jpeg(const char *filename,
                  struct jpeg_decompress_struct *cinfo,
                  struct jpeg_error_mgr *jerr,

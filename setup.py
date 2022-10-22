@@ -127,6 +127,7 @@ for v in libjpeg_versions:
     cfiles[v] = [f for f in files if f[-2:] == '.c']
     hfiles[v] = [f for f in files if f[-2:] == '.h']
     sources = ['jpeglib/cjpeglib/cjpeglib.c', *cfiles[v]]
+    sources.append('jpeglib/cjpeglib/cjpeglib_wrapper.cpp')
 
     # define macros
     macros = [
@@ -169,7 +170,6 @@ for v in libjpeg_versions:
         headers=hfiles[v],
         define_macros=macros,
         extra_compile_args=["-fPIC", "-g"],
-        language="C",
         py_limited_api=True,
     )
 
