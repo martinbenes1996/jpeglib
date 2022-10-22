@@ -1,7 +1,13 @@
+#ifndef CJPEGLIB_H
+#define CJPEGLIB_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "cjpeglib_common_flags.h"
 
 // ---------- Meta -------------
-typedef unsigned long BITMASK;
-
 int read_jpeg_info(
     const char *srcfile,
     int *block_dims,
@@ -11,11 +17,13 @@ int read_jpeg_info(
     int *jpeg_color_space,
     int *marker_lengths,
     int *mark_types,
-    BITMASK *flags);
+    BITMASK *flags
+);
 
 int read_jpeg_markers(
     const char *srcfile,
-    unsigned char *markers);
+    unsigned char *markers
+);
 
 // ----------- DCT -------------
 int read_jpeg_dct(
@@ -24,7 +32,8 @@ int read_jpeg_dct(
     short *Cb,
     short *Cr,
     unsigned short *qt,
-    unsigned char *quant_tbl_no);
+    unsigned char *quant_tbl_no
+);
 int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,
@@ -41,7 +50,8 @@ int write_jpeg_dct(
     int num_markers,
     int *marker_types,
     int *marker_lengths,
-    unsigned char *markers);
+    unsigned char *markers
+);
 
 // ----------- RGB -------------
 int read_jpeg_spatial(
@@ -52,7 +62,8 @@ int read_jpeg_spatial(
     int out_color_space,
     int dither_mode,
     int dct_method,
-    BITMASK flags);
+    BITMASK flags
+);
 
 int write_jpeg_spatial(
     const char *dstfile,
@@ -70,7 +81,14 @@ int write_jpeg_spatial(
     int *marker_types,
     int *marker_lengths,
     unsigned char *markers,
-    BITMASK flags);
+    BITMASK flags
+);
 
 // int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }
 int print_jpeg_params(const char *srcfile);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // CJPEGLIB_H

@@ -236,10 +236,10 @@ class JPEG:
 def load_jpeg_info(path: str) -> JPEG:
     """"""
     # allocate
-    _block_dims = (ctypes.c_int*6)()
+    _block_dims = (ctypes.c_int*8)()
+    _samp_factor = (ctypes.c_int*8)()
     _image_dims = (ctypes.c_int*2)()
     _num_components = (ctypes.c_int*1)()
-    _samp_factor = (ctypes.c_int*6)()
     _jpeg_color_space = (ctypes.c_int*2)()
     _marker_lengths = (ctypes.c_int*MAX_MARKER)()
     _marker_types = (ctypes.c_uint32*MAX_MARKER)()
@@ -260,11 +260,13 @@ def load_jpeg_info(path: str) -> JPEG:
     # process
     num_components = _num_components[0]  # number of components in JPEG
     block_dims = (
-        np.array([_block_dims[i] for i in range(2*num_components)], int)
-        .reshape(num_components, 2))
+        np.array([_block_dims[i] for i in range(2*num_components)], 'int32')
+        .reshape(num_components, 2)
+    )
     samp_factor = (
-        np.array([_samp_factor[i] for i in range(2*num_components)], int)
-        .reshape(num_components, 2))
+        np.array([_samp_factor[i] for i in range(2*num_components)], 'int32')
+        .reshape(num_components, 2)
+    )
     markers = []
     for i in range(MAX_MARKER):
         # marker length
@@ -288,14 +290,25 @@ def load_jpeg_info(path: str) -> JPEG:
     # allocate
     _markers = (ctypes.c_ubyte * np.sum(marker_lengths))()
     # call
+    print("call CJpegLib.read_jpeg_markers")
     CJpegLib.read_jpeg_markers(
         srcfile=str(path),
         markers=_markers,
     )
+    print("CJpegLib.read_jpeg_markers called")
+    print(marker_lengths)
     # process
     cumlens = np.cumsum([0] + marker_lengths.tolist())
+    print("before loop")
     for i in range(num_markers):
         markers[i].content = bytes(_markers[cumlens[i]:cumlens[i+1]])
+    print("create JPEG and return")
+    print("block dims")
+    print(_block_dims[:])
+    print(block_dims)
+    print("samp_factor")
+    print(samp_factor)
+
     # create jpeg
     return JPEG(
         path=str(path),

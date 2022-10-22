@@ -28,28 +28,28 @@ except ModuleNotFoundError:
 __version__ = os.environ.get('VERSION_NEW', '0.11.3')
 libjpeg_versions = {
     '6b': (None, 60),
-    '7': (None, 70),
-    '8': (None, 80),
-    '8a': (None, 80),
-    '8b': (None, 80),
-    '8c': (None, 80),
-    '8d': (None, 80),
-    '9': (None, 90),
-    '9a': (None, 90),
-    '9b': (None, 90),
-    '9c': (None, 90),
-    '9d': (None, 90),
-    '9e': (None, 90),
-    'turbo120': ('1.2.0', 120),
-    'turbo130': ('1.3.0', 130),
-    'turbo140': ('1.4.0', 140),
-    'turbo150': ('1.5.0', 150),
-    'turbo200': ('2.0.0', 200),
-    'turbo210': ('2.1.0', 210),
-    'mozjpeg101': ('1.0.1', 101),
-    'mozjpeg201': ('2.0.1', 201),
-    'mozjpeg300': ('3.0.0', 300),
-    'mozjpeg403': ('4.0.3', 403),
+    # '7': (None, 70),
+    # '8': (None, 80),
+    # '8a': (None, 80),
+    # '8b': (None, 80),
+    # '8c': (None, 80),
+    # '8d': (None, 80),
+    # '9': (None, 90),
+    # '9a': (None, 90),
+    # '9b': (None, 90),
+    # '9c': (None, 90),
+    # '9d': (None, 90),
+    # '9e': (None, 90),
+    # 'turbo120': ('1.2.0', 120),
+    # 'turbo130': ('1.3.0', 130),
+    # 'turbo140': ('1.4.0', 140),
+    # 'turbo150': ('1.5.0', 150),
+    # 'turbo200': ('2.0.0', 200),
+    # 'turbo210': ('2.1.0', 210),
+    # 'mozjpeg101': ('1.0.1', 101),
+    # 'mozjpeg201': ('2.0.1', 201),
+    # 'mozjpeg300': ('3.0.0', 300),
+    # 'mozjpeg403': ('4.0.3', 403),
 }
 
 # requirements
@@ -79,9 +79,9 @@ for v in libjpeg_versions:
     package_name = 'libjpeg'
     (Path(clib) / 'jconfig.h').touch()
     (Path(clib) / 'config.h').touch()
-    if not (Path(clib) / 'vjpeglib.h').exists():
+    if True:  # not (Path(clib) / 'vjpeglib.h').exists():
         with open(Path(clib) / 'vjpeglib.h','w') as f:
-            f.write('\n#include "jpeglib.h"\n')
+            f.write('#include "jpeglib.h"')
     if is_turbo_moz:
         package_name += '-turbo'
         (Path(clib) / 'jconfigint.h').touch()
@@ -126,8 +126,15 @@ for v in libjpeg_versions:
     # split to sources and headers
     cfiles[v] = [f for f in files if f[-2:] == '.c']
     hfiles[v] = [f for f in files if f[-2:] == '.h']
-    sources = ['jpeglib/cjpeglib/cjpeglib.c', *cfiles[v]]
-    sources.append('jpeglib/cjpeglib/cjpeglib_wrapper.cpp')
+    sources = cfiles[v]
+    hfiles[v].append('jpeglib/cjpeglib/cjpeglib_common.h')
+    hfiles[v].append('jpeglib/cjpeglib/cjpeglib_common_flags.h')
+    hfiles[v].append('jpeglib/cjpeglib/cjpeglib_common_markers.h')
+    sources.append('jpeglib/cjpeglib/cjpeglib_dct.cpp')
+    sources.append('jpeglib/cjpeglib/cjpeglib_spatial.cpp')
+    sources.append('jpeglib/cjpeglib/cjpeglib_common_flags.c')
+    sources.append('jpeglib/cjpeglib/cjpeglib_common_markers.cpp')
+    sources.append('jpeglib/cjpeglib/cjpeglib_common.cpp')
 
     # define macros
     macros = [
@@ -170,6 +177,7 @@ for v in libjpeg_versions:
         headers=hfiles[v],
         define_macros=macros,
         extra_compile_args=["-fPIC", "-g"],
+        # language='C++',
         py_limited_api=True,
     )
 
