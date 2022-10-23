@@ -10,14 +10,15 @@ typedef unsigned long BITMASK;
 #ifdef __cplusplus
 #define FLAG_SET boolean
 #else
-#define FLAG_SET char
+#include <stdbool.h>
+#define FLAG_SET bool
 #endif
 
 FLAG_SET flag_is_set(
 	BITMASK flags,
 	BITMASK mask
 );
-FLAG_SET overwrite_flag(
+unsigned char overwrite_flag(
 	BITMASK flags,
 	BITMASK mask
 );

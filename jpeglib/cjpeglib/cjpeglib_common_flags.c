@@ -11,11 +11,11 @@ FLAG_SET flag_is_set(
 ) {
 	return (flags & mask) != 0;
 }
-FLAG_SET overwrite_flag(
+unsigned char overwrite_flag(
 	BITMASK flags,
 	BITMASK mask
 ) {
-	return (flags & (mask << 1)) == 0;
+	return ((flags & (mask << 1)) == 0);
 }
 
 #ifdef __cplusplus

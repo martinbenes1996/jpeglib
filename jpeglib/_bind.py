@@ -166,6 +166,7 @@ class CJpegLib:
         markers,
         flags: List[str],
     ):
+
         status = cls.get().write_jpeg_spatial(
             cls.cstr(dstfile),
             spatial,
@@ -208,7 +209,7 @@ class CJpegLib:
 
     @classmethod
     def flags_to_mask(cls, flags: List[str]):
-        mask = 0xFFFFFFFF
+        mask = 0xFFFFFFFFFFFFFFFF
         if flags is None:
             return mask
         for flag in flags:
