@@ -1,5 +1,6 @@
 
 import importlib
+import logging
 import numpy as np
 from PIL import Image
 import sys
@@ -10,6 +11,7 @@ import jpeglib
 
 
 class TestVersion(unittest.TestCase):
+    logger = logging.getLogger(__name__)
 
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
