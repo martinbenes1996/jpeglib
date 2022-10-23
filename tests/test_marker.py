@@ -58,6 +58,7 @@ class TestMarker(unittest.TestCase):
         self.assertEqual(marker.index, 0xE0 + 5)
 
     def test_image_marker(self):
+        self.logger.info("test_image_marker")
         # read im
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
         # check markers

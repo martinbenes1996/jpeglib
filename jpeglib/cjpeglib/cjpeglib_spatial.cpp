@@ -97,16 +97,16 @@ int read_jpeg_spatial(
 			);
 			rowptr += cinfo.output_width * stride;
 		}
-		// read quantization colormap
-		if (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
-			int N = cinfo.out_color_components;
-			for (int ch = 0; ch < N; ch++) {
-				for (int i = 0; i < 256; i++) {
-					colormap[ch * 256 + i] = cinfo.colormap[ch][i];
-					// colormap[ch*256 + i] = cinfo.colormap[i][ch];
-				}
-			}
-		}
+		// // read quantization colormap
+		// if (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
+		// 	int N = cinfo.out_color_components;
+		// 	for (int ch = 0; ch < N; ch++) {
+		// 		for (int i = 0; i < 256; i++) {
+		// 			colormap[ch * 256 + i] = cinfo.colormap[ch][i];
+		// 			// colormap[ch*256 + i] = cinfo.colormap[i][ch];
+		// 		}
+		// 	}
+		// }
 
 		// cleanup
 		(void)jpeg_finish_decompress(&cinfo);
