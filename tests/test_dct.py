@@ -1,6 +1,8 @@
 
 import logging
 import numpy as np
+from parameterized import parameterized
+from PIL import Image
 import tempfile
 import unittest
 
@@ -44,37 +46,68 @@ class TestDCT(unittest.TestCase):
     def tearDown(self):
         del self.tmp
 
-    def test_synthetic_dct(self):
-        """"""
-        global qt50_standard
-        self.logger.info("test_synthetic_dct")
-        # create synthetic JPEG
-        np.random.seed(12345)
-        Y = (np.random.rand(32, 32, 8, 8)*255-128).astype(np.int16)
-        Cb = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
-        Cr = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
-        # qt = (np.random.rand(2, 8, 8)*8+1).astype(np.int16)
-        qt = qt50_standard
+    def test_dct(self):
+        """Test of lossless reading and writing of DCT."""
+        self.logger.info("test_dct")
+        # get original DCT coefficients
+        jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        # write and read again
+        jpeg.write_dct(self.tmp.name)
+        jpeg2 = jpeglib.read_dct(self.tmp.name)
+        # test DCT coefficients are the same after write/read
+        np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
+        np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
+        np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
+        np.testing.assert_array_equal(jpeg.qt, jpeg2.qt)
+
+    def test_dct_grayscale(self):
+        """Test of grayscale DCT coefficients."""
+        self.logger.info("test_dct_grayscale")
+        # get original DCT coefficients
+        jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        # write grayscale
         jpeglib.from_dct(
-            Y=Y,
-            Cb=Cb,
-            Cr=Cr,
-            qt=qt,
-            quant_tbl_no=np.array([0,1,2]),
+            Y=jpeg.Y,
+            qt=jpeg.qt[:1],
         ).write_dct(self.tmp.name)
-        # load and compare
+        jpeg2 = jpeglib.read_dct(self.tmp.name)
+        # test DCT coefficients are the same after write/read
+        self.assertFalse(jpeg2.has_chrominance)
+        np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
+        np.testing.assert_array_equal(jpeg.qt[:1], jpeg2.qt)
+
+    @parameterized.expand([
+        [((1,1),(1,1),(1,1))],
+        [((2,2),(2,1),(2,1))],
+        [((2,2),(1,2),(1,2))],
+        [((3,1),(1,1),(1,1))],
+    ])
+    def test_dct_samp_factor(self, samp_factor):
+        """Test of reading DCT with different sampling factors."""
+        self.logger.info("test_dct_samp_factor")
+        # compress image with given sampling factor
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im.samp_factor = samp_factor
+        im.write_spatial(self.tmp.name)
+        # read DCT coefficients
         jpeg = jpeglib.read_dct(self.tmp.name)
-        # print(jpeg.qt)
-        np.testing.assert_array_equal(Y, jpeg.Y)
-        np.testing.assert_array_equal(Cb, jpeg.Cb)
-        np.testing.assert_array_equal(Cr, jpeg.Cr)
-        np.testing.assert_array_equal(qt, jpeg.qt)
+        ratio_Cb = [samp_factor[0][i]/samp_factor[1][i] for i in range(2)]
+        ratio_Cr = [samp_factor[0][i]/samp_factor[2][i] for i in range(2)]
+        # test DCT coefficients are the same after write/read
+        self.assertEqual(jpeg.Y.shape[0], jpeg.Cb.shape[0]*ratio_Cb[1])
+        self.assertEqual(jpeg.Y.shape[1], jpeg.Cb.shape[1]*ratio_Cb[0])
+        self.assertEqual(jpeg.Y.shape[0], jpeg.Cr.shape[0]*ratio_Cr[1])
+        self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1]*ratio_Cr[0])
+        # write back (just for completeness)
+        jpeg.write_dct(self.tmp.name)
+
 
     def test_dct_coefficient_decoder(self):
+        """Test output against blorch/dct-coefficient-decoder."""
         self.logger.info("test_dct_coefficient_decoder")
-        # jpeglib
+        # read DCT with jpeglib
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        # dct-coefficient-decoder
+        # read DCT with dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder
         except (ModuleNotFoundError,ImportError) as e:  # error loading
@@ -83,7 +116,7 @@ class TestDCT(unittest.TestCase):
             )
             return
         d = PyCoefficientDecoder('examples/IMG_0311.jpeg')
-        # process
+        # convert to the same format
         qtT = np.stack([
             d.get_quantization_table(0),
             d.get_quantization_table(1),
@@ -101,25 +134,25 @@ class TestDCT(unittest.TestCase):
             d.get_dct_coefficients(2)
             .reshape((im.width_in_blocks(2), -1, 8, 8), order='F')
             .transpose((1, 0, 2, 3)))
-        # test DCT coefficients
+        # test equal
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
         np.testing.assert_array_equal(im.Cr, CrT)
-        # test quantization
         np.testing.assert_array_equal(im.qt, qtT)
 
     def test_python_jpeg_toolbox(self):
+        """Test output against daniellerch/python-jpeg-toolbox."""
         self.logger.info("test_python_jpeg_toolbox")
-        # jpeglib
+        # read DCT with jpeglib
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        # jpeg-toolbox
+        # read DCT with python-jpeg-toolbox
         try:
             import jpeg_toolbox
         except (ModuleNotFoundError,ImportError) as e:
             logging.error(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
-        # process
+        # convert to the same format
         YT = (
             img['coef_arrays'][0]
             .reshape((im.height_in_blocks(0), 8, -1, 8))
@@ -137,130 +170,18 @@ class TestDCT(unittest.TestCase):
             img['quant_tables'][1],
             img['quant_tables'][1],
         ])
-
-        # test quantization
+        # test equal
         np.testing.assert_array_equal(im.qt, qtT)
-        # test DCT coefficients
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
         np.testing.assert_array_equal(im.Cr, CrT)
 
-    def test_to_jpegio(self):
-        self.logger.info("test_to_jpegio")
-        # jpeglib
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        im = jpeglib.to_jpegio(im)
-        # jpegio
-        try:
-            import jpegio
-        except (ModuleNotFoundError,ImportError) as e:
-            logging.error(f"invalid installation of jpegio: {e}")
-            return 1
-        jpeg = jpegio.read('examples/IMG_0311.jpeg')
-        # test quantization
-        self.assertEqual(len(im.quant_tables), 2)
-        np.testing.assert_array_equal(jpeg.quant_tables[0], im.quant_tables[0])
-        np.testing.assert_array_equal(jpeg.quant_tables[1], im.quant_tables[1])
-        # test DCT coefficients
-        self.assertEqual(len(im.coef_arrays), 3)
-        np.testing.assert_array_equal(jpeg.coef_arrays[0], im.coef_arrays[0])
-        np.testing.assert_array_equal(jpeg.coef_arrays[1], im.coef_arrays[1])
-        np.testing.assert_array_equal(jpeg.coef_arrays[2], im.coef_arrays[2])
-
-    def test_jpegio_write(self):
-        self.logger.info("test_jpegio_write")
-        # jpeglib
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        im = jpeglib.to_jpegio(im)
-        # change quantization table in JPEGio
-        im.qt[0, 0, 0] = 2
-        self.assertEqual(im.qt[0, 0, 0], 2)
-        # change quantization table in JPEG
-        im.quant_tables[0][0, 0] = 1
-        self.assertEqual(im.quant_tables[0][0, 0], 1)
-        # write JPEGio and reload
-        im.write(self.tmp.name)
-        im2 = jpeglib.read_dct(self.tmp.name)
-        im2 = jpeglib.to_jpegio(im2)
-        # check quantization table
-        self.assertEqual(im.qt[0, 0, 0], 1)
-        self.assertEqual(im.quant_tables[0][0, 0], 1)
-
-    def test_dct(self):
-        self.logger.info("test_dct")
-        # pass qt through
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        im.write_dct(self.tmp.name)
-        im2 = jpeglib.read_dct(self.tmp.name)
-        # test matrix
-        np.testing.assert_array_equal(im.Y, im2.Y)
-        np.testing.assert_array_equal(im.Cb, im2.Cb)
-        np.testing.assert_array_equal(im.Cr, im2.Cr)
-        np.testing.assert_array_equal(im.qt, im2.qt)
-
-    def test_dct_qt(self):
-        self.logger.info("test_dct_qt")
-        # pass qt through
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        im.qt = im.qt
-        im.write_dct(self.tmp.name)
-        im2 = jpeglib.read_dct(self.tmp.name)
-        # test matrix
-        np.testing.assert_array_equal(im.Y, im2.Y)
-        np.testing.assert_array_equal(im.Cb, im2.Cb)
-        np.testing.assert_array_equal(im.Cr, im2.Cr)
-        np.testing.assert_array_equal(im.qt, im2.qt)
-
-    def test_dct_qt50(self):
-        self.logger.info("test_dct_qt50")
-        global qt50_standard
-        # pass qt through
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        im.qt = qt50_standard
-        im.write_dct(self.tmp.name)
-        im2 = jpeglib.read_dct(self.tmp.name)
-        # test matrix
-        np.testing.assert_array_equal(im2.qt, qt50_standard)
-
-    def test_dct_qt_edit(self):
-        self.logger.info("test_dct_qt_edit")
-        # write with different qt
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
-        qt = (im.qt).copy()
-        qt[0, 4, 4] = 1  # change qt
-        im.qt = qt
-        im.write_dct(self.tmp.name)
-        im2 = jpeglib.read_dct(self.tmp.name)
-        # test matrix
-        np.testing.assert_array_equal(im.Y, im2.Y)
-        np.testing.assert_array_equal(im.Cb, im2.Cb)
-        np.testing.assert_array_equal(im.Cr, im2.Cr)
-        np.testing.assert_array_equal(im.qt, im2.qt)
-
-    def test_qt1(self):
-        self.logger.info("test_qt1")
-        im = jpeglib.read_dct("examples/qt1.jpeg")
-        np.testing.assert_array_equal(im.qt[0], im.qt[1])
-
-    def test_from_dct(self):
-        self.logger.info("test_from_dct")
-        # generate random DCT
-        Y = np.random.randint(-127, 127, (2, 2, 8, 8), dtype=np.int16)
-        Cb = np.random.randint(-127, 127, (1, 1, 8, 8), dtype=np.int16)
-        Cr = np.random.randint(-127, 127, (1, 1, 8, 8), dtype=np.int16)
-        jpeg = jpeglib.from_dct(Y, Cb, Cr)
-        jpeg.write_dct(self.tmp.name)
-        # reopen and compare
-        jpeg2 = jpeglib.read_dct(self.tmp.name)
-        np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
-        np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
-        np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
-
     def test_torchjpeg(self):
+        """Test output against queuecumber/torchjpeg."""
         self.logger.info("test_torchjpeg")
-        # read image
+        # read DCT with jpeglib
         jpeg = jpeglib.read_dct("examples/IMG_0791.jpeg")
-        # read by torchjpeg
+        # read DCT with torchjpeg
         try:
             import torchjpeg.codec
             shape, qt, Y, CbCr = torchjpeg.codec.read_coefficients(  # noqa: E501
@@ -271,8 +192,7 @@ class TestDCT(unittest.TestCase):
                 f"invalid installation of torchjpeg: {e}"
             )
             return
-
-        # compare
+        # convert to the same format and test
         get_full_shape = lambda c: (
             np.array([np.prod(c.shape[i::2]) for i in range(2)])
         )
@@ -302,6 +222,135 @@ class TestDCT(unittest.TestCase):
             np.einsum('bcde->bced', CbCr[1].numpy())
         )
 
+    def test_pil_qt(self):
+        """Test the same QT is acquired from pillow."""
+        self.logger.info("test_pil_qt")
+        # read qt with jpeglib
+        jpeg = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        # pillow
+        im = Image.open("examples/IMG_0791.jpeg")
+        # convert to the same format
+        pil_qt = [
+            (
+                np.array(im.quantization[k])
+                .reshape(8,8)
+            )
+            for k in sorted(im.quantization)
+        ]
+        pil_qt = np.array([
+            pil_qt[i]
+            for i in jpeg.quant_tbl_no
+        ])
+        # test equal
+        np.testing.assert_equal(pil_qt, jpeg.qt)
+        im.close()
+
+    def test_to_jpegio(self):
+        """Test identical output of jpegio to DCTJPEGio interface."""
+        self.logger.info("test_to_jpegio")
+        # jpeglib
+        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.to_jpegio(im)
+        # jpegio
+        try:
+            import jpegio
+        except (ModuleNotFoundError,ImportError) as e:
+            logging.error(f"invalid installation of jpegio: {e}")
+            return 1
+        jpeg = jpegio.read('examples/IMG_0311.jpeg')
+        # test quantization
+        self.assertEqual(len(im.quant_tables), 2)
+        np.testing.assert_array_equal(jpeg.quant_tables[0], im.quant_tables[0])
+        np.testing.assert_array_equal(jpeg.quant_tables[1], im.quant_tables[1])
+        # test DCT coefficients
+        self.assertEqual(len(im.coef_arrays), 3)
+        np.testing.assert_array_equal(jpeg.coef_arrays[0], im.coef_arrays[0])
+        np.testing.assert_array_equal(jpeg.coef_arrays[1], im.coef_arrays[1])
+        np.testing.assert_array_equal(jpeg.coef_arrays[2], im.coef_arrays[2])
+
+    def test_jpegio_write(self):
+        """Test writing of DCTJPEGio interface."""
+        self.logger.info("test_jpegio_write")
+        # jpeglib
+        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.to_jpegio(im)
+        # change quantization table in JPEGio
+        im.qt[0, 0, 0] = 2
+        self.assertEqual(im.qt[0, 0, 0], 2)
+        # change quantization table in JPEG
+        im.quant_tables[0][0, 0] = 1
+        self.assertEqual(im.quant_tables[0][0, 0], 1)
+        # write JPEGio and reload
+        im.write(self.tmp.name)
+        im2 = jpeglib.read_dct(self.tmp.name)
+        im2 = jpeglib.to_jpegio(im2)
+        # check quantization table
+        self.assertEqual(im.qt[0, 0, 0], 1)
+        self.assertEqual(im.quant_tables[0][0, 0], 1)
+
+    def test_dct_edit(self):
+        """Test of changing DCT coefficient, e.g."""
+        self.logger.info("test_dct_edit")
+        # write with different qt
+        jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        Yc = jpeg.Y.copy()
+        jpeg.Y[0,0,0,1] += 1  # change DCT (e.g., steganography)
+        jpeg.write_dct(self.tmp.name)
+        jpeg2 = jpeglib.read_dct(self.tmp.name)
+        # test matrix
+        self.assertEqual(np.sum(jpeg2.Y - Yc), 1) # difference by 1
+        self.assertEqual(
+            tuple([int(i) for i in np.where(jpeg2.Y != Yc)]),
+            (0,0,0,1)
+        )
+        np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
+        np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
+        np.testing.assert_array_equal(jpeg.qt, jpeg2.qt)
+
+    def test_qt1(self):
+        """Test reading DCT of color JPEG with one QT."""
+        self.logger.info("test_qt1")
+        # read DCT of JPEG having one QT
+        jpeg = jpeglib.read_dct("examples/qt1.jpeg")
+        np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
+        np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[2])
+        np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0,0,0]))
+
+    def test_from_dct(self):
+        """Test creating synthetic JPEG DCT coefficients.
+
+        Write them using from_dct call.
+        """
+        global qt50_standard
+        self.logger.info("test_from_dct")
+        # generate random DCT
+        np.random.seed(12345)
+        Y = np.random.randint(-127, 127, (32, 32, 8, 8), dtype=np.int16)
+        Cb = np.random.randint(-127, 127, (16, 16, 8, 8), dtype=np.int16)
+        Cr = np.random.randint(-127, 127, (16, 16, 8, 8), dtype=np.int16)
+        # choose standard QT 50
+        qt = qt50_standard
+        # generating random QT causes wierd error messages,
+        # increasing values in zigzag order are probably required
+
+        # create synthetic JPEG using from_dct
+        jpeglib.from_dct(
+            Y=Y,
+            Cb=Cb,
+            Cr=Cr,
+            qt=qt,
+            quant_tbl_no=np.array([0,1,2]),
+        ).write_dct(self.tmp.name)
+        # load and compare
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(Y, jpeg.Y)
+        np.testing.assert_array_equal(Cb, jpeg.Cb)
+        np.testing.assert_array_equal(Cr, jpeg.Cr)
+        np.testing.assert_array_equal(qt, jpeg.qt)
+
+
+
+    # === tests with non-public software ===
     # def _rainer_qt(self, outchannel, qt):
     #     # test quantization tables
     #     # get Rainer's (reference) result

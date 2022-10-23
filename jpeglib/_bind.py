@@ -274,8 +274,11 @@ class CJpegLib:
 
     @classmethod
     def versions(cls):
+        # list DLLs
         vs = [re.search(r'cjpeglib_[^.]*\..*\.so', f) for f in cls._versions()]
         vs = [v[0] for v in vs if v]
+        # parse versions
+        vs = [re.search(r'(?<=cjpeglib_)[^.]*', f)[0] for f in cls._versions()]
         return vs
 
     @classmethod

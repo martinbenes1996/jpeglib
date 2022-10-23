@@ -6,3 +6,4 @@ scipy
 #opencv-python
 #pylibjpeg
 torchjpeg
+parameterized

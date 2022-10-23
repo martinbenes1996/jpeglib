@@ -8,7 +8,7 @@
  *
  * This file contains master control logic for the JPEG compressor.
  * These routines are concerned with parameter validation, initial setup,
- * and inter-pass control (determining the number of passes and the work 
+ * and inter-pass control (determining the number of passes and the work
  * to be done in each pass).
  */
 
@@ -211,7 +211,7 @@ jpeg_calc_trans_dimensions (j_compress_ptr cinfo)
   if (cinfo->min_DCT_h_scaled_size != cinfo->min_DCT_v_scaled_size)
     ERREXIT2(cinfo, JERR_BAD_DCTSIZE,
 	     cinfo->min_DCT_h_scaled_size, cinfo->min_DCT_v_scaled_size);
-  
+
   cinfo->block_size = cinfo->min_DCT_h_scaled_size;
 }
 
@@ -224,7 +224,7 @@ initial_setup (j_compress_ptr cinfo, boolean transcode_only)
   jpeg_component_info *compptr;
   long samplesperrow;
   JDIMENSION jd_samplesperrow;
-  
+
   if (transcode_only)
     jpeg_calc_trans_dimensions(cinfo);
   else
@@ -248,7 +248,7 @@ initial_setup (j_compress_ptr cinfo, boolean transcode_only)
   /* Derive lim_Se from block_size */
   cinfo->lim_Se = cinfo->block_size < DCTSIZE ?
     cinfo->block_size * cinfo->block_size - 1 : DCTSIZE2-1;
-  
+
   /* Sanity check on image dimensions */
   if (cinfo->jpeg_height <= 0 || cinfo->jpeg_width <= 0 ||
       cinfo->num_components <= 0 || cinfo->input_components <= 0)
@@ -381,7 +381,7 @@ validate_script (j_compress_ptr cinfo)
 #ifdef C_PROGRESSIVE_SUPPORTED
     cinfo->progressive_mode = TRUE;
     last_bitpos_ptr = & last_bitpos[0][0];
-    for (ci = 0; ci < cinfo->num_components; ci++) 
+    for (ci = 0; ci < cinfo->num_components; ci++)
       for (coefi = 0; coefi < DCTSIZE2; coefi++)
 	*last_bitpos_ptr++ = -1;
 #else
@@ -389,7 +389,7 @@ validate_script (j_compress_ptr cinfo)
 #endif
   } else {
     cinfo->progressive_mode = FALSE;
-    for (ci = 0; ci < cinfo->num_components; ci++) 
+    for (ci = 0; ci < cinfo->num_components; ci++)
       component_sent[ci] = FALSE;
   }
 
@@ -575,16 +575,16 @@ per_scan_setup (j_compress_ptr cinfo)
 {
   int ci, mcublks, tmp;
   jpeg_component_info *compptr;
-  
+
   if (cinfo->comps_in_scan == 1) {
-    
+
     /* Noninterleaved (single-component) scan */
     compptr = cinfo->cur_comp_info[0];
-    
+
     /* Overall image size in MCUs */
     cinfo->MCUs_per_row = compptr->width_in_blocks;
     cinfo->MCU_rows_in_scan = compptr->height_in_blocks;
-    
+
     /* For noninterleaved scan, always one block per MCU */
     compptr->MCU_width = 1;
     compptr->MCU_height = 1;
@@ -597,18 +597,18 @@ per_scan_setup (j_compress_ptr cinfo)
     tmp = (int) (compptr->height_in_blocks % compptr->v_samp_factor);
     if (tmp == 0) tmp = compptr->v_samp_factor;
     compptr->last_row_height = tmp;
-    
+
     /* Prepare array describing MCU composition */
     cinfo->blocks_in_MCU = 1;
     cinfo->MCU_membership[0] = 0;
-    
+
   } else {
-    
+
     /* Interleaved (multi-component) scan */
     if (cinfo->comps_in_scan <= 0 || cinfo->comps_in_scan > MAX_COMPS_IN_SCAN)
       ERREXIT2(cinfo, JERR_COMPONENT_COUNT, cinfo->comps_in_scan,
 	       MAX_COMPS_IN_SCAN);
-    
+
     /* Overall image size in MCUs */
     cinfo->MCUs_per_row = (JDIMENSION)
       jdiv_round_up((long) cinfo->jpeg_width,
@@ -616,9 +616,9 @@ per_scan_setup (j_compress_ptr cinfo)
     cinfo->MCU_rows_in_scan = (JDIMENSION)
       jdiv_round_up((long) cinfo->jpeg_height,
 		    (long) (cinfo->max_v_samp_factor * cinfo->block_size));
-    
+
     cinfo->blocks_in_MCU = 0;
-    
+
     for (ci = 0; ci < cinfo->comps_in_scan; ci++) {
       compptr = cinfo->cur_comp_info[ci];
       /* Sampling factors give # of blocks of component in each MCU */
@@ -642,7 +642,7 @@ per_scan_setup (j_compress_ptr cinfo)
 	cinfo->MCU_membership[cinfo->blocks_in_MCU++] = ci;
       }
     }
-    
+
   }
 
   /* Convert restart specified in rows to actual MCU count. */
@@ -666,7 +666,7 @@ METHODDEF(void)
 prepare_for_pass (j_compress_ptr cinfo)
 {
   my_master_ptr master = (my_master_ptr) cinfo->master;
-  
+
   switch (master->pass_type) {
   case main_pass:
     /* Initial pass: will collect input data, and do either Huffman
@@ -696,7 +696,6 @@ prepare_for_pass (j_compress_ptr cinfo)
 #ifdef ENTROPY_OPT_SUPPORTED
   case huff_opt_pass:
     /* Do Huffman optimization for a scan after the first one. */
-    fprintf(stderr, "jcmaster.c:705: prepare_for_pass()\n");
     select_scan_parameters(cinfo);
     per_scan_setup(cinfo);
     if (cinfo->Ss != 0 || cinfo->Ah == 0) {
