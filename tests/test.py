@@ -1,15 +1,14 @@
 
-
 import sys
 import unittest
 sys.path.append(".")
-
 
 # logging
 if __name__ == "__main__":
     import logging
     logging.basicConfig(filename="test.log", level=logging.INFO)
-
+    import jpeglib
+    logging.info(f"{jpeglib.__path__=}")
 
 # === unit tests ===
 from test_dct import TestDCT  # noqa: F401,E402
@@ -23,7 +22,6 @@ from test_shapes import TestShapes  # noqa: F401,E402
 from test_spatial import TestSpatial
 from test_version import TestVersion  # noqa: F401,E402
 # ==================
-
 
 # run unittests
 if __name__ == "__main__":

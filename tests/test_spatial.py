@@ -41,58 +41,50 @@ class TestSpatial(unittest.TestCase):
 
     def setUp(self):
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
-        self.tmp2 = tempfile.NamedTemporaryFile(suffix='.jpeg')
 
     def tearDown(self):
         del self.tmp
-        del self.tmp2
 
-    def test_synthetic(self):
-        global qt50_standard
-        self.logger.info("test_synthetic")
+    def test_synthetic_spatial(self):
+        """"""
+        self.logger.info("test_synthetic_spatial")
         # create synthetic JPEG
-        Y = (np.random.rand(32, 32, 8, 8)*255-128).astype(np.int16)
-        Cb = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
-        Cr = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
-        qt = (np.random.rand(2, 8, 8)*8+1).astype(np.int16)
-        qt = qt50_standard
-        jpeglib.from_dct(
-            Y=Y,
-            Cb=Cb,
-            Cr=Cr,
-            qt=qt,
-            quant_tbl_no=np.array([0,1,2])
-        ).write_dct(self.tmp.name)
+        np.random.seed(12345)
+        spatial = (np.random.rand(512,512,3)*255).astype(np.int16)
+        jpeglib.from_spatial(
+            spatial=spatial,
+            in_color_space='JCS_RGB'
+        ).write_spatial(self.tmp.name)
         # load and compare
-        jpeg = jpeglib.read_dct(self.tmp.name)
-        # print(jpeg.qt)
-        np.testing.assert_array_equal(Y, jpeg.Y)
-        np.testing.assert_array_equal(Cb, jpeg.Cb)
-        np.testing.assert_array_equal(Cr, jpeg.Cr)
-        np.testing.assert_array_equal(qt, jpeg.qt)
+        jpeg = jpeglib.read_spatial(self.tmp.name)
+        mse = np.mean((
+            spatial/255. -
+            jpeg.spatial/255.
+        )**2)
+        # psnr = 10*np.log10(1./mse)
+        self.assertLessEqual(mse, 1.)
 
-
-    def _test_default_quality(self, version, qf):
-        jpeglib.version.set(version)
-        jpeg = jpeglib.read_spatial("examples/IMG_0791.jpeg")
-        # with explicit qf
-        jpeg.write_spatial(self.tmp.name, qt=qf)
-        _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
-        # with default qf
-        jpeg.write_spatial(self.tmp.name)
-        _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
-        # test equal qts
-        np.testing.assert_array_equal(qt1, qt2)
-
-    def test_6b_quality(self):
-        self.logger.info("test_6b_quality")
-        self._test_default_quality('6b', 75)
-
-    # def test_7_quality(self):
-    #     self._test_default_quality('7', 75)
-
-    # def test_9e_quality(self):
-    #     self._test_default_quality('9e', 75)
+    def _test_default_quality(self, version, qt=75):
+        """Test default quality factor for a given version."""
+        self.logger.info(f"test_{version}_quality")
+        with jpeglib.version(version):
+            jpeg = jpeglib.read_spatial("examples/IMG_0791.jpeg")
+            # with explicit qf
+            jpeg.write_spatial(self.tmp.name, qt=qt)
+            _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
+            # with default qf
+            jpeg.write_spatial(self.tmp.name)
+            _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
+            # test equal qts
+            np.testing.assert_array_equal(qt1, qt2)
+    def test_default_quality_6b(self):
+        self._test_default_quality('6b')
+    # def test_default_quality_7(self):
+    #     self._test_default_quality('7')
+    # def test_default_quality_9e(self):
+    #     self._test_default_quality('9e')
+    # def test_default_quality_mozjpeg300(self):
+    #     self._test_default_quality('mozjpeg300')
 
     # def test_spatial_quality(self):
     #     global qt50_standard

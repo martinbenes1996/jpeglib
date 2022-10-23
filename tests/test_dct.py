@@ -44,6 +44,32 @@ class TestDCT(unittest.TestCase):
     def tearDown(self):
         del self.tmp
 
+    def test_synthetic_dct(self):
+        """"""
+        global qt50_standard
+        self.logger.info("test_synthetic_dct")
+        # create synthetic JPEG
+        np.random.seed(12345)
+        Y = (np.random.rand(32, 32, 8, 8)*255-128).astype(np.int16)
+        Cb = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
+        Cr = (np.random.rand(16, 16, 8, 8)*255-128).astype(np.int16)
+        # qt = (np.random.rand(2, 8, 8)*8+1).astype(np.int16)
+        qt = qt50_standard
+        jpeglib.from_dct(
+            Y=Y,
+            Cb=Cb,
+            Cr=Cr,
+            qt=qt,
+            quant_tbl_no=np.array([0,1,2]),
+        ).write_dct(self.tmp.name)
+        # load and compare
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        # print(jpeg.qt)
+        np.testing.assert_array_equal(Y, jpeg.Y)
+        np.testing.assert_array_equal(Cb, jpeg.Cb)
+        np.testing.assert_array_equal(Cr, jpeg.Cr)
+        np.testing.assert_array_equal(qt, jpeg.qt)
+
     def test_dct_coefficient_decoder(self):
         self.logger.info("test_dct_coefficient_decoder")
         # jpeglib

@@ -172,8 +172,8 @@ int write_jpeg_dct(
 		// allocate
 		struct jpeg_compress_struct cinfo_out;
 		struct jpeg_error_mgr jerr_out;
-		// memset((void *)&cinfo_out, 0x0, sizeof(struct jpeg_compress_struct));
-		// memset((void *)&jerr_out, 0x0, sizeof(struct jpeg_error_mgr));
+		memset((void *)&cinfo_out, 0x0, sizeof(struct jpeg_compress_struct));
+		memset((void *)&jerr_out, 0x0, sizeof(struct jpeg_error_mgr));
 
 		// open the destination file
 		FILE *fp_out;
