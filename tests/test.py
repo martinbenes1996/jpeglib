@@ -25,4 +25,4 @@ from test_version import TestVersion  # noqa: F401,E402
 
 # run unittests
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(verbosity=1)
