@@ -1,6 +1,7 @@
 
 import logging
 import numpy as np
+import pandas as pd
 from parameterized import parameterized
 from PIL import Image
 import subprocess
