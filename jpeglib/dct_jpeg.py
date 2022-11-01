@@ -163,7 +163,7 @@ class DCTJPEG(_jpeg.JPEG):
             # write content into temporary file
             tmp.write(self.content)
             tmp.flush()
-            tmp.close()
+        tmp.close()
 
         # call
         CJpegLib.write_jpeg_dct(

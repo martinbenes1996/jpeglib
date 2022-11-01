@@ -1,6 +1,7 @@
 
 import logging
 import numpy as np
+import os
 import pandas as pd
 from parameterized import parameterized
 from PIL import Image
@@ -43,10 +44,11 @@ class TestDCT(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        self.tmp.close()
 
     def tearDown(self):
-        self.tmp.close()
+        os.remove(self.tmp.name)
         del self.tmp
 
     def test_dct(self):
@@ -80,10 +82,10 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.qt[:1], jpeg2.qt)
 
     @parameterized.expand([
-        [((1,1),(1,1),(1,1))],
-        [((2,2),(2,1),(2,1))],
-        [((2,2),(1,2),(1,2))],
-        [((3,1),(1,1),(1,1))],
+        [((1, 1), (1, 1), (1, 1))],
+        [((2, 2), (2, 1), (2, 1))],
+        [((2, 2), (1, 2), (1, 2))],
+        [((3, 1), (1, 1), (1, 1))],
     ])
     def test_dct_samp_factor(self, samp_factor):
         """Test of reading DCT with different sampling factors."""
@@ -104,7 +106,6 @@ class TestDCT(unittest.TestCase):
         # write back (just for completeness)
         jpeg.write_dct(self.tmp.name)
 
-
     def test_dct_coefficient_decoder(self):
         """Test output against blorch/dct-coefficient-decoder."""
         self.logger.info("test_dct_coefficient_decoder")
@@ -113,7 +114,7 @@ class TestDCT(unittest.TestCase):
         # read DCT with dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder
-        except (ModuleNotFoundError,ImportError) as e:  # error loading
+        except (ModuleNotFoundError, ImportError) as e:  # error loading
             logging.error(
                 f"invalid installation of dct-coefficient-decoder: {e}"
             )
@@ -151,7 +152,7 @@ class TestDCT(unittest.TestCase):
         # read DCT with python-jpeg-toolbox
         try:
             import jpeg_toolbox
-        except (ModuleNotFoundError,ImportError) as e:
+        except (ModuleNotFoundError, ImportError) as e:
             logging.error(f"invalid installation of python-jpeg-toolbox: {e}")
             return
         img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
@@ -196,9 +197,11 @@ class TestDCT(unittest.TestCase):
             )
             return
         # convert to the same format and test
-        get_full_shape = lambda c: (
-            np.array([np.prod(c.shape[i::2]) for i in range(2)])
-        )
+        def get_full_shape(c):
+            return np.array([
+                np.prod(c.shape[i::2])
+                for i in range(2)
+            ])
         np.testing.assert_array_equal(
             get_full_shape(jpeg.Y),
             shape.numpy()[0,::]
@@ -236,7 +239,7 @@ class TestDCT(unittest.TestCase):
         pil_qt = [
             (
                 np.array(im.quantization[k])
-                .reshape(8,8)
+                .reshape(8, 8)
             )
             for k in sorted(im.quantization)
         ]
@@ -257,7 +260,7 @@ class TestDCT(unittest.TestCase):
         # jpegio
         try:
             import jpegio
-        except (ModuleNotFoundError,ImportError) as e:
+        except (ModuleNotFoundError, ImportError) as e:
             logging.error(f"invalid installation of jpegio: {e}")
             return 1
         jpeg = jpegio.read('examples/IMG_0311.jpeg')
@@ -297,14 +300,14 @@ class TestDCT(unittest.TestCase):
         # write with different qt
         jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
         Yc = jpeg.Y.copy()
-        jpeg.Y[0,0,0,1] += 1  # change DCT (e.g., steganography)
+        jpeg.Y[0, 0, 0, 1] += 1  # change DCT (e.g., steganography)
         jpeg.write_dct(self.tmp.name)
         jpeg2 = jpeglib.read_dct(self.tmp.name)
         # test matrix
         self.assertEqual(np.sum(jpeg2.Y - Yc), 1) # difference by 1
         self.assertEqual(
             tuple([int(i) for i in np.where(jpeg2.Y != Yc)]),
-            (0,0,0,1)
+            (0, 0, 0, 1)
         )
         np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
         np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
@@ -317,7 +320,7 @@ class TestDCT(unittest.TestCase):
         jpeg = jpeglib.read_dct("examples/qt1.jpeg")
         np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
         np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[2])
-        np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0,0,0]))
+        np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0, 0, 0]))
 
     def test_from_dct(self):
         """Test creating synthetic JPEG DCT coefficients.
