@@ -10,7 +10,7 @@ class TestDCTMethod(unittest.TestCase):
     logger = logging.getLogger()
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
 
     def tearDown(self):
         self.tmp.close()

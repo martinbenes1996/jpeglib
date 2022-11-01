@@ -12,7 +12,7 @@ class TestProgressive(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
 
     def tearDown(self):
         self.tmp.close()

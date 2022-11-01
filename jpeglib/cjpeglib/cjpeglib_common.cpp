@@ -31,6 +31,8 @@ FILE *_read_jpeg(const char *filename,
 	if ((fp = fopen(filename, "rb")) == NULL) {
 		fprintf(stderr, "not possible to open %s\n", filename);
 		return NULL;
+	} else {
+		fprintf(stderr, "file %s opened\n", filename);
 	}
 
 	// check file size

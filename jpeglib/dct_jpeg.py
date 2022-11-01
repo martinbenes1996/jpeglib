@@ -127,11 +127,6 @@ class DCTJPEG(_jpeg.JPEG):
         >>> jpeg = jpeglib.read_spatial("input.jpeg")
         >>> jpeg.write_spatial("output.jpeg", quality=92)
         """  # noqa: E501
-        tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
-        if self.content is not None:
-            # write content into temporary file
-            tmp.write(self.content)
-            tmp.flush()
         # path
         dstfile = path if path is not None else self.path
         if dstfile is None:
@@ -159,27 +154,32 @@ class DCTJPEG(_jpeg.JPEG):
         if quality != -1:
             qt = None
 
-        # call
-        CJpegLib.write_jpeg_dct(
-            srcfile=tmp.name if self.content is not None else None,
-            dstfile=str(dstfile),
-            Y=Y,
-            Cb=Cb,
-            Cr=Cr,
-            image_dims=self.c_image_dims(),
-            block_dims=self.c_block_dims(),
-            in_color_space=self.jpeg_color_space.index,
-            in_components=self.num_components,
-            qt=qt,
-            quality=quality,
-            quant_tbl_no=quant_tbl_no,
-            num_markers=self.num_markers,
-            marker_types=self.c_marker_types(),
-            marker_lengths=self.c_marker_lengths(),
-            markers=self.c_markers(),
-        )
-        # close temporary file
-        tmp.close()
+        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
+            if self.content is not None:
+                # write content into temporary file
+                tmp.write(self.content)
+                tmp.flush()
+
+            # call
+            CJpegLib.write_jpeg_dct(
+                srcfile=tmp.name if self.content is not None else None,
+                dstfile=str(dstfile),
+                Y=Y,
+                Cb=Cb,
+                Cr=Cr,
+                image_dims=self.c_image_dims(),
+                block_dims=self.c_block_dims(),
+                in_color_space=self.jpeg_color_space.index,
+                in_components=self.num_components,
+                qt=qt,
+                quality=quality,
+                quant_tbl_no=quant_tbl_no,
+                num_markers=self.num_markers,
+                marker_types=self.c_marker_types(),
+                marker_lengths=self.c_marker_lengths(),
+                markers=self.c_markers(),
+            )
+
 
     @property
     def Y(self) -> np.ndarray:
