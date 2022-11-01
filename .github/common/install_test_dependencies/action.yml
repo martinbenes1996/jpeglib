@@ -13,8 +13,8 @@ runs:
     - name: Install test dependencies
       shell: bash
       run: |
-        if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
-        pip install torchjpeg; true
+        if [ -f tests/requirements.txt ]; then pip3 install -r tests/requirements.txt; fi
+        pip3 install torchjpeg || true
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
         git checkout 8f05ed58ff95a2475defa117f9eeccdcee795dc2
@@ -26,8 +26,8 @@ runs:
         cd jpegio
         cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
         mv setup2.py setup.py
-        python3 setup.py install; true
-        python3 setup.py install
+        python3 setup.py install || true
+        # python3 setup.py install
         cd ..
         pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox@829dbb9c50d0c885d228fc087de1c104160eee33
 
