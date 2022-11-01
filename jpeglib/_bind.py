@@ -292,7 +292,8 @@ class CJpegLib:
             so_file = None
         if so_file is None:
             raise RuntimeError(f'version "{version}" not found')
-        libname = pathlib.Path(list(cjpeglib.__path__)[0]) / so_file
+        # libname = pathlib.Path(list(cjpeglib.__path__)[0]) / so_file
+        libname = str(os.path.join(list(cjpeglib.__path__)[0], so_file))
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)
         cls.version = version
