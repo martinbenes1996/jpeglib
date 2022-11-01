@@ -38,20 +38,7 @@ int unset_marker_handlers(
 int jpeg_getc (
 	j_decompress_ptr cinfo
 );
-// /**
-//  * @brief Asynchronous marker handler.
-//  *
-//  * @param cinfo
-//  * @return int
-//  */
-// int jpeg_handle_marker (
-// 	j_decompress_ptr cinfo
-// );
 
-int read_jpeg_markers(
-  const char *srcfile,
-  unsigned char *markers
-);
 
 #ifdef __cplusplus
 }
