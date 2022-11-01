@@ -80,7 +80,7 @@ for v in libjpeg_versions:
     (Path(clib) / 'jconfig.h').touch()
     (Path(clib) / 'config.h').touch()
     if True:  # not (Path(clib) / 'vjpeglib.h').exists():
-        with open(Path(clib) / 'vjpeglib.h','w') as f:
+        with open(Path(clib) / 'vjpeglib.h', 'w') as f:
             f.write('#include "jpeglib.h"')
     if is_turbo_moz:
         package_name += '-turbo'
@@ -181,18 +181,19 @@ for v in libjpeg_versions:
         py_limited_api=True,
     )
 
-# extension builder
-class custom_build_ext(setuptools.command.build_ext.build_ext):
-    def get_export_symbols(self, ext):
-        parts = ext.name.split(".")
-        if parts[-1] == "__init__":
-            initfunc_name = "PyInit_" + parts[-2]
-        else:
-            initfunc_name = "PyInit_" + parts[-1]
 
-    def build_extensions(self):
-        setuptools.command.build_ext.build_ext.build_extensions(self)
-        setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
+# # extension builder
+# class custom_build_ext(setuptools.command.build_ext.build_ext):
+#     def get_export_symbols(self, ext):
+#         parts = ext.name.split(".")
+#         if parts[-1] == "__init__":
+#             initfunc_name = "PyInit_" + parts[-2]
+#         else:
+#             initfunc_name = "PyInit_" + parts[-1]
+
+#     def build_extensions(self):
+#         setuptools.command.build_ext.build_ext.build_extensions(self)
+#         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
 # class CTypesExtension(Extension): pass
 # class custom_build_ext(setuptools.command.build_ext.build_ext):
@@ -235,7 +236,10 @@ setuptools.setup(
     package_data={'': ['data/*']},
     include_package_data=True,
     ext_modules=[cjpeglib[v] for v in libjpeg_versions],
-    cmdclass={"build_ext": custom_build_ext, **custom_bdist_wheel},
+    cmdclass={
+        # "build_ext": custom_build_ext,
+        **custom_bdist_wheel
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Science/Research',

@@ -46,7 +46,7 @@ __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
     'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
     'Colorspace', 'DCTMethod', 'Dithermode', 'Marker',
-    'version',
+    'version','ops',
     'Timer', 'dct',
     '__version__',
 ]

@@ -2,6 +2,7 @@
 import ctypes
 from dataclasses import dataclass
 import numpy as np
+import os
 import tempfile
 import typing
 import warnings
@@ -49,22 +50,25 @@ class SpatialJPEG(JPEG):
         spatial = self._alloc_spatial(self.color_space.channels)
 
         # write content into temporary file
-        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
-            tmp.write(self.content)
-            tmp.flush()
+        tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        tmp.write(self.content)
+        tmp.flush()
+        tmp.close()
 
-            # call
-            CJpegLib.read_jpeg_spatial(
-                path=str(self.path),
-                srcfile=tmp.name,
-                spatial=spatial,
-                colormap=self.jpeg_color_space.index,
-                in_colormap=None,  # support of color quantization
-                out_color_space=self.color_space.index,
-                dither_mode=dither_mode,
-                dct_method=dct_method,
-                flags=self.flags,
-            )
+        # call
+        CJpegLib.read_jpeg_spatial(
+            path=str(self.path),
+            srcfile=tmp.name,
+            spatial=spatial,
+            colormap=self.jpeg_color_space.index,
+            in_colormap=None,  # support of color quantization
+            out_color_space=self.color_space.index,
+            dither_mode=dither_mode,
+            dct_method=dct_method,
+            flags=self.flags,
+        )
+        # clean up temporary file
+        os.remove(tmp.name)
         # process
         self.spatial = (
             np.ctypeslib.as_array(spatial)

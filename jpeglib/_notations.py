@@ -37,14 +37,14 @@ def Jab_to_factors(Jab) -> List:
     """  # noqa: E501
     # parse input
     J, a, b = Jab
-    assert(J in {1, 2, 3, 4})
+    assert J in {1, 2, 3, 4}
     if J == 4:
-        assert(a in {4, 2, 1, 0})
+        assert a in {4, 2, 1, 0}
     elif J == 3:
-        assert(a in {3, 1, 0})
+        assert a in {3, 1, 0}
     else:
-        assert(a in {J, 1, 0})
-    assert(b in {a, 0})
+        assert a in {J, 1, 0}
+    assert b in {a, 0}
     # chroma dimensions
     Y = [J, 2]
     Cb = Cr = [a, (a == b) + 1]

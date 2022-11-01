@@ -1,6 +1,7 @@
 
 import numpy as np
 
+
 def blockify_8x8(x: np.ndarray) -> np.ndarray:
     """Splits the spatial domain into 8x8 tiles.
 
@@ -28,6 +29,7 @@ def blockify_8x8(x: np.ndarray) -> np.ndarray:
     xb = np.array(xhv)
     return xb
 
+
 def luminance(x: np.ndarray) -> np.ndarray:
     """Converts RGB into luminance / grayscale.
 
@@ -46,6 +48,7 @@ def luminance(x: np.ndarray) -> np.ndarray:
     """
     lumo_contributions = np.array([0.2989, 0.5870, 0.1140])
     return np.expand_dims(x @ lumo_contributions, 2)
+
 
 def grayscale(x: np.ndarray) -> np.ndarray:
     return luminance(x=x)

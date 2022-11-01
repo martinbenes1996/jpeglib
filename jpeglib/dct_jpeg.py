@@ -2,6 +2,7 @@
 import ctypes
 import dataclasses
 import numpy as np
+import os
 import tempfile
 from typing import List
 import warnings
@@ -75,20 +76,23 @@ class DCTJPEG(_jpeg.JPEG):
         _quant_tbl_no = (ctypes.c_ubyte*4)()
 
         # write content into temporary file
-        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
-            tmp.write(self.content)
-            tmp.flush()
+        tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        tmp.write(self.content)
+        tmp.flush()
+        tmp.close()
 
-            # call
-            CJpegLib.read_jpeg_dct(
-                path=str(self.path),
-                srcfile=tmp.name,
-                Y=Y,
-                Cb=Cb,
-                Cr=Cr,
-                qt=qt,
-                quant_tbl_no=_quant_tbl_no,
-            )
+        # call
+        CJpegLib.read_jpeg_dct(
+            path=str(self.path),
+            srcfile=tmp.name,
+            Y=Y,
+            Cb=Cb,
+            Cr=Cr,
+            qt=qt,
+            quant_tbl_no=_quant_tbl_no,
+        )
+        # clean up temporary file
+        os.remove(tmp.name)
 
         # process
         def process_component(comp):
@@ -150,36 +154,38 @@ class DCTJPEG(_jpeg.JPEG):
         Cb = process_component(self.Cb)
         Cr = process_component(self.Cr)
         # quality and quantization table
-        assert(quality in set(range(-1, 101)))
+        assert quality in set(range(-1, 101))
         if quality != -1:
             qt = None
 
-        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
-            if self.content is not None:
-                # write content into temporary file
-                tmp.write(self.content)
-                tmp.flush()
+        tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        if self.content is not None:
+            # write content into temporary file
+            tmp.write(self.content)
+            tmp.flush()
+            tmp.close()
 
-            # call
-            CJpegLib.write_jpeg_dct(
-                srcfile=tmp.name if self.content is not None else None,
-                dstfile=str(dstfile),
-                Y=Y,
-                Cb=Cb,
-                Cr=Cr,
-                image_dims=self.c_image_dims(),
-                block_dims=self.c_block_dims(),
-                in_color_space=self.jpeg_color_space.index,
-                in_components=self.num_components,
-                qt=qt,
-                quality=quality,
-                quant_tbl_no=quant_tbl_no,
-                num_markers=self.num_markers,
-                marker_types=self.c_marker_types(),
-                marker_lengths=self.c_marker_lengths(),
-                markers=self.c_markers(),
-            )
-
+        # call
+        CJpegLib.write_jpeg_dct(
+            srcfile=tmp.name if self.content is not None else None,
+            dstfile=str(dstfile),
+            Y=Y,
+            Cb=Cb,
+            Cr=Cr,
+            image_dims=self.c_image_dims(),
+            block_dims=self.c_block_dims(),
+            in_color_space=self.jpeg_color_space.index,
+            in_components=self.num_components,
+            qt=qt,
+            quality=quality,
+            quant_tbl_no=quant_tbl_no,
+            num_markers=self.num_markers,
+            marker_types=self.c_marker_types(),
+            marker_lengths=self.c_marker_lengths(),
+            markers=self.c_markers(),
+        )
+        # clean up temporary file
+        os.remove(tmp.name)
 
     @property
     def Y(self) -> np.ndarray:

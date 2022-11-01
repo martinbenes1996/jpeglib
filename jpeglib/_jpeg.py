@@ -8,7 +8,8 @@ from ._bind import CJpegLib
 from ._colorspace import Colorspace
 from ._marker import Marker
 
-MAX_MARKER:int = 50
+MAX_MARKER: int = 50
+
 
 @dataclasses.dataclass
 class JPEG:
@@ -298,7 +299,6 @@ def load_jpeg_info(path: str) -> JPEG:
     cumlens = np.cumsum([0] + marker_lengths.tolist())
     for i in range(num_markers):
         markers[i].content = bytes(_markers[cumlens[i]:cumlens[i+1]])
-
 
     # create jpeg
     return JPEG(
