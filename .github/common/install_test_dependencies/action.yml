@@ -21,13 +21,12 @@ runs:
         cat decoder.pyx | sed -E 's/(.*BG_RGB.*)/# \1/g' | sed -E 's/(.*BG_YCC.*)/# \1/g' > decoder.pyx
         python setup.py install || true
         cd ..
-        sudo apt-get install -y libjpeg62-dev # default-jre-headless libjpeg62
+        sudo apt-get install -y libjpeg62-dev || true # default-jre-headless libjpeg62
         git clone https://github.com/dwgoon/jpegio
         cd jpegio
         cat setup.py | sed -E 's/^.*-march=native.*$//' > setup2.py
         mv setup2.py setup.py || true
         python3 setup.py install || true
-        # python3 setup.py install
         cd ..
         pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox@829dbb9c50d0c885d228fc087de1c104160eee33 || true
 
