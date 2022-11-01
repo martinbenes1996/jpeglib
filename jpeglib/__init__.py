@@ -35,7 +35,12 @@ except pkg_resources.DistributionNotFound:
     __version__ = None
 
 # set default version
-version.set('6b')
+try:
+    version.set('6b')
+except IndexError:
+    import logging
+    logging.warning('found versions: ' + ' '.join(version.versions()))
+    raise RuntimeError('invalid installation, version 6b not found')
 
 __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',

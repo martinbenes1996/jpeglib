@@ -7,17 +7,36 @@ on: # trigger
 
 # parallel jobs to perform
 jobs:
-  unit_tests:
+  unit_tests_linux:
     name: Run unit tests
     runs-on: ubuntu-latest # runner
     if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master' }}
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2
-      - name: Set up Python 3.8 # set architecture and Python3
+      - name: Set up Python 3.10 # set architecture and Python3
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: "3.10"
+          architecture: "x64" # architecture
+      - name: Install test dependencies
+        uses: ./.github/common/install_test_dependencies
+      - name: Build from source
+        uses: ./.github/common/build_from_source
+      - name: Run unit tests # run unittests
+        uses: ./.github/common/unit_tests
+
+  unit_tests_windows:
+    name: Run unit tests
+    runs-on: windows-latest # runner
+    if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master' }}
+    steps: # tasks
+      - name: Set Github Workspace # access Github Workspace
+        uses: actions/checkout@v2
+      - name: Set up Python 3.10 # set architecture and Python3
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
           architecture: "x64" # architecture
       - name: Install test dependencies
         uses: ./.github/common/install_test_dependencies
@@ -32,10 +51,10 @@ jobs:
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2
-      - name: Set up Python 3.x # set architecture and Python3
+      - name: Set up Python 3.10 # set architecture and Python3
         uses: actions/setup-python@v2
         with:
-          python-version: "3.8"
+          python-version: "3.10"
           architecture: "x64" # architecture
       - name: Install dependencies
         uses: ./.github/common/install_dependencies

@@ -635,7 +635,6 @@ per_scan_setup (j_compress_ptr cinfo)
       compptr->last_row_height = tmp;
       /* Prepare array describing MCU composition */
       mcublks = compptr->MCU_blocks;
-      //fprintf(stderr, "blocks %d+%d > %d\n", cinfo->blocks_in_MCU, mcublks, C_MAX_BLOCKS_IN_MCU);
       if (cinfo->blocks_in_MCU + mcublks > C_MAX_BLOCKS_IN_MCU)
 	ERREXIT(cinfo, JERR_BAD_MCU_SIZE);
       while (mcublks-- > 0) {

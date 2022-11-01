@@ -276,8 +276,7 @@ class CJpegLib:
     @classmethod
     def versions(cls):
         # list DLLs
-        vs = [re.search(r'cjpeglib_[^.]*\..*\.so', f) for f in cls._versions()]
-        vs = [v[0] for v in vs if v]
+        vs = [re.search(r'cjpeglib_[^.]*\..*\.so', f)[0] for f in cls._versions()]
         # parse versions
         vs = [re.search(r'(?<=cjpeglib_)[^.]*', f)[0] for f in cls._versions()]
         return vs
@@ -290,7 +289,9 @@ class CJpegLib:
         try:
             so_file = so_files[0]
         except IndexError:
-            raise Exception("dynamic library not found")
+            so_file = None
+        if so_file is None:
+            raise RuntimeError(f'version "{version}" not found')
         libname = pathlib.Path(list(cjpeglib.__path__)[0]) / so_file
         # connect
         cjpeglib_dylib = ctypes.CDLL(libname)
