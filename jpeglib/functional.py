@@ -56,6 +56,7 @@ def read_dct(
     path = str(path)
     with open(path, "rb") as f:
         content = f.read()
+        f.flush()
     # load info
     info = _jpeg.load_jpeg_info(path)
     # create jpeg

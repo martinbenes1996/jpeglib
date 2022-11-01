@@ -1,11 +1,14 @@
 
 import logging
 import numpy as np
+import os
+from parameterized import parameterized
 from PIL import Image
 import tempfile
 import unittest
 
 import jpeglib
+from _defs import ALL_VERSIONS, LIBJPEG_VERSIONS
 
 # https://www.sciencedirect.com/topics/computer-science/quantization-matrix
 qt50_standard = np.array([
@@ -40,14 +43,37 @@ class TestSpatial(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        self.tmp.close()
 
     def tearDown(self):
-        self.tmp.close()
+        os.remove(self.tmp.name)
         del self.tmp
 
+    def assert_compressed(self, x1, x2):
+        mse = np.mean((
+            x1/255. -
+            x2/255.
+        )**2)
+        self.assertLessEqual(mse, 1.)
+
+    def test_spatial(self):
+        """Test of compression and decompression."""
+        self.logger.info("test_spatial")
+        # get decompressed spatial
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        # write and read again
+        im.write_spatial(self.tmp.name)
+        im2 = jpeglib.read_spatial(self.tmp.name)
+        # test compressed version
+        self.assert_compressed(im.spatial, im2.spatial)
+
     def test_synthetic_spatial(self):
-        """"""
+        """Test of synthetic image being generated and stored.
+
+        Comparison is being done based on MSE lower than 1.
+        (weak, but better than nothing)
+        """
         self.logger.info("test_synthetic_spatial")
         # create synthetic JPEG
         np.random.seed(12345)
@@ -57,35 +83,30 @@ class TestSpatial(unittest.TestCase):
             in_color_space='JCS_RGB'
         ).write_spatial(self.tmp.name)
         # load and compare
-        jpeg = jpeglib.read_spatial(self.tmp.name)
-        mse = np.mean((
-            spatial/255. -
-            jpeg.spatial/255.
-        )**2)
-        # psnr = 10*np.log10(1./mse)
-        self.assertLessEqual(mse, 1.)
+        im = jpeglib.read_spatial(self.tmp.name)
+        # test compressed version
+        self.assert_compressed(spatial, im.spatial)
 
-    def _test_default_quality(self, version, qt=75):
+
+    # @parameterized.expand(ALL_VERSIONS)  # found bug with turbo/mozjpeg markers
+    @parameterized.expand(LIBJPEG_VERSIONS)
+    def test_default_quality(self, version):
         """Test default quality factor for a given version."""
-        self.logger.info(f"test_{version}_quality")
+        self.logger.info(f"test_default_quality_{version}")
         with jpeglib.version(version):
-            jpeg = jpeglib.read_spatial("examples/IMG_0791.jpeg")
+            jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
             # with explicit qf
-            jpeg.write_spatial(self.tmp.name, qt=qt)
+            jpeg.write_spatial(self.tmp.name, qt=75)
+            print("read_dct1")
             _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
             # with default qf
+            print("write_spatial2")
             jpeg.write_spatial(self.tmp.name)
+            print("read_dct2")
             _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
             # test equal qts
             np.testing.assert_array_equal(qt1, qt2)
-    def test_default_quality_6b(self):
-        self._test_default_quality('6b')
-    # def test_default_quality_7(self):
-    #     self._test_default_quality('7')
-    # def test_default_quality_9e(self):
-    #     self._test_default_quality('9e')
-    # def test_default_quality_mozjpeg300(self):
-    #     self._test_default_quality('mozjpeg300')
+
 
     # def test_spatial_quality(self):
     #     global qt50_standard

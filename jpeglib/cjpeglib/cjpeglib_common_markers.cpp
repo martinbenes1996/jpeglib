@@ -155,12 +155,12 @@ int set_marker_handlers(
 		JPEG_COM,
 		jpeg_handle_marker
 	);
-	jpeg_set_marker_processor(
-		cinfo,
-		JPEG_APP0 + 15,
-		jpeg_handle_marker
-	);
-	for (int i = 1; i < 14; i++)
+	// jpeg_set_marker_processor(
+	// 	cinfo,
+	// 	JPEG_APP0 + 15,
+	// 	jpeg_handle_marker
+	// );
+	for (int i = 0; i <= 15; i++)
 		jpeg_set_marker_processor(
 			cinfo,
 			JPEG_APP0 + i,
