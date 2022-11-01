@@ -64,10 +64,7 @@ class DCTJPEG(_jpeg.JPEG):
         # no content
         if self.content is None:
             return None, (None, None), None
-        # write content into temporary file
-        tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
-        tmp.write(self.content)
-        tmp.flush()
+
         # allocate DCT components
         Y = self._alloc_dct_component(0)
         Cb, Cr = None, None
@@ -76,18 +73,22 @@ class DCTJPEG(_jpeg.JPEG):
             Cr = self._alloc_dct_component(2)
         qt = ((ctypes.c_short * 64) * 4)()
         _quant_tbl_no = (ctypes.c_ubyte*4)()
-        # call
-        CJpegLib.read_jpeg_dct(
-            path=str(self.path),
-            srcfile=tmp.name,
-            Y=Y,
-            Cb=Cb,
-            Cr=Cr,
-            qt=qt,
-            quant_tbl_no=_quant_tbl_no,
-        )
-        # close temporary file
-        tmp.close()
+
+        # write content into temporary file
+        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
+            tmp.write(self.content)
+            tmp.flush()
+
+            # call
+            CJpegLib.read_jpeg_dct(
+                path=str(self.path),
+                srcfile=tmp.name,
+                Y=Y,
+                Cb=Cb,
+                Cr=Cr,
+                qt=qt,
+                quant_tbl_no=_quant_tbl_no,
+            )
 
         # process
         def process_component(comp):

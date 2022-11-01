@@ -45,7 +45,8 @@ jobs:
       - name: Debug library
         shell: bash
         run: |
-          nm jpeglib/cjpeglib/cjpeglib_turbo130.pyd
+          nm jpeglib\\cjpeglib\\cjpeglib_6b.pyd || true
+          ls C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\ || true
       - name: Run unit tests # run unittests
         uses: ./.github/common/unit_tests
 

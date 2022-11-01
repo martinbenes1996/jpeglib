@@ -31,10 +31,6 @@ class SpatialJPEG(JPEG):
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
 
     def load(self) -> np.ndarray:
-        # write content into temporary file
-        tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
-        tmp.write(self.content)
-        tmp.flush()
 
         # colorspace
         if self.color_space is None:
@@ -52,26 +48,29 @@ class SpatialJPEG(JPEG):
         # allocate spatial
         spatial = self._alloc_spatial(self.color_space.channels)
 
-        # call
-        CJpegLib.read_jpeg_spatial(
-            path=str(self.path),
-            srcfile=tmp.name,
-            spatial=spatial,
-            colormap=self.jpeg_color_space.index,
-            in_colormap=None,  # support of color quantization
-            out_color_space=self.color_space.index,
-            dither_mode=dither_mode,
-            dct_method=dct_method,
-            flags=self.flags,
-        )
+        # write content into temporary file
+        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
+            tmp.write(self.content)
+            tmp.flush()
+
+            # call
+            CJpegLib.read_jpeg_spatial(
+                path=str(self.path),
+                srcfile=tmp.name,
+                spatial=spatial,
+                colormap=self.jpeg_color_space.index,
+                in_colormap=None,  # support of color quantization
+                out_color_space=self.color_space.index,
+                dither_mode=dither_mode,
+                dct_method=dct_method,
+                flags=self.flags,
+            )
         # process
         self.spatial = (
             np.ctypeslib.as_array(spatial)
             .astype(np.ubyte)
             .reshape(self.height, -1, self.color_space.channels)
         )
-        # close temporary file
-        tmp.close()
 
         return self.spatial
 
