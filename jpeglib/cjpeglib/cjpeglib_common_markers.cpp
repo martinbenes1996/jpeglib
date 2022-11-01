@@ -6,6 +6,7 @@
 extern "C" {
 #endif
 
+#include "cjpeglib.h"
 #include "cjpeglib_common_markers.h"
 
 /**

@@ -176,7 +176,7 @@ for v in libjpeg_versions:
         sources=sources,
         headers=hfiles[v],
         define_macros=macros,
-        extra_compile_args=["-fPIC", "-g"] if sys.platform.startswith("win") else [],
+        extra_compile_args=[] if sys.platform.startswith("win") else ["-fPIC", "-g"],
         # language='C++',
         py_limited_api=True,
     )

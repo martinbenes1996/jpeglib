@@ -5,16 +5,14 @@
 extern "C" {
 #endif
 
+#include <stdio.h>
+#include "vjpeglib.h"
+
 typedef unsigned long BITMASK;
 
-#ifdef __cplusplus
 #define FLAG_SET boolean
-#else
-#include <stdbool.h>
-#define FLAG_SET bool
-#endif
 
-FLAG_SET flag_is_set(
+boolean flag_is_set(
 	BITMASK flags,
 	BITMASK mask
 );

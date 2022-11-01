@@ -42,6 +42,10 @@ jobs:
         uses: ./.github/common/install_test_dependencies
       - name: Build from source
         uses: ./.github/common/build_from_source
+      - name: Debug library
+        shell: bash
+        run: |
+          nm jpeglib/cjpeglib/cjpeglib_turbo130.pyd
       - name: Run unit tests # run unittests
         uses: ./.github/common/unit_tests
 

@@ -11,7 +11,8 @@
 #include "cjpeglib_common_flags.h"
 
 // ---------- Meta -------------
-LIBRARY_API int read_jpeg_info(
+LIBRARY_API
+int read_jpeg_info(
     const char *srcfile,
     int *block_dims,
     int *image_dims,
@@ -23,13 +24,15 @@ LIBRARY_API int read_jpeg_info(
     BITMASK *flags
 );
 
-LIBRARY_API int read_jpeg_markers(
+LIBRARY_API
+int read_jpeg_markers(
     const char *srcfile,
     unsigned char *markers
 );
 
 // ----------- DCT -------------
-LIBRARY_API int read_jpeg_dct(
+LIBRARY_API
+int read_jpeg_dct(
     const char *srcfile,
     short *Y,
     short *Cb,
@@ -37,7 +40,8 @@ LIBRARY_API int read_jpeg_dct(
     unsigned short *qt,
     unsigned char *quant_tbl_no
 );
-LIBRARY_API int write_jpeg_dct(
+LIBRARY_API
+int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,
     short *Y,
@@ -57,7 +61,8 @@ LIBRARY_API int write_jpeg_dct(
 );
 
 // ----------- RGB -------------
-LIBRARY_API int read_jpeg_spatial(
+LIBRARY_API
+int read_jpeg_spatial(
     const char *srcfile,
     unsigned char *rgb,
     unsigned char *colormap,    // colormap used
@@ -68,7 +73,8 @@ LIBRARY_API int read_jpeg_spatial(
     BITMASK flags
 );
 
-LIBRARY_API int write_jpeg_spatial(
+LIBRARY_API
+int write_jpeg_spatial(
     const char *dstfile,
     unsigned char *rgb,
     int *image_dims,
@@ -88,7 +94,8 @@ LIBRARY_API int write_jpeg_spatial(
 );
 
 // int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }
-LIBRARY_API int print_jpeg_params(const char *srcfile);
+LIBRARY_API
+int print_jpeg_params(const char *srcfile);
 
 
 #endif // CJPEGLIB_H
