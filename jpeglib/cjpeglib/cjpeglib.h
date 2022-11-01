@@ -1,14 +1,17 @@
 #ifndef CJPEGLIB_H
 #define CJPEGLIB_H
 
-#ifdef __cplusplus
-extern "C" {
+#ifdef _WIN32
+#define LIBRARY_API extern "C" __declspec(dllexport)
+#else
+#define LIBRARY_API extern "C"
 #endif
+
 
 #include "cjpeglib_common_flags.h"
 
 // ---------- Meta -------------
-int read_jpeg_info(
+LIBRARY_API int read_jpeg_info(
     const char *srcfile,
     int *block_dims,
     int *image_dims,
@@ -20,13 +23,13 @@ int read_jpeg_info(
     BITMASK *flags
 );
 
-int read_jpeg_markers(
+LIBRARY_API int read_jpeg_markers(
     const char *srcfile,
     unsigned char *markers
 );
 
 // ----------- DCT -------------
-int read_jpeg_dct(
+LIBRARY_API int read_jpeg_dct(
     const char *srcfile,
     short *Y,
     short *Cb,
@@ -34,7 +37,7 @@ int read_jpeg_dct(
     unsigned short *qt,
     unsigned char *quant_tbl_no
 );
-int write_jpeg_dct(
+LIBRARY_API int write_jpeg_dct(
     const char *srcfile,
     const char *dstfile,
     short *Y,
@@ -54,7 +57,7 @@ int write_jpeg_dct(
 );
 
 // ----------- RGB -------------
-int read_jpeg_spatial(
+LIBRARY_API int read_jpeg_spatial(
     const char *srcfile,
     unsigned char *rgb,
     unsigned char *colormap,    // colormap used
@@ -65,7 +68,7 @@ int read_jpeg_spatial(
     BITMASK flags
 );
 
-int write_jpeg_spatial(
+LIBRARY_API int write_jpeg_spatial(
     const char *dstfile,
     unsigned char *rgb,
     int *image_dims,
@@ -85,10 +88,7 @@ int write_jpeg_spatial(
 );
 
 // int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }
-int print_jpeg_params(const char *srcfile);
+LIBRARY_API int print_jpeg_params(const char *srcfile);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif // CJPEGLIB_H
