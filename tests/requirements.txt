@@ -3,6 +3,4 @@ cython
 Pillow
 pandas
 scipy
-#opencv-python
-#pylibjpeg
 parameterized
