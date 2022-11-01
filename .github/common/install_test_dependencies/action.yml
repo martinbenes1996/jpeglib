@@ -14,6 +14,7 @@ runs:
       shell: bash
       run: |
         if [ -f tests/requirements.txt ]; then pip install -r tests/requirements.txt; fi
+        pip install torchjpeg
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
         git checkout 8f05ed58ff95a2475defa117f9eeccdcee795dc2

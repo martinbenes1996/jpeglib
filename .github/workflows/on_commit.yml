@@ -8,7 +8,7 @@ on: # trigger
 # parallel jobs to perform
 jobs:
   unit_tests_linux:
-    name: Run unit tests
+    name: Run unit tests on Linux
     runs-on: ubuntu-latest # runner
     if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master' }}
     steps: # tasks
@@ -27,7 +27,7 @@ jobs:
         uses: ./.github/common/unit_tests
 
   unit_tests_windows:
-    name: Run unit tests
+    name: Run unit tests on Windows
     runs-on: windows-latest # runner
     if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master' }}
     steps: # tasks
