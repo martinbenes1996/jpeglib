@@ -182,35 +182,18 @@ for v in libjpeg_versions:
     )
 
 
-# # extension builder
-# class custom_build_ext(setuptools.command.build_ext.build_ext):
-#     def get_export_symbols(self, ext):
-#         parts = ext.name.split(".")
-#         if parts[-1] == "__init__":
-#             initfunc_name = "PyInit_" + parts[-2]
-#         else:
-#             initfunc_name = "PyInit_" + parts[-1]
+# extension builder
+class custom_build_ext(setuptools.command.build_ext.build_ext):
+    def get_export_symbols(self, ext):
+        parts = ext.name.split(".")
+        if parts[-1] == "__init__":
+            initfunc_name = "PyInit_" + parts[-2]
+        else:
+            initfunc_name = "PyInit_" + parts[-1]
 
-#     def build_extensions(self):
-#         setuptools.command.build_ext.build_ext.build_extensions(self)
-#         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
-
-# class CTypesExtension(Extension): pass
-# class custom_build_ext(setuptools.command.build_ext.build_ext):
-
-#     def build_extension(self, ext):
-#         self._ctypes = isinstance(ext, CTypesExtension)
-#         return super().build_extension(ext)
-
-#     def get_export_symbols(self, ext):
-#         if self._ctypes:
-#             return ext.export_symbols
-#         return super().get_export_symbols(ext)
-
-#     def get_ext_filename(self, ext_name):
-#         if self._ctypes:
-#             return ext_name + '.so'
-#         return super().get_ext_filename(ext_name)
+    def build_extensions(self):
+        setuptools.command.build_ext.build_ext.build_extensions(self)
+        setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
 # define package
 setuptools.setup(
@@ -237,7 +220,7 @@ setuptools.setup(
     include_package_data=True,
     ext_modules=[cjpeglib[v] for v in libjpeg_versions],
     cmdclass={
-        # "build_ext": custom_build_ext,
+        "build_ext": custom_build_ext,
         **custom_bdist_wheel
     },
     classifiers=[
