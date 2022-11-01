@@ -269,14 +269,14 @@ class CJpegLib:
         so_files = [
             f
             for f in os.listdir(list(cjpeglib.__path__)[0])
-            if re.fullmatch(r'cjpeglib_.*\..*\.so', f)
+            if re.fullmatch(r'cjpeglib_.*\.(.*\.so|pyd)', f)
         ]
         return so_files
 
     @classmethod
     def versions(cls):
         # list DLLs
-        vs = [re.search(r'cjpeglib_[^.]*\..*\.so', f)[0] for f in cls._versions()]
+        vs = [re.search(r'cjpeglib_[^.]*\.(.*\.so|pyd)', f)[0] for f in cls._versions()]
         # parse versions
         vs = [re.search(r'(?<=cjpeglib_)[^.]*', f)[0] for f in cls._versions()]
         return vs
@@ -285,7 +285,7 @@ class CJpegLib:
     def _bind_lib(cls, version='6b'):
         # path of the library
         so_files = [f for f in cls._versions() if re.fullmatch(
-            f'cjpeglib_{version}' + r'\..*\.so', f)]
+            f'cjpeglib_{version}' + r'\.(.*\.so|pyd)', f)]
         try:
             so_file = so_files[0]
         except IndexError:
