@@ -19,6 +19,7 @@ class TestVersion(unittest.TestCase):
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
 
     def tearDown(self):
+        self.tmp.close()
         del self.tmp
         jpeglib.version.set(self.original_version)
 

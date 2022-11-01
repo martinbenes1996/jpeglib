@@ -13,6 +13,7 @@ class TestMarker(unittest.TestCase):
         self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
 
     def tearDown(self):
+        self.tmp.close()
         del self.tmp
 
     def test_marker_jpeg_app0(self):

@@ -189,6 +189,7 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
             initfunc_name = "PyInit_" + parts[-2]
         else:
             initfunc_name = "PyInit_" + parts[-1]
+        return initfunc_name
 
     def build_extensions(self):
         setuptools.command.build_ext.build_ext.build_extensions(self)

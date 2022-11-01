@@ -13,6 +13,7 @@ class TestDCTMethod(unittest.TestCase):
         self.tmp = tempfile.NamedTemporaryFile(suffix='jpeg')
 
     def tearDown(self):
+        self.tmp.close()
         del self.tmp
 
     def test_islow(self):

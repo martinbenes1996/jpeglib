@@ -43,6 +43,7 @@ class TestSpatial(unittest.TestCase):
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
 
     def tearDown(self):
+        self.tmp.close()
         del self.tmp
 
     def test_synthetic_spatial(self):
