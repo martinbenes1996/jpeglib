@@ -69,6 +69,7 @@ class CJpegLib:
             quant_tbl_no
         )
         if status == 0:
+            print(f"{path=} {srcfile=}")
             raise IOError(f"reading of {path} DCT failed")
 
     @classmethod

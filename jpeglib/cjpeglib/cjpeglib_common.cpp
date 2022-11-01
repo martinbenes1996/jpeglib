@@ -29,7 +29,7 @@ FILE *_read_jpeg(const char *filename,
 	// open file
 	FILE *fp;
 	if ((fp = fopen(filename, "rb")) == NULL) {
-		fprintf(stderr, "not possible to open\n");
+		fprintf(stderr, "not possible to open %s\n", filename);
 		return NULL;
 	}
 

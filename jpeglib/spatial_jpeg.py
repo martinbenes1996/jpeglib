@@ -70,6 +70,9 @@ class SpatialJPEG(JPEG):
             .astype(np.ubyte)
             .reshape(self.height, -1, self.color_space.channels)
         )
+        # close temporary file
+        tmp.close()
+
         return self.spatial
 
     def read_spatial(self) -> np.ndarray:

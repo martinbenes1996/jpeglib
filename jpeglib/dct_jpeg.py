@@ -177,6 +177,8 @@ class DCTJPEG(_jpeg.JPEG):
             marker_lengths=self.c_marker_lengths(),
             markers=self.c_markers(),
         )
+        # close temporary file
+        tmp.close()
 
     @property
     def Y(self) -> np.ndarray:
