@@ -85,6 +85,7 @@ int write_jpeg_spatial(
     unsigned short *qt,
     short quality,
     short *quant_tbl_no,
+    short base_quant_tbl_idx,
     short smoothing_factor,
     int num_markers,
     int *marker_types,

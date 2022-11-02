@@ -1,11 +1,17 @@
 
+from __future__ import annotations
 from dataclasses import dataclass
+from typing import Union, Type
 
 
 @dataclass
 class CStruct:
     name: str
     """item name"""
+
+    def __post_init__(self):
+        self.index  # check if valid
+
     @classmethod
     def name_to_index(cls, name):
         raise NotImplementedError
@@ -48,3 +54,15 @@ class CStruct:
         """
         name = cls.index_to_name(index)
         return cls(name=name)
+
+    @classmethod
+    def parse_input(cls, x: Union[str, CStruct]) -> int:
+        # not specified
+        if x is None:
+            return -1
+        # check string
+        if isinstance(x, str):
+            return cls(x).index
+        # CStruct
+        else:
+            return x.index

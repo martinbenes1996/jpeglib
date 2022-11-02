@@ -10,8 +10,6 @@ extern "C" {
 
 typedef unsigned long BITMASK;
 
-#define FLAG_SET boolean
-
 boolean flag_is_set(
 	BITMASK flags,
 	BITMASK mask

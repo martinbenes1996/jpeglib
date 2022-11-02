@@ -82,8 +82,8 @@ def read_dct(
 def read_spatial(
     path: str,
     out_color_space: str = None,
-    dither_mode: str = None,
-    dct_method: str = None,
+    dct_method: typing.Union[str, DCTMethod] = None,
+    dither_mode: typing.Union[str, Dithermode] = None,
     flags: list = []
 ) -> SpatialJPEG:
     """Function for decompressing the JPEG as a pixel data (spatial domain).
@@ -144,12 +144,8 @@ def read_spatial(
             'JCS_RGB' if info.has_chrominance else 'JCS_GRAYSCALE'
         )
 
-    if dct_method is not None:
-        dct_method = DCTMethod(dct_method)
-    if dither_mode is not None:
-        dither_mode = Dithermode(dither_mode)
     # create jpeg
-    return SpatialJPEG(
+    im = SpatialJPEG(
         path=path,
         content=content,
         height=info.height,
@@ -161,11 +157,24 @@ def read_spatial(
         markers=info.markers,
         spatial=None,
         color_space=out_color_space,
-        dither_mode=dither_mode,
-        dct_method=dct_method,
+        # dither_mode=dither_mode,
+        # dct_method=dct_method,
         flags=flags,
         progressive_mode=info.progressive_mode
     )
+    if dct_method is not None or dither_mode is not None:
+        # parse inputs
+        if dct_method is not None:
+            dct_method = DCTMethod.parse_input(dct_method)
+        if dither_mode is not None:
+            dither_mode = Dithermode.parse_input(dither_mode)
+        # load image data
+        im.load(
+            dct_method=dct_method,
+            dither_mode=dither_mode
+        )
+    return im
+
 
 
 def from_spatial(
@@ -262,8 +271,6 @@ def from_spatial(
         markers=None,
         spatial=spatial,
         color_space=in_color_space,
-        dither_mode=None,
-        dct_method=None,
         flags=[],
         progressive_mode=None
     )

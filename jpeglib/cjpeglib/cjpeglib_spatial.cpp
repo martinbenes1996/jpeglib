@@ -133,22 +133,23 @@ int read_jpeg_spatial(
 }
 
 int write_jpeg_spatial(
-  const char *dstfile,
-  unsigned char *rgb,
-  int *image_dims,
-  int *jpeg_color_space,
-  int *num_components,
-  int dct_method,
-  int *samp_factor,
-  unsigned short *qt,
-  short quality,
-  short *quant_tbl_no,
-  short smoothing_factor,
-  int num_markers,
-  int *marker_types,
-  int *marker_lengths,
-  unsigned char *markers,
-  BITMASK flags
+	const char *dstfile,
+	unsigned char *rgb,
+	int *image_dims,
+	int *jpeg_color_space,
+	int *num_components,
+	int dct_method,
+	int *samp_factor,
+	unsigned short *qt,
+	short quality,
+	short *quant_tbl_no,
+	short base_quant_tbl_idx,
+	short smoothing_factor,
+	int num_markers,
+	int *marker_types,
+	int *marker_lengths,
+	unsigned char *markers,
+	BITMASK flags
 ) {
 	// sanitizing libjpeg errors
 	try {
@@ -170,25 +171,27 @@ int write_jpeg_spatial(
 		// set basic parameters
 		cinfo.image_height = image_dims[0];
 		cinfo.image_width = image_dims[1];
-		if (jpeg_color_space != NULL)
+		if (jpeg_color_space != NULL) {
 			cinfo.in_color_space = (J_COLOR_SPACE)(jpeg_color_space[0]);
-		if (num_components != NULL)
+		}
+		if (num_components != NULL) {
 			cinfo.input_components = num_components[0];
-
+		}
 		jpeg_set_defaults(&cinfo);
 		jpeg_set_colorspace(&cinfo, (J_COLOR_SPACE)(jpeg_color_space[1]));
 
 		// set advanced parameters
 		if (dct_method >= 0) {
 			cinfo.dct_method = (J_DCT_METHOD)dct_method;
+			fprintf(stderr, "dct method %d->%d\n", dct_method, cinfo.dct_method);
 		}
 		int chroma_factor[2];
 		if (samp_factor != NULL) {
 			chroma_factor[0] = *(samp_factor + 0);
 			chroma_factor[1] = *(samp_factor + 1);
 			for (int comp = 0; comp < cinfo.num_components; comp++) {
-			cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp * 2 + 0);
-			cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp * 2 + 1);
+				cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp * 2 + 0);
+				cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp * 2 + 1);
 			}
 		} else {
 			chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;
@@ -200,6 +203,16 @@ int write_jpeg_spatial(
 			_write_qt(&cinfo, qt, quant_tbl_no, 1);
 		// write quality
 		} else if (quality > 0) {
+			#if LIBVERSION >= 6300
+			if(base_quant_tbl_idx >= 0) {
+				jpeg_c_set_int_param(
+					&cinfo,
+					JINT_BASE_QUANT_TBL_IDX,
+					base_quant_tbl_idx
+				);
+			}
+			#endif
+
 			// force baseline (8bit quantization)
 			boolean force_baseline = FALSE;
 			if (overwrite_flag(flags, FORCE_BASELINE))
@@ -258,19 +271,16 @@ int write_jpeg_spatial(
 				&cinfo,
 				marker_types[i],
 				(const JOCTET *)(markers + offset),
+				// markers + offset,
 				marker_lengths[i]
 			);
 			offset += marker_lengths[i];
 		}
 
 		// write data
-		char *rowptr = (char *)rgb;
+		unsigned char *rowptr = rgb;
 		for (unsigned h = 0; h < cinfo.image_height; h++) {
-			jpeg_write_scanlines(
-				&cinfo,
-				(JSAMPARRAY)&rowptr,
-				1
-			);
+			jpeg_write_scanlines(&cinfo, &rowptr, 1);
 			rowptr += cinfo.image_width * cinfo.input_components;
 		}
 		// cleanup

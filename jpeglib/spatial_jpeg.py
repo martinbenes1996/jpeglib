@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import os
 import tempfile
-import typing
+from typing import Union
 import warnings
 
 from ._bind import CJpegLib
@@ -22,8 +22,8 @@ class SpatialJPEG(JPEG):
     color_space: Colorspace
     """color space of the pixel data"""
     # needed for compression, not actual props
-    dither_mode: Dithermode
-    dct_method: DCTMethod
+    # dither_mode: Dithermode
+    # dct_method: DCTMethod
     flags: list
 
     def _alloc_spatial(self, channels: int = None):
@@ -31,20 +31,20 @@ class SpatialJPEG(JPEG):
             channels = self.color_space.channels
         return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
 
-    def load(self) -> np.ndarray:
+    def load(
+        self,
+        dct_method: Union[DCTMethod, str] = None,
+        dither_mode: Union[Dithermode, str] = None,
+    ) -> np.ndarray:
 
         # colorspace
         if self.color_space is None:
             self.color_space = Colorspace('JCS_RGB')
             # self.color_space = self.jpeg_color_space
         # dither mode
-        dither_mode = None
-        if self.dither_mode is not None:
-            dither_mode = self.dither_mode.index
+        dither_mode = Dithermode.parse_input(dither_mode)
         # dct method
-        dct_method = None
-        if self.dct_method is not None:
-            dct_method = self.dct_method.index
+        dct_method = DCTMethod.parse_input(dct_method)
 
         # allocate spatial
         spatial = self._alloc_spatial(self.color_space.channels)
@@ -82,14 +82,17 @@ class SpatialJPEG(JPEG):
         warnings.warn('read_spatial() is obsolete, use load()')
         return self.load()
 
-    def write_spatial(self,
-                      path: str = None,
-                      qt: typing.Union[int, np.ndarray] = None,
-                      quant_tbl_no: np.ndarray = None,
-                      dct_method: typing.Union[str, DCTMethod] = None,
-                      # dither_mode: Dithermode = None,
-                      smoothing_factor: int = None,
-                      flags: list = []):
+    def write_spatial(
+        self,
+        path: str = None,
+        qt: Union[int, np.ndarray] = None,
+        quant_tbl_no: np.ndarray = None,
+        base_quant_tbl_idx: int = None,
+        dct_method: Union[str, DCTMethod] = None,
+        # dither_mode: Dithermode = None,
+        smoothing_factor: int = None,
+        flags: list = []
+    ):
         """Writes a spatial image representation (i.e. RGB) to a file.
 
         :param path: Destination file name. If not given, source file is overwritten.
@@ -98,6 +101,8 @@ class SpatialJPEG(JPEG):
         :type qt: int | numpy.ndarray, optional
         :param quant_tbl_no: assignment of quantization tables to components, (0 Y, 1 Cb, 1Cr) by default
         :type quant_tbl_no: numpy.ndarray, optional
+        :param base_quant_tbl_idx: base QT to scale, only supported in MozJPEG 3+
+        :type base_quant_tbl_idx: int, optional
         :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`. If not given, using the libjpeg default.
         :type dct_method: str | :class:`_dctmethod.DCTMethod`, optional
         :param smoothing_factor: Smoothing factor, between 0 and 100. Using default from libjpeg by default.
@@ -131,13 +136,7 @@ class SpatialJPEG(JPEG):
         if dstfile is None:
             raise IOError('no destination file specified')
         # dct method
-        if dct_method is not None:
-            # str
-            try:
-                dct_method = DCTMethod(dct_method).index
-            # DCTMethod
-            except KeyError:
-                dct_method = dct_method.index
+        dct_method = DCTMethod.parse_input(dct_method)
         # quality
         # use default of library
         if qt is None:
@@ -172,6 +171,7 @@ class SpatialJPEG(JPEG):
             qt=qt,
             quality=quality,
             quant_tbl_no=quant_tbl_no,
+            base_quant_tbl_idx=base_quant_tbl_idx,
             smoothing_factor=smoothing_factor,
             num_markers=self.num_markers,
             marker_types=self.c_marker_types(),

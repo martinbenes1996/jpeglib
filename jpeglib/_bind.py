@@ -160,6 +160,7 @@ class CJpegLib:
         qt,
         quality,
         quant_tbl_no,
+        base_quant_tbl_idx,
         smoothing_factor,
         num_markers: int,
         marker_types,
@@ -179,6 +180,7 @@ class CJpegLib:
             qt,
             cls.factor(quality),
             quant_tbl_no,
+            cls.factor(base_quant_tbl_idx),
             cls.factor(smoothing_factor),
             num_markers,
             marker_types,
@@ -210,11 +212,10 @@ class CJpegLib:
 
     @classmethod
     def flags_to_mask(cls, flags: List[str]):
-        mask = 0xFFFFFFFFFFFFFFFF
+        mask = 0xFFFFFFFF
         if flags is None:
             return mask
         for flag in flags:
-            # print(f"flag {flag}:")
             # parse sign
             sign = '-' if flag[0] == '-' else '+'
             if not flag[0].isalpha():
@@ -243,7 +244,7 @@ class CJpegLib:
     @classmethod
     def factor(cls, factor):
         if factor is None:
-            factor = 0
+            factor = -1
         return ctypes.c_short(factor)
 
     _lib = None

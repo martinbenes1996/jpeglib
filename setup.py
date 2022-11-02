@@ -1,5 +1,4 @@
 
-
 import codecs
 import ctypes
 import os
@@ -40,16 +39,16 @@ libjpeg_versions = {
     '9c': (None, 90),
     '9d': (None, 90),
     '9e': (None, 90),
-    'turbo120': ('1.2.0', 120),
-    'turbo130': ('1.3.0', 130),
-    'turbo140': ('1.4.0', 140),
-    'turbo150': ('1.5.0', 150),
-    'turbo200': ('2.0.0', 200),
-    'turbo210': ('2.1.0', 210),
-    'mozjpeg101': ('1.0.1', 101),
-    'mozjpeg201': ('2.0.1', 201),
-    'mozjpeg300': ('3.0.0', 300),
-    'mozjpeg403': ('4.0.3', 403),
+    'turbo120': ('1.2.0', 3120),
+    'turbo130': ('1.3.0', 3130),
+    'turbo140': ('1.4.0', 3140),
+    'turbo150': ('1.5.0', 3150),
+    'turbo200': ('2.0.0', 3200),
+    'turbo210': ('2.1.0', 3210),
+    'mozjpeg101': ('1.0.1', 6101),
+    'mozjpeg201': ('2.0.1', 6201),
+    'mozjpeg300': ('3.0.0', 6300),
+    'mozjpeg403': ('4.0.3', 6403),
 }
 
 # requirements
@@ -139,6 +138,7 @@ for v in libjpeg_versions:
     # define macros
     macros = [
         ("BITS_IN_JSAMPLE", 8),
+        ("HAVE_UNSIGNED_CHAR", 1),
         ("HAVE_STDLIB_H", 1),
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),

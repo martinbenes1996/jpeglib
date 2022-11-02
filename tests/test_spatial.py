@@ -88,21 +88,18 @@ class TestSpatial(unittest.TestCase):
         self.assert_compressed(spatial, im.spatial)
 
 
-    # @parameterized.expand(ALL_VERSIONS)  # found bug with turbo/mozjpeg markers
-    @parameterized.expand(LIBJPEG_VERSIONS)
+    @parameterized.expand(ALL_VERSIONS)
+    # @parameterized.expand(LIBJPEG_VERSIONS)
     def test_default_quality(self, version):
         """Test default quality factor for a given version."""
         self.logger.info(f"test_default_quality_{version}")
         with jpeglib.version(version):
             jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
             # with explicit qf
-            jpeg.write_spatial(self.tmp.name, qt=75)
-            print("read_dct1")
+            jpeg.write_spatial(self.tmp.name, qt=75, base_quant_tbl_idx=0)
             _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
             # with default qf
-            print("write_spatial2")
             jpeg.write_spatial(self.tmp.name)
-            print("read_dct2")
             _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
             # test equal qts
             np.testing.assert_array_equal(qt1, qt2)
