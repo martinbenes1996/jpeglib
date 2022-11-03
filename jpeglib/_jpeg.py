@@ -126,6 +126,24 @@ class JPEG:
         return self.num_components > 1
 
     @property
+    def has_black(self) -> bool:
+        """Indicator of presence of fourth, black channel.
+
+        :return: True for YCCK/CMYK image, False for simple grayscale/color image
+        :rtype: bool
+
+        :Example:
+
+        >>> im = jpeglib.read_spatial("rgb.jpeg")
+        >>> im.has_chrominance # -> False
+
+        >>> im = jpeglib.read_spatial("cmyk.jpeg")
+        >>> im.has_chrominance # -> True
+
+        """
+        return self.num_components > 3
+
+    @property
     def num_components(self) -> int:
         """Getter of number of color components in the JPEG.
 
@@ -299,7 +317,6 @@ def load_jpeg_info(path: str) -> JPEG:
     cumlens = np.cumsum([0] + marker_lengths.tolist())
     for i in range(num_markers):
         markers[i].content = bytes(_markers[cumlens[i]:cumlens[i+1]])
-
     # create jpeg
     return JPEG(
         path=str(path),

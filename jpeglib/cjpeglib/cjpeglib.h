@@ -37,6 +37,7 @@ int read_jpeg_dct(
     short *Y,
     short *Cb,
     short *Cr,
+    short *K,
     unsigned short *qt,
     unsigned char *quant_tbl_no
 );
@@ -47,6 +48,7 @@ int write_jpeg_dct(
     short *Y,
     short *Cb,
     short *Cr,
+    short *K,
     int *image_dims,
     int *block_dims,
     int in_color_space,

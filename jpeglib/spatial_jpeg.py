@@ -39,7 +39,10 @@ class SpatialJPEG(JPEG):
 
         # colorspace
         if self.color_space is None:
-            self.color_space = Colorspace('JCS_RGB')
+            if self.jpeg_color_space == Colorspace('JCS_CMYK'):
+                self.color_space = Colorspace('JCS_CMYK')
+            else:
+                self.color_space = Colorspace('JCS_RGB')
             # self.color_space = self.jpeg_color_space
         # dither mode
         dither_mode = Dithermode.parse_input(dither_mode)

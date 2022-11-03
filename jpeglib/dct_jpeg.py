@@ -21,21 +21,13 @@ class DCTJPEG(_jpeg.JPEG):
     """chrominance blue-difference tensor"""
     Cr: np.ndarray
     """chrominance red-difference tensor"""
+    K: np.ndarray
+    """black (cmyK) tensor"""
     qt: np.ndarray
     """quantization tensor"""
     quant_tbl_no: np.ndarray
     """assignment of quantization tables to components,
     (0 Y, 1 Cb, 1Cr) by default"""
-
-    # def is_read(self) -> bool:
-    #     has_Y = self.Y is not None
-    #     has_qt = self.qt is not None
-    #     has_CbCr = self.Cb is not None and self.Cr is not None
-    #     has_no_CbCr = self.Cb is None and self.Cr is None
-    #     return (
-    #         (has_Y and has_qt and has_no_CbCr) # grayscale
-    #         or (has_Y and has_qt and has_CbCr) # color
-    #     )
 
     def _alloc_dct_component(self, i: int):
         return (
@@ -72,8 +64,11 @@ class DCTJPEG(_jpeg.JPEG):
         if self.has_chrominance:  # has chrominance
             Cb = self._alloc_dct_component(1)
             Cr = self._alloc_dct_component(2)
+        K = None
+        if self.has_black:  # has black
+            K = self._alloc_dct_component(3)
         qt = ((ctypes.c_short * 64) * 4)()
-        _quant_tbl_no = (ctypes.c_ubyte*4)()
+        _quant_tbl_no = (ctypes.c_ubyte * 4)()
 
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
@@ -88,6 +83,7 @@ class DCTJPEG(_jpeg.JPEG):
             Y=Y,
             Cb=Cb,
             Cr=Cr,
+            K=K,
             qt=qt,
             quant_tbl_no=_quant_tbl_no,
         )
@@ -103,6 +99,8 @@ class DCTJPEG(_jpeg.JPEG):
         if self.has_chrominance:
             self.Cb = process_component(Cb)
             self.Cr = process_component(Cr)
+        if self.has_black:
+            self.K = process_component(K)
         self.quant_tbl_no = np.array([
             _quant_tbl_no[i]
             for i in range(self.num_components)
@@ -153,6 +151,7 @@ class DCTJPEG(_jpeg.JPEG):
         Y = process_component(self.Y)
         Cb = process_component(self.Cb)
         Cr = process_component(self.Cr)
+        K = process_component(self.K)
         # quality and quantization table
         assert quality in set(range(-1, 101))
         if quality != -1:
@@ -172,6 +171,7 @@ class DCTJPEG(_jpeg.JPEG):
             Y=Y,
             Cb=Cb,
             Cr=Cr,
+            K=K,
             image_dims=self.c_image_dims(),
             block_dims=self.c_block_dims(),
             in_color_space=self.jpeg_color_space.index,
@@ -222,6 +222,18 @@ class DCTJPEG(_jpeg.JPEG):
     def Cr(self, Cr: np.ndarray):
         """Chrominance red-difference tensor setter."""
         self._Cr = Cr
+
+    @property
+    def K(self) -> np.ndarray:
+        """Black tensor getter."""
+        if self.has_black and self._K is None:
+            self.load()
+        return self._K
+
+    @K.setter
+    def K(self, K: np.ndarray):
+        """Black tensor setter."""
+        self._K = K
 
     @property
     def qt(self) -> np.ndarray:
@@ -281,6 +293,7 @@ class DCTJPEG(_jpeg.JPEG):
         del self._Y
         del self._Cb
         del self._Cr
+        del self._K
         del self._qt
 
 

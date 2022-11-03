@@ -52,7 +52,6 @@ class TestSpatial(unittest.TestCase):
         del self.tmp
         jpeglib.version.set(self.original_version)
 
-
     def assert_compressed(self, x1, x2):
         mse = np.mean((
             x1/255. -
@@ -152,6 +151,30 @@ class TestSpatial(unittest.TestCase):
             with jpeglib.version(v):
                 x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
             np.testing.assert_array_equal(x_ref, x)
+
+    def test_grayscale(self):
+        """Test reading and writing grayscale spatial."""
+        # compress
+        np.random.seed(12345)
+        x = np.random.randint(0, 255, (128, 128, 1), dtype=np.int16)
+        jpeglib.from_spatial(x).write_spatial(self.tmp.name)
+        # load DCT
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        self.assertFalse(jpeg.has_chrominance)
+        self.assertEqual(jpeg.Y.shape, (16, 16, 8, 8))
+        # decompress
+        im = jpeglib.read_spatial(self.tmp.name)
+        self.assertFalse(im.has_chrominance)
+        self.assertEqual(im.spatial.shape, (128, 128, 1))
+        # writeback of grayscale
+        im.write_spatial(self.tmp.name)
+
+
+
+    def test_cmyk(self):
+        """Test reading and writing cmyk spatial."""
+        pass  # TODO
+
 
     # def test_spatial_qt(self):
     #     global qt50_standard

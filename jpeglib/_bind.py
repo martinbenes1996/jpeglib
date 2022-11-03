@@ -54,6 +54,7 @@ class CJpegLib:
         Y,
         Cb,
         Cr,
+        K,
         qt,
         quant_tbl_no,
         path=None,
@@ -65,6 +66,7 @@ class CJpegLib:
             Y,
             Cb,
             Cr,
+            K,
             qt,
             quant_tbl_no
         )
@@ -80,6 +82,7 @@ class CJpegLib:
         Y,
         Cb,
         Cr,
+        K,
         image_dims,
         block_dims,
         in_color_space,
@@ -98,6 +101,7 @@ class CJpegLib:
             Y,
             Cb,
             Cr,
+            K,
             image_dims,
             block_dims,
             in_color_space,
@@ -189,7 +193,7 @@ class CJpegLib:
             cls.flags_to_mask(flags)
         )
         if status == 0:
-            raise IOError(f"writing RGB to {dstfile} failed")
+            raise IOError(f"writing spatial to {dstfile} failed")
 
     MASKS = {
         "DO_FANCY_SAMPLING": (0b1 << 0),

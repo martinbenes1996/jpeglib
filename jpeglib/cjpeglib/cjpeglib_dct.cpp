@@ -39,6 +39,7 @@ int read_jpeg_dct(
   short *Y,
   short *Cb,
   short *Cr,
+  short *K,
   unsigned short *qt,
   unsigned char *quant_tbl_no
 ) {
@@ -58,7 +59,7 @@ int read_jpeg_dct(
 		JCOEFPTR blockptr_one;
 		//int HblocksY = cinfo.comp_info->height_in_blocks; // max height
 		//int WblocksY = cinfo.comp_info->width_in_blocks; // max width
-		short *dct[3] = {Y, Cb, Cr};
+		short *dct[4] = {Y, Cb, Cr, K};
 		for(int ch = 0; ch < cinfo.num_components; ch++) {
 			if(dct[ch] == NULL) continue; // skip component, if null
 			jpeg_component_info* compptr_one = cinfo.comp_info + ch;
@@ -88,10 +89,10 @@ int read_jpeg_dct(
 			//   }
 			// }
 			for (int ch = 0; ch < cinfo.num_components; ch++) {
-			int qt_i = cinfo.comp_info[ch].quant_tbl_no;
-			quant_tbl_no[ch] = qt_i; // copy quantization table assignment
-			for (int i = 0; i < 64; i++) {
-				qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[qt_i]->quantval[i]; //[(i&7)*8+(i>>3)];
+				int qt_i = cinfo.comp_info[ch].quant_tbl_no;
+				quant_tbl_no[ch] = qt_i; // copy quantization table assignment
+				for (int i = 0; i < 64; i++) {
+					qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[qt_i]->quantval[i]; //[(i&7)*8+(i>>3)];
 			}
 			//(i&7)*8+(i>>3)
 			// memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
@@ -136,6 +137,7 @@ int write_jpeg_dct(
 	short *Y,
 	short *Cb,
 	short *Cr,
+	short *K,
 	int *image_dims,
 	int *block_dims,
 	int in_color_space,
@@ -314,20 +316,20 @@ int write_jpeg_dct(
 		// write DCT coefficients
 		JBLOCKARRAY buffer_one;
 		JCOEFPTR blockptr_one;
-		short *dct[3] = {Y, Cb, Cr};
+		short *dct[4] = {Y, Cb, Cr, K};
 		for (int ch = 0; ch < 3; ch++) { // channel iterator
 			if (dct[ch] == NULL) continue;
 			jpeg_component_info *comp_ptr = cinfo_out.comp_info + ch;
 			int Hblocks = comp_ptr->height_in_blocks; // max height
 			int Wblocks = comp_ptr->width_in_blocks;  // max width
 			for (int h = 0; h < Hblocks; h++) { // height iterator
-			buffer_one = (cinfo_out.mem->access_virt_barray)((j_common_ptr)&cinfo_out, coeffs_array[ch], h, (JDIMENSION)1, TRUE);
-			for (int w = 0; w < Wblocks; w++) { // width iterator
-				blockptr_one = buffer_one[0][w];
-				for (int bh = 0; bh < 8; bh++)
-				for (int bw = 0; bw < 8; bw++)
-					blockptr_one[bh * 8 + bw] = ((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[bw * 8 + bh];
-			}
+				buffer_one = (cinfo_out.mem->access_virt_barray)((j_common_ptr)&cinfo_out, coeffs_array[ch], h, (JDIMENSION)1, TRUE);
+				for (int w = 0; w < Wblocks; w++) { // width iterator
+					blockptr_one = buffer_one[0][w];
+					for (int bh = 0; bh < 8; bh++)
+						for (int bw = 0; bw < 8; bw++)
+							blockptr_one[bh * 8 + bw] = ((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[bw * 8 + bh];
+				}
 			}
 		}
 

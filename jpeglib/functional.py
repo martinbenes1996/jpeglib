@@ -74,6 +74,7 @@ def read_dct(
         Y=None,
         Cb=None,
         Cr=None,
+        K=None,
         qt=None,
         progressive_mode=info.progressive_mode
     )
@@ -140,9 +141,11 @@ def read_spatial(
         out_color_space = Colorspace(out_color_space)
         jpeg_color_space = out_color_space
     else:
-        out_color_space = Colorspace(
-            'JCS_RGB' if info.has_chrominance else 'JCS_GRAYSCALE'
-        )
+        if info.has_black:
+            out_color_space = 'JCS_CMYK'
+        else:
+            out_color_space = 'JCS_RGB' if info.has_chrominance else 'JCS_GRAYSCALE'
+        out_color_space = Colorspace(out_color_space)
 
     # create jpeg
     im = SpatialJPEG(
@@ -236,12 +239,10 @@ def from_spatial(
     height, width, num_components = spatial.shape
     # parse colorspace
     if in_color_space is not None:
-        try:
+        if not isinstance(in_color_space, Colorspace):
             cspace = Colorspace(in_color_space)
             cspace.index
             in_color_space = cspace
-        except KeyError:
-            in_color_space = in_color_space
     # infere colorspace
     if in_color_space is None:
         if num_components == 3:
@@ -254,6 +255,8 @@ def from_spatial(
             raise IOError('failed to infere colorspace')
     if in_color_space == Colorspace('JCS_GRAYSCALE'):
         jpeg_color_space = Colorspace('JCS_GRAYSCALE')
+    elif in_color_space == Colorspace('JCS_CMYK'):
+        jpeg_color_space = Colorspace('JCS_YCCK')
     else:
         jpeg_color_space = Colorspace('JCS_YCbCr')
     # else:
@@ -280,6 +283,7 @@ def from_dct(
     Y: np.ndarray,
     Cb: np.ndarray = None,
     Cr: np.ndarray = None,
+    K: np.ndarray = None,
     qt: np.ndarray = None,
     quant_tbl_no: list = None,
 ) -> DCTJPEG:
@@ -304,6 +308,8 @@ def from_dct(
     :type Cb: np.ndarray
     :param Cr: Red chrominance tensor.
     :type Cr: np.ndarray
+    :param K: Black tensor.
+    :type K: np.ndarray
     :param qt: Quantization table tensor.
     :type qt: np.ndarray
 
@@ -339,7 +345,10 @@ def from_dct(
     """
     # infere colorspace
     if Cb is not None and Cr is not None:
-        jpeg_color_space = Colorspace('JCS_YCbCr')
+        if K is not None:
+            jpeg_color_space = Colorspace('JCS_YCCK')
+        else:
+            jpeg_color_space = Colorspace('JCS_YCbCr')
     elif Cb is None and Cr is None:
         # jpeg_color_space = Colorspace('JCS_YCbCr')  # only Y
         jpeg_color_space = Colorspace('JCS_GRAYSCALE')
@@ -360,12 +369,14 @@ def from_dct(
             quant_tbl_no = np.array([0])
     # infere samp_factor
     # TODO
-    samp_factor = ((1, 1), (1, 1), (1, 1))
+    samp_factor = ((1, 1), (1, 1), (1, 1), (1, 1))
     # block dims
     block_dims = [[Y.shape[0], Y.shape[1]]]
     if Cb is not None and Cr is not None:
         block_dims.append([Cb.shape[0], Cb.shape[1]])
         block_dims.append([Cr.shape[0], Cr.shape[1]])
+    if K is not None:
+        block_dims.append([K.shape[0], K.shape[1]])
     block_dims = np.array(block_dims)
 
     # create jpeg
@@ -383,6 +394,7 @@ def from_dct(
         Y=Y,
         Cb=Cb,
         Cr=Cr,
+        K=None,
         qt=qt,
         progressive_mode=None,
     )
