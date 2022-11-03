@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 import jpeglib
-from _defs import ALL_VERSIONS, LIBJPEG_VERSIONS
+from _defs import ALL_VERSIONS, version_cluster
 
 # https://www.sciencedirect.com/topics/computer-science/quantization-matrix
 qt50_standard = np.array([
@@ -43,12 +43,15 @@ class TestSpatial(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
+        self.original_version = jpeglib.version.get()
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
         self.tmp.close()
 
     def tearDown(self):
         os.remove(self.tmp.name)
         del self.tmp
+        jpeglib.version.set(self.original_version)
+
 
     def assert_compressed(self, x1, x2):
         mse = np.mean((
@@ -116,6 +119,39 @@ class TestSpatial(unittest.TestCase):
 
     #     # test matrix
     #     np.testing.assert_array_equal(qt50, qt50_standard)
+
+    @parameterized.expand([
+        ['6b', '7', True],
+        ['9', '9a', False],
+    ])
+    def test_mismatch_baseline(self, v1, v2, equal_Y):
+        """Decompress with given two versions and observe differing output."""
+        self.logger.info(f"test_mismatch_baseline_{v1}_{v2}")
+        # decompress image with given versions
+        with jpeglib.version(v1):
+            x1 = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        with jpeglib.version(v2):
+            x2 = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        # compare not equal
+        self.assertFalse((x1 == x2).all())
+
+    @parameterized.expand([
+        ['6b','turbo120','turbo130','turbo140','turbo150','turbo200','turbo210'],
+        ['7','8','8a','8b','8c','8d','9'],
+        ['9a','9b','9c','9d','9e'],
+        ['6b','mozjpeg101','mozjpeg201','mozjpeg300','mozjpeg403'],
+    ], name_func=version_cluster)
+    def test_equal_baseline(self, *versions):
+        """Decompress with given versions and observe the same output."""
+        self.logger.info(f"test_mismatch_baseline_{'_'.join(versions)}")
+        # decompress image with reference
+        with jpeglib.version(versions[0]):
+            x_ref = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        # decompress with each version and compare to the reference
+        for v in versions:
+            with jpeglib.version(v):
+                x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+            np.testing.assert_array_equal(x_ref, x)
 
     # def test_spatial_qt(self):
     #     global qt50_standard

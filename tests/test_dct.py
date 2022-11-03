@@ -10,6 +10,7 @@ import tempfile
 import unittest
 
 import jpeglib
+from _defs import version_cluster
 
 # https://www.sciencedirect.com/topics/computer-science/quantization-matrix
 qt50_standard = np.array([
@@ -44,12 +45,14 @@ class TestDCT(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
+        self.original_version = jpeglib.version.get()
         self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
         self.tmp.close()
 
     def tearDown(self):
         os.remove(self.tmp.name)
         del self.tmp
+        jpeglib.version.set(self.original_version)
 
     def test_dct(self):
         """Test of lossless reading and writing of DCT."""
@@ -105,6 +108,52 @@ class TestDCT(unittest.TestCase):
         self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1]*ratio_Cr[0])
         # write back (just for completeness)
         jpeg.write_dct(self.tmp.name)
+
+    def _compressed_dct(self, im, v):
+        with jpeglib.version(v):
+            im.write_spatial(self.tmp.name)
+            return jpeglib.read_dct(self.tmp.name).load()
+
+    @parameterized.expand([
+        ['6b', '7', True],
+        ['9d', '9e', True],
+        ['mozjpeg201','mozjpeg300', False],
+    ])
+    def test_mismatch_baseline(self, v1, v2, equal_Y):
+        """Compress with given two versions and observe differing output."""
+        self.logger.info(f"test_mismatch_baseline_{v1}_{v2}")
+        # compress image with given versions
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        Y1, (Cb1, Cr1), _ = self._compressed_dct(im, v1)
+        Y2, (Cb2, Cr2), _ = self._compressed_dct(im, v2)
+        # compare not equal
+        if equal_Y:
+            self.assertTrue((Y1 == Y2).all())
+        else:
+            self.assertFalse((Y1 == Y2).all())
+        self.assertFalse((Cb1 == Cb2).all())
+        self.assertFalse((Cr1 == Cr2).all())
+
+    @parameterized.expand([
+        ['6b','turbo120','turbo130','turbo140','turbo150','turbo200','turbo210'],
+        ['7','8','8a','8b','8c','8d','9','9a','9b','9c','9d'],
+        ['9e'],
+        ['mozjpeg101','mozjpeg201'],
+        ['mozjpeg300','mozjpeg403'],
+    ], name_func=version_cluster)
+    def test_equal_baseline(self, *versions):
+        """Compress with given versions and observe the same output."""
+        self.logger.info(f"test_mismatch_baseline_{'_'.join(versions)}")
+        # compress image with reference
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        Y_ref, (Cb_ref, Cr_ref), qt_ref = self._compressed_dct(im, versions[0])
+        # compress with each version and compare to the reference
+        for v in versions:
+            Y, (Cb, Cr), qt = self._compressed_dct(im, v)
+            np.testing.assert_array_equal(Y_ref, Y)
+            np.testing.assert_array_equal(Cb_ref, Cb)
+            np.testing.assert_array_equal(Cr_ref, Cr)
+            np.testing.assert_array_equal(qt_ref, qt)
 
     def test_dct_coefficient_decoder(self):
         """Test output against blorch/dct-coefficient-decoder."""

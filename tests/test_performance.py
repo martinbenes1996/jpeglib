@@ -2,6 +2,7 @@
 
 import logging
 import numpy as np
+import os
 from PIL import Image
 from scipy.stats import ttest_ind, ttest_1samp
 import timeit
@@ -15,13 +16,17 @@ class TestPerformance(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        self.original_version = jpeglib.version.get()
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        self.tmp.close()
 
     def tearDown(self):
-        self.tmp.close()
+        os.remove(self.tmp.name)
         del self.tmp
+        jpeglib.version.set(self.original_version)
 
     def test_reading(self):
+        """Test reading is statistically significantly faster than 300ms."""
         self.logger.info("test_reading")
         # load and time jpeglib 50 times
         jpeglib.version.set('turbo210')
@@ -42,6 +47,7 @@ class TestPerformance(unittest.TestCase):
         self.assertLess(faster_than_300ms.pvalue, .05)
 
     def test_writing(self):
+        """Test writing is statistically significantly faster than 300ms."""
         self.logger.info("test_writing")
         x = jpeglib.read_spatial("examples/IMG_0791.jpeg").spatial
         jpeglib.version.set('turbo210')
