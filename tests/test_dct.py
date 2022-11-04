@@ -434,7 +434,7 @@ class TestDCT(unittest.TestCase):
                         "examples/IMG_0791.jpeg ",  # input file
                         self.tmp.name],  # output file
                     shell=True,
-                    stdout=subprocess.DEVNULL
+                    stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL)
                 if res != 0:
                     raise Exception("Rainer's MMSec failed!")
