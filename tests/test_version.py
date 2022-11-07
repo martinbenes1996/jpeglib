@@ -152,4 +152,23 @@ class TestVersion(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
         np.testing.assert_array_equal(jpeg.qt, jpeg2.qt)
 
+    @parameterized.expand([
+        ['libjpeg6b'],
+        ['6c'],
+        ['turbo209'],
+        ['nonexistent']
+    ])
+    def test_bad_version(self, version):
+        # bad version set
+        try:
+            jpeglib.version.set(version)
+        except RuntimeError as e:
+            self.assertEqual(str(e), f'version "{version}" not found, was the package compiled correctly?')
+        # bad with version
+        try:
+            with jpeglib.version(version):
+                pass
+        except RuntimeError as e:
+            self.assertEqual(str(e), f'version "{version}" not found, was the package compiled correctly?')
+
 __all__ = ["TestVersion"]

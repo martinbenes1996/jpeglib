@@ -172,7 +172,6 @@ class CJpegLib:
         markers,
         flags: List[str],
     ):
-
         status = cls.get().write_jpeg_spatial(
             cls.cstr(dstfile),
             spatial,

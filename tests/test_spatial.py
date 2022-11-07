@@ -89,9 +89,7 @@ class TestSpatial(unittest.TestCase):
         # test compressed version
         self.assert_compressed(spatial, im.spatial)
 
-
     @parameterized.expand(ALL_VERSIONS)
-    # @parameterized.expand(LIBJPEG_VERSIONS)
     def test_default_quality(self, version):
         """Test default quality factor for a given version."""
         self.logger.info(f"test_default_quality_{version}")
@@ -105,6 +103,26 @@ class TestSpatial(unittest.TestCase):
             _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
             # test equal qts
             np.testing.assert_array_equal(qt1, qt2)
+
+    @parameterized.expand([
+        ['9d', '9e'],
+        ['mozjpeg101', 'mozjpeg403'],
+    ])
+    def test_qt_changes(self, v1, v2):
+        """Test default quantization table differs for given versions."""
+        self.logger.info(f"test_default_quality_{v1}_{v2}")
+        # get QT from version 1
+        with jpeglib.version(v1):
+            jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+            jpeg.write_spatial(self.tmp.name, qt=75)
+            _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
+        # get QT from version 2
+        with jpeglib.version(v2):
+            jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+            jpeg.write_spatial(self.tmp.name, qt=75)
+            _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
+        # not equal
+        self.assertFalse((qt1 == qt2).all())
 
 
     # def test_spatial_quality(self):
