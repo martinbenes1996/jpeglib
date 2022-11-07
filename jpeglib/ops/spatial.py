@@ -29,6 +29,32 @@ def blockify_8x8(x: np.ndarray) -> np.ndarray:
     xb = np.array(xhv)
     return xb
 
+def deblockify_8x8(xb:np.ndarray) -> np.ndarray:
+    """Merges split spatial domain (8x8 blocks).
+
+    The output has shape (N, M) for input (N/8, M/8, 8, 8)
+
+    :param xb: tiled pixels
+    :type xb: np.ndarray
+    :return: spatial domain representation
+    :rtype: np.ndarray
+
+    :Examples:
+
+    Example of usage with jpeglib
+
+    >>> import jpeglib
+    >>> im = jpeglib.read_dct('image.jpeg')
+    >>> X = jpeglib.backward_dct(im.Y)
+    >>> r = jpeglib.ops.deblockify_8x8(X)
+    """
+    return (
+        np.einsum('abcd->adbc', xb)
+            .reshape(xb.shape[0]*8, xb.shape[1]*8)
+    )
+
+
+def decompress_lossless(Y:np.ndarray)
 
 def luminance(x: np.ndarray) -> np.ndarray:
     """Converts RGB into luminance / grayscale.
