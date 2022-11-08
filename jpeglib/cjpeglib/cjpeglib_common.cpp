@@ -99,8 +99,8 @@ int read_jpeg_info(
 		// copy to caller
 		if (block_dims != NULL) {
 			for (int i = 0; i < cinfo.num_components; i++) {
-			block_dims[2 * i] = cinfo.comp_info[i].height_in_blocks;
-			block_dims[2 * i + 1] = cinfo.comp_info[i].width_in_blocks;
+				block_dims[2 * i] = cinfo.comp_info[i].height_in_blocks;
+				block_dims[2 * i + 1] = cinfo.comp_info[i].width_in_blocks;
 			}
 		}
 		if (image_dims != NULL) {
@@ -109,8 +109,8 @@ int read_jpeg_info(
 		}
 		if (num_components != NULL) {
 			num_components[0] = cinfo.num_components;
-			// num_components[1] = cinfo.out_color_components;
-			// num_components[2] = cinfo.output_components;
+			num_components[1] = cinfo.out_color_components;
+			num_components[2] = cinfo.output_components;
 		}
 		if (jpeg_color_space != NULL) {
 			jpeg_color_space[0] = cinfo.out_color_space;

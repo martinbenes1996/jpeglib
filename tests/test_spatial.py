@@ -52,12 +52,16 @@ class TestSpatial(unittest.TestCase):
         del self.tmp
         jpeglib.version.set(self.original_version)
 
-    def assert_compressed(self, x1, x2):
-        mse = np.mean((
-            x1/255. -
-            x2/255.
-        )**2)
-        self.assertLessEqual(mse, 1.)
+    def assert_mse_less(self, x1, x2, threshold=1.):
+        x1 = x1.astype('int32')
+        x2 = x2.astype('int32')
+        rmse = np.sqrt(np.mean(np.abs(x1-x2)))
+        self.assertLessEqual(rmse, threshold)
+
+    def assert_equal_ratio_greater(self, y1, y2, threshold=.95):
+        eqs = y1 == y2
+        eq_ratio = np.mean(eqs[y1 != 0])
+        self.assertGreaterEqual(eq_ratio, threshold)
 
     def test_spatial(self):
         """Test of compression and decompression."""
@@ -68,7 +72,7 @@ class TestSpatial(unittest.TestCase):
         im.write_spatial(self.tmp.name)
         im2 = jpeglib.read_spatial(self.tmp.name)
         # test compressed version
-        self.assert_compressed(im.spatial, im2.spatial)
+        self.assert_mse_less(im.spatial, im2.spatial, 1.2)
 
     def test_synthetic_spatial(self):
         """Test of synthetic image being generated and stored.
@@ -79,7 +83,7 @@ class TestSpatial(unittest.TestCase):
         self.logger.info("test_synthetic_spatial")
         # create synthetic JPEG
         np.random.seed(12345)
-        spatial = (np.random.rand(512,512,3)*255).astype(np.int16)
+        spatial = np.random.randint(0, 255, (512,512,3), dtype='uint8')
         jpeglib.from_spatial(
             spatial=spatial,
             in_color_space='JCS_RGB'
@@ -87,7 +91,7 @@ class TestSpatial(unittest.TestCase):
         # load and compare
         im = jpeglib.read_spatial(self.tmp.name)
         # test compressed version
-        self.assert_compressed(spatial, im.spatial)
+        self.assert_mse_less(spatial, im.spatial, 7.)
 
     @parameterized.expand(ALL_VERSIONS)
     def test_default_quality(self, version):
@@ -123,7 +127,6 @@ class TestSpatial(unittest.TestCase):
             _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
         # not equal
         self.assertFalse((qt1 == qt2).all())
-
 
     # def test_spatial_quality(self):
     #     global qt50_standard
@@ -172,6 +175,7 @@ class TestSpatial(unittest.TestCase):
 
     def test_grayscale(self):
         """Test reading and writing grayscale spatial."""
+        self.logger.info(f"test_grayscale")
         # compress
         np.random.seed(12345)
         x = np.random.randint(0, 255, (128, 128, 1), dtype=np.int16)
@@ -187,12 +191,59 @@ class TestSpatial(unittest.TestCase):
         # writeback of grayscale
         im.write_spatial(self.tmp.name)
 
-
-
     def test_cmyk(self):
         """Test reading and writing cmyk spatial."""
-        pass  # TODO
+        self.logger.info(f"test_cmyk")
+        # compress
+        np.random.seed(12345)
+        x = np.random.randint(0, 255, (256, 256, 4), dtype=np.int16)
+        jpeglib.from_spatial(x, 'JCS_CMYK').write_spatial(self.tmp.name)
+        # load DCT
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        self.assertTrue(jpeg.has_chrominance)
+        self.assertTrue(jpeg.has_black)
+        self.assertEqual(jpeg.jpeg_color_space, 'JCS_CMYK')  # JCS_YCCK
+        self.assertEqual(jpeg.Y.shape, (32, 32, 8, 8))
+        self.assertEqual(jpeg.K.shape, (32, 32, 8, 8))
+        # decompress
+        im = jpeglib.read_spatial(self.tmp.name)
+        self.assertTrue(im.has_chrominance)
+        self.assertTrue(jpeg.has_black)
+        self.assertEqual(im.jpeg_color_space, 'JCS_CMYK')  # JCS_YCCK
+        self.assertEqual(im.color_space, 'JCS_CMYK')
+        self.assertEqual(im.spatial.shape, (256, 256, 4))
+        # writeback
+        im.write_spatial(self.tmp.name)
+        # TODO: check similarity before and after compression
 
+    def test_spatial_dct_compression(self):
+        """Test of compression DCT methods."""
+        self.logger.info("test_spatial_dct_compression")
+        # get decompressed spatial
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        # compress with islow
+        im.write_spatial(self.tmp.name, dct_method='JDCT_ISLOW')
+        im_islow = jpeglib.read_dct(self.tmp.name)
+        im_islow.load()
+        # compress with ifast
+        im.write_spatial(self.tmp.name, dct_method='JDCT_IFAST')
+        im_ifast = jpeglib.read_dct(self.tmp.name)
+        im_ifast.load()
+        # compress with float
+        im.write_spatial(self.tmp.name, dct_method='JDCT_FLOAT')
+        im_float = jpeglib.read_dct(self.tmp.name)
+        im_float.load()
+
+        # test compressed version
+        self.assert_equal_ratio_greater(im_islow.Y, im_ifast.Y, .95)
+        self.assert_equal_ratio_greater(im_islow.Cb, im_ifast.Cb, .95)
+        self.assert_equal_ratio_greater(im_islow.Cr, im_ifast.Cr, .95)
+        self.assert_equal_ratio_greater(im_islow.Y, im_float.Y, .98)
+        self.assert_equal_ratio_greater(im_islow.Cb, im_float.Cb, .98)
+        self.assert_equal_ratio_greater(im_islow.Cr, im_float.Cr, .98)
+        self.assert_equal_ratio_greater(im_ifast.Y, im_float.Y, .9)
+        self.assert_equal_ratio_greater(im_ifast.Cb, im_float.Cb, .9)
+        self.assert_equal_ratio_greater(im_ifast.Cr, im_float.Cr, .9)
 
     # def test_spatial_qt(self):
     #     global qt50_standard

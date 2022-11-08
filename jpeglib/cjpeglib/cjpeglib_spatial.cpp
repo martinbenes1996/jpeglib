@@ -183,7 +183,7 @@ int write_jpeg_spatial(
 		// set advanced parameters
 		if (dct_method >= 0) {
 			cinfo.dct_method = (J_DCT_METHOD)dct_method;
-			fprintf(stderr, "dct method %d->%d\n", dct_method, cinfo.dct_method);
+			// fprintf(stderr, "dct method %d->%d\n", dct_method, cinfo.dct_method);
 		}
 		int chroma_factor[2];
 		if (samp_factor != NULL) {

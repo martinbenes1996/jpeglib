@@ -106,8 +106,8 @@ class Colorspace(CStruct):
             "JCS_YCCK":      4,
         }
         if self.name == "JCS_UNKNOWN":
-            raise Exception("""can't get number of channels
-                            for JCS_UNKNOWN colorspace""")
+            raise Exception("can't get number of channels "
+                            "for JCS_UNKNOWN colorspace")
         return channel_no[self.name]
 
     def __repr__(self) -> str:

@@ -53,9 +53,6 @@ def deblockify_8x8(xb:np.ndarray) -> np.ndarray:
             .reshape(xb.shape[0]*8, xb.shape[1]*8)
     )
 
-
-def decompress_lossless(Y:np.ndarray)
-
 def luminance(x: np.ndarray) -> np.ndarray:
     """Converts RGB into luminance / grayscale.
 
