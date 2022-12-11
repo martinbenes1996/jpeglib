@@ -114,7 +114,12 @@ class DCTJPEG(_jpeg.JPEG):
         warnings.warn('read_dct() is obsolete, use load()')
         return self.load()
 
-    def write_dct(self, path: str = None, quality: int = -1):
+    def write_dct(
+        self,
+        path: str = None,
+        quality: int = -1,
+        flags: List[str] = []
+    ):
         """Function to write DCT coefficients to JPEG file.
 
         Does not perform JPEG compression, writing DCT is lossless.
@@ -123,6 +128,8 @@ class DCTJPEG(_jpeg.JPEG):
         :type path: str, optional
         :param quality: Compression quality, between 0 and 100. Special value -1 stands for using qt inside the instance or keeping libjpeg default.
         :type quality: int, optional
+        :param flags: Bool compression parameters as str. If not given, using the libjpeg default. More at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
+        :type flags: list, optional
 
         :Example:
 
@@ -183,6 +190,7 @@ class DCTJPEG(_jpeg.JPEG):
             marker_types=self.c_marker_types(),
             marker_lengths=self.c_marker_lengths(),
             markers=self.c_markers(),
+            flags=flags,
         )
         # clean up temporary file
         os.remove(tmp.name)

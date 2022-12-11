@@ -55,15 +55,17 @@ FILE *_read_jpeg(const char *filename,
 }
 
 int read_jpeg_info(
-  const char *srcfile,
-  int *block_dims,
-  int *image_dims,
-  int *num_components,
-  int *samp_factor,
-  int *jpeg_color_space,
-  int *marker_lengths,
-  int *marker_types,
-  BITMASK *flags
+	const char *srcfile,
+	int *block_dims,
+	int *image_dims,
+	int *num_components,
+	int *samp_factor,
+	int *jpeg_color_space,
+	int *marker_lengths,
+	int *marker_types,
+	unsigned char *huffman_bits,
+	unsigned char *huffman_values,
+	BITMASK *flags
 ) {
 	// sanitizing libjpeg errors
 	try {
@@ -119,12 +121,47 @@ int read_jpeg_info(
 
 		if (samp_factor != NULL)
 			for (int comp = 0; comp < cinfo.num_components; comp++) {
-			*(samp_factor + comp * 2 + 0) = cinfo.comp_info[comp].h_samp_factor;
-			*(samp_factor + comp * 2 + 1) = cinfo.comp_info[comp].v_samp_factor;
+				*(samp_factor + comp * 2 + 0) = cinfo.comp_info[comp].h_samp_factor;
+				*(samp_factor + comp * 2 + 1) = cinfo.comp_info[comp].v_samp_factor;
 			}
 
 		if (flags != NULL) {
-			(*flags) = (((cinfo.progressive_mode) ? (-1) : 0) & PROGRESSIVE_MODE) | (*flags);
+			*(flags) = (((cinfo.progressive_mode) ? (-1) : 0) & PROGRESSIVE_MODE) | (*flags);
+		}
+
+		if(huffman_bits != NULL) {
+			for(int i = 0; i < 17; i++) {
+				fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[0]->bits[i]);
+			}
+			fprintf(stderr, "\n");
+			for(int i = 0; i < 17; i++) {
+				fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->bits[i]);
+			}
+			fprintf(stderr, "\n");
+			for(int i = 0; i < 17; i++) {
+				fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[1]->bits[i]);
+			}
+			fprintf(stderr, "\n");
+			for(int i = 0; i < 17; i++) {
+				fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[1]->bits[i]);
+			}
+			fprintf(stderr, "\n");
+			for(int comp = 0; comp < cinfo.num_components; comp++) {
+				// huffman tables - bits
+				for(int i = 0; i < 17; i++) {
+					if(cinfo.dc_huff_tbl_ptrs[comp] != NULL)
+						*(huffman_bits + comp * 17 * 2 + i) = cinfo.dc_huff_tbl_ptrs[comp]->bits[i];
+					if(cinfo.ac_huff_tbl_ptrs[comp] != NULL)
+						*(huffman_bits + comp * 17 * 2 + 17 + i) = cinfo.ac_huff_tbl_ptrs[comp]->bits[i];
+				}
+				// hufman tables - values
+				for(int v = 0; v < 256; v++) {
+					if(cinfo.dc_huff_tbl_ptrs[comp] != NULL)
+						*(huffman_values + comp * 256 * 2 + v) = cinfo.dc_huff_tbl_ptrs[comp]->huffval[v];
+					if(cinfo.ac_huff_tbl_ptrs[comp] != NULL)
+						*(huffman_values + comp * 256 * 2 + 256 + v) = cinfo.ac_huff_tbl_ptrs[comp]->huffval[v];
+				}
+			}
 		}
 
 		// cleanup

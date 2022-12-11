@@ -25,6 +25,8 @@ class CJpegLib:
         jpeg_color_space: int,
         marker_lengths,
         marker_types,
+        huffman_bits,
+        huffman_values,
         flags: List[str],
     ):
         status = cls.get().read_jpeg_info(
@@ -36,6 +38,8 @@ class CJpegLib:
             jpeg_color_space,
             marker_lengths,
             marker_types,
+            huffman_bits,
+            huffman_values,
             flags
         )
         if status == 0:
@@ -94,6 +98,7 @@ class CJpegLib:
         marker_types,
         marker_lengths,
         markers,
+        flags: List[str],
     ):
         status = cls.get().write_jpeg_dct(
             cls.cstr(srcfile),
@@ -112,7 +117,8 @@ class CJpegLib:
             num_markers,
             marker_types,
             marker_lengths,
-            markers
+            markers,
+            cls.flags_to_mask(flags),
         )
         if status == 0:
             raise IOError(f"writing DCT to {dstfile} failed")
@@ -189,7 +195,7 @@ class CJpegLib:
             marker_types,
             marker_lengths,
             markers,
-            cls.flags_to_mask(flags)
+            cls.flags_to_mask(flags),
         )
         if status == 0:
             raise IOError(f"writing spatial to {dstfile} failed")

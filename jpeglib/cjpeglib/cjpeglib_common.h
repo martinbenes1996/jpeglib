@@ -28,19 +28,6 @@ FILE *_read_jpeg(
     bool read_header
 );
 
-int read_jpeg_info(
-  const char *srcfile,
-  int *block_dims,
-  int *image_dims,
-  int *num_components,
-  int *samp_factor,
-  int *jpeg_color_space,
-  int *marker_lengths,
-  int *marker_types,
-  BITMASK *flags
-);
-
-
 /**
  * @brief Custom error handler, mapping libjpeg error on C++ exception.
  * @author licy183

@@ -262,6 +262,8 @@ def load_jpeg_info(path: str) -> JPEG:
     _jpeg_color_space = (ctypes.c_int*2)()
     _marker_lengths = (ctypes.c_int*MAX_MARKER)()
     _marker_types = (ctypes.c_uint32*MAX_MARKER)()
+    _huffman_bits = (((ctypes.c_uint8*17)*2)*4)()
+    _huffman_values = (((ctypes.c_uint8*256)*2)*4)()
     _flags = (ctypes.c_uint64*1)()
 
     # call
@@ -274,6 +276,8 @@ def load_jpeg_info(path: str) -> JPEG:
         jpeg_color_space=_jpeg_color_space,
         marker_lengths=_marker_lengths,
         marker_types=_marker_types,
+        huffman_bits=_huffman_bits,
+        huffman_values=_huffman_values,
         flags=_flags
     )
     # process
@@ -304,6 +308,7 @@ def load_jpeg_info(path: str) -> JPEG:
     marker_lengths = np.array(
         [marker.length for marker in markers], dtype=np.int32)
     num_markers = marker_lengths.shape[0]
+    huffman_bits = _huffman_bits
     flags = CJpegLib.mask_to_flags(_flags)
 
     # allocate

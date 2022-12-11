@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import os
 import tempfile
-from typing import Union
+from typing import Union, List
 import warnings
 
 from ._bind import CJpegLib
@@ -94,7 +94,7 @@ class SpatialJPEG(JPEG):
         dct_method: Union[str, DCTMethod] = None,
         # dither_mode: Dithermode = None,
         smoothing_factor: int = None,
-        flags: list = []
+        flags: List[str] = []
     ):
         """Writes a spatial image representation (i.e. RGB) to a file.
 

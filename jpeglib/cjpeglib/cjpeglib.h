@@ -21,6 +21,8 @@ int read_jpeg_info(
     int *jpeg_color_space,
     int *marker_lengths,
     int *mark_types,
+    unsigned char *huffman_bits,
+    unsigned char *huffman_values,
     BITMASK *flags
 );
 
@@ -59,7 +61,8 @@ int write_jpeg_dct(
     int num_markers,
     int *marker_types,
     int *marker_lengths,
-    unsigned char *markers
+    unsigned char *markers,
+	BITMASK flags
 );
 
 // ----------- RGB -------------
