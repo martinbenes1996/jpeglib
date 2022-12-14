@@ -25,6 +25,7 @@ class CJpegLib:
         jpeg_color_space: int,
         marker_lengths,
         marker_types,
+        huffman_valid,
         huffman_bits,
         huffman_values,
         flags: List[str],
@@ -38,6 +39,7 @@ class CJpegLib:
             jpeg_color_space,
             marker_lengths,
             marker_types,
+            huffman_valid,
             huffman_bits,
             huffman_values,
             flags

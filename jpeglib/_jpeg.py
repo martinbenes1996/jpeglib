@@ -2,10 +2,11 @@
 import ctypes
 import dataclasses
 import numpy as np
-from typing import List
+from typing import List, Dict
 
 from ._bind import CJpegLib
 from ._colorspace import Colorspace
+from ._huffman import Huffman
 from ._marker import Marker
 
 MAX_MARKER: int = 50
@@ -32,6 +33,8 @@ class JPEG:
     second is orientation (0 horizontal, 1 vertical)"""
     markers: List[Marker]
     """list of marker objects"""
+    huffmans: List[Dict[str, Huffman]]
+    """huffman tables"""
     jpeg_color_space: Colorspace
     """color space of the JPEG file"""
     progressive_mode: bool
@@ -262,8 +265,9 @@ def load_jpeg_info(path: str) -> JPEG:
     _jpeg_color_space = (ctypes.c_int*2)()
     _marker_lengths = (ctypes.c_int*MAX_MARKER)()
     _marker_types = (ctypes.c_uint32*MAX_MARKER)()
-    _huffman_bits = (((ctypes.c_uint8*17)*2)*4)()
-    _huffman_values = (((ctypes.c_uint8*256)*2)*4)()
+    _huffman_valid = ((ctypes.c_bool*4)*2)()
+    _huffman_bits = (((ctypes.c_uint8*17)*4)*2)()
+    _huffman_values = (((ctypes.c_uint8*256)*4)*2)()
     _flags = (ctypes.c_uint64*1)()
 
     # call
@@ -276,6 +280,7 @@ def load_jpeg_info(path: str) -> JPEG:
         jpeg_color_space=_jpeg_color_space,
         marker_lengths=_marker_lengths,
         marker_types=_marker_types,
+        huffman_valid=_huffman_valid,
         huffman_bits=_huffman_bits,
         huffman_values=_huffman_values,
         flags=_flags
@@ -290,6 +295,19 @@ def load_jpeg_info(path: str) -> JPEG:
         np.array([_samp_factor[i] for i in range(2*num_components)], 'int32')
         .reshape(num_components, 2)
     )
+    huffman_valid = np.ctypeslib.as_array(_huffman_valid)
+    huffman_bits = np.ctypeslib.as_array(_huffman_bits)
+    huffman_values = np.ctypeslib.as_array(_huffman_values)
+
+    huffmans = []
+    for i in range(4):
+        huffman = {
+            k: Huffman(bits=huffman_bits[j, i], values=huffman_values[j, i])
+            for k, j in zip(['AC', 'DC'], [1, 0])
+            if huffman_valid[j, i]
+        }
+        huffmans.append(huffman)
+
     markers = []
     for i in range(MAX_MARKER):
         # marker length
@@ -334,5 +352,6 @@ def load_jpeg_info(path: str) -> JPEG:
         jpeg_color_space=Colorspace.from_index(_jpeg_color_space[1]),
         content=None,
         markers=markers,
+        huffmans=huffmans,
         progressive_mode="PROGRESSIVE_MODE" in flags
     )

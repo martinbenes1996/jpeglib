@@ -63,6 +63,7 @@ int read_jpeg_info(
 	int *jpeg_color_space,
 	int *marker_lengths,
 	int *marker_types,
+	unsigned char *huffman_valid,
 	unsigned char *huffman_bits,
 	unsigned char *huffman_values,
 	BITMASK *flags
@@ -130,43 +131,48 @@ int read_jpeg_info(
 		}
 
 		if(huffman_bits != NULL) {
-			// if(cinfo.dc_huff_tbl_ptrs[0] != NULL) {
-			// 	for(int i = 0; i < 17; i++)
-			// 		fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[0]->bits[i]);
-			// 	fprintf(stderr, "\n");
-			// }
 			// if(cinfo.ac_huff_tbl_ptrs[0] != NULL) {
-			// 	for(int i = 0; i < 17; i++) {
+			// 	for(int i = 0; i < 17; i++)
 			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->bits[i]);
-			// 	}
+			// 	fprintf(stderr, "\n");
+			// 	for(int i = 0; i < 256; i++)
+			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->huffval[i]);
 			// 	fprintf(stderr, "\n");
 			// }
 			// if(cinfo.dc_huff_tbl_ptrs[1] != NULL) {
-			// 	for(int i = 0; i < 17; i++) {
-			// 		fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[1]->bits[i]);
+			// 	for(int i = 0; i < 256; i++) {
+			// 		fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[1]->huffval[i]);
+			// 	}
+			// 	fprintf(stderr, "\n");
+			// }
+			// if(cinfo.ac_huff_tbl_ptrs[0] != NULL) {
+			// 	for(int i = 0; i < 256; i++) {
+			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->huffval[i]);
 			// 	}
 			// 	fprintf(stderr, "\n");
 			// }
 			// if(cinfo.ac_huff_tbl_ptrs[1] != NULL) {
-			// 	for(int i = 0; i < 17; i++) {
-			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[1]->bits[i]);
+			// 	for(int i = 0; i < 256; i++) {
+			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[1]->huffval[i]);
 			// 	}
 			// 	fprintf(stderr, "\n");
 			// }
 			for(int comp = 0; comp < cinfo.num_components; comp++) {
+				*(huffman_valid + comp) = cinfo.dc_huff_tbl_ptrs[comp] != NULL;
+				*(huffman_valid + comp + 4) = cinfo.ac_huff_tbl_ptrs[comp] != NULL;
 				// huffman tables - bits
 				for(int i = 0; i < 17; i++) {
 					if(cinfo.dc_huff_tbl_ptrs[comp] != NULL)
-						*(huffman_bits + comp * 17 * 2 + i) = cinfo.dc_huff_tbl_ptrs[comp]->bits[i];
+						*(huffman_bits + comp * 17 + i) = cinfo.dc_huff_tbl_ptrs[comp]->bits[i];
 					if(cinfo.ac_huff_tbl_ptrs[comp] != NULL)
-						*(huffman_bits + comp * 17 * 2 + 17 + i) = cinfo.ac_huff_tbl_ptrs[comp]->bits[i];
+						*(huffman_bits + comp * 17 + i + 17*4) = cinfo.ac_huff_tbl_ptrs[comp]->bits[i];
 				}
 				// hufman tables - values
 				for(int v = 0; v < 256; v++) {
 					if(cinfo.dc_huff_tbl_ptrs[comp] != NULL)
-						*(huffman_values + comp * 256 * 2 + v) = cinfo.dc_huff_tbl_ptrs[comp]->huffval[v];
+						*(huffman_values + comp * 256 + v) = cinfo.dc_huff_tbl_ptrs[comp]->huffval[v];
 					if(cinfo.ac_huff_tbl_ptrs[comp] != NULL)
-						*(huffman_values + comp * 256 * 2 + 256 + v) = cinfo.ac_huff_tbl_ptrs[comp]->huffval[v];
+						*(huffman_values + comp * 256 + v + 256*4) = cinfo.ac_huff_tbl_ptrs[comp]->huffval[v];
 				}
 			}
 		}

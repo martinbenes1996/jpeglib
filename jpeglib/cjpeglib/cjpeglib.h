@@ -21,6 +21,7 @@ int read_jpeg_info(
     int *jpeg_color_space,
     int *marker_lengths,
     int *mark_types,
+	unsigned char *huffman_valid,
     unsigned char *huffman_bits,
     unsigned char *huffman_values,
     BITMASK *flags
