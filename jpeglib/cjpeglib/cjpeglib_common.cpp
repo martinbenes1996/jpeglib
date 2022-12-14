@@ -130,22 +130,29 @@ int read_jpeg_info(
 		}
 
 		if(huffman_bits != NULL) {
-			for(int i = 0; i < 17; i++) {
-				fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[0]->bits[i]);
-			}
-			fprintf(stderr, "\n");
-			for(int i = 0; i < 17; i++) {
-				fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->bits[i]);
-			}
-			fprintf(stderr, "\n");
-			for(int i = 0; i < 17; i++) {
-				fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[1]->bits[i]);
-			}
-			fprintf(stderr, "\n");
-			for(int i = 0; i < 17; i++) {
-				fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[1]->bits[i]);
-			}
-			fprintf(stderr, "\n");
+			// if(cinfo.dc_huff_tbl_ptrs[0] != NULL) {
+			// 	for(int i = 0; i < 17; i++)
+			// 		fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[0]->bits[i]);
+			// 	fprintf(stderr, "\n");
+			// }
+			// if(cinfo.ac_huff_tbl_ptrs[0] != NULL) {
+			// 	for(int i = 0; i < 17; i++) {
+			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->bits[i]);
+			// 	}
+			// 	fprintf(stderr, "\n");
+			// }
+			// if(cinfo.dc_huff_tbl_ptrs[1] != NULL) {
+			// 	for(int i = 0; i < 17; i++) {
+			// 		fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[1]->bits[i]);
+			// 	}
+			// 	fprintf(stderr, "\n");
+			// }
+			// if(cinfo.ac_huff_tbl_ptrs[1] != NULL) {
+			// 	for(int i = 0; i < 17; i++) {
+			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[1]->bits[i]);
+			// 	}
+			// 	fprintf(stderr, "\n");
+			// }
 			for(int comp = 0; comp < cinfo.num_components; comp++) {
 				// huffman tables - bits
 				for(int i = 0; i < 17; i++) {
