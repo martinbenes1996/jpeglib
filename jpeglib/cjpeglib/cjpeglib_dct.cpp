@@ -93,14 +93,13 @@ int read_jpeg_dct(
 				quant_tbl_no[ch] = qt_i; // copy quantization table assignment
 				for (int i = 0; i < 64; i++) {
 					qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[qt_i]->quantval[i]; //[(i&7)*8+(i>>3)];
-			}
+				}
 			//(i&7)*8+(i>>3)
 			// memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
 			// JQUANT_TBL *tbl = cinfo.comp_info[ch].quant_table;
 			// memcpy((void *)(qt + ch*64), (void*)tbl->quantval, sizeof(short)*64);
 			}
 		}
-
 
 		// cleanup
 		jpeg_finish_decompress(&cinfo);
@@ -192,7 +191,7 @@ int write_jpeg_dct(
 		// read source jpeg
 		if (srcfile != NULL) {
 			if ((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in, FALSE)) == NULL)
-			return 0;
+				return 0;
 			// todo write markers
 			(void)jpeg_read_header(&cinfo_in, TRUE);
 		}
@@ -279,28 +278,30 @@ int write_jpeg_dct(
 			coeffs_array = jpeg_read_coefficients(&cinfo_in);
 		} else { // allocate new
 			coeffs_array = (jvirt_barray_ptr *)(cinfo_out.mem->alloc_small)(
-			(j_common_ptr)&cinfo_out,
-			JPOOL_IMAGE,
-			sizeof(jvirt_barray_ptr) * cinfo_out.num_components);
-			for (int ch = 0; ch < (cinfo_out.num_components); ch++) { // channel iterator
-			jpeg_component_info *comp_ptr = cinfo_out.comp_info + ch;
-			// long v_samp_factor = *(samp_factor + ch*2 + 0);
-			// long h_samp_factor = *(samp_factor + ch*2 + 1);
-			comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
-			comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
-			// if(ch > 0) {
-			//   comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
-			//   comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);
-			// }
-			coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
 				(j_common_ptr)&cinfo_out,
 				JPOOL_IMAGE,
-				TRUE,
-				(JDIMENSION)jround_up(comp_ptr->width_in_blocks, // component size in dct blocks (ignoring mcu)
-									comp_ptr->h_samp_factor),  // round up is important, if border MCUs are not completely needed
-				(JDIMENSION)jround_up(comp_ptr->height_in_blocks,
-									comp_ptr->v_samp_factor),
-				(JDIMENSION)comp_ptr->v_samp_factor);
+				sizeof(jvirt_barray_ptr) * cinfo_out.num_components
+			);
+			for (int ch = 0; ch < (cinfo_out.num_components); ch++) { // channel iterator
+				jpeg_component_info *comp_ptr = cinfo_out.comp_info + ch;
+				// long v_samp_factor = *(samp_factor + ch*2 + 0);
+				// long h_samp_factor = *(samp_factor + ch*2 + 1);
+				comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
+				comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
+				// if(ch > 0) {
+				//   comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
+				//   comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);
+				// }
+				coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
+					(j_common_ptr)&cinfo_out,
+					JPOOL_IMAGE,
+					TRUE,
+					(JDIMENSION)jround_up(comp_ptr->width_in_blocks, // component size in dct blocks (ignoring mcu)
+										comp_ptr->h_samp_factor),  // round up is important, if border MCUs are not completely needed
+					(JDIMENSION)jround_up(comp_ptr->height_in_blocks,
+										comp_ptr->v_samp_factor),
+					(JDIMENSION)comp_ptr->v_samp_factor
+				);
 			}
 		}
 

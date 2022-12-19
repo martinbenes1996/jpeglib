@@ -118,7 +118,7 @@ class DCTJPEG(_jpeg.JPEG):
         self,
         path: str = None,
         quality: int = -1,
-        flags: List[str] = []
+        flags: List[str] = [],
     ):
         """Function to write DCT coefficients to JPEG file.
 

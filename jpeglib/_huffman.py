@@ -51,3 +51,7 @@ class Huffman:
     def __str__(self) -> str:
         """Converts the class to str, returns name."""
         return repr(self)
+
+    def __eq__(self, other) -> bool:
+        """Compares two huffman tables for equality."""
+        return (self.bits == other.bits).all() and (self.values == other.values).all()
