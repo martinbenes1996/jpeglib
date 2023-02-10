@@ -212,6 +212,18 @@ class TestInterface(unittest.TestCase):
         self.assertEqual(im.spatial.shape[0], pilnpshape[0])
         self.assertEqual(im.spatial.shape[1], pilnpshape[1])
 
+    def test_copy(self):
+        self.logger.info("test_read_pil")
+        # read DCT
+        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        Y_original = im.Y.copy()
+        # change DCT
+        im2 = im.copy()
+        im2.Y[0, 0, 0, 0] += 1
+        # check unequal
+        self.assertTrue((im.Y == Y_original).all())
+        self.assertFalse((im.Y == im2.Y).all())
+
 
 
 __all__ = ["TestInterface"]

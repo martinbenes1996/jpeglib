@@ -1,4 +1,5 @@
 
+import copy
 import ctypes
 import dataclasses
 import numpy as np
@@ -224,6 +225,10 @@ class JPEG:
         for marker in self.markers:
             marker_contents += [i for i in marker.content]
         return (ctypes.c_ubyte*int(np.sum(marker_lengths)))(*marker_contents)
+
+    def copy(self):
+        """Create a deep copy of the JPEG object."""
+        return copy.deepcopy(self)
 
     def free(self):
         """Free the allocated tensors."""
