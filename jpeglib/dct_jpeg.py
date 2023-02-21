@@ -171,6 +171,14 @@ class DCTJPEG(_jpeg.JPEG):
             tmp.flush()
         tmp.close()
 
+        # print(self.samp_factor)
+        # print(self.c_block_dims()[:])
+        # print(
+        #     self.c_samp_factor()[0][:],
+        #     self.c_samp_factor()[1][:],
+        #     self.c_samp_factor()[1][:],
+        # )
+
         # call
         CJpegLib.write_jpeg_dct(
             srcfile=tmp.name if self.content is not None else None,
@@ -181,6 +189,7 @@ class DCTJPEG(_jpeg.JPEG):
             K=K,
             image_dims=self.c_image_dims(),
             block_dims=self.c_block_dims(),
+            samp_factor=self.c_samp_factor(),
             in_color_space=self.jpeg_color_space.index,
             in_components=self.num_components,
             qt=qt,

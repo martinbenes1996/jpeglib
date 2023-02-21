@@ -162,6 +162,12 @@ class SpatialJPEG(JPEG):
                 self.width,
             )
         )
+        # print(
+        #     self.c_samp_factor(),
+        #     self.c_samp_factor()[0][:],
+        #     self.c_samp_factor()[1][:],
+        #     self.c_samp_factor()[2][:],
+        # )
         # call
         CJpegLib.write_jpeg_spatial(
             dstfile=str(dstfile),

@@ -18,6 +18,7 @@ from test_ops import TestOps
 from test_performance import TestPerformance
 from test_spatial import TestSpatial
 from test_version import TestVersion  # noqa: F401,E402
+
 # from test_flags import TestFlags
 # from test_marker import TestMarker  # noqa: F401,E402
 # from test_progressive import TestProgressive  # noqa: F401,E402

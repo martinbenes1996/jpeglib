@@ -101,13 +101,23 @@ class TestDCT(unittest.TestCase):
         jpeg = jpeglib.read_dct(self.tmp.name)
         ratio_Cb = [samp_factor[0][i]/samp_factor[1][i] for i in range(2)]
         ratio_Cr = [samp_factor[0][i]/samp_factor[2][i] for i in range(2)]
-        # test DCT coefficients are the same after write/read
+        # test DCT coefficients are the same after read
         self.assertEqual(jpeg.Y.shape[0], jpeg.Cb.shape[0]*ratio_Cb[1])
         self.assertEqual(jpeg.Y.shape[1], jpeg.Cb.shape[1]*ratio_Cb[0])
         self.assertEqual(jpeg.Y.shape[0], jpeg.Cr.shape[0]*ratio_Cr[1])
         self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1]*ratio_Cr[0])
-        # write back (just for completeness)
-        jpeg.write_dct(self.tmp.name)
+        # write DCT coefficients
+        jpeglib.from_dct(
+            Y=jpeg.Y,
+            Cb=jpeg.Cb,
+            Cr=jpeg.Cr,
+            qt=jpeg.qt,
+        ).write_dct(self.tmp.name)
+        # test DCT coefficients are the same after write
+        jpeg2 = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
+        np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
+        np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)
 
     def _compressed_dct(self, im, v):
         with jpeglib.version(v):

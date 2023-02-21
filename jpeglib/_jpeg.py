@@ -203,6 +203,7 @@ class JPEG:
         if self.samp_factor is None:
             return self.samp_factor
         samp_factor = np.array(self.samp_factor, dtype=np.int32)
+        # samp_factor = np.ascontiguousarray(samp_factor)
         return np.ctypeslib.as_ctypes(samp_factor)
 
     def c_marker_types(self):

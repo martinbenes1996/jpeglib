@@ -371,8 +371,22 @@ def from_dct(
         else:
             quant_tbl_no = np.array([0])
     # infere samp_factor
-    # TODO
-    samp_factor = ((1, 1), (1, 1), (1, 1), (1, 1))
+    if Cb is not None and Cr is not None:
+        dims = [
+            Cb.shape[:2],
+            Cr.shape[:2],
+        ]
+        if K is not None:
+            dims.append(K.shape[:2])
+        dims = np.array([np.array(Y.shape[:2]) / np.array(i) for i in dims])
+        max_subs = np.max(dims, axis=0)
+        samp_factor = np.array([
+            max_subs,
+            *(max_subs / dims)
+        ]).astype('int16')
+    else:
+        samp_factor = np.array([[1,1]])
+    # print(f'{samp_factor=}')
     # block dims
     block_dims = [[Y.shape[0], Y.shape[1]]]
     if Cb is not None and Cr is not None:
@@ -381,6 +395,7 @@ def from_dct(
     if K is not None:
         block_dims.append([K.shape[0], K.shape[1]])
     block_dims = np.array(block_dims)
+    # print(block_dims)
 
     # create jpeg
     return DCTJPEG(

@@ -139,6 +139,7 @@ int write_jpeg_dct(
 	short *K,
 	int *image_dims,
 	int *block_dims,
+	int *samp_factor,
 	int in_color_space,
 	int in_components,
 	unsigned short *qt,
@@ -215,18 +216,28 @@ int write_jpeg_dct(
 			jpeg_set_defaults(&cinfo_out);
 
 		// set sampling factors
-		// int chroma_factor[2];
-		// if(samp_factor != NULL) {
-		//  chroma_factor[0] = *(samp_factor + 0);
-		//  chroma_factor[1] = *(samp_factor + 1);
-		// for(int comp = 0; comp < cinfo_out.num_components; comp++) {
-		//  cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
-		//  cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
-		//}
-		//} else {
+		int chroma_factor[2];
+		if(samp_factor != NULL) {
+			// for (int ch = 0; ch < (cinfo_out.num_components); ch++) { // channel iterator
+			// 	jpeg_component_info *comp_ptr = cinfo_out.comp_info + ch;
+			// 	// long v_samp_factor = *(samp_factor + ch*2 + 0);
+			// 	// long h_samp_factor = *(samp_factor + ch*2 + 1);
+			// 	comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
+			// 	comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
+			// }
+
+			chroma_factor[0] = *(samp_factor + 0);
+			chroma_factor[1] = *(samp_factor + 1);
+			for(int comp = 0; comp < cinfo_out.num_components; comp++) {
+				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 0);
+				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 1);
+			}
+			// fprintf(stderr, "\n");
+		}
+		// else {
 		//  chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
 		//  chroma_factor[1] = cinfo_out.comp_info[0].v_samp_factor;
-		//}
+		// }
 		// for(int comp = 0; comp < cinfo.num_components; comp++) {
 		//     *(samp_factor + comp*2 + 0) = cinfo.comp_info[comp].h_samp_factor;
 		//     *(samp_factor + comp*2 + 1) = cinfo.comp_info[comp].v_samp_factor;
@@ -288,6 +299,7 @@ int write_jpeg_dct(
 				// long h_samp_factor = *(samp_factor + ch*2 + 1);
 				comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
 				comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
+				// fprintf(stderr, "%d %d ", comp_ptr->height_in_blocks, comp_ptr->width_in_blocks);
 				// if(ch > 0) {
 				//   comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
 				//   comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);

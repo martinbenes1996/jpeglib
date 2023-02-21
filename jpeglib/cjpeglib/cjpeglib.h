@@ -54,6 +54,7 @@ int write_jpeg_dct(
     short *K,
     int *image_dims,
     int *block_dims,
+	int *samp_factor,
     int in_color_space,
     int in_components,
     unsigned short *qt,

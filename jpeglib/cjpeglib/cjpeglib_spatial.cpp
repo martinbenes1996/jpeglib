@@ -183,15 +183,18 @@ int write_jpeg_spatial(
 		// set advanced parameters
 		if (dct_method >= 0) {
 			cinfo.dct_method = (J_DCT_METHOD)dct_method;
-			// fprintf(stderr, "dct method %d->%d\n", dct_method, cinfo.dct_method);
 		}
 		int chroma_factor[2];
 		if (samp_factor != NULL) {
 			chroma_factor[0] = *(samp_factor + 0);
 			chroma_factor[1] = *(samp_factor + 1);
-			for (int comp = 0; comp < cinfo.num_components; comp++) {
-				cinfo.comp_info[comp].h_samp_factor = *(samp_factor + comp * 2 + 0);
-				cinfo.comp_info[comp].v_samp_factor = *(samp_factor + comp * 2 + 1);
+			for (int ch = 0; ch < cinfo.num_components; ch++) {
+				// fprintf(stderr, "%d: sampling %d %d\n",
+				// 	*(samp_factor + ch * 2 + 0),
+				// 	*(samp_factor + ch * 2 + 1)
+				// );
+				cinfo.comp_info[ch].h_samp_factor = *(samp_factor + ch * 2 + 0);
+				cinfo.comp_info[ch].v_samp_factor = *(samp_factor + ch * 2 + 1);
 			}
 		} else {
 			chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;
