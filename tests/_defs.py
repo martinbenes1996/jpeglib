@@ -46,7 +46,7 @@ LIBJPEG_VERSIONS = [
 
 
 def version_cluster(testcase_func, param_num, param):
-    return "%s_%s"  % (
+    return "%s_%s" % (
         testcase_func.__name__,
         parameterized.to_safe_name("_".join(str(x) for x in param.args)),
     )
