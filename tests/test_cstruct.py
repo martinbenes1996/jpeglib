@@ -69,6 +69,7 @@ class TestCStruct(unittest.TestCase):
             self.assertRaises(Exception, lambda : cspace.channels)
         else:
             self.assertEqual(cspace.channels, channels)
+
     def test_color_space_invalid(self):
         """Test invalid color space."""
         self.logger.info('test_color_space_invalid')

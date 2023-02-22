@@ -51,4 +51,3 @@ class TestFlags(unittest.TestCase):
         # self.assertTrue((Y_fu != Y_ss).any())
         # self.assertTrue((Cb_fu != Cb_ss).any())
         # self.assertTrue((Cr_fu != Cr_ss).any())
-

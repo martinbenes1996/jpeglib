@@ -127,7 +127,7 @@ class TestDCT(unittest.TestCase):
     @parameterized.expand([
         ['6b', '7', True],
         ['9d', '9e', True],
-        ['mozjpeg201','mozjpeg300', False],
+        ['mozjpeg201', 'mozjpeg300', False],
     ])
     def test_mismatch_baseline(self, v1, v2, equal_Y):
         """Compress with given two versions and observe differing output."""
@@ -362,7 +362,7 @@ class TestDCT(unittest.TestCase):
         jpeg.write_dct(self.tmp.name)
         jpeg2 = jpeglib.read_dct(self.tmp.name)
         # test matrix
-        self.assertEqual(np.sum(jpeg2.Y - Yc), 1) # difference by 1
+        self.assertEqual(np.sum(jpeg2.Y - Yc), 1)  # difference by 1
         self.assertEqual(
             tuple([int(i) for i in np.where(jpeg2.Y != Yc)]),
             (0, 0, 0, 1)
@@ -403,7 +403,7 @@ class TestDCT(unittest.TestCase):
             Cb=Cb,
             Cr=Cr,
             qt=qt,
-            quant_tbl_no=np.array([0,1,2]),
+            quant_tbl_no=np.array([0, 1, 2]),
         ).write_dct(self.tmp.name)
         # load and compare
         jpeg = jpeglib.read_dct(self.tmp.name)
@@ -411,8 +411,6 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(Cb, jpeg.Cb)
         np.testing.assert_array_equal(Cr, jpeg.Cr)
         np.testing.assert_array_equal(qt, jpeg.qt)
-
-
 
     # === tests with non-public software ===
     def test_rainer_MMSec(self):
@@ -436,15 +434,17 @@ class TestDCT(unittest.TestCase):
             for channel in ['Y', 'Cb', 'Cr']:
 
                 # test DCT
-                res = subprocess.call(
-                        ["Rscript", "tests/test_rainer.R",  # script
+                res = subprocess.call([
+                    "Rscript", "tests/test_rainer.R",  # script
                         "dct",  # mode - quantization table or DCT coefficients
                         channel,  # channel - Y, Cr, or Cb
                         "examples/IMG_0791.jpeg ",  # input file
-                        self.tmp.name],  # output file
+                        self.tmp.name,  # output file
+                    ],
                     shell=True,
                     stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL)
+                    stderr=subprocess.DEVNULL
+                )
                 if res != 0:
                     raise Exception("Rainer's MMSec failed!")
                 df = pd.read_csv(self.tmp.name, header=None)
@@ -459,13 +459,13 @@ class TestDCT(unittest.TestCase):
 
                 # test QT
                 res = subprocess.call(
-                        "Rscript tests/test_rainer.R " + # script
-                        "qt " + " " + # produce quantization table
-                        channel + " " +# Y, Cr or Cb
-                        "examples/IMG_0791.jpeg " + # input file
-                        self.tmp.name, # output file
-
-                    shell=True)
+                        "Rscript tests/test_rainer.R " +  # script
+                        "qt " + " " +  # produce quantization table
+                        channel + " " +  # Y, Cr or Cb
+                        "examples/IMG_0791.jpeg " +  # input file
+                        self.tmp.name,  # output file
+                    shell=True
+                )
                 if res != 0:
                     raise Exception("Rainer's script failed!")
                 df = pd.read_csv("tmp/result.csv", header=None)

@@ -3,7 +3,6 @@ import logging
 import numpy as np
 import os
 from parameterized import parameterized
-from PIL import Image
 import tempfile
 import unittest
 
@@ -83,7 +82,7 @@ class TestSpatial(unittest.TestCase):
         self.logger.info("test_synthetic_spatial")
         # create synthetic JPEG
         np.random.seed(12345)
-        spatial = np.random.randint(0, 255, (512,512,3), dtype='uint8')
+        spatial = np.random.randint(0, 255, (512, 512, 3), dtype='uint8')
         jpeglib.from_spatial(
             spatial=spatial,
             in_color_space='JCS_RGB'
@@ -156,10 +155,10 @@ class TestSpatial(unittest.TestCase):
         self.assertFalse((x1 == x2).all())
 
     @parameterized.expand([
-        ['6b','turbo120','turbo130','turbo140','turbo150','turbo200','turbo210'],
-        ['7','8','8a','8b','8c','8d','9'],
-        ['9a','9b','9c','9d','9e'],
-        ['6b','mozjpeg101','mozjpeg201','mozjpeg300','mozjpeg403'],
+        ['6b', 'turbo120', 'turbo130', 'turbo140', 'turbo150', 'turbo200', 'turbo210'],
+        ['7', '8', '8a', '8b', '8c', '8d', '9'],
+        ['9a', '9b', '9c', '9d', '9e'],
+        ['6b', 'mozjpeg101', 'mozjpeg201', 'mozjpeg300', 'mozjpeg403'],
     ], name_func=version_cluster)
     def test_equal_baseline(self, *versions):
         """Decompress with given versions and observe the same output."""
@@ -175,7 +174,7 @@ class TestSpatial(unittest.TestCase):
 
     def test_grayscale(self):
         """Test reading and writing grayscale spatial."""
-        self.logger.info(f"test_grayscale")
+        self.logger.info("test_grayscale")
         # compress
         np.random.seed(12345)
         x = np.random.randint(0, 255, (128, 128, 1), dtype=np.int16)
@@ -193,7 +192,7 @@ class TestSpatial(unittest.TestCase):
 
     def test_cmyk(self):
         """Test reading and writing cmyk spatial."""
-        self.logger.info(f"test_cmyk")
+        self.logger.info("test_cmyk")
         # compress
         np.random.seed(12345)
         x = np.random.randint(0, 255, (256, 256, 4), dtype=np.int16)

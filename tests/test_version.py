@@ -12,6 +12,7 @@ import unittest
 import jpeglib
 from _defs import ALL_VERSIONS, LIBJPEG_VERSIONS
 
+
 class TestVersion(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
@@ -170,5 +171,6 @@ class TestVersion(unittest.TestCase):
                 pass
         except RuntimeError as e:
             self.assertEqual(str(e), f'version "{version}" not found, was the package compiled correctly?')
+
 
 __all__ = ["TestVersion"]

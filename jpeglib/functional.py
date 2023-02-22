@@ -8,6 +8,7 @@ from . import _jpeg
 from ._colorspace import Colorspace
 from ._dctmethod import DCTMethod
 from ._dithermode import Dithermode
+from . import _infere
 
 
 def read_dct(
@@ -246,22 +247,8 @@ def from_spatial(
             in_color_space = cspace
     # infere colorspace
     if in_color_space is None:
-        if num_components == 3:
-            in_color_space = Colorspace('JCS_RGB')
-            # jpeg_color_space = Colorspace('JCS_YCbCr')
-        elif num_components == 1:
-            in_color_space = Colorspace('JCS_GRAYSCALE')
-            # jpeg_color_space = Colorspace('JCS_GRAYSCALE')
-        else:
-            raise IOError('failed to infere colorspace')
-    if in_color_space == Colorspace('JCS_GRAYSCALE'):
-        jpeg_color_space = Colorspace('JCS_GRAYSCALE')
-    elif in_color_space == Colorspace('JCS_CMYK'):
-        jpeg_color_space = Colorspace('JCS_YCCK')
-    else:
-        jpeg_color_space = Colorspace('JCS_YCbCr')
-    # else:
-    #     raise IOError('failed to infere colorspace')
+        in_color_space = _infere.in_color_space(num_components)
+    jpeg_color_space = _infere.jpeg_in_color_space(in_color_space)
 
     # create jpeg
     return SpatialJPEG(
@@ -346,54 +333,14 @@ def from_dct(
     >>>     pass
     """
     # infere colorspace
-    is_grayscale = Cb is None and Cr is None
-    if is_grayscale:  # grayscale
-        jpeg_color_space = Colorspace('JCS_GRAYSCALE')
-    elif Cb is None or Cr is None:  # Cb or Cr not given
-        raise IOError('both Cb and Cr must be non-zero')
-    elif K is None:  # YCbCr
-        jpeg_color_space = Colorspace('JCS_YCbCr')
-    else:  # K given
-        jpeg_color_space = Colorspace('JCS_YCCK')
+    jpeg_color_space = _infere.jpeg_color_space(Cb, Cr, K)
     # infere quant_tbl_no
     if quant_tbl_no is None:
-        ASSIGNMENT = {
-            2: np.array([0, 1, 1]),
-            3: np.array([0, 1, 2]),
-            4: np.array([0, 1, 2, 3]),
-        }
-        if is_grayscale:  # grayscale
-            quant_tbl_no = np.array([0])
-        elif qt is None:
-            quant_tbl_no = None
-        elif qt.shape[0] in ASSIGNMENT:
-            quant_tbl_no = ASSIGNMENT[qt.shape[0]]
-        else:
-            raise Exception('failed to infere quant_tbl_no')
+        quant_tbl_no = _infere.quant_tbl_no(Cb, Cr, qt)
     # infere samp_factor
-    if not is_grayscale:
-        dims = [
-            Cb.shape[:2],
-            Cr.shape[:2],
-        ]
-        if K is not None:
-            dims.append(K.shape[:2])
-        dims = np.array([np.array(Y.shape[:2]) / np.array(i) for i in dims])
-        max_subs = np.max(dims, axis=0)
-        samp_factor = np.array([
-            max_subs,
-            *(max_subs / dims)
-        ]).astype('int16')
-    else:  # grayscale
-        samp_factor = np.array([[1,1]])
+    samp_factor = _infere.samp_factor(Y, Cb, Cr, K)
     # block dims
-    block_dims = [[Y.shape[0], Y.shape[1]]]
-    if Cb is not None and Cr is not None:
-        block_dims.append([Cb.shape[0], Cb.shape[1]])
-        block_dims.append([Cr.shape[0], Cr.shape[1]])
-    if K is not None:
-        block_dims.append([K.shape[0], K.shape[1]])
-    block_dims = np.array(block_dims)
+    block_dims = _infere.block_dims(Y, Cb, Cr, K)
 
     # create jpeg
     return DCTJPEG(

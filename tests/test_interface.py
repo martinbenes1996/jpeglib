@@ -83,7 +83,6 @@ class TestInterface(unittest.TestCase):
         self.assertEqual(im.qt.shape[1], 8)
         self.assertEqual(im.qt.shape[2], 8)
 
-
     def test_read_spatial(self):
         self.logger.info("test_read_spatial")
         im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
@@ -148,8 +147,6 @@ class TestInterface(unittest.TestCase):
         self.assertEqual(im.spatial.shape[1], im.width)
         self.assertEqual(im.spatial.shape[2], im.channels)
 
-
-
     def test_with_version(self):
         """Test with statement for version."""
         self.logger.info("test_with_version")
@@ -179,7 +176,6 @@ class TestInterface(unittest.TestCase):
         jpeg.load()
         im.write_spatial(Path(self.tmp.name))
         jpeg.write_dct(Path(self.tmp.name))
-
 
     def test_read_pil(self):
         self.logger.info("test_read_pil")
@@ -223,7 +219,6 @@ class TestInterface(unittest.TestCase):
         # check unequal
         self.assertTrue((im.Y == Y_original).all())
         self.assertFalse((im.Y == im2.Y).all())
-
 
 
 __all__ = ["TestInterface"]
