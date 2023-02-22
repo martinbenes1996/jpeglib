@@ -71,7 +71,7 @@ int read_jpeg_dct(
 				blockptr_one = buffer_one[0][w];
 				for(int bh = 0; bh < 8; bh++) {
 				for(int bw = 0; bw < 8; bw++) {
-					int i = bw*8 + bh;
+					int i = bh*8 + bw;
 					((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[i] = blockptr_one[bh*8 + bw];
 				}
 				// memcpy(_dct_offset(dct, ch, w, h, WblocksY, HblocksY), (void *)blockptr_one, sizeof(short)*64);
@@ -350,7 +350,7 @@ int write_jpeg_dct(
 					blockptr_one = buffer_one[0][w];
 					for (int bh = 0; bh < 8; bh++)
 						for (int bw = 0; bw < 8; bw++)
-							blockptr_one[bh * 8 + bw] = ((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[bw * 8 + bh];
+							blockptr_one[bh * 8 + bw] = ((short *)_dct_offset(dct, ch, h, w, Hblocks, Wblocks))[bh * 8 + bw];
 				}
 			}
 		}

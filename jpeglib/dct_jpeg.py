@@ -16,15 +16,15 @@ class DCTJPEG(_jpeg.JPEG):
     """JPEG instance to work with DCT domain."""
 
     Y: np.ndarray
-    """luminance tensor"""
+    """luminance tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""
     Cb: np.ndarray
-    """chrominance blue-difference tensor"""
+    """chrominance blue-difference tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""
     Cr: np.ndarray
-    """chrominance red-difference tensor"""
+    """chrominance red-difference tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""
     K: np.ndarray
     """black (cmyK) tensor"""
     qt: np.ndarray
-    """quantization tensor"""
+    """quantization tensor with shape [vertical_block_size, horizontal_block_size]"""
     quant_tbl_no: np.ndarray
     """assignment of quantization tables to components,
     (0 Y, 1 Cb, 1Cr) by default"""
@@ -361,17 +361,27 @@ class DCTJPEGio(DCTJPEG):
             self.quant_tbl_no = np.array([0])
 
     def _convert_dct_jpegio(self, dct: np.ndarray) -> np.ndarray:
+        # From jpeglib's 4D tensor to jpegio 2D
+        num_vertical_blocks, num_horizontal_blocks = dct.shape[:2]
+
         return (
             dct
-            .transpose((0, 3, 1, 2))
-            .reshape((dct.shape[0]*dct.shape[2], dct.shape[1]*dct.shape[3]))
+            .transpose((0, 2, 1, 3))
+            .reshape((num_vertical_blocks * 8, num_horizontal_blocks * 8))
         ).astype(np.int32)
 
     def _convert_jpegio_dct(self, dct: np.ndarray) -> np.ndarray:
+        # From jpegio 2D to jpeglib 4D
+        assert dct.shape[0] % 8 == 0
+        assert dct.shape[1] % 8 == 0
+
+        num_vertical_blocks = dct.shape[0] // 8
+        num_horizontal_blocks = dct.shape[1] // 8
+
         return (
             dct
-            .reshape((-1, 8, dct.shape[1]//8, 8))
-            .transpose((0, 2, 3, 1))
+            .reshape((num_vertical_blocks, 8, num_horizontal_blocks, 8))
+            .transpose((0, 2, 1, 3))
         ).astype(np.int16)
 
     @property

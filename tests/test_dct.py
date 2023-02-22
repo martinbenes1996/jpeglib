@@ -166,7 +166,7 @@ class TestDCT(unittest.TestCase):
             np.testing.assert_array_equal(qt_ref, qt)
 
     def test_dct_coefficient_decoder(self):
-        """Test output against blorch/dct-coefficient-decoder."""
+        """Test output against btlorch/dct-coefficient-decoder."""
         self.logger.info("test_dct_coefficient_decoder")
         # read DCT with jpeglib
         im = jpeglib.read_dct("examples/IMG_0311.jpeg")
@@ -187,16 +187,14 @@ class TestDCT(unittest.TestCase):
         ])
         YT = (
             d.get_dct_coefficients(0)
-            .reshape((im.width_in_blocks(0), -1, 8, 8), order='F')
-            .transpose((1, 0, 2, 3)))
+            .reshape((im.height_in_blocks(0), im.width_in_blocks(0), 8, 8)))
         CbT = (
             d.get_dct_coefficients(1)
-            .reshape((im.width_in_blocks(1), -1, 8, 8), order='F')
-            .transpose((1, 0, 2, 3)))
+            .reshape((im.height_in_blocks(1), im.width_in_blocks(1), 8, 8)))
         CrT = (
             d.get_dct_coefficients(2)
-            .reshape((im.width_in_blocks(2), -1, 8, 8), order='F')
-            .transpose((1, 0, 2, 3)))
+            .reshape((im.height_in_blocks(2), im.width_in_blocks(2), 8, 8)))
+
         # test equal
         np.testing.assert_array_equal(im.Y, YT)
         np.testing.assert_array_equal(im.Cb, CbT)
