@@ -217,15 +217,15 @@ class TestDCT(unittest.TestCase):
         YT = (
             img['coef_arrays'][0]
             .reshape((im.height_in_blocks(0), 8, -1, 8))
-            .transpose((0, 2, 3, 1)))
+            .transpose((0, 2, 1, 3)))
         CbT = (
             img['coef_arrays'][1]
             .reshape((im.height_in_blocks(1), 8, -1, 8))
-            .transpose((0, 2, 3, 1)))
+            .transpose((0, 2, 1, 3)))
         CrT = (
             img['coef_arrays'][2]
             .reshape((im.height_in_blocks(2), 8, -1, 8))
-            .transpose((0, 2, 3, 1)))
+            .transpose((0, 2, 1, 3)))
         qtT = np.stack([
             img['quant_tables'][0],
             img['quant_tables'][1],
