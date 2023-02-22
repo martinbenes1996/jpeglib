@@ -274,15 +274,15 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.qt, qt.numpy())
         np.testing.assert_array_equal(
             jpeg.Y,
-            np.einsum('abcde->bced', Y.numpy())
+            Y.numpy()[0]
         )  # noqa: E501
         np.testing.assert_array_equal(  # noqa: E501
             jpeg.Cb,
-            np.einsum('bcde->bced', CbCr[0].numpy())
+            CbCr[0].numpy()
         )
         np.testing.assert_array_equal(  # noqa: E501
             jpeg.Cr,
-            np.einsum('bcde->bced', CbCr[1].numpy())
+            CbCr[1].numpy()
         )
 
     def test_pil_qt(self):
