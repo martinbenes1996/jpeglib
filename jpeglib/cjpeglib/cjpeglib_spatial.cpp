@@ -229,7 +229,7 @@ int write_jpeg_spatial(
 		// if (in_color_space >= 0)
 		//   cinfo.in_color_space = in_color_space;
 
-		#if JPEG_LIB_VERSION >= 70
+		#if LIBVERSION >= 70
 		if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
 			cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
 		}
