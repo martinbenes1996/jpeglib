@@ -4,6 +4,7 @@ from __future__ import annotations
 import dataclasses
 import numpy as np
 
+
 @dataclasses.dataclass
 class Huffman:
     bits: np.ndarray

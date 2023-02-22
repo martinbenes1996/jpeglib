@@ -2,10 +2,11 @@
 import numpy as np
 from ._colorspace import Colorspace
 
+
 def jpeg_color_space(
-    Cb:np.ndarray,
-    Cr:np.ndarray,
-    K:np.ndarray
+    Cb: np.ndarray,
+    Cr: np.ndarray,
+    K: np.ndarray
 ) -> Colorspace:
     """"""
     if Cb is None and Cr is None:  # grayscale
@@ -19,8 +20,9 @@ def jpeg_color_space(
     #
     return colorspace
 
+
 def in_color_space(
-    num_components:int
+    num_components: int
 ) -> Colorspace:
     """Inferes in_color_space from number of components."""
     if num_components == 3:
@@ -31,12 +33,14 @@ def in_color_space(
         raise IOError('failed to infere colorspace')
     return colorspace
 
+
 IN_JPEG_COLORSPACE = {
     ('JCS_GRAYSCALE'): Colorspace('JCS_GRAYSCALE'),
     ('JCS_CMYK'): Colorspace('JCS_YCCK'),
     ('JCS_RGB'): Colorspace('JCS_YCbCr'),
     ('JCS_YCbCr'): Colorspace('JCS_YCbCr'),
 }
+
 
 def jpeg_in_color_space(
     in_color_space:Colorspace
@@ -47,14 +51,18 @@ def jpeg_in_color_space(
         Colorspace('JCS_YCbCr')
     )
 
+
 ASSIGNMENT = {
     2: np.array([0, 1, 1]),
     3: np.array([0, 1, 2]),
     4: np.array([0, 1, 2, 3]),
 }
 
+
 def quant_tbl_no(
-    Cb, Cr, qt
+    Cb: np.ndarray,
+    Cr: np.ndarray,
+    qt: np.ndarray,
 ) -> np.ndarray:
     """Inferes quant_tbl_no to given non-luminance components."""
     if qt is None:  # no qt
@@ -68,8 +76,12 @@ def quant_tbl_no(
     #
     return tbl_no
 
+
 def samp_factor(
-    Y, Cb, Cr, K,
+    Y: np.ndarray,
+    Cb: np.ndarray,
+    Cr: np.ndarray,
+    K: np.ndarray,
 ) -> np.ndarray:
     if Cb is None and Cr is None:  # grayscale
         factor = np.array([1,1])
@@ -89,8 +101,12 @@ def samp_factor(
         ]).astype('int16')
     return factor
 
+
 def block_dims(
-    Y, Cb, Cr, K
+    Y: np.ndarray,
+    Cb: np.ndarray,
+    Cr: np.ndarray,
+    K: np.ndarray,
 ) -> np.ndarray:
     return np.array([
         [i.shape[0], i.shape[1]]

@@ -52,7 +52,7 @@ def read_dct(
     >>> print(jpeg.Y) # read and returned
     >>> print(jpeg.Y) # second time it is already stored in the object
     >>> print(jpeg.Cb) # no reading, already stored in the object too
-    """
+    """  # noqa: F501
     # load file content
     path = str(path)
     with open(path, "rb") as f:

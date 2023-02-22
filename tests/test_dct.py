@@ -434,8 +434,9 @@ class TestDCT(unittest.TestCase):
             for channel in ['Y', 'Cb', 'Cr']:
 
                 # test DCT
-                res = subprocess.call([
-                    "Rscript", "tests/test_rainer.R",  # script
+                res = subprocess.call(
+                    [
+                        "Rscript", "tests/test_rainer.R",  # script
                         "dct",  # mode - quantization table or DCT coefficients
                         channel,  # channel - Y, Cr, or Cb
                         "examples/IMG_0791.jpeg ",  # input file

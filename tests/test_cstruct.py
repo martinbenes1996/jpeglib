@@ -66,7 +66,7 @@ class TestCStruct(unittest.TestCase):
         self.assertIsInstance(cspace.index, int)
         self.assertEqual(cspace.index, i)
         if cspace_name == 'JCS_UNKNOWN':
-            self.assertRaises(Exception, lambda : cspace.channels)
+            self.assertRaises(Exception, lambda: cspace.channels)
         else:
             self.assertEqual(cspace.channels, channels)
 

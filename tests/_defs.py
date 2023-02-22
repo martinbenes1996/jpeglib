@@ -1,4 +1,6 @@
 
+from parameterized import parameterized
+
 ALL_VERSIONS = [
     ['6b'],
     ['7'],
@@ -42,10 +44,9 @@ LIBJPEG_VERSIONS = [
     ['9e'],
 ]
 
-from parameterized import parameterized
 
 def version_cluster(testcase_func, param_num, param):
-    return "%s_%s" %(
+    return "%s_%s"  % (
         testcase_func.__name__,
         parameterized.to_safe_name("_".join(str(x) for x in param.args)),
     )
