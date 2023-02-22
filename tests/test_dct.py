@@ -460,11 +460,13 @@ class TestDCT(unittest.TestCase):
 
                 # test QT
                 res = subprocess.call(
-                        "Rscript tests/test_rainer.R " +  # script
-                        "qt " + " " +  # produce quantization table
-                        channel + " " +  # Y, Cr or Cb
-                        "examples/IMG_0791.jpeg " +  # input file
+                    [
+                        "Rscript", "tests/test_rainer.R",  # script
+                        "qt",  # produce quantization table
+                        channel,  # Y, Cr or Cb
+                        "examples/IMG_0791.jpeg",  # input file
                         self.tmp.name,  # output file
+                    ],
                     shell=True
                 )
                 if res != 0:

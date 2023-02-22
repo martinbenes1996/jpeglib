@@ -43,7 +43,7 @@ IN_JPEG_COLORSPACE = {
 
 
 def jpeg_in_color_space(
-    in_color_space:Colorspace
+    in_color_space: Colorspace,
 ) -> Colorspace:
     """Returns jpeg_color_space corresponding to in_color_space."""
     return IN_JPEG_COLORSPACE.get(
@@ -84,7 +84,7 @@ def samp_factor(
     K: np.ndarray,
 ) -> np.ndarray:
     if Cb is None and Cr is None:  # grayscale
-        factor = np.array([1,1])
+        factor = np.array([1, 1])
     else:
         # collect dimensions
         dims = [
