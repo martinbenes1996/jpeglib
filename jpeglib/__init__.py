@@ -22,6 +22,7 @@ from ._marker import Marker
 from .version import version
 
 # for unit tests
+from ._notations import Jab_to_factors
 from ._timer import Timer
 
 # package version
@@ -43,7 +44,7 @@ __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
     'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
     'Colorspace', 'DCTMethod', 'Dithermode', 'Marker',
-    'version',
+    'version', 'Jab_to_factors',
     'Timer', 'dct',
     '__version__',
 ]

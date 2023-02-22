@@ -3,12 +3,13 @@ import copy
 import ctypes
 import dataclasses
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Union
 
 from ._bind import CJpegLib
 from ._colorspace import Colorspace
 from ._huffman import Huffman
 from ._marker import Marker
+from ._notations import Jab_to_factors
 
 MAX_MARKER: int = 50
 
@@ -28,10 +29,12 @@ class JPEG:
     """DCT shapes in blocks;
     first is DCT component (0 Y,1 Cb,2 Cr),
     second is dimension (0 height, 1 width)"""
-    samp_factor: np.ndarray
+    samp_factor: Union[np.ndarray, str]
     """sampling factor;
     first is DCT component, (0 Y,1 Cb,2 Cr),
-    second is orientation (0 horizontal, 1 vertical)"""
+    second is orientation (0 horizontal, 1 vertical)
+    can be also specified as str in format 'J:a:b'
+    """
     markers: List[Marker]
     """list of marker objects"""
     huffmans: List[Dict[str, Huffman]]
@@ -200,9 +203,18 @@ class JPEG:
                 self.block_dims[0][0], self.block_dims[0][1],)
 
     def c_samp_factor(self):
+        # no sampling factor
         if self.samp_factor is None:
             return self.samp_factor
-        samp_factor = np.array(self.samp_factor, dtype=np.int32)
+        # "J:a:b"
+        if isinstance(self.samp_factor, str):
+            samp_factor = Jab_to_factors(
+                list(map(int, self.samp_factor.split(':')))
+            )
+        # [[hY,wY],[hCb,wCb],[hCr,wCr]]
+        else:
+            samp_factor = self.samp_factor
+        samp_factor = np.array(samp_factor, dtype=np.int32)
         # samp_factor = np.ascontiguousarray(samp_factor)
         return np.ctypeslib.as_ctypes(samp_factor)
 

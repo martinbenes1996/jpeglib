@@ -57,16 +57,3 @@ def Jab_to_factors(Jab) -> List:
         [int(Cr[0] / gcd0), int(Cr[1] / gcd1)],
     ]
     return factors
-
-
-if __name__ == '__main__':
-    Jab_to_factors([4, 4, 4])
-    Jab_to_factors([4, 4, 0])
-    Jab_to_factors([4, 2, 2])
-    Jab_to_factors([4, 2, 0])
-    Jab_to_factors([4, 1, 1])
-    Jab_to_factors([4, 1, 0])
-    Jab_to_factors([3, 3, 3])
-    Jab_to_factors([3, 3, 0])
-    Jab_to_factors([3, 1, 1])
-    Jab_to_factors([3, 1, 0])
