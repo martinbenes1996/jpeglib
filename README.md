@@ -27,8 +27,7 @@ pip install jpeglib
 ```
 
 
-> :warning: This will install `jpeglib` together with every integrated version of libjpeg, libjpeg-turbo and mozjpeg. It takes longer to install than the package.
-
+> :warning: This will install `jpeglib` together with every integrated version of libjpeg, libjpeg-turbo and mozjpeg. For common architectures/OS we provide prebuilt wheels, but installing from source takes couple of minutes to install.
 
 ## Usage
 
@@ -107,4 +106,5 @@ im = jpeglib.read_spatial('image.jpeg') # using 6b again
 
 ## Credits
 
-Developed by [Martin Benes](https://github.com/martinbenes1996).
+Developed by [Martin Benes](https://github.com/martinbenes1996), Universität Innsbruck, 2023.
+
