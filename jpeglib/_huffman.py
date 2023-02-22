@@ -1,12 +1,10 @@
 
 
 from __future__ import annotations
-from dataclasses import dataclass
+import dataclasses
 import numpy as np
-from typing import Union, Type
 
-
-@dataclass
+@dataclasses.dataclass
 class Huffman:
     bits: np.ndarray
     """bits used to represent number of elements"""
@@ -18,11 +16,6 @@ class Huffman:
     #     print(len(np.unique(self.values)))
     #     print(self.values)
     #     assert len(self.values) == np.sum(self.bits), 'invalid histogram'
-
-    @property
-    def bits(self) -> int:
-        """Index getter."""
-        return self.name_to_index(self.name)
 
     @property
     def bits(self) -> str:

@@ -16,11 +16,11 @@ class DCTJPEG(_jpeg.JPEG):
     """JPEG instance to work with DCT domain."""
 
     Y: np.ndarray
-    """luminance tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""
+    """luminance tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""  # noqa: F501
     Cb: np.ndarray
-    """chrominance blue-difference tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""
+    """chrominance blue-difference tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""  # noqa: F501
     Cr: np.ndarray
-    """chrominance red-difference tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""
+    """chrominance red-difference tensor with shape [num_vertical_blocks, num_horizontal_blocks, vertical_block_size, horizontal_block_size]"""  # noqa: F501
     K: np.ndarray
     """black (cmyK) tensor"""
     qt: np.ndarray

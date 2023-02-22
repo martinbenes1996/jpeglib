@@ -145,11 +145,11 @@ class TestDCT(unittest.TestCase):
         self.assertFalse((Cr1 == Cr2).all())
 
     @parameterized.expand([
-        ['6b','turbo120','turbo130','turbo140','turbo150','turbo200','turbo210'],
-        ['7','8','8a','8b','8c','8d','9','9a','9b','9c','9d'],
+        ['6b', 'turbo120', 'turbo130', 'turbo140', 'turbo150', 'turbo200', 'turbo210'],
+        ['7', '8', '8a', '8b', '8c', '8d', '9', '9a', '9b', '9c', '9d'],
         ['9e'],
-        ['mozjpeg101','mozjpeg201'],
-        ['mozjpeg300','mozjpeg403'],
+        ['mozjpeg101', 'mozjpeg201'],
+        ['mozjpeg300', 'mozjpeg403'],
     ], name_func=version_cluster)
     def test_equal_baseline(self, *versions):
         """Compress with given versions and observe the same output."""
@@ -253,6 +253,7 @@ class TestDCT(unittest.TestCase):
                 f"invalid installation of torchjpeg: {e}"
             )
             return
+
         # convert to the same format and test
         def get_full_shape(c):
             return np.array([
@@ -261,15 +262,15 @@ class TestDCT(unittest.TestCase):
             ])
         np.testing.assert_array_equal(
             get_full_shape(jpeg.Y),
-            shape.numpy()[0,::]
+            shape.numpy()[0]
         )
         np.testing.assert_array_equal(
             get_full_shape(jpeg.Cb),
-            shape.numpy()[1,::]
+            shape.numpy()[1]
         )
         np.testing.assert_array_equal(
             get_full_shape(jpeg.Cr),
-            shape.numpy()[2,::]
+            shape.numpy()[2]
         )
         np.testing.assert_array_equal(jpeg.qt, qt.numpy())
         np.testing.assert_array_equal(

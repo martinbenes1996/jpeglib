@@ -3,8 +3,7 @@
 import logging
 import numpy as np
 import os
-from PIL import Image
-from scipy.stats import ttest_ind, ttest_1samp
+from scipy.stats import ttest_1samp
 import timeit
 import tempfile
 import unittest
@@ -66,7 +65,6 @@ class TestPerformance(unittest.TestCase):
             )
         )
         self.assertLess(faster_than_300ms.pvalue, .05)
-
 
 
 __all__ = ["TestPerformance"]

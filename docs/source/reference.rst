@@ -60,21 +60,3 @@ Manage libjpeg version
    :members: set, get, versions
    :special-members: __enter__, __exit__
 
-
-Miscellaneous operations with images
-------------------------------------
-
-DCT implementation
-""""""""""""""""""
-
-.. autofunction:: jpeglib.ops.forward_dct
-
-.. autofunction:: jpeglib.ops.backward_dct
-
-
-JPEG compression primitives
-"""""""""""""""""""""""""""
-
-.. autofunction:: jpeglib.ops.blockify_8x8
-
-.. autofunction:: jpeglib.ops.grayscale

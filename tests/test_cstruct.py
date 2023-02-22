@@ -35,9 +35,10 @@ class TestCStruct(unittest.TestCase):
         self.assertEqual(dct.name, dct_name)
         self.assertIsInstance(dct.index, int)
         self.assertEqual(dct.index, i)
+
     def test_dct_method_invalid(self):
         """Test invalid DCT method."""
-        self.logger.info(f'test_dct_method_invalid')
+        self.logger.info('test_dct_method_invalid')
         self.assertRaises(
             KeyError,
             jpeglib.DCTMethod,
@@ -70,11 +71,12 @@ class TestCStruct(unittest.TestCase):
             self.assertEqual(cspace.channels, channels)
     def test_color_space_invalid(self):
         """Test invalid color space."""
-        self.logger.info(f'test_color_space_invalid')
+        self.logger.info('test_color_space_invalid')
         self.assertRaises(
             KeyError,
             jpeglib.DCTMethod,
             'JCS_HSV'
         )
+
 
 __all__ = ["TestCStruct"]

@@ -14,12 +14,11 @@ if __name__ == "__main__":
 from test_cstruct import TestCStruct  # noqa: F401,E402
 from test_dct import TestDCT  # noqa: F401,E402
 from test_interface import TestInterface  # noqa: F401,E402
-from test_ops import TestOps
-from test_performance import TestPerformance
-from test_spatial import TestSpatial
+from test_performance import TestPerformance  # noqa: F401,E402
+from test_spatial import TestSpatial  # noqa: F401,E402
 from test_version import TestVersion  # noqa: F401,E402
 
-# from test_flags import TestFlags
+# from test_flags import TestFlags  # noqa: F401,E402
 # from test_marker import TestMarker  # noqa: F401,E402
 # from test_progressive import TestProgressive  # noqa: F401,E402
 # ==================

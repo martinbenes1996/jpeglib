@@ -22,8 +22,8 @@ class TestFlags(unittest.TestCase):
         jpeglib.version.set('8')
         fname = 'examples/IMG_0791.jpeg'
         im_def = jpeglib.read_spatial(fname, flags=[])
-        im_fu  = jpeglib.read_spatial(fname, flags=['+DO_FANCY_UPSAMPLING'])
-        im_ss  = jpeglib.read_spatial(fname, flags=['-DO_FANCY_UPSAMPLING'])
+        im_fu = jpeglib.read_spatial(fname, flags=['+DO_FANCY_UPSAMPLING'])
+        im_ss = jpeglib.read_spatial(fname, flags=['-DO_FANCY_UPSAMPLING'])
         np.testing.assert_array_equal(im_def.spatial, im_fu.spatial)
         self.assertTrue((im_def.spatial != im_ss.spatial).any())
 
@@ -43,8 +43,6 @@ class TestFlags(unittest.TestCase):
         self.tmp.flush()
         Y_ss, (Cb_ss, Cr_ss), qt_ss = jpeglib.read_dct(self.tmp.name).load()
 
-
-
         np.testing.assert_array_equal(Y_def, Y_fu)
         np.testing.assert_array_equal(Cb_def, Cb_fu)
         np.testing.assert_array_equal(Cr_def, Cr_fu)
@@ -53,3 +51,4 @@ class TestFlags(unittest.TestCase):
         # self.assertTrue((Y_fu != Y_ss).any())
         # self.assertTrue((Cb_fu != Cb_ss).any())
         # self.assertTrue((Cr_fu != Cr_ss).any())
+

@@ -21,9 +21,6 @@ from ._marker import Marker
 # libjpeg versions
 from .version import version
 
-# DCT implementation
-from . import ops
-
 # for unit tests
 from ._timer import Timer
 
@@ -46,7 +43,7 @@ __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
     'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
     'Colorspace', 'DCTMethod', 'Dithermode', 'Marker',
-    'version','ops',
+    'version',
     'Timer', 'dct',
     '__version__',
 ]

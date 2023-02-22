@@ -195,6 +195,7 @@ class custom_build_ext(setuptools.command.build_ext.build_ext):
         setuptools.command.build_ext.build_ext.build_extensions(self)
         setuptools.command.build_ext.build_ext.get_export_symbols = self.get_export_symbols
 
+
 # define package
 setuptools.setup(
     name='jpeglib',

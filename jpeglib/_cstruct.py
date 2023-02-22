@@ -1,10 +1,10 @@
 
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Union, Type
+import dataclasses
+import typing
 
 
-@dataclass
+@dataclasses.dataclass
 class CStruct:
     name: str
     """item name"""
@@ -56,7 +56,7 @@ class CStruct:
         return cls(name=name)
 
     @classmethod
-    def parse_input(cls, x: Union[str, CStruct]) -> int:
+    def parse_input(cls, x: typing.Union[str, CStruct]) -> int:
         # not specified
         if x is None:
             return -1

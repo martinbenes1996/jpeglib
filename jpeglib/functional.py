@@ -181,7 +181,6 @@ def read_spatial(
     return im
 
 
-
 def from_spatial(
     spatial: np.ndarray,
     in_color_space: typing.Union[str, Colorspace] = None
@@ -347,31 +346,32 @@ def from_dct(
     >>>     pass
     """
     # infere colorspace
-    if Cb is not None and Cr is not None:
-        if K is not None:
-            jpeg_color_space = Colorspace('JCS_YCCK')
-        else:
-            jpeg_color_space = Colorspace('JCS_YCbCr')
-    elif Cb is None and Cr is None:
-        # jpeg_color_space = Colorspace('JCS_YCbCr')  # only Y
+    is_grayscale = Cb is None and Cr is None
+    if is_grayscale:  # grayscale
         jpeg_color_space = Colorspace('JCS_GRAYSCALE')
-    else:
-        raise IOError('failed to infere colorspace')
+    elif Cb is None or Cr is None:  # Cb or Cr not given
+        raise IOError('both Cb and Cr must be non-zero')
+    elif K is None:  # YCbCr
+        jpeg_color_space = Colorspace('JCS_YCbCr')
+    else:  # K given
+        jpeg_color_space = Colorspace('JCS_YCCK')
     # infere quant_tbl_no
-    if quant_tbl_no is None and qt is not None:
-        if Cb is not None and Cr is not None:
-            if qt.shape[0] == 2:
-                quant_tbl_no = np.array([0, 1, 1])
-            elif qt.shape[0] == 3:
-                quant_tbl_no = np.array([0, 1, 2])
-            elif qt.shape[0] == 4:
-                quant_tbl_no = np.array([0, 1, 2, 3])
-            else:
-                raise Exception('failed to infere quant_tbl_no')
-        else:
+    if quant_tbl_no is None:
+        ASSIGNMENT = {
+            2: np.array([0, 1, 1]),
+            3: np.array([0, 1, 2]),
+            4: np.array([0, 1, 2, 3]),
+        }
+        if is_grayscale:  # grayscale
             quant_tbl_no = np.array([0])
+        elif qt is None:
+            quant_tbl_no = None
+        elif qt.shape[0] in ASSIGNMENT:
+            quant_tbl_no = ASSIGNMENT[qt.shape[0]]
+        else:
+            raise Exception('failed to infere quant_tbl_no')
     # infere samp_factor
-    if Cb is not None and Cr is not None:
+    if not is_grayscale:
         dims = [
             Cb.shape[:2],
             Cr.shape[:2],
@@ -384,9 +384,8 @@ def from_dct(
             max_subs,
             *(max_subs / dims)
         ]).astype('int16')
-    else:
+    else:  # grayscale
         samp_factor = np.array([[1,1]])
-    # print(f'{samp_factor=}')
     # block dims
     block_dims = [[Y.shape[0], Y.shape[1]]]
     if Cb is not None and Cr is not None:
@@ -395,7 +394,6 @@ def from_dct(
     if K is not None:
         block_dims.append([K.shape[0], K.shape[1]])
     block_dims = np.array(block_dims)
-    # print(block_dims)
 
     # create jpeg
     return DCTJPEG(
