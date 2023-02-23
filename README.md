@@ -27,7 +27,7 @@ pip install jpeglib
 ```
 
 
-> :warning: This will install `jpeglib` together with every integrated version of libjpeg, libjpeg-turbo and mozjpeg. For common architectures/OS we provide prebuilt wheels, but installing from source takes couple of minutes to install.
+> :warning: This will install `jpeglib` together with multiple versions of libjpeg, libjpeg-turbo and mozjpeg. For common architectures/OS we provide prebuilt wheels, but installing from source takes couple of minutes.
 
 ## Usage
 

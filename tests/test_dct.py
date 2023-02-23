@@ -92,7 +92,7 @@ class TestDCT(unittest.TestCase):
     ])
     def test_dct_samp_factor(self, samp_factor):
         """Test of reading DCT with different sampling factors."""
-        self.logger.info("test_dct_samp_factor")
+        self.logger.info(f'test_dct_samp_factor({samp_factor})')
         # compress image with given sampling factor
         im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
         im.samp_factor = samp_factor

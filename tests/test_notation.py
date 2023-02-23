@@ -36,7 +36,7 @@ class TestNotation(unittest.TestCase):
     ])
     def test_Jab(self, Jab, samp_factor):
         """Test of J:a:b to samp factor convertor."""
-        self.logger.info('test_Jab')
+        self.logger.info(f'test_Jab({Jab})')
         np.testing.assert_array_equal(
             # convert Jab to factors
             jpeglib.Jab_to_factors(Jab),
@@ -57,7 +57,7 @@ class TestNotation(unittest.TestCase):
         ['3:1:0', [[3,2],[1,1],[1,1]]],
     ])
     def test_samp_factor(self, Jab, samp_factor):
-        self.logger.info('test_samp_factor')
+        self.logger.info(f'test_samp_factor({Jab})')
         # load image
         im = jpeglib.read_spatial('examples/IMG_0311.jpeg')
         # store with sampling factor
