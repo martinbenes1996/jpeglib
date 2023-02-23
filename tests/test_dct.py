@@ -104,10 +104,10 @@ class TestDCT(unittest.TestCase):
         ratio_Cb = [samp_factor[0][i]/samp_factor[1][i] for i in range(2)]
         ratio_Cr = [samp_factor[0][i]/samp_factor[2][i] for i in range(2)]
         # test DCT coefficients are the same after read
-        self.assertEqual(jpeg.Y.shape[0], jpeg.Cb.shape[0]*ratio_Cb[1])
-        self.assertEqual(jpeg.Y.shape[1], jpeg.Cb.shape[1]*ratio_Cb[0])
-        self.assertEqual(jpeg.Y.shape[0], jpeg.Cr.shape[0]*ratio_Cr[1])
-        self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1]*ratio_Cr[0])
+        self.assertEqual(jpeg.Y.shape[0], jpeg.Cb.shape[0]*ratio_Cb[0])
+        self.assertEqual(jpeg.Y.shape[1], jpeg.Cb.shape[1]*ratio_Cb[1])
+        self.assertEqual(jpeg.Y.shape[0], jpeg.Cr.shape[0]*ratio_Cr[0])
+        self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1]*ratio_Cr[1])
         # write DCT coefficients
         jpeglib.from_dct(
             Y=jpeg.Y,
