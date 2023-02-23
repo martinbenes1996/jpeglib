@@ -211,7 +211,7 @@ class JPEG:
             samp_factor = Jab_to_factors(
                 list(map(int, self.samp_factor.split(':')))
             )
-        # [[hY,wY],[hCb,wCb],[hCr,wCr]]
+        # [[vY,hY],[vCb,hCb],[vCr,hCr]]
         else:
             samp_factor = self.samp_factor
         samp_factor = np.array(samp_factor, dtype=np.int32)

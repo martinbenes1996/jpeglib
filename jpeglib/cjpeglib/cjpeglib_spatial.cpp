@@ -193,8 +193,8 @@ int write_jpeg_spatial(
 				// 	*(samp_factor + ch * 2 + 0),
 				// 	*(samp_factor + ch * 2 + 1)
 				// );
-				cinfo.comp_info[ch].h_samp_factor = *(samp_factor + ch * 2 + 0);
-				cinfo.comp_info[ch].v_samp_factor = *(samp_factor + ch * 2 + 1);
+				cinfo.comp_info[ch].v_samp_factor = *(samp_factor + ch * 2 + 0);
+				cinfo.comp_info[ch].h_samp_factor = *(samp_factor + ch * 2 + 1);
 			}
 		} else {
 			chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;

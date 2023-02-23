@@ -122,8 +122,8 @@ int read_jpeg_info(
 
 		if (samp_factor != NULL)
 			for (int comp = 0; comp < cinfo.num_components; comp++) {
-				*(samp_factor + comp * 2 + 0) = cinfo.comp_info[comp].h_samp_factor;
-				*(samp_factor + comp * 2 + 1) = cinfo.comp_info[comp].v_samp_factor;
+				*(samp_factor + comp * 2 + 0) = cinfo.comp_info[comp].v_samp_factor;
+				*(samp_factor + comp * 2 + 1) = cinfo.comp_info[comp].h_samp_factor;
 			}
 
 		if (flags != NULL) {

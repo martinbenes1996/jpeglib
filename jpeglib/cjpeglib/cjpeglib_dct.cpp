@@ -230,43 +230,12 @@ int write_jpeg_dct(
 			chroma_factor[0] = *(samp_factor + 0);
 			chroma_factor[1] = *(samp_factor + 1);
 			for(int comp = 0; comp < cinfo_out.num_components; comp++) {
-				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
-				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
+				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 0);
+				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 1);
+				// fprintf(stderr, "v%d h%d ", cinfo_out.comp_info[comp].v_samp_factor, cinfo_out.comp_info[comp].h_samp_factor);
 			}
+			// fprintf(stderr, "\n");
 		}
-		// else {
-		//  chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
-		//  chroma_factor[1] = cinfo_out.comp_info[0].v_samp_factor;
-		// }
-		// for(int comp = 0; comp < cinfo.num_components; comp++) {
-		//     *(samp_factor + comp*2 + 0) = cinfo.comp_info[comp].h_samp_factor;
-		//     *(samp_factor + comp*2 + 1) = cinfo.comp_info[comp].v_samp_factor;
-		//   }
-		// if(samp_factor != NULL) {
-		//   int J_factor = *(samp_factor + 0);
-		//   int a_factor = *(samp_factor + 1);
-		//   int b_factor = *(samp_factor + 2);
-
-		//   cinfo_out.comp_info[0].h_samp_factor = chroma_factor[0] = J_factor / a_factor;
-		//   cinfo_out.comp_info[0].v_samp_factor = chroma_factor[1] = (int)(a_factor == b_factor) + 1;
-		//   cinfo_out.comp_info[1].h_samp_factor = cinfo_out.comp_info[1].v_samp_factor = 1;
-		//   cinfo_out.comp_info[2].h_samp_factor = cinfo_out.comp_info[2].v_samp_factor = 1;
-		// } else {
-		//   chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
-		//   chroma_factor[1] = cinfo_out.comp_info[0].v_samp_factor;
-		// }
-
-		// for(int comp = 0; comp < cinfo_out.input_components; comp++) {
-		//   //cinfo_out.comp_info[comp].h_samp_factor
-		//   //int J_factor,a_factor,b_factor;
-		//   //J,a,b = samp_factor
-		//   //  #samp_factor = np.array([
-		//   //  #    [int(J / a), int(a == b) + 1],
-		//   //fprintf(stderr, "scale %d: %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
-		//   cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
-		//   cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
-		//   //fprintf(stderr, "scale %d': %d %d\n", comp, cinfo_out.comp_info[comp].h_samp_factor, cinfo_out.comp_info[comp].v_samp_factor);
-		// }
 
 		// write qt
 		if(qt != NULL)
