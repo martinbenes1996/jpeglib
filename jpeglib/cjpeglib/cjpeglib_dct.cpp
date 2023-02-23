@@ -215,6 +215,7 @@ int write_jpeg_dct(
 		if (srcfile == NULL) // set defaults
 			jpeg_set_defaults(&cinfo_out);
 
+
 		// set sampling factors
 		int chroma_factor[2];
 		if(samp_factor != NULL) {
@@ -229,10 +230,9 @@ int write_jpeg_dct(
 			chroma_factor[0] = *(samp_factor + 0);
 			chroma_factor[1] = *(samp_factor + 1);
 			for(int comp = 0; comp < cinfo_out.num_components; comp++) {
-				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 0);
-				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 1);
+				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 0);
+				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 1);
 			}
-			// fprintf(stderr, "\n");
 		}
 		// else {
 		//  chroma_factor[0] = cinfo_out.comp_info[0].h_samp_factor;
@@ -299,10 +299,9 @@ int write_jpeg_dct(
 				// long h_samp_factor = *(samp_factor + ch*2 + 1);
 				comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
 				comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
-				// fprintf(stderr, "%d %d ", comp_ptr->height_in_blocks, comp_ptr->width_in_blocks);
 				// if(ch > 0) {
-				//   comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
 				//   comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);
+				//   comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
 				// }
 				coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
 					(j_common_ptr)&cinfo_out,

@@ -179,6 +179,13 @@ class DCTJPEG(_jpeg.JPEG):
         #     self.c_samp_factor()[1][:],
         # )
 
+        # print(Y, Cb, Cr, K)
+        # print(np.ctypeslib.as_array(self.c_image_dims()))
+        # print(np.ctypeslib.as_array(self.c_block_dims()))
+        # print(np.ctypeslib.as_array(self.c_samp_factor()))
+        # print(self.jpeg_color_space.index)
+        # print(self.num_components)
+
         # call
         CJpegLib.write_jpeg_dct(
             srcfile=tmp.name if self.content is not None else None,
