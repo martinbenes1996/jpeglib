@@ -18,6 +18,16 @@ from .spatial_jpeg import SpatialJPEG
 # cenums
 from ._cenum import Colorspace, DCTMethod, Dithermode, MarkerType
 from ._marker import Marker
+# cenum abbreviations
+JCS_UNKNOWN = Colorspace.JCS_UNKNOWN
+JCS_GRAYSCALE = Colorspace.JCS_GRAYSCALE
+JCS_RGB = Colorspace.JCS_RGB
+JCS_YCbCr = Colorspace.JCS_YCbCr
+JCS_CMYK = Colorspace.JCS_CMYK
+JCS_YCCK = Colorspace.JCS_YCCK
+JDCT_ISLOW = DCTMethod.JDCT_ISLOW
+JDCT_IFAST = DCTMethod.JDCT_IFAST
+JDCT_FLOAT = DCTMethod.JDCT_FLOAT
 
 # libjpeg versions
 from .version import version
@@ -43,7 +53,7 @@ except IndexError:
 __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
     'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
-    'Colorspace', 'DCTMethod', 'Dithermode', 'Marker',
+    'Colorspace', 'DCTMethod', 'Dithermode', 'Marker', 'MarkerType',
     'version', 'Jab_to_factors',
     '__version__',
 ]

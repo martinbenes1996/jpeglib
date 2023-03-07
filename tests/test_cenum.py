@@ -93,5 +93,19 @@ class TestCEnum(unittest.TestCase):
             'JCS_HSV'
         )
 
+    def test_abbr_cenum(self):
+        """Test abbreviated CEnum."""
+        self.logger.info('test_abbr_cenum')
+        self.assertEqual(jpeglib.Colorspace.JCS_UNKNOWN, jpeglib.JCS_UNKNOWN)
+        self.assertEqual(jpeglib.Colorspace.JCS_GRAYSCALE, jpeglib.JCS_GRAYSCALE)
+        self.assertEqual(jpeglib.Colorspace.JCS_RGB, jpeglib.JCS_RGB)
+        self.assertEqual(jpeglib.Colorspace.JCS_YCbCr, jpeglib.JCS_YCbCr)
+        self.assertEqual(jpeglib.Colorspace.JCS_CMYK, jpeglib.JCS_CMYK)
+        self.assertEqual(jpeglib.Colorspace.JCS_YCCK, jpeglib.JCS_YCCK)
+        self.assertEqual(jpeglib.DCTMethod.JDCT_ISLOW, jpeglib.JDCT_ISLOW)
+        self.assertEqual(jpeglib.DCTMethod.JDCT_IFAST, jpeglib.JDCT_IFAST)
+        self.assertEqual(jpeglib.DCTMethod.JDCT_FLOAT, jpeglib.JDCT_FLOAT)
+
+
 
 __all__ = ["TestCEnum"]
