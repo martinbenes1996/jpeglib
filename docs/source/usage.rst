@@ -35,9 +35,9 @@ You can specify a particular :term:`libjpeg` version to use with
 
 Currently supported are
 
-* libjpeg versions ``"6b"``, ``"7"``, ``"8"``, ``"8a"``, ``"8b"``, ``"8c"``, ``"8d"``, ``"9"``, ``"9a"``, ``"9b"``, ``"9c"``, ``"9d"`` , ``"9e"``,
-* libjpeg-turbo versions ``"turbo120"``, ``"turbo130"``, ``"turbo140"``, ``"turbo150"``, ``"turbo200"``, ``"turbo210"``, and
-* mozjpeg versions ``"mozjpeg101"``, ``"mozjpeg201"``, ``"mozjpeg300"``, and ``"mozjpeg403"``.
+* libjpeg versions ``6b``, ``7``, ``8``, ``8a``, ``8b``, ``8c``, ``8d``, ``9``, ``9a``, ``9b``, ``9c``, ``9d``, ``9e``,
+* libjpeg-turbo versions ``turbo120``, ``turbo130``, ``turbo140``, ``turbo150``, ``turbo200``, ``turbo210``, and
+* mozjpeg versions ``mozjpeg101``, ``mozjpeg201``, ``mozjpeg300``, and ``mozjpeg403``.
 
 .. note::
 
@@ -66,7 +66,7 @@ Decompress input file ``input.jpeg`` into spatial representation in numpy array 
 
 The output channels depend on the source file. You can explicitly request returning RGB
 
->>> im = jpeglib.read_spatial("input.jpeg", out_color_space=jpeglib.Colorspace.JCS_RGB)
+>>> im = jpeglib.read_spatial("input.jpeg", out_color_space=jpeglib.JCS_RGB)
 >>> rgb = im.spatial
 
 For more parameters check out the documentation of the function `jpeglib.JPEG.read_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.functional.read_spatial>`_
@@ -82,8 +82,9 @@ Compression of a spatial domain to an output file ``output.jpeg`` is done with
 Compression parameters connected with the JPEG, such as dimensions, colorspace or markers
 are attributes of the object and can be overwritten. Others are parameters of the function.
 
->>> im.samp_factor = ((2,1),(1,1),(1,1))
->>> im.write_spatial("output.jpeg", dct_method=jpeglib.DCTMethod.JDCT_IFAST)
+>>> im.samp_factor = ((1,2),(1,1),(1,1))
+>>> im.samp_factor = '4:4:0'  # alternative
+>>> im.write_spatial("output.jpeg", dct_method=jpeglib.JDCT_FLOAT)
 
 The color space is chosen based on reading. All the parameter options are listen in the
 `jpeglib.spatial_jpeg.SpatialJPEG.write_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.spatial_jpeg.SpatialJPEG.write_spatial>`_
