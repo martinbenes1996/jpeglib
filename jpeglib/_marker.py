@@ -10,10 +10,14 @@ from ._cenum import MarkerType
 
 @dataclass
 class Marker:
+    """Representation of JPEG marker."""
 
     type: MarkerType
+    """type of marker"""
     length: int
+    """length (in bytes)"""
     content: bytes
+    """content of the marker"""
 
     def __repr__(self) -> str:
         data_size = 0
