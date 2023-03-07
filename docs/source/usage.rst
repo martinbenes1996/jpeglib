@@ -34,6 +34,7 @@ You can specify a particular :term:`libjpeg` version to use with
 >>> jpeglib.version.set('6b')
 
 Currently supported are
+
 * libjpeg versions ``"6b"``, ``"7"``, ``"8"``, ``"8a"``, ``"8b"``, ``"8c"``, ``"8d"``, ``"9"``, ``"9a"``, ``"9b"``, ``"9c"``, ``"9d"`` , ``"9e"``,
 * libjpeg-turbo versions ``"turbo120"``, ``"turbo130"``, ``"turbo140"``, ``"turbo150"``, ``"turbo200"``, ``"turbo210"``, and
 * mozjpeg versions ``"mozjpeg101"``, ``"mozjpeg201"``, ``"mozjpeg300"``, and ``"mozjpeg403"``.

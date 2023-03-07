@@ -36,20 +36,20 @@ Using jpegio interface
 .. autoclass:: jpeglib.DCTJPEGio
    :members: coef_arrays, quant_tables, write
 
-libjpeg-like structures
-"""""""""""""""""""""""
+libjpeg-like enumerations
+"""""""""""""""""""""""""
 
 .. autoclass:: jpeglib.Dithermode
-   :members: from_index, name, index, name_to_index, index_to_name, J_DITHER_MODE, iJ_DITHER_MODE
+   :members: JDITHER_NONE, JDITHER_ORDERED, JDITHER_FS
 
 .. autoclass:: jpeglib.Colorspace
-   :members: from_index, name, index, name_to_index, index_to_name, J_COLOR_SPACE, iJ_COLOR_SPACE, channels
+   :members: JCS_UNKNOWN, JCS_GRAYSCALE, JCS_RGB, JCS_YCbCr, JCS_CMYK, JCS_YCCK
 
 .. autoclass:: jpeglib.DCTMethod
-   :members: from_index, name, index, name_to_index, index_to_name, J_DCT_METHOD, iJ_DCT_METHOD
+   :members: JDCT_ISLOW, JDCT_IFAST, JDCT_FLOAT
 
 .. autoclass:: jpeglib.Marker
-   :members: from_index, name, index, name_to_index, index_to_name, J_MARKER_CODE, iJ_MARKER_CODE, content, length
+   :members: JPEG_RST0, JPEG_RST1, JPEG_RST2, JPEG_RST3, JPEG_RST4, JPEG_RST5, JPEG_RST6, JPEG_RST7, JPEG_RST8, JPEG_EOI, JPEG_APP0, JPEG_APP1, JPEG_APP2, JPEG_APP3, JPEG_APP4, JPEG_APP5, JPEG_APP6, JPEG_APP7, JPEG_APP8, JPEG_APP9, JPEG_APP10, JPEG_APP11, JPEG_APP12, JPEG_APP13, JPEG_APP14, JPEG_APP15, JPEG_COM
 
 
 
