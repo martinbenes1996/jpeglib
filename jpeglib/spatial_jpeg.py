@@ -36,8 +36,8 @@ class SpatialJPEG(JPEG):
 
     def load(
         self,
-        dct_method: Union[DCTMethod, str] = None,
-        dither_mode: Union[Dithermode, str] = None,
+        dct_method: DCTMethod = None,
+        dither_mode: Dithermode = None,
     ) -> np.ndarray:
 
         # colorspace
@@ -47,6 +47,12 @@ class SpatialJPEG(JPEG):
             else:
                 self.color_space = Colorspace('JCS_RGB')
             # self.color_space = self.jpeg_color_space
+        # dithermode
+        if dither_mode:
+            dither_mode = int(dither_mode)
+        # dct method
+        if dct_method:
+            dct_method = int(dct_method)
 
         # allocate spatial
         spatial = self._alloc_spatial(self.color_space.channels)

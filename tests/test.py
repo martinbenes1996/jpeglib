@@ -16,7 +16,7 @@ if __name__ == "__main__":
     logging.info(f"{jpeglib.__path__=}")
 
 # === unit tests ===
-from test_cstruct import TestCStruct  # noqa: F401,E402
+from test_cenum import TestCEnum  # noqa: F401,E402
 from test_dct import TestDCT  # noqa: F401,E402
 from test_interface import TestInterface  # noqa: F401,E402
 from test_marker import TestMarker  # noqa: F401,E402

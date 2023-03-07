@@ -13,7 +13,7 @@ import unittest
 import jpeglib
 
 
-class TestCStruct(unittest.TestCase):
+class TestCEnum(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
@@ -34,10 +34,26 @@ class TestCStruct(unittest.TestCase):
     def test_dct_method(self, dct_name, dct_ref, i):
         """Test class DCTMethod."""
         self.logger.info(f'test_dct_method_{dct_name}_{i}')
+        #
         dct = jpeglib.DCTMethod[dct_name]
         self.assertEqual(dct, dct_ref)
         self.assertEqual(str(dct), dct_name)
         self.assertEqual(int(dct), i)
+
+    def test_dct_method_diff(self):
+        """Test difference between DCT methods."""
+        self.logger.info('test_dct_method_diff')
+        #
+        im = {
+            k: jpeglib.read_spatial(
+                'examples/IMG_0311.jpeg',
+                dct_method=jpeglib.DCTMethod[k],
+            )
+            for k in ['JDCT_ISLOW', 'JDCT_IFAST', 'JDCT_FLOAT']
+        }
+        self.assertFalse((im['JDCT_ISLOW'].spatial == im['JDCT_IFAST'].spatial).all())
+        self.assertFalse((im['JDCT_ISLOW'].spatial == im['JDCT_FLOAT'].spatial).all())
+        self.assertFalse((im['JDCT_IFAST'].spatial == im['JDCT_FLOAT'].spatial).all())
 
     def test_dct_method_invalid(self):
         """Test invalid DCT method."""
@@ -78,4 +94,4 @@ class TestCStruct(unittest.TestCase):
         )
 
 
-__all__ = ["TestCStruct"]
+__all__ = ["TestCEnum"]
