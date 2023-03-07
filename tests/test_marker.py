@@ -69,6 +69,7 @@ class TestMarker(unittest.TestCase):
         # check markers
         self.assertIsInstance(im.markers, list)
         self.assertEqual(len(im.markers), 2)
+        self.assertIsInstance(str(im.markers), str)
         # check marker 1
         self.assertEqual(str(im.markers[0].type), "JPEG_APP1")
         self.assertEqual(im.markers[0].length, 2250)
