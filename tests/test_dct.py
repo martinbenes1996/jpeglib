@@ -364,7 +364,6 @@ class TestDCT(unittest.TestCase):
 
         Write them using from_dct call.
         """
-        global qt50_standard
         self.logger.info("test_from_dct")
         # generate random DCT
         np.random.seed(12345)
@@ -372,7 +371,7 @@ class TestDCT(unittest.TestCase):
         Cb = np.random.randint(-127, 127, (16, 16, 8, 8), dtype=np.int16)
         Cr = np.random.randint(-127, 127, (16, 16, 8, 8), dtype=np.int16)
         # choose standard QT 50
-        qt = qt50_standard
+        qt = qt50_standard.copy()
         # generating random QT causes wierd error messages,
         # increasing values in zigzag order are probably required
 

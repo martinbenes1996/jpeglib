@@ -104,17 +104,21 @@ class TestSpatial(unittest.TestCase):
         # not equal
         self.assertFalse((qt1 == qt2).all())
 
-    # def test_spatial_quality(self):
-    #     global qt50_standard
-    #     # print("test_spatial_quality")
-    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-    #         x = im.read_spatial()
-    #         im.write_spatial(x, self.tmp.name, qt=50)
-    #     im = jpeglib.JPEG(self.tmp.name)
-    #     _, _, qt50 = im.read_dct()
+    def test_spatial_quality(self):
+        """Tests standard QF given."""
+        self.logger.info("test_spatial_quality")
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im.write_spatial(self.tmp.name, qt=50)
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.qt, qt50_standard)
 
-    #     # test matrix
-    #     np.testing.assert_array_equal(qt50, qt50_standard)
+    def test_spatial_qt(self):
+        """Tests custom QT given."""
+        self.logger.info("test_spatial_qt")
+        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im.write_spatial(self.tmp.name, qt=qt50_standard)
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.qt, qt50_standard)
 
     @parameterized.expand([
         ['6b', '7', True],
@@ -222,19 +226,6 @@ class TestSpatial(unittest.TestCase):
         self.assert_equal_ratio_greater(im_ifast.Y, im_float.Y, .9)
         self.assert_equal_ratio_greater(im_ifast.Cb, im_float.Cb, .9)
         self.assert_equal_ratio_greater(im_ifast.Cr, im_float.Cr, .9)
-
-    # def test_spatial_qt(self):
-    #     global qt50_standard
-    #     # print("test_spatial_qt")
-    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
-    #         x = im.read_spatial()
-    #         im.write_spatial(x, self.tmp.name, qt=qt50_standard)
-
-    #     im = jpeglib.JPEG(self.tmp.name)
-    #     _, _, qt50 = im.read_dct()
-
-    #     # test matrix
-    #     np.testing.assert_array_equal(qt50, qt50_standard)
 
     # def test_pil_read(self):
     #     jpeglib.version.set('8d')
