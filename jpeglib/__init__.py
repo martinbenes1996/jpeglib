@@ -3,6 +3,9 @@ Python envelope for the popular C library libjpeg for handling JPEG files.
 
 It offers full control over compression and decompression
 and exposes DCT coefficients and quantization tables.
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
 """
 
 # functions
@@ -12,10 +15,8 @@ from .functional import read_dct, read_spatial, from_spatial, from_dct
 from .dct_jpeg import DCTJPEG, DCTJPEGio, to_jpegio
 from .spatial_jpeg import SpatialJPEG
 
-# cstructs
-from ._colorspace import Colorspace
-from ._dctmethod import DCTMethod
-from ._dithermode import Dithermode
+# cenums
+from ._cenum import Colorspace, DCTMethod, Dithermode, MarkerType
 from ._marker import Marker
 
 # libjpeg versions

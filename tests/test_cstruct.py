@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import logging
 import os
@@ -22,49 +27,42 @@ class TestCStruct(unittest.TestCase):
         jpeglib.version.set(self.original_version)
 
     @parameterized.expand([
-        [dct_name, i]
-        for i, dct_name in enumerate([
-            'JDCT_ISLOW', 'JDCT_IFAST', 'JDCT_FLOAT'
-        ])
+        ['JDCT_ISLOW', jpeglib.DCTMethod.JDCT_ISLOW, 0],
+        ['JDCT_IFAST', jpeglib.DCTMethod.JDCT_IFAST, 1],
+        ['JDCT_FLOAT', jpeglib.DCTMethod.JDCT_FLOAT, 2],
     ])
-    def test_dct_method(self, dct_name, i):
+    def test_dct_method(self, dct_name, dct_ref, i):
         """Test class DCTMethod."""
         self.logger.info(f'test_dct_method_{dct_name}_{i}')
-        dct = jpeglib.DCTMethod(name=dct_name)
-        self.assertIsInstance(dct.name, str)
-        self.assertEqual(dct.name, dct_name)
-        self.assertIsInstance(dct.index, int)
-        self.assertEqual(dct.index, i)
+        dct = jpeglib.DCTMethod[dct_name]
+        self.assertEqual(dct, dct_ref)
+        self.assertEqual(str(dct), dct_name)
+        self.assertEqual(int(dct), i)
 
     def test_dct_method_invalid(self):
         """Test invalid DCT method."""
         self.logger.info('test_dct_method_invalid')
         self.assertRaises(
-            KeyError,
+            ValueError,
             jpeglib.DCTMethod,
             'JDCT_SUPERFAST'
         )
 
     @parameterized.expand([
-        [dct_name, channels, i]
-        for i, (dct_name, channels) in enumerate(({
-            'JCS_UNKNOWN': None,
-            'JCS_GRAYSCALE': 1,
-            'JCS_RGB': 3,
-            'JCS_YCbCr': 3,
-            'JCS_CMYK': 4,
-            'JCS_YCCK': 4,
-        }).items())
+        ['JCS_UNKNOWN', jpeglib.Colorspace.JCS_UNKNOWN, None, 0],
+        ['JCS_GRAYSCALE', jpeglib.Colorspace.JCS_UNKNOWN, 1, 1],
+        ['JCS_RGB', jpeglib.Colorspace.JCS_UNKNOWN, 3, 2],
+        ['JCS_YCbCr', jpeglib.Colorspace.JCS_UNKNOWN, 3, 3],
+        ['JCS_CMYK', jpeglib.Colorspace.JCS_UNKNOWN, 4, 4],
+        ['JCS_YCCK', jpeglib.Colorspace.JCS_UNKNOWN, 4, 5],
     ])
-    def test_color_space(self, cspace_name, channels, i):
+    def test_color_space(self, cspace_name, cspace_ref, channels, i):
         """Test class Colorspace."""
         self.logger.info(f'test_color_space_{cspace_name}_{channels}_{i}')
-        cspace = jpeglib.Colorspace(name=cspace_name)
-        self.assertEqual(cspace, jpeglib.Colorspace(name=cspace_name))
-        self.assertIsInstance(cspace.name, str)
-        self.assertEqual(cspace.name, cspace_name)
-        self.assertIsInstance(cspace.index, int)
-        self.assertEqual(cspace.index, i)
+        cspace = jpeglib.Colorspace[cspace_name]
+        self.assertEqual(cspace, cspace_ref)
+        self.assertEqual(str(cspace), cspace_name)
+        self.assertEqual(int(cspace), i)
         if cspace_name == 'JCS_UNKNOWN':
             self.assertRaises(Exception, lambda: cspace.channels)
         else:
@@ -74,7 +72,7 @@ class TestCStruct(unittest.TestCase):
         """Test invalid color space."""
         self.logger.info('test_color_space_invalid')
         self.assertRaises(
-            KeyError,
+            ValueError,
             jpeglib.DCTMethod,
             'JCS_HSV'
         )

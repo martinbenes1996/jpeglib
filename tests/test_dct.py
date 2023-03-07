@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import logging
 import numpy as np
@@ -10,35 +15,7 @@ import tempfile
 import unittest
 
 import jpeglib
-from _defs import version_cluster
-
-# https://www.sciencedirect.com/topics/computer-science/quantization-matrix
-qt50_standard = np.array([
-    [[16, 11, 10, 16, 24, 40, 51, 61],
-     [12, 12, 14, 19, 26, 58, 60, 55],
-     [14, 13, 16, 24, 40, 57, 69, 56],
-     [14, 17, 22, 29, 51, 87, 80, 62],
-     [18, 22, 37, 56, 68, 109, 103, 77],
-     [24, 35, 55, 64, 81, 104, 113, 92],
-     [49, 64, 78, 87, 103, 121, 120, 101],
-     [72, 92, 95, 98, 112, 100, 103, 99]],
-    [[17, 18, 24, 47, 99, 99, 99, 99],
-     [18, 21, 26, 66, 99, 99, 99, 99],
-     [24, 26, 56, 99, 99, 99, 99, 99],
-     [47, 66, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99]],
-    [[17, 18, 24, 47, 99, 99, 99, 99],
-     [18, 21, 26, 66, 99, 99, 99, 99],
-     [24, 26, 56, 99, 99, 99, 99, 99],
-     [47, 66, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99]]
-    ])
+from _defs import version_cluster, qt50_standard
 
 
 class TestDCT(unittest.TestCase):
@@ -96,7 +73,7 @@ class TestDCT(unittest.TestCase):
         """Test of reading DCT with different sampling factors."""
         self.logger.info(f'test_dct_samp_factor({samp_factor})')
         # compress image with given sampling factor
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial('examples/IMG_0311.jpeg')
         im.samp_factor = samp_factor
         im.write_spatial(self.tmp.name)
         # read DCT coefficients

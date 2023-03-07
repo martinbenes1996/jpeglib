@@ -65,7 +65,7 @@ Decompress input file ``input.jpeg`` into spatial representation in numpy array 
 
 The output channels depend on the source file. You can explicitly request returning RGB
 
->>> im = jpeglib.read_spatial("input.jpeg", out_color_space="JCS_RGB")
+>>> im = jpeglib.read_spatial("input.jpeg", out_color_space=jpeglib.Colorspace.JCS_RGB)
 >>> rgb = im.spatial
 
 For more parameters check out the documentation of the function `jpeglib.JPEG.read_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.functional.read_spatial>`_
@@ -82,7 +82,7 @@ Compression parameters connected with the JPEG, such as dimensions, colorspace o
 are attributes of the object and can be overwritten. Others are parameters of the function.
 
 >>> im.samp_factor = ((2,1),(1,1),(1,1))
->>> im.write_spatial("output.jpeg", dct_method='JDCT_IFAST')
+>>> im.write_spatial("output.jpeg", dct_method=jpeglib.DCTMethod.JDCT_IFAST)
 
 The color space is chosen based on reading. All the parameter options are listen in the
 `jpeglib.spatial_jpeg.SpatialJPEG.write_spatial <https://jpeglib.readthedocs.io/en/latest/reference.html#jpeglib.spatial_jpeg.SpatialJPEG.write_spatial>`_

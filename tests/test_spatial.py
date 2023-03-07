@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import logging
 import numpy as np
@@ -7,35 +12,7 @@ import tempfile
 import unittest
 
 import jpeglib
-from _defs import ALL_VERSIONS, version_cluster
-
-# https://www.sciencedirect.com/topics/computer-science/quantization-matrix
-qt50_standard = np.array([
-    [[16, 11, 10, 16, 24, 40, 51, 61],
-     [12, 12, 14, 19, 26, 58, 60, 55],
-     [14, 13, 16, 24, 40, 57, 69, 56],
-     [14, 17, 22, 29, 51, 87, 80, 62],
-     [18, 22, 37, 56, 68, 109, 103, 77],
-     [24, 35, 55, 64, 81, 104, 113, 92],
-     [49, 64, 78, 87, 103, 121, 120, 101],
-     [72, 92, 95, 98, 112, 100, 103, 99]],
-    [[17, 18, 24, 47, 99, 99, 99, 99],
-     [18, 21, 26, 66, 99, 99, 99, 99],
-     [24, 26, 56, 99, 99, 99, 99, 99],
-     [47, 66, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99]],
-    [[17, 18, 24, 47, 99, 99, 99, 99],
-     [18, 21, 26, 66, 99, 99, 99, 99],
-     [24, 26, 56, 99, 99, 99, 99, 99],
-     [47, 66, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99],
-     [99, 99, 99, 99, 99, 99, 99, 99]],
-])
+from _defs import ALL_VERSIONS, version_cluster, qt50_standard
 
 
 class TestSpatial(unittest.TestCase):
@@ -85,7 +62,7 @@ class TestSpatial(unittest.TestCase):
         spatial = np.random.randint(0, 255, (512, 512, 3), dtype='uint8')
         jpeglib.from_spatial(
             spatial=spatial,
-            in_color_space='JCS_RGB'
+            in_color_space=jpeglib.Colorspace.JCS_RGB,
         ).write_spatial(self.tmp.name)
         # load and compare
         im = jpeglib.read_spatial(self.tmp.name)
@@ -178,7 +155,8 @@ class TestSpatial(unittest.TestCase):
         # compress
         np.random.seed(12345)
         x = np.random.randint(0, 255, (128, 128, 1), dtype=np.int16)
-        jpeglib.from_spatial(x).write_spatial(self.tmp.name)
+        im = jpeglib.from_spatial(x)
+        im.write_spatial(self.tmp.name)
         # load DCT
         jpeg = jpeglib.read_dct(self.tmp.name)
         self.assertFalse(jpeg.has_chrominance)
@@ -196,20 +174,21 @@ class TestSpatial(unittest.TestCase):
         # compress
         np.random.seed(12345)
         x = np.random.randint(0, 255, (256, 256, 4), dtype=np.int16)
-        jpeglib.from_spatial(x, 'JCS_CMYK').write_spatial(self.tmp.name)
+        im = jpeglib.from_spatial(x, jpeglib.Colorspace.JCS_CMYK)
+        im.write_spatial(self.tmp.name)
         # load DCT
         jpeg = jpeglib.read_dct(self.tmp.name)
         self.assertTrue(jpeg.has_chrominance)
         self.assertTrue(jpeg.has_black)
-        self.assertEqual(jpeg.jpeg_color_space, 'JCS_CMYK')  # JCS_YCCK
+        self.assertEqual(jpeg.jpeg_color_space, jpeglib.Colorspace.JCS_CMYK)  # JCS_YCCK
         self.assertEqual(jpeg.Y.shape, (32, 32, 8, 8))
         self.assertEqual(jpeg.K.shape, (32, 32, 8, 8))
         # decompress
         im = jpeglib.read_spatial(self.tmp.name)
         self.assertTrue(im.has_chrominance)
         self.assertTrue(jpeg.has_black)
-        self.assertEqual(im.jpeg_color_space, 'JCS_CMYK')  # JCS_YCCK
-        self.assertEqual(im.color_space, 'JCS_CMYK')
+        self.assertEqual(im.jpeg_color_space, jpeglib.Colorspace.JCS_CMYK)  # JCS_YCCK
+        self.assertEqual(im.color_space, jpeglib.Colorspace.JCS_CMYK)
         self.assertEqual(im.spatial.shape, (256, 256, 4))
         # writeback
         im.write_spatial(self.tmp.name)
@@ -221,15 +200,15 @@ class TestSpatial(unittest.TestCase):
         # get decompressed spatial
         im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
         # compress with islow
-        im.write_spatial(self.tmp.name, dct_method='JDCT_ISLOW')
+        im.write_spatial(self.tmp.name, dct_method=jpeglib.DCTMethod.JDCT_ISLOW)
         im_islow = jpeglib.read_dct(self.tmp.name)
         im_islow.load()
         # compress with ifast
-        im.write_spatial(self.tmp.name, dct_method='JDCT_IFAST')
+        im.write_spatial(self.tmp.name, dct_method=jpeglib.DCTMethod.JDCT_IFAST)
         im_ifast = jpeglib.read_dct(self.tmp.name)
         im_ifast.load()
         # compress with float
-        im.write_spatial(self.tmp.name, dct_method='JDCT_FLOAT')
+        im.write_spatial(self.tmp.name, dct_method=jpeglib.DCTMethod.JDCT_FLOAT)
         im_float = jpeglib.read_dct(self.tmp.name)
         im_float.load()
 

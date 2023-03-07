@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import ctypes
 from typing import List

@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 from typing import List
 

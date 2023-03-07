@@ -1,13 +1,17 @@
+"""Functional interface of the library.
+
+Global functions to call.
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import numpy as np
-import typing
 
 from .dct_jpeg import DCTJPEG
 from .spatial_jpeg import SpatialJPEG
 from . import _jpeg
-from ._colorspace import Colorspace
-from ._dctmethod import DCTMethod
-from ._dithermode import Dithermode
+from ._cenum import Colorspace, DCTMethod, Dithermode
 from . import _infere
 
 
@@ -84,9 +88,9 @@ def read_dct(
 
 def read_spatial(
     path: str,
-    out_color_space: str = None,
-    dct_method: typing.Union[str, DCTMethod] = None,
-    dither_mode: typing.Union[str, Dithermode] = None,
+    out_color_space: Colorspace = None,
+    dct_method: DCTMethod = None,
+    dither_mode: Dithermode = None,
     flags: list = []
 ) -> SpatialJPEG:
     """Function for decompressing the JPEG as a pixel data (spatial domain).
@@ -99,12 +103,12 @@ def read_spatial(
 
     :param path: Path to a source file in JPEG format.
     :type path: str
-    :param out_color_space: Output color space, must be accepted by :class:`_colorspace.Colorspace`. If not given, using the libjpeg default.
-    :type out_color_space: str, optional
-    :param dither_mode: Dither mode, must be accepted by :class:`_dithermode.Dithermode`. If not given, using the libjpeg default.
-    :type dither_mode: str, optional
-    :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`. If not given, using the libjpeg default.
-    :type dct_method: str, optional
+    :param out_color_space: Output color space. If not given, using the libjpeg default.
+    :type out_color_space: :class:`Colorspace`
+    :param dither_mode: Dither mode. If not given, using the libjpeg default.
+    :type dither_mode: :class:`Dithermode`
+    :param dct_method: DCT method. If not given, using the libjpeg default.
+    :type dct_method: :class:`DCTMethod`
     :param flags: Bool decompression parameters as str. If not given, using the libjpeg default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
     :type flags: list, optional
     :return: Spatial JPEG object
@@ -140,14 +144,15 @@ def read_spatial(
     # parse
     jpeg_color_space = info.jpeg_color_space
     if out_color_space is not None:
-        out_color_space = Colorspace(out_color_space)
         jpeg_color_space = out_color_space
     else:
         if info.has_black:
             out_color_space = 'JCS_CMYK'
+        elif info.has_chrominance:
+            out_color_space = 'JCS_RGB'
         else:
-            out_color_space = 'JCS_RGB' if info.has_chrominance else 'JCS_GRAYSCALE'
-        out_color_space = Colorspace(out_color_space)
+            out_color_space = 'JCS_GRAYSCALE'
+        out_color_space = Colorspace[out_color_space]
 
     # create jpeg
     im = SpatialJPEG(
@@ -163,28 +168,18 @@ def read_spatial(
         huffmans=info.huffmans,
         spatial=None,
         color_space=out_color_space,
-        # dither_mode=dither_mode,
-        # dct_method=dct_method,
         flags=flags,
         progressive_mode=info.progressive_mode
     )
+    # load image data
     if dct_method is not None or dither_mode is not None:
-        # parse inputs
-        if dct_method is not None:
-            dct_method = DCTMethod.parse_input(dct_method)
-        if dither_mode is not None:
-            dither_mode = Dithermode.parse_input(dither_mode)
-        # load image data
-        im.load(
-            dct_method=dct_method,
-            dither_mode=dither_mode
-        )
+        im.load(dct_method=dct_method, dither_mode=dither_mode)
     return im
 
 
 def from_spatial(
     spatial: np.ndarray,
-    in_color_space: typing.Union[str, Colorspace] = None
+    in_color_space: Colorspace = None
 ) -> SpatialJPEG:
     """A factory of :class:`SpatialJPEG` from pixel data.
 
@@ -210,14 +205,14 @@ def from_spatial(
 
     >>> spatial = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
     >>> im = jpeglib.from_spatial(spatial) # 3 channels -> rgb infered
-    >>> print(im.color_space) # -> 'JCS_RGB'
+    >>> print(im.color_space) # -> Colorspace.JCS_RGB
     >>> im.write_spatial("output.jpeg")
 
     When data has one color channels, grayscale is infered
 
     >>> spatial = np.random.randint(0,255,(16,16,1),dtype=np.uint8)
     >>> im = jpeglib.from_spatial(spatial) # 1 channel -> grayscale infered
-    >>> print(im.color_space) # -> 'JCS_GRAYSCALE'
+    >>> print(im.color_space) # -> Colorspace.JCS_GRAYSCALE
     >>> im.write_spatial("output.jpeg")
 
     For other color channels, color space can't be infered. Error is raised.
@@ -239,12 +234,6 @@ def from_spatial(
     """
     # shape
     height, width, num_components = spatial.shape
-    # parse colorspace
-    if in_color_space is not None:
-        if not isinstance(in_color_space, Colorspace):
-            cspace = Colorspace(in_color_space)
-            cspace.index
-            in_color_space = cspace
     # infere colorspace
     if in_color_space is None:
         in_color_space = _infere.in_color_space(num_components)

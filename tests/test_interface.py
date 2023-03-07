@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import logging
 import numpy as np
@@ -121,7 +126,7 @@ class TestInterface(unittest.TestCase):
     def test_read_spatial_grayscale(self):
         self.logger.info("test_read_spatial_grayscale")
         # read info
-        im = jpeglib.read_spatial("examples/IMG_0791.jpeg", 'JCS_GRAYSCALE')
+        im = jpeglib.read_spatial("examples/IMG_0791.jpeg", jpeglib.Colorspace.JCS_GRAYSCALE)
         # inner state before reading
         self.assertEqual(im.path, "examples/IMG_0791.jpeg")  # source file
         self.assertTrue(im.content is not None)

@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import ctypes
 import os
@@ -9,6 +14,7 @@ from . import cjpeglib
 
 
 class CJpegLib:
+    """"""
 
     @classmethod
     def jpeg_lib_version(cls):

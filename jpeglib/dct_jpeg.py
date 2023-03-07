@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import ctypes
 import dataclasses
@@ -197,7 +202,7 @@ class DCTJPEG(_jpeg.JPEG):
             image_dims=self.c_image_dims(),
             block_dims=self.c_block_dims(),
             samp_factor=self.c_samp_factor(),
-            in_color_space=self.jpeg_color_space.index,
+            in_color_space=int(self.jpeg_color_space),
             in_components=self.num_components,
             qt=qt,
             quality=quality,

@@ -1,6 +1,11 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import numpy as np
-from ._colorspace import Colorspace
+from ._cenum import Colorspace
 
 
 def jpeg_color_space(
@@ -10,13 +15,13 @@ def jpeg_color_space(
 ) -> Colorspace:
     """"""
     if Cb is None and Cr is None:  # grayscale
-        colorspace = Colorspace('JCS_GRAYSCALE')
+        colorspace = Colorspace.JCS_GRAYSCALE
     elif Cb is None or Cr is None:  # Cb or Cr not given
         raise IOError('both Cb and Cr must be non-zero')
     elif K is None:  # YCbCr
-        colorspace = Colorspace('JCS_YCbCr')
+        colorspace = Colorspace.JCS_YCbCr
     else:  # K given
-        colorspace = Colorspace('JCS_YCCK')
+        colorspace = Colorspace.JCS_YCCK
     #
     return colorspace
 
@@ -26,29 +31,29 @@ def in_color_space(
 ) -> Colorspace:
     """Inferes in_color_space from number of components."""
     if num_components == 3:
-        colorspace = Colorspace('JCS_RGB')
+        colorspace = Colorspace.JCS_RGB
     elif num_components == 1:
-        colorspace = Colorspace('JCS_GRAYSCALE')
+        colorspace = Colorspace.JCS_GRAYSCALE
     else:
         raise IOError('failed to infere colorspace')
     return colorspace
 
 
 IN_JPEG_COLORSPACE = {
-    ('JCS_GRAYSCALE'): Colorspace('JCS_GRAYSCALE'),
-    ('JCS_CMYK'): Colorspace('JCS_YCCK'),
-    ('JCS_RGB'): Colorspace('JCS_YCbCr'),
-    ('JCS_YCbCr'): Colorspace('JCS_YCbCr'),
+    'JCS_GRAYSCALE': Colorspace.JCS_GRAYSCALE,
+    'JCS_CMYK': Colorspace.JCS_YCCK,
+    'JCS_RGB': Colorspace.JCS_YCbCr,
+    'JCS_YCbCr': Colorspace.JCS_YCbCr,
 }
-
 
 def jpeg_in_color_space(
     in_color_space: Colorspace,
 ) -> Colorspace:
     """Returns jpeg_color_space corresponding to in_color_space."""
+    # return IN_JPEG_COLORSPACE[str(in_color_space)]
     return IN_JPEG_COLORSPACE.get(
         str(in_color_space),
-        Colorspace('JCS_YCbCr')
+        Colorspace.JCS_YCbCr
     )
 
 

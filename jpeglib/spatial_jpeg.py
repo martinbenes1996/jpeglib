@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import ctypes
 from dataclasses import dataclass
@@ -8,10 +13,8 @@ from typing import Union, List
 import warnings
 
 from ._bind import CJpegLib
+from ._cenum import Colorspace, Dithermode, DCTMethod
 from ._jpeg import JPEG
-from ._colorspace import Colorspace
-from ._dithermode import Dithermode
-from ._dctmethod import DCTMethod
 
 
 @dataclass
@@ -44,10 +47,6 @@ class SpatialJPEG(JPEG):
             else:
                 self.color_space = Colorspace('JCS_RGB')
             # self.color_space = self.jpeg_color_space
-        # dither mode
-        dither_mode = Dithermode.parse_input(dither_mode)
-        # dct method
-        dct_method = DCTMethod.parse_input(dct_method)
 
         # allocate spatial
         spatial = self._alloc_spatial(self.color_space.channels)
@@ -63,9 +62,9 @@ class SpatialJPEG(JPEG):
             path=str(self.path),
             srcfile=tmp.name,
             spatial=spatial,
-            colormap=self.jpeg_color_space.index,
+            colormap=int(self.jpeg_color_space),
             in_colormap=None,  # support of color quantization
-            out_color_space=self.color_space.index,
+            out_color_space=int(self.color_space),
             dither_mode=dither_mode,
             dct_method=dct_method,
             flags=self.flags,
@@ -91,7 +90,7 @@ class SpatialJPEG(JPEG):
         qt: Union[int, np.ndarray] = None,
         quant_tbl_no: np.ndarray = None,
         base_quant_tbl_idx: int = None,
-        dct_method: Union[str, DCTMethod] = None,
+        dct_method: DCTMethod = None,
         # dither_mode: Dithermode = None,
         smoothing_factor: int = None,
         flags: List[str] = []
@@ -133,13 +132,14 @@ class SpatialJPEG(JPEG):
         num_components = (ctypes.c_int*2)(
             self.color_space.channels, jpeg_color_space.channels)
         jpeg_color_space = (ctypes.c_int*2)(
-            self.color_space.index, jpeg_color_space.index)
+            int(self.color_space), int(jpeg_color_space))
+        # dct method
+        if dct_method is not None:
+            dct_method = int(dct_method)
         # path
         dstfile = path if path is not None else self.path
         if dstfile is None:
             raise IOError('no destination file specified')
-        # dct method
-        dct_method = DCTMethod.parse_input(dct_method)
         # quality
         # use default of library
         if qt is None:
@@ -162,12 +162,6 @@ class SpatialJPEG(JPEG):
                 self.width,
             )
         )
-        # print(
-        #     self.c_samp_factor(),
-        #     self.c_samp_factor()[0][:],
-        #     self.c_samp_factor()[1][:],
-        #     self.c_samp_factor()[2][:],
-        # )
         # call
         CJpegLib.write_jpeg_spatial(
             dstfile=str(dstfile),
@@ -209,9 +203,10 @@ class SpatialJPEG(JPEG):
 
     @property
     def channels(self) -> int:
-        if self._color_space is None:
+        try:
+            return self._color_space.channels
+        except AttributeError:
             return None
-        return self._color_space.channels
 
     @property
     def dither_mode(self) -> np.ndarray:

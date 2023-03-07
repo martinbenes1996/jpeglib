@@ -1,4 +1,8 @@
+"""
 
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import logging
 import numpy as np

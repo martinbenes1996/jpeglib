@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import logging
 import tempfile
@@ -23,19 +28,18 @@ class TestMarker(unittest.TestCase):
         name = 'JPEG_APP0'
         content = b'abcd1234eeee'
         marker = jpeglib.Marker(
-            name=name,
+            type=jpeglib.MarkerType[name],
             content=content,
             length=len(content)
         )
         # attributes
-        self.assertIsInstance(marker.name, str)
-        self.assertEqual(marker.name, name)
+        self.assertEqual(str(marker.type), name)
         self.assertIsInstance(marker.content, bytes)
         self.assertEqual(marker.content, content)
         self.assertIsInstance(marker.length, int)
         self.assertEqual(marker.length, len(content))
-        self.assertIsInstance(marker.index, int)
-        self.assertEqual(marker.index, 0xE0)
+        self.assertIsInstance(int(marker.type), int)
+        self.assertEqual(int(marker.type), 0xE0)
 
     def test_marker_jpeg_app5(self):
         """Interface of marker."""
@@ -44,19 +48,19 @@ class TestMarker(unittest.TestCase):
         name = 'JPEG_APP5'
         content = b'abcd1234eeee'
         marker = jpeglib.Marker(
-            name=name,
+            type=jpeglib.MarkerType[name],
             content=content,
             length=len(content)
         )
         # attributes
-        self.assertIsInstance(marker.name, str)
-        self.assertEqual(marker.name, name)
+        self.assertIsInstance(str(marker.type), str)
+        self.assertEqual(str(marker.type), name)
+        self.assertIsInstance(int(marker.type), int)
+        self.assertEqual(int(marker.type), 0xE0 + 5)
         self.assertIsInstance(marker.content, bytes)
         self.assertEqual(marker.content, content)
         self.assertIsInstance(marker.length, int)
         self.assertEqual(marker.length, len(content))
-        self.assertIsInstance(marker.index, int)
-        self.assertEqual(marker.index, 0xE0 + 5)
 
     def test_image_marker(self):
         self.logger.info("test_image_marker")
@@ -66,11 +70,11 @@ class TestMarker(unittest.TestCase):
         self.assertIsInstance(im.markers, list)
         self.assertEqual(len(im.markers), 2)
         # check marker 1
-        self.assertEqual(im.markers[0].name, "JPEG_APP1")
+        self.assertEqual(str(im.markers[0].type), "JPEG_APP1")
         self.assertEqual(im.markers[0].length, 2250)
         self.assertEqual(len(im.markers[0].content), 2250)
         # check marker 1
-        self.assertEqual(im.markers[1].name, "JPEG_APP2")
+        self.assertEqual(str(im.markers[1].type), "JPEG_APP2")
         self.assertEqual(im.markers[1].length, 562)
         self.assertEqual(len(im.markers[1].content), 562)
 

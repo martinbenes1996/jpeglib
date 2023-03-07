@@ -1,3 +1,8 @@
+"""
+
+Author: Martin Benes
+Affiliation: Universitaet Innsbruck
+"""
 
 import copy
 import ctypes
@@ -6,7 +11,7 @@ import numpy as np
 from typing import List, Dict, Union
 
 from ._bind import CJpegLib
-from ._colorspace import Colorspace
+from ._cenum import Colorspace, MarkerType
 from ._huffman import Huffman
 from ._marker import Marker
 from ._notations import Jab_to_factors
@@ -221,7 +226,7 @@ class JPEG:
     def c_marker_types(self):
         if self.markers is None:
             return None
-        marker_types = [marker.index for marker in self.markers]
+        marker_types = [int(marker.type) for marker in self.markers]
         return (ctypes.c_int32*self.num_markers)(*marker_types)
 
     def c_marker_lengths(self):
@@ -335,8 +340,8 @@ def load_jpeg_info(path: str) -> JPEG:
         # marker type
         marker_type = _marker_types[i]
         # create marker
-        marker = Marker.from_index(
-            index=marker_type,
+        marker = Marker(
+            type=MarkerType(marker_type),
             length=marker_length,
             content=None,
         )
@@ -367,7 +372,7 @@ def load_jpeg_info(path: str) -> JPEG:
         samp_factor=samp_factor,
         # num_components=num_components,
         # out_color_space=Colorspace.from_index(_jpeg_color_space[0]),
-        jpeg_color_space=Colorspace.from_index(_jpeg_color_space[1]),
+        jpeg_color_space=Colorspace(_jpeg_color_space[1]),
         content=None,
         markers=markers,
         huffmans=huffmans,
