@@ -23,7 +23,7 @@ class Marker:
         data_size = 0
         if self.content is not None:
             data_size = len(self.content)
-        return '<Marker %s N=%s>' % (self.name, data_size)
+        return '<Marker %s N=%s>' % (str(self.type), data_size)
 
     def __len__(self):
         return self.length
