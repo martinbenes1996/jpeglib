@@ -214,21 +214,21 @@ class SpatialJPEG(JPEG):
         except AttributeError:
             return None
 
-    @property
-    def dither_mode(self) -> np.ndarray:
-        return self._dither_mode
+    # @property
+    # def dither_mode(self) -> np.ndarray:
+    #     return self._dither_mode
 
-    @dither_mode.setter
-    def dither_mode(self, dither_mode: Dithermode):
-        self._dither_mode = dither_mode
+    # @dither_mode.setter
+    # def dither_mode(self, dither_mode: Dithermode):
+    #     self._dither_mode = dither_mode
 
-    @property
-    def dct_method(self) -> np.ndarray:
-        return self._dct_method
+    # @property
+    # def dct_method(self) -> np.ndarray:
+    #     return self._dct_method
 
-    @dct_method.setter
-    def dct_method(self, dct_method: DCTMethod):
-        self._dct_method = dct_method
+    # @dct_method.setter
+    # def dct_method(self, dct_method: DCTMethod):
+    #     self._dct_method = dct_method
 
     @property
     def flags(self) -> list:
