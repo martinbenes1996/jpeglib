@@ -1,4 +1,4 @@
-"""
+"""Main module for tests.
 
 Author: Martin Benes
 Affiliation: Universitaet Innsbruck
