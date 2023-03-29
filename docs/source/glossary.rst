@@ -57,6 +57,47 @@ hmax and wmax (2 and 3) and normalizing factors with the respective maximum; now
 [[1,1],[1/2,2/3],[1,1/3]], which stands for how large are sides compared to a rectangle 2x3 pixels.
 Thus multiplied by the image size, Y has 300 x 300, Cb 150 x 200 and Cr 300 x 100.
 
+Flags
+"""""
+
+Compression and decompression parameters have a crucial impact on the output JPEG.
+Boolean parameters are in jpeglib simply called flags, and contain following.
+
+**Compression**
+
+- DO_FANCY_SAMPLING, DO_FANCY_DOWNSAMPLING
+- OPTIMIZE_CODING
+- PROGRESSIVE_MODE
+- ARITH_CODE
+- TRELLIS_QUANT (>= mozjpeg300)
+- TRELLIS_QUANT_DC (>= mozjpeg300)
+- FORCE_BASELINE
+- WRITE_JFIF_HEADER
+- WRITE_ADOBE_MARKER
+
+**Decompression**
+
+- DO_FANCY_UPSAMPLING
+- QUANTIZE_COLORS
+- DO_BLOCK_SMOOTHING
+- TWO_PASS_QUANTIZE
+- ENABLE_1PASS_QUANT
+- ENABLE_2PASS_QUANT
+- ENABLE_EXTERNAL_QUANT
+- CCIR601_SAMPLING
+
+The flags can be specified as a list of string, either enabling or disabling the option.
+Following code decompresses the input using simple upsampling, and then compresses it again
+into progressive JPEG, with explicitly disabling Huffman code optimization.
+
+>>> jpeglib.version.set('6b')
+>>> im = jpeglib.read_spatial("input.jpeg", flags=["-DO_FANCY_UPSAMPLING"])
+>>> im.write_spatial("output.jpeg", flags=["+PROGRESSIVE_MODE", "-OPTIMIZE_CODING"])
+
+The values of not-specified flags are kept to be defaultly set by the selected libjpeg version,
+or copied from the source image.
+
+
 References
 """"""""""
 
@@ -85,5 +126,5 @@ Glossary terms
 
     spatial domain
         Description of spatial domain
-    
-    
+
+

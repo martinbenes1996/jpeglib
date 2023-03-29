@@ -8,7 +8,7 @@ extern "C" {
 #include <stdio.h>
 #include "vjpeglib.h"
 
-typedef unsigned long BITMASK;
+typedef unsigned long long BITMASK;
 
 boolean flag_is_set(
 	BITMASK flags,
@@ -33,6 +33,8 @@ unsigned char overwrite_flag(
 #define WRITE_ADOBE_MARKER ((BITMASK)0b1 << 22)
 #define CCIR601_SAMPLING ((BITMASK)0b1 << 24)
 #define FORCE_BASELINE ((BITMASK)0b1 << 26)
+#define TRELLIS_QUANT ((BITMASK)0b1 << 28)
+#define TRELLIS_QUANT_DC ((BITMASK)0b1 << 30)
 
 #ifdef __cplusplus
 }

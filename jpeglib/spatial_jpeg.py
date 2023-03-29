@@ -107,7 +107,7 @@ class SpatialJPEG(JPEG):
         :type path: str, optional
         :param qt: Compression quality, can be integer 0-100 or a tensor with quantization tables. Defaultly -1 (default factor kept).
         :type qt: int | numpy.ndarray, optional
-        :param quant_tbl_no: assignment of quantization tables to components, (0 Y, 1 Cb, 1Cr) by default
+        :param quant_tbl_no: assignment of quantization tables to components, (0 Y, 1 Cb, 1 Cr) by default
         :type quant_tbl_no: numpy.ndarray, optional
         :param base_quant_tbl_idx: base QT to scale, only supported in MozJPEG 3+
         :type base_quant_tbl_idx: int, optional
@@ -127,7 +127,7 @@ class SpatialJPEG(JPEG):
 
         >>> x = np.random.randint(0,255,(16,16,3),dtype=np.uint8)
         >>> im = jpeglib.from_spatial(x)
-        >>> im.jpeg_color_space = jpeglib.Colorspace('JCS_GRAYSCALE')
+        >>> im.jpeg_color_space = jpeglib.JCS_GRAYSCALE
         >>> im.write_spatial("hello.jpeg")
         """  # noqa: E501
         # colorspace

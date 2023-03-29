@@ -227,6 +227,8 @@ class CJpegLib:
         "WRITE_ADOBE_MARKER": (0b1 << 22),
         "CCIR601_SAMPLING": (0b1 << 24),
         "FORCE_BASELINE": (0b1 << 26),
+        "TRELLIS_QUANT": (0b1 << 28),
+        "TRELLIS_QUANT_DC": (0b1 << 30),
     }
 
     @classmethod

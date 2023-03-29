@@ -16,7 +16,7 @@ class version:
     def set(cls, version: str):
         """Sets the version of libjpeg to use. Loads the library.
 
-        :param version: libjpeg version, one of 6b, 8d, 9d, turbo210.
+        :param version: libjpeg version, one of 6b, 7, 8, 8a, 8b, 8c, 8d, 9, 9a, 9b, 9c, 9d, 9e, turbo120, turbo130, turbo140, turbo150, turbo200, turbo210, mozjpeg101, mozjpeg201, mozjpeg300, mozjpeg403.
         :type version: str
         :raises [NotImplementedError]: unsupported libjpeg version
 
@@ -24,16 +24,18 @@ class version:
 
         >>> import jpeglib
         >>> jpeglib.version.set('8d')
-        """
+        """  # noqa: E501
         try:
             # libjpeg
             if version in {
-                '6b', '7', '8', '8a', '8b', '8c', '8d', '9', '9a', '9b', '9c', '9d', '9e'
+                '6b', '7', '8', '8a', '8b', '8c', '8d',
+                '9', '9a', '9b', '9c', '9d', '9e'
             }:
                 CJpegLib.set_version(version=version)
             # libjpeg-turbo
             elif version in {
-                'turbo120', 'turbo130', 'turbo140', 'turbo150', 'turbo200', 'turbo210'
+                'turbo120', 'turbo130', 'turbo140',
+                'turbo150', 'turbo200', 'turbo210',
             }:
                 CJpegLib.set_version(version=version)
             # mozjpeg
@@ -45,7 +47,10 @@ class version:
                 raise NotImplementedError(
                     f'Unsupported libjpeg version: {version}')
         except RuntimeError:
-            raise RuntimeError(f'version "{version}" not found, was the package compiled correctly?')
+            raise RuntimeError(
+                f'version "{version}" not found, '
+                'was the package compiled correctly?'
+            )
 
     @staticmethod
     def get() -> str:

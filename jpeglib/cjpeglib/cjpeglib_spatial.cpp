@@ -257,6 +257,23 @@ int write_jpeg_spatial(
 		if (overwrite_flag(flags, CCIR601_SAMPLING)) {
 			cinfo.CCIR601_sampling = flag_is_set(flags, CCIR601_SAMPLING);
 		}
+		#if LIBVERSION >= 6300
+		if(overwrite_flag(flags, TRELLIS_QUANT)) {
+			jpeg_c_set_bool_param(
+				&cinfo,
+				JBOOLEAN_TRELLIS_QUANT,
+				flag_is_set(flags, TRELLIS_QUANT)
+			);
+		}
+		if(overwrite_flag(flags, TRELLIS_QUANT_DC)) {
+			jpeg_c_set_bool_param(
+				&cinfo,
+				JBOOLEAN_TRELLIS_QUANT_DC,
+				flag_is_set(flags, TRELLIS_QUANT_DC)
+			);
+		}
+		#endif
+
 		// fprintf(stderr, "number of scans: %d\n", cinfo.num_scans);
 		// fprintf(stderr, "components in scan: %d\n", cinfo.comps_in_scan);
 		// fprintf(stderr, "Ss: %d\n", cinfo.Ss);

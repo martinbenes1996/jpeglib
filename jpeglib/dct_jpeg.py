@@ -29,7 +29,7 @@ class DCTJPEG(_jpeg.JPEG):
     K: np.ndarray
     """black (cmyK) tensor"""
     qt: np.ndarray
-    """quantization tensor with shape [vertical_block_size, horizontal_block_size]"""
+    """quantization tensor with shape [vertical_block_size, horizontal_block_size]"""  # noqa: E501
     quant_tbl_no: np.ndarray
     """assignment of quantization tables to components,
     (0 Y, 1 Cb, 1Cr) by default"""
