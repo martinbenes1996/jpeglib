@@ -26,7 +26,7 @@ Inside spatial domain
 .. autofunction:: jpeglib.from_spatial
 
 .. autoclass:: jpeglib.SpatialJPEG
-   :members: path, spatial, write_spatial, color_space, dither_mode, dct_method, flags, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance
+   :members: path, spatial, write_spatial, color_space, flags, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance
 
 
 Using jpegio interface
