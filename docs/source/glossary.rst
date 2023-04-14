@@ -57,6 +57,19 @@ hmax and wmax (2 and 3) and normalizing factors with the respective maximum; now
 [[1,1],[1/2,2/3],[1,1/3]], which stands for how large are sides compared to a rectangle 2x3 pixels.
 Thus multiplied by the image size, Y has 300 x 300, Cb 150 x 200 and Cr 300 x 100.
 
+You can specify the chroma subsampling before writing a JPEG image as follows:
+```python
+# im is a jpeglib.JPEG object
+
+# Variant 1: Specify in J:a:b notation
+im.samp_factor = '4:4:4'
+
+# Variant 2: Specify per-channel sampling factors as a list [[vY, hY], [vCb, hCb],[vCr, hCr]]
+im.samp_factor = [[1, 1], [1, 1], [1, 1]]
+
+# now you can write im to a file
+```
+
 Flags
 """""
 
