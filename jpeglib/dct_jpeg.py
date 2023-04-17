@@ -100,18 +100,24 @@ class DCTJPEG(_jpeg.JPEG):
             comp_np = np.ctypeslib.as_array(comp)
             return comp_np.reshape((*comp_np.shape[:-1], 8, 8))
         qt = process_component(qt)
-        self.Y = process_component(Y)
+        if self._Y is None:
+            self.Y = process_component(Y)
         if self.has_chrominance:
-            self.Cb = process_component(Cb)
-            self.Cr = process_component(Cr)
+            if self._Cb is None:
+                self.Cb = process_component(Cb)
+            if self._Cr is None:
+                self.Cr = process_component(Cr)
         if self.has_black:
-            self.K = process_component(K)
-        self.quant_tbl_no = np.array([
-            _quant_tbl_no[i]
-            for i in range(self.num_components)
-        ])
+            if self._K is None:
+                self.K = process_component(K)
+        if self._quant_tbl_no is None:
+            self.quant_tbl_no = np.array([
+                _quant_tbl_no[i]
+                for i in range(self.num_components)
+            ])
         # crop
-        self.qt = qt[:self.num_components]
+        if self._qt is None:
+            self.qt = qt[:self.num_components]
         # return
         return self.Y, (self.Cb, self.Cr), self.qt
 
