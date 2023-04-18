@@ -162,7 +162,6 @@ class TestDCT(unittest.TestCase):
         qtT = np.stack([
             d.get_quantization_table(0),
             d.get_quantization_table(1),
-            d.get_quantization_table(1),
         ])
         YT = (
             d.get_dct_coefficients(0)
