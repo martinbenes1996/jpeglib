@@ -155,7 +155,7 @@ class SpatialJPEG(JPEG):
             except TypeError:
                 # infere quant_tbl_no
                 if quant_tbl_no is None:
-                    quant_tbl_no = _infere.quant_tbl_no(qt)
+                    quant_tbl_no = _infere.quant_tbl_no(qt, spatial=self.spatial)
                 #
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
                 quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
