@@ -89,20 +89,34 @@ def quant_tbl_no(
     # no qt
     if qt is None:
         tbl_no = None
+
     # spatial
-    elif spatial is not None and spatial.shape[2] == 1:
-        tbl_no = np.array([0])
-    elif spatial is not None and (qt.shape[0], spatial.shape[2]) in ASSIGNMENT_SPATIAL:
-        tbl_no = ASSIGNMENT_SPATIAL[(qt.shape[0], spatial.shape[2])]
-    # YCC/K
-    elif Cb is None and Cr is None:
-        tbl_no = np.array([0])
-    elif K is not None and qt.shape[0] in ASSIGNMENT_YCCK:
-        tbl_no = ASSIGNMENT_YCCK[qt.shape[0]]
-    elif qt.shape[0] in ASSIGNMENT_YCC:
-        tbl_no = ASSIGNMENT_YCC[qt.shape[0]]
+    elif spatial is not None:
+        # grayscale
+        if spatial.shape[2] == 1:
+            tbl_no = np.array([0])
+        # color
+        elif (qt.shape[0], spatial.shape[2]) in ASSIGNMENT_SPATIAL:
+            tbl_no = ASSIGNMENT_SPATIAL[(qt.shape[0], spatial.shape[2])]
+        # fail
+        else:
+            raise Exception('failed to infere quant_tbl_no')
+
+    # DCT
     else:
-        raise Exception('failed to infere quant_tbl_no')
+        # grayscale
+        if Cb is None and Cr is None:
+            tbl_no = np.array([0])
+        # YCCK
+        elif K is not None and qt.shape[0] in ASSIGNMENT_YCCK:
+            tbl_no = ASSIGNMENT_YCCK[qt.shape[0]]
+        # YCbCr
+        elif qt.shape[0] in ASSIGNMENT_YCC:
+            tbl_no = ASSIGNMENT_YCC[qt.shape[0]]
+        # fail
+        else:
+            raise Exception('failed to infere quant_tbl_no')
+
     #
     return tbl_no
 
