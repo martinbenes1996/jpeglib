@@ -280,10 +280,10 @@ class TestDCT(unittest.TestCase):
             )
             for k in sorted(im.quantization)
         ]
-        pil_qt = np.array([
-            pil_qt[i]
-            for i in jpeg.quant_tbl_no
-        ])
+        # pil_qt = np.array([
+        #     pil_qt[i]
+        #     for i in jpeg.quant_tbl_no
+        # ])
         # test equal
         np.testing.assert_equal(pil_qt, jpeg.qt)
         im.close()
@@ -355,8 +355,9 @@ class TestDCT(unittest.TestCase):
         self.logger.info("test_qt1")
         # read DCT of JPEG having one QT
         jpeg = jpeglib.read_dct("examples/qt1.jpeg")
-        np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
-        np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[2])
+        self.assertEqual(jpeg.qt.shape[0], 1)
+        # np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
+        # np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
         np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0, 0, 0]))
 
     def test_from_dct(self):
@@ -381,7 +382,7 @@ class TestDCT(unittest.TestCase):
             Cb=Cb,
             Cr=Cr,
             qt=qt,
-            quant_tbl_no=np.array([0, 1, 2]),
+            quant_tbl_no=np.array([0, 1, 1]),
         ).write_dct(self.tmp.name)
         # load and compare
         jpeg = jpeglib.read_dct(self.tmp.name)
@@ -403,9 +404,9 @@ class TestDCT(unittest.TestCase):
             'Cr': jpeg.Cr,
         }
         jpeglib_qt = {
-            'Y': jpeg.qt[0],
-            'Cb': jpeg.qt[1],
-            'Cr': jpeg.qt[2],
+            'Y': jpeg.qt[jpeg.quant_tbl_no[0]],
+            'Cb': jpeg.qt[jpeg.quant_tbl_no[1]],
+            'Cr': jpeg.qt[jpeg.quant_tbl_no[2]],
         }
         try:
             # read image using Rainer's MMSec library

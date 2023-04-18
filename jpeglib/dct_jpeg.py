@@ -117,7 +117,7 @@ class DCTJPEG(_jpeg.JPEG):
             ])
         # crop
         if self._qt is None:
-            self.qt = qt[:self.num_components]
+            self.qt = qt[:np.max(self.quant_tbl_no)+1]
         # return
         return self.Y, (self.Cb, self.Cr), self.qt
 

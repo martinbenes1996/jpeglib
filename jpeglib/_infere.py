@@ -56,26 +56,38 @@ def jpeg_in_color_space(
         Colorspace.JCS_YCbCr
     )
 
-
-ASSIGNMENT = {
+ASSIGNMENT_YCC = {
+    1: np.array([0]),
     2: np.array([0, 1, 1]),
     3: np.array([0, 1, 2]),
     4: np.array([0, 1, 2, 3]),
 }
-
+ASSIGNMENT_YCCK = {
+    2: np.array([0, 1, 1, 1]),
+    3: np.array([0, 1, 1, 2]),
+    4: np.array([0, 1, 2, 3]),
+}
 
 def quant_tbl_no(
-    Cb: np.ndarray,
-    Cr: np.ndarray,
     qt: np.ndarray,
+    Cb: np.ndarray = None,
+    Cr: np.ndarray = None,
+    K: np.ndarray = None,
 ) -> np.ndarray:
-    """Inferes quant_tbl_no to given non-luminance components."""
+    """Inferes quant_tbl_no to given non-luminance components.
+
+    Either give Cb, Cr, K, or spatial.
+    """
     if qt is None:  # no qt
         tbl_no = None
-    elif Cb is None and Cr is None:  # grayscale
-        tbl_no = np.array([0])
-    elif qt.shape[0] in ASSIGNMENT:
-        tbl_no = ASSIGNMENT[qt.shape[0]]
+    # elif spatial is not None and qt.shape[0] in ASSIGNMENT_YCC:
+    #     tbl_no = ASSIGNMENT_YCC[qt.shape[0]]
+    # elif Cb is None and Cr is None:  # grayscale
+    #     tbl_no = np.array([0])
+    elif K is not None and qt.shape[0] in ASSIGNMENT_YCCK:
+        tbl_no = ASSIGNMENT_YCCK[qt.shape[0]]
+    elif qt.shape[0] in ASSIGNMENT_YCC:
+        tbl_no = ASSIGNMENT_YCC[qt.shape[0]]
     else:
         raise Exception('failed to infere quant_tbl_no')
     #

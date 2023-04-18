@@ -116,9 +116,12 @@ class TestSpatial(unittest.TestCase):
         """Tests custom QT given."""
         self.logger.info("test_spatial_qt")
         im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
-        im.write_spatial(self.tmp.name, qt=qt50_standard)
+        qt50_3 = np.zeros((3, 8, 8))
+        qt50_3[:2] = qt50_standard
+        qt50_3[2] = qt50_standard[1]
+        im.write_spatial(self.tmp.name, qt=qt50_3)
         jpeg = jpeglib.read_dct(self.tmp.name)
-        np.testing.assert_array_equal(jpeg.qt, qt50_standard)
+        np.testing.assert_array_equal(jpeg.qt, qt50_3)
 
     @parameterized.expand([
         ['6b', '7', True],
@@ -226,6 +229,29 @@ class TestSpatial(unittest.TestCase):
         self.assert_equal_ratio_greater(im_ifast.Y, im_float.Y, .9)
         self.assert_equal_ratio_greater(im_ifast.Cb, im_float.Cb, .9)
         self.assert_equal_ratio_greater(im_ifast.Cr, im_float.Cr, .9)
+
+    def test_infer_qt1(self):
+        """Check that qt_tbl_no is inferred when 1 QT is given."""
+        self.logger.info("test_infer_qt1")
+        # recompress image with custom QT
+        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        qt_ref = np.array([
+            [
+                [17, 18, 24, 47, 99, 99, 99, 99],
+                [18, 21, 26, 66, 99, 99, 99, 99],
+                [24, 26, 56, 99, 99, 99, 99, 99],
+                [47, 66, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+            ],
+        ])
+        jpeglib.from_spatial(x).write_spatial(self.tmp.name, qt=qt_ref)
+        # compare QTs
+        qt = jpeglib.read_dct(self.tmp.name).qt
+        np.testing.assert_array_equal(qt, qt_ref)
+
 
     # def test_pil_read(self):
     #     jpeglib.version.set('8d')

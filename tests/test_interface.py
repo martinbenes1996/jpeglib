@@ -84,7 +84,7 @@ class TestInterface(unittest.TestCase):
         self.assertIsInstance(im.qt, np.ndarray)
         self.assertEqual(len(im.qt.shape), 3)
         # quantization tables for lumo and chroma channels
-        self.assertEqual(im.qt.shape[0], 3)
+        self.assertEqual(im.qt.shape[0], 2)
         self.assertEqual(im.qt.shape[1], 8)
         self.assertEqual(im.qt.shape[2], 8)
 

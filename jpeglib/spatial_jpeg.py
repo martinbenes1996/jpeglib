@@ -14,6 +14,7 @@ import warnings
 
 from ._bind import CJpegLib
 from ._cenum import Colorspace, Dithermode, DCTMethod
+from . import _infere
 from ._jpeg import JPEG
 
 
@@ -24,9 +25,6 @@ class SpatialJPEG(JPEG):
     """pixel data tensor"""
     color_space: Colorspace
     """color space of the pixel data"""
-    # needed for compression, not actual props
-    # dither_mode: Dithermode
-    # dct_method: DCTMethod
     flags: list
 
     def _alloc_spatial(self, channels: int = None):
@@ -46,7 +44,6 @@ class SpatialJPEG(JPEG):
                 self.color_space = Colorspace('JCS_CMYK')
             else:
                 self.color_space = Colorspace('JCS_RGB')
-            # self.color_space = self.jpeg_color_space
         # dithermode
         if dither_mode:
             dither_mode = int(dither_mode)
@@ -156,9 +153,12 @@ class SpatialJPEG(JPEG):
                 quality, qt = int(qt), None
             # quantization table
             except TypeError:
+                # infere quant_tbl_no
+                if quant_tbl_no is None:
+                    quant_tbl_no = _infere.quant_tbl_no(qt)
+                #
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
-                if quant_tbl_no is not None:
-                    quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
+                quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
 
         # process
         spatial = np.ctypeslib.as_ctypes(

@@ -91,8 +91,13 @@ int read_jpeg_dct(
 			for (int ch = 0; ch < cinfo.num_components; ch++) {
 				int qt_i = cinfo.comp_info[ch].quant_tbl_no;
 				quant_tbl_no[ch] = qt_i; // copy quantization table assignment
+			}
+
+			for (int ch = 0; ch < 4; ch++) {
+				if (cinfo.quant_tbl_ptrs[ch] == NULL)
+					continue;
 				for (int i = 0; i < 64; i++) {
-					qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[qt_i]->quantval[i]; //[(i&7)*8+(i>>3)];
+					qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[ch]->quantval[i]; //[(i&7)*8+(i>>3)];
 				}
 			//(i&7)*8+(i>>3)
 			// memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
