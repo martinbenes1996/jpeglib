@@ -325,7 +325,7 @@ def from_dct(
     jpeg_color_space = _infere.jpeg_color_space(Cb, Cr, K)
     # infere quant_tbl_no
     if quant_tbl_no is None:
-        quant_tbl_no = _infere.quant_tbl_no(qt, Cb=Cb, Cr=Cr, K=K)
+        quant_tbl_no = _infere.quant_tbl_no(qt, K=K)
     # infere samp_factor
     samp_factor = _infere.samp_factor(Y, Cb, Cr, K)
     # block dims

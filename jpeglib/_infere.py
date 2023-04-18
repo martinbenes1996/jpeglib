@@ -70,8 +70,6 @@ ASSIGNMENT_YCCK = {
 
 def quant_tbl_no(
     qt: np.ndarray,
-    Cb: np.ndarray = None,
-    Cr: np.ndarray = None,
     K: np.ndarray = None,
 ) -> np.ndarray:
     """Inferes quant_tbl_no to given non-luminance components.

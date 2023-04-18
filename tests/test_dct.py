@@ -208,7 +208,6 @@ class TestDCT(unittest.TestCase):
         qtT = np.stack([
             img['quant_tables'][0],
             img['quant_tables'][1],
-            img['quant_tables'][1],
         ])
         # test equal
         np.testing.assert_array_equal(im.qt, qtT)
@@ -251,7 +250,9 @@ class TestDCT(unittest.TestCase):
             get_full_shape(jpeg.Cr),
             shape.numpy()[2]
         )
-        np.testing.assert_array_equal(jpeg.qt, qt.numpy())
+        np.testing.assert_array_equal(jpeg.qt[0], qt.numpy()[0])
+        np.testing.assert_array_equal(jpeg.qt[1], qt.numpy()[1])
+        np.testing.assert_array_equal(jpeg.qt[1], qt.numpy()[2])
         np.testing.assert_array_equal(
             jpeg.Y,
             Y.numpy()[0]
