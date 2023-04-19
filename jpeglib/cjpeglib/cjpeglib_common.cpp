@@ -204,7 +204,7 @@ void _write_qt(
 	if (qt != NULL) {
 		unsigned qt_u[64];
 		unsigned char qt_slot_seen = 0;
-		for(int ch = 0; ch < cinfo.num_components; ch++) {
+		for(int ch = 0; ch < cinfo->num_components; ch++) {
 			fprintf(stderr, "- channel %d\n", ch);
 			// get qt slot for component
 			int qt_ch = ch;
