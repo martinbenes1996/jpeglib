@@ -117,6 +117,13 @@ def quant_tbl_no(
         else:
             raise Exception('failed to infere quant_tbl_no')
 
+    # fill
+    q_tbl_no = -np.ones(4, dtype='int16')
+    q_tbl_no[:len(tbl_no)] = tbl_no
+    if spatial is not None:
+        print(spatial.shape, qt.shape)
+        print(q_tbl_no)
+
     #
     return tbl_no
 

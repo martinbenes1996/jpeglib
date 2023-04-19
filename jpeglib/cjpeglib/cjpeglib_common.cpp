@@ -210,7 +210,7 @@ void _write_qt(
 			if(quant_tbl_no != NULL) {
 				qt_ch = quant_tbl_no[ch];
 				if(qt_ch < 0)
-				continue;
+					continue;
 			}
 			cinfo->comp_info[ch].component_id = ch;
 			cinfo->comp_info[ch].quant_tbl_no = qt_ch;
@@ -239,9 +239,8 @@ void _write_qt(
 
 				// just change
 				} else {
-				for (int i = 0; i < 64; i++)
-					cinfo->quant_tbl_ptrs[qt_ch]->quantval[i] = qt[qt_ch * 64 + i];
-
+					for (int i = 0; i < 64; i++)
+						cinfo->quant_tbl_ptrs[qt_ch]->quantval[i] = qt[qt_ch * 64 + i];
 				}
 			}
 		}
