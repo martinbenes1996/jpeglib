@@ -205,7 +205,6 @@ void _write_qt(
 		unsigned qt_u[64];
 		unsigned char qt_slot_seen = 0;
 		for(int ch = 0; ch < cinfo->num_components; ch++) {
-			fprintf(stderr, "- channel %d\n", ch);
 			// get qt slot for component
 			int qt_ch = ch;
 			if(quant_tbl_no != NULL) {
@@ -213,7 +212,6 @@ void _write_qt(
 				if(qt_ch < 0)
 					continue;
 			}
-			fprintf(stderr, "- slot %d\n", qt_ch);
 			cinfo->comp_info[ch].component_id = ch;
 			cinfo->comp_info[ch].quant_tbl_no = qt_ch;
 			if(!(qt_slot_seen & (0x1 << qt_ch))) {
@@ -225,21 +223,17 @@ void _write_qt(
 					for (int i = 0; i < 64; i++)
 						qt_u[i] = qt[ch * 64 + i];
 
-					fprintf(stderr, "- jpeg_add_quant_table\n");
 					jpeg_add_quant_table(cinfo, qt_ch, qt_u, 100, FALSE);
 
 					if(!cinfo->ac_huff_tbl_ptrs[qt_ch]) {
 						int i = qt_ch;
 						while((i >= 0) && !cinfo->ac_huff_tbl_ptrs[--i]) ;
-						fprintf(stderr, "- jpeg_alloc_huff_table AC\n");
 						cinfo->ac_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
 						memcpy(cinfo->ac_huff_tbl_ptrs[qt_ch], cinfo->ac_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
 					}
 					if(!cinfo->dc_huff_tbl_ptrs[qt_ch]) {
 						int i = qt_ch;
 						while((i >= 0) && !cinfo->dc_huff_tbl_ptrs[--i]) {}
-
-						fprintf(stderr, "- jpeg_alloc_huff_table DC\n");
 						cinfo->dc_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
 						memcpy(cinfo->dc_huff_tbl_ptrs[qt_ch], cinfo->dc_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
 					}
@@ -251,7 +245,6 @@ void _write_qt(
 				}
 			}
 
-			fprintf(stderr, "- channel %d done\n", ch);
 		}
 	}
 }
