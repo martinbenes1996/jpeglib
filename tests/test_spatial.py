@@ -119,9 +119,9 @@ class TestSpatial(unittest.TestCase):
         qt50_3 = np.zeros((3, 8, 8))
         qt50_3[:2] = qt50_standard
         qt50_3[2] = qt50_standard[1]
-        im.write_spatial(self.tmp.name, qt=qt50_3)
+        im.write_spatial(self.tmp.name, qt=qt50_standard)
         jpeg = jpeglib.read_dct(self.tmp.name)
-        np.testing.assert_array_equal(jpeg.qt, qt50_3)
+        np.testing.assert_array_equal(jpeg.qt, qt50_standard)
 
     @parameterized.expand([
         ['6b', '7', True],
@@ -251,6 +251,66 @@ class TestSpatial(unittest.TestCase):
         # compare QTs
         qt = jpeglib.read_dct(self.tmp.name).qt
         np.testing.assert_array_equal(qt, qt_ref)
+
+    def test_infer_qt1(self):
+        """Check that qt_tbl_no is inferred when 1 QT is given."""
+        self.logger.info("test_infer_qt1")
+        # recompress image with custom QT
+        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        qt_ref = np.ascontiguousarray(qt50_standard[:1])
+        jpeglib.from_spatial(x).write_spatial(self.tmp.name, qt=qt_ref)
+        # compare QTs
+        qt = jpeglib.read_dct(self.tmp.name).qt
+        np.testing.assert_array_equal(qt, qt_ref)
+
+    def test_infer_qt2(self):
+        """Check that qt_tbl_no is inferred when 2 QT is given."""
+        self.logger.info("test_infer_qt2")
+        # recompress image with custom QT
+        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        jpeglib.from_spatial(x).write_spatial(self.tmp.name, qt=qt50_standard)
+        # compare QTs
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.qt, qt50_standard)
+        np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0, 1, 1]))
+
+    def test_infer_qt3(self):
+        """Check that qt_tbl_no is inferred when 3 QT is given."""
+        self.logger.info("test_infer_qt3")
+        # recompress image with custom QT
+        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        qt50_3 = np.zeros((3, 8, 8))
+        qt50_3[:2] = qt50_standard
+        qt50_3[2] = qt50_standard[1]
+        jpeglib.from_spatial(x).write_spatial(self.tmp.name, qt=qt50_3)
+        # compare QTs
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.qt, qt50_3)
+        np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0, 1, 2]))
+
+    def test_infer_grayscale(self):
+        """Check that qt_tbl_no is inferred when grayscale spatial is given."""
+        self.logger.info("test_infer_grayscale")
+        # recompress image with custom QT
+        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        x_gray = np.ascontiguousarray(x[:, :, :1])
+        qt_ref = np.array([
+            [
+                [17, 18, 24, 47, 99, 99, 99, 99],
+                [18, 21, 26, 66, 99, 99, 99, 99],
+                [24, 26, 56, 99, 99, 99, 99, 99],
+                [47, 66, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+                [99, 99, 99, 99, 99, 99, 99, 99],
+            ],
+        ])
+        jpeglib.from_spatial(x_gray).write_spatial(self.tmp.name, qt=qt_ref)
+        # compare QTs
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(jpeg.qt, qt_ref)
+        np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0]))
 
 
     # def test_pil_read(self):
