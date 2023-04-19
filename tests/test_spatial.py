@@ -294,18 +294,7 @@ class TestSpatial(unittest.TestCase):
         # recompress image with custom QT
         x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
         x_gray = np.ascontiguousarray(x[:, :, :1])
-        qt_ref = np.array([
-            [
-                [17, 18, 24, 47, 99, 99, 99, 99],
-                [18, 21, 26, 66, 99, 99, 99, 99],
-                [24, 26, 56, 99, 99, 99, 99, 99],
-                [47, 66, 99, 99, 99, 99, 99, 99],
-                [99, 99, 99, 99, 99, 99, 99, 99],
-                [99, 99, 99, 99, 99, 99, 99, 99],
-                [99, 99, 99, 99, 99, 99, 99, 99],
-                [99, 99, 99, 99, 99, 99, 99, 99],
-            ],
-        ])
+        qt_ref = np.ascontiguousarray(qt50_standard[:1])
         jpeglib.from_spatial(x_gray).write_spatial(self.tmp.name, qt=qt_ref)
         # compare QTs
         jpeg = jpeglib.read_dct(self.tmp.name)

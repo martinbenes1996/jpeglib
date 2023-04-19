@@ -95,6 +95,8 @@ def quant_tbl_no(
         # grayscale
         if spatial.shape[2] == 1:
             tbl_no = np.array([0])
+            print(spatial.shape, qt.shape)
+            print(tbl_no)
         # color
         elif (qt.shape[0], spatial.shape[2]) in ASSIGNMENT_SPATIAL:
             tbl_no = ASSIGNMENT_SPATIAL[(qt.shape[0], spatial.shape[2])]
@@ -120,9 +122,6 @@ def quant_tbl_no(
     # fill
     q_tbl_no = -np.ones(4, dtype='int16')
     q_tbl_no[:len(tbl_no)] = tbl_no
-    if spatial is not None:
-        print(spatial.shape, qt.shape)
-        print(q_tbl_no)
 
     #
     return tbl_no
