@@ -203,9 +203,7 @@ int write_jpeg_spatial(
 
 		// write qt
 		if(qt != NULL) {
-			fprintf(stderr, "- start writing QT\n");
 			_write_qt(&cinfo, qt, quant_tbl_no, 1);
-			fprintf(stderr, "- end writing QT\n");
 		// write quality
 		} else if (quality > 0) {
 			#if LIBVERSION >= 6300
@@ -284,9 +282,7 @@ int write_jpeg_spatial(
 		// fprintf(stderr, "Al: %d\n", cinfo.Al);
 		// fprintf(stderr, " %d\n", cinfo.Al);
 
-		fprintf(stderr, "- before start compress\n");
 		jpeg_start_compress(&cinfo, TRUE);
-		fprintf(stderr, "- after start compress\n");
 
 		// write markers
 		int offset = 0;
@@ -308,9 +304,7 @@ int write_jpeg_spatial(
 			rowptr += cinfo.image_width * cinfo.input_components;
 		}
 		// cleanup
-		fprintf(stderr, "- before finish compress\n");
 		jpeg_finish_compress(&cinfo);
-		fprintf(stderr, "- after finish compress\n");
 		jpeg_destroy_compress(&cinfo);
 		fclose(fp);
 
