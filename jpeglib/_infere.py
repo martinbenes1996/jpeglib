@@ -95,8 +95,6 @@ def quant_tbl_no(
         # grayscale
         if spatial.shape[2] == 1:
             tbl_no = np.array([0])
-            print(spatial.shape, qt.shape)
-            print(tbl_no)
         # color
         elif (qt.shape[0], spatial.shape[2]) in ASSIGNMENT_SPATIAL:
             tbl_no = ASSIGNMENT_SPATIAL[(qt.shape[0], spatial.shape[2])]
