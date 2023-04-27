@@ -68,15 +68,16 @@ int read_jpeg_info(
 	unsigned char *huffman_values,
 	BITMASK *flags
 ) {
+	// allocate
+	FILE *fp = NULL;
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
-		// allocate
-		struct jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
-
 		// read jpeg header
-		FILE *fp;
 		if((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL) return 0;
 
 		// markers
@@ -131,32 +132,6 @@ int read_jpeg_info(
 		}
 
 		if(huffman_bits != NULL) {
-			// if(cinfo.ac_huff_tbl_ptrs[0] != NULL) {
-			// 	// for(int i = 0; i < 17; i++)
-			// 	// 	fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->bits[i]);
-			// 	// fprintf(stderr, "\n");
-			// 	for(int i = 0; i < 256; i++)
-			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->huffval[i]);
-			// 	fprintf(stderr, "\n");
-			// }
-			// if(cinfo.dc_huff_tbl_ptrs[1] != NULL) {
-			// 	for(int i = 0; i < 256; i++) {
-			// 		fprintf(stderr, "%d ", cinfo.dc_huff_tbl_ptrs[1]->huffval[i]);
-			// 	}
-			// 	fprintf(stderr, "\n");
-			// }
-			// if(cinfo.ac_huff_tbl_ptrs[0] != NULL) {
-			// 	for(int i = 0; i < 256; i++) {
-			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[0]->huffval[i]);
-			// 	}
-			// 	fprintf(stderr, "\n");
-			// }
-			// if(cinfo.ac_huff_tbl_ptrs[1] != NULL) {
-			// 	for(int i = 0; i < 256; i++) {
-			// 		fprintf(stderr, "%d ", cinfo.ac_huff_tbl_ptrs[1]->huffval[i]);
-			// 	}
-			// 	fprintf(stderr, "\n");
-			// }
 			for(int comp = 0; comp < 4; comp++) {
 				*(huffman_valid + (comp)) = cinfo.dc_huff_tbl_ptrs[comp] != NULL;
 				*(huffman_valid + (comp + 4)) = cinfo.ac_huff_tbl_ptrs[comp] != NULL;
@@ -182,16 +157,16 @@ int read_jpeg_info(
 			}
 		}
 
-		// cleanup
-		jpeg_destroy_decompress(&cinfo);
-		fclose(fp);
-
-		return 1;
-
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
+
+	// cleanup and return
+	jpeg_destroy_decompress(&cinfo);
+	if(fp != NULL)
+		fclose(fp);
+	return status;
 
 }
 
@@ -253,17 +228,18 @@ void _write_qt(
 int print_jpeg_params(
 	const char *srcfile
 ) {
+
+	// allocate
+	FILE *fp = NULL;
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
-		// allocate
-		struct jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
-
 		// read jpeg header
-		FILE *fp;
 		if ((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
-
 		(void)jpeg_start_decompress(&cinfo);
 
 		printf("File %s details:\n", srcfile);
@@ -319,12 +295,17 @@ int print_jpeg_params(
 			printf("    last_row_height        %d\n", cinfo.comp_info[comp].last_row_height);
 		}
 
-		return 1;
-
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
+
+	// cleanup and return
+	jpeg_destroy_decompress(&cinfo);
+	if(fp != NULL)
+		fclose(fp);
+	return status;
+
 }
 
 #ifdef __cplusplus

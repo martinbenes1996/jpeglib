@@ -43,22 +43,23 @@ int read_jpeg_dct(
   unsigned short *qt,
   unsigned char *quant_tbl_no
 ) {
+	// allocate
+	FILE *fp;
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
-		// allocate
-		struct jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
 		// read jpeg header
-		FILE *fp;
 		if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) return 0;
+
 		// read DCT
 		jvirt_barray_ptr *coeffs_array = jpeg_read_coefficients(&cinfo);
 		// read dct
 		JBLOCKARRAY buffer_one;
 		JCOEFPTR blockptr_one;
-		//int HblocksY = cinfo.comp_info->height_in_blocks; // max height
-		//int WblocksY = cinfo.comp_info->width_in_blocks; // max width
 		short *dct[4] = {Y, Cb, Cr, K};
 		for(int ch = 0; ch < cinfo.num_components; ch++) {
 			if(dct[ch] == NULL) continue; // skip component, if null
@@ -82,12 +83,6 @@ int read_jpeg_dct(
 
 		// read quantization table
 		if (qt != NULL) {
-			// if(cinfo.num_components > 1) {
-			//   if(cinfo.comp_info[1].quant_tbl_no != cinfo.comp_info[2].quant_tbl_no) {
-			//     fprintf(stderr, "Mismatching chrominance quantization tables not supported.");
-			//     return 0;
-			//   }
-			// }
 			for (int ch = 0; ch < cinfo.num_components; ch++) {
 				int qt_i = cinfo.comp_info[ch].quant_tbl_no;
 				quant_tbl_no[ch] = qt_i; // copy quantization table assignment
@@ -99,24 +94,22 @@ int read_jpeg_dct(
 				for (int i = 0; i < 64; i++) {
 					qt[ch * 64 + i] = cinfo.quant_tbl_ptrs[ch]->quantval[i]; //[(i&7)*8+(i>>3)];
 				}
-			//(i&7)*8+(i>>3)
-			// memcpy((void *)(qt + ch*64), (void *)cinfo.quant_tbl_ptrs[ch]->quantval, sizeof(short)*64);
-			// JQUANT_TBL *tbl = cinfo.comp_info[ch].quant_table;
-			// memcpy((void *)(qt + ch*64), (void*)tbl->quantval, sizeof(short)*64);
 			}
 		}
 
 		// cleanup
 		jpeg_finish_decompress(&cinfo);
-		jpeg_destroy_decompress(&cinfo);
-		fclose(fp);
-
-		return 1;
 
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
+
+	// cleanup and return
+	jpeg_destroy_decompress(&cinfo);
+	if(fp != NULL)
+		fclose(fp);
+	return status;
 
 }
 
@@ -156,7 +149,16 @@ int write_jpeg_dct(
 	unsigned char *markers,
 	BITMASK flags
 ) {
+	// allocate
+	FILE *fp_in = NULL, *fp_out = NULL;
+	struct jpeg_compress_struct cinfo_out;
+	struct jpeg_decompress_struct cinfo_in;
+	struct jpeg_error_mgr jerr_in, jerr_out;
+	memset((void *)&cinfo_out, 0x0, sizeof(struct jpeg_compress_struct));
+	memset((void *)&jerr_out, 0x0, sizeof(struct jpeg_error_mgr));
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
 		// check inputs
@@ -164,10 +166,6 @@ int write_jpeg_dct(
 			fprintf(stderr, "you must specify dstfile\n");
 			return 0;
 		}
-		// if ((qt == NULL) && (quality < 0)) {
-		//   fprintf(stderr, "you must specify either qt or quality\n");
-		//   return 0;
-		// }
 		if (Y == NULL) {
 			fprintf(stderr, "you must specify Y\n");
 			return 0;
@@ -177,23 +175,12 @@ int write_jpeg_dct(
 			return 0;
 		}
 
-		// allocate
-		struct jpeg_compress_struct cinfo_out;
-		struct jpeg_error_mgr jerr_out;
-		memset((void *)&cinfo_out, 0x0, sizeof(struct jpeg_compress_struct));
-		memset((void *)&jerr_out, 0x0, sizeof(struct jpeg_error_mgr));
-
 		// open the destination file
-		FILE *fp_out;
 		if ((fp_out = fopen(dstfile, "wb")) == NULL) {
 			fprintf(stderr, "can't open %s\n", dstfile);
 			return 0;
 		}
 
-		// allocate
-		struct jpeg_decompress_struct cinfo_in;
-		struct jpeg_error_mgr jerr_in;
-		FILE *fp_in;
 		// read source jpeg
 		if (srcfile != NULL) {
 			if ((fp_in = _read_jpeg(srcfile, &cinfo_in, &jerr_in, FALSE)) == NULL)
@@ -201,12 +188,11 @@ int write_jpeg_dct(
 			// todo write markers
 			(void)jpeg_read_header(&cinfo_in, TRUE);
 		}
-
 		cinfo_out.err = jpeg_std_error(&jerr_out);
 		jpeg_create_compress(&cinfo_out);
 		jpeg_stdio_dest(&cinfo_out, fp_out);
-
-		if (srcfile != NULL) // copy critical parameters to dstfile
+		// copy critical parameters to dstfile
+		if (srcfile != NULL)
 			jpeg_copy_critical_parameters((j_decompress_ptr)&cinfo_in, &cinfo_out);
 
 		cinfo_out.image_height = image_dims[0];
@@ -220,26 +206,16 @@ int write_jpeg_dct(
 		if (srcfile == NULL) // set defaults
 			jpeg_set_defaults(&cinfo_out);
 
-
 		// set sampling factors
 		int chroma_factor[2];
 		if(samp_factor != NULL) {
-			// for (int ch = 0; ch < (cinfo_out.num_components); ch++) { // channel iterator
-			// 	jpeg_component_info *comp_ptr = cinfo_out.comp_info + ch;
-			// 	// long v_samp_factor = *(samp_factor + ch*2 + 0);
-			// 	// long h_samp_factor = *(samp_factor + ch*2 + 1);
-			// 	comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
-			// 	comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
-			// }
 
 			chroma_factor[0] = *(samp_factor + 0);
 			chroma_factor[1] = *(samp_factor + 1);
 			for(int comp = 0; comp < cinfo_out.num_components; comp++) {
 				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 0);
 				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 1);
-				// fprintf(stderr, "v%d h%d ", cinfo_out.comp_info[comp].v_samp_factor, cinfo_out.comp_info[comp].h_samp_factor);
 			}
-			// fprintf(stderr, "\n");
 		}
 
 		// write qt
@@ -257,6 +233,7 @@ int write_jpeg_dct(
 			cinfo_out.arith_code = flag_is_set(flags, ARITH_CODE);
 		}
 		#endif
+
 		// DCT coefficients
 		jvirt_barray_ptr *coeffs_array;
 		if (srcfile != NULL) { // copy from source
@@ -269,14 +246,8 @@ int write_jpeg_dct(
 			);
 			for (int ch = 0; ch < (cinfo_out.num_components); ch++) { // channel iterator
 				jpeg_component_info *comp_ptr = cinfo_out.comp_info + ch;
-				// long v_samp_factor = *(samp_factor + ch*2 + 0);
-				// long h_samp_factor = *(samp_factor + ch*2 + 1);
 				comp_ptr->height_in_blocks = (JDIMENSION)block_dims[2 * ch];
 				comp_ptr->width_in_blocks = (JDIMENSION)block_dims[2 * ch + 1];
-				// if(ch > 0) {
-				//   comp_ptr->height_in_blocks = ceil(((double)comp_ptr->height_in_blocks) / chroma_factor[1]);
-				//   comp_ptr->width_in_blocks = ceil(((double)comp_ptr->width_in_blocks) / chroma_factor[0]);
-				// }
 				coeffs_array[ch] = (cinfo_out.mem->request_virt_barray)(
 					(j_common_ptr)&cinfo_out,
 					JPOOL_IMAGE,
@@ -328,23 +299,26 @@ int write_jpeg_dct(
 			}
 		}
 
-		// cleanup
+		// finish
 		jpeg_finish_compress(&cinfo_out);
-		jpeg_destroy_compress(&cinfo_out);
-		fclose(fp_out);
-
-		if (srcfile != NULL) {
+		if (srcfile != NULL)
 			jpeg_finish_decompress(&cinfo_in);
-			jpeg_destroy_decompress(&cinfo_in);
-			fclose(fp_in);
-		}
-
-		return 1;
 
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
+
+	// cleanup and return
+	jpeg_destroy_compress(&cinfo_out);
+	if(fp_out != NULL)
+		fclose(fp_out);
+	if (srcfile != NULL) {
+		jpeg_destroy_decompress(&cinfo_in);
+		if(fp_in != NULL)
+			fclose(fp_in);
+	}
+	return status;
 
 }
 
