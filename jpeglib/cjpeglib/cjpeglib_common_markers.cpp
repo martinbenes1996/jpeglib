@@ -30,15 +30,16 @@ int read_jpeg_markers(
   const char *srcfile,
   unsigned char *markers
 ) {
+	// allocate
+	FILE *fp = NULL;
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
-		// allocate
-		struct jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
-
 		// read jpeg header
-		FILE *fp;
 		if ((fp = _read_jpeg(srcfile, &cinfo, &jerr, FALSE)) == NULL)
 			return 0;
 
@@ -59,18 +60,16 @@ int read_jpeg_markers(
 			unset_marker_handlers(&cinfo);
 		}
 
-		//(void)jpeg_read_coefficients(&cinfo);
-
-		// cleanup
-		jpeg_destroy_decompress(&cinfo);
-		fclose(fp);
-
-		return 1;
-
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
+
+	// cleanup
+	jpeg_destroy_decompress(&cinfo);
+	if(fp != NULL)
+		fclose(fp);
+	return status;
 }
 
 

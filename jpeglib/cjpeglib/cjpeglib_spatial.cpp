@@ -23,15 +23,16 @@ int read_jpeg_spatial(
 	int dct_method,
 	BITMASK flags
 ) {
+	// allocate
+	FILE *fp;
+	struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
-		// allocate
-		struct jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
-
 		// read jpeg header
-		FILE *fp;
 		if((fp = _read_jpeg(srcfile, &cinfo, &jerr, TRUE)) == NULL) {
 			return 0;
 		}
@@ -107,29 +108,20 @@ int read_jpeg_spatial(
 			);
 			rowptr += cinfo.output_width * stride;
 		}
-		// // read quantization colormap
-		// if (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
-		// 	int N = cinfo.out_color_components;
-		// 	for (int ch = 0; ch < N; ch++) {
-		// 		for (int i = 0; i < 256; i++) {
-		// 			colormap[ch * 256 + i] = cinfo.colormap[ch][i];
-		// 			// colormap[ch*256 + i] = cinfo.colormap[i][ch];
-		// 		}
-		// 	}
-		// }
 
 		// cleanup
 		(void)jpeg_finish_decompress(&cinfo);
-		jpeg_destroy_decompress(&cinfo);
-		fclose(fp);
-
-		return 1;
 
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
 
+	// cleanup and return
+	jpeg_destroy_decompress(&cinfo);
+	if(fp != NULL)
+		fclose(fp);
+	return status;
 }
 
 int write_jpeg_spatial(
@@ -151,15 +143,17 @@ int write_jpeg_spatial(
 	unsigned char *markers,
 	BITMASK flags
 ) {
+
+	// allocate
+	FILE *fp;
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
 	// sanitizing libjpeg errors
+	int status = 1;
 	try {
 
-		// allocate
-		struct jpeg_compress_struct cinfo;
-		struct jpeg_error_mgr jerr;
-
 		// open the destination file
-		FILE *fp;
 		if ((fp = fopen(dstfile, "wb")) == NULL) {
 			fprintf(stderr, "can't open %s\n", dstfile);
 			return 0;
@@ -189,10 +183,6 @@ int write_jpeg_spatial(
 			chroma_factor[0] = *(samp_factor + 0);
 			chroma_factor[1] = *(samp_factor + 1);
 			for (int ch = 0; ch < cinfo.num_components; ch++) {
-				// fprintf(stderr, "%d: sampling %d %d\n",
-				// 	*(samp_factor + ch * 2 + 0),
-				// 	*(samp_factor + ch * 2 + 1)
-				// );
 				cinfo.comp_info[ch].v_samp_factor = *(samp_factor + ch * 2 + 0);
 				cinfo.comp_info[ch].h_samp_factor = *(samp_factor + ch * 2 + 1);
 			}
@@ -274,14 +264,6 @@ int write_jpeg_spatial(
 		}
 		#endif
 
-		// fprintf(stderr, "number of scans: %d\n", cinfo.num_scans);
-		// fprintf(stderr, "components in scan: %d\n", cinfo.comps_in_scan);
-		// fprintf(stderr, "Ss: %d\n", cinfo.Ss);
-		// fprintf(stderr, "Se: %d\n", cinfo.Se);
-		// fprintf(stderr, "Ah: %d\n", cinfo.Ah);
-		// fprintf(stderr, "Al: %d\n", cinfo.Al);
-		// fprintf(stderr, " %d\n", cinfo.Al);
-
 		jpeg_start_compress(&cinfo, TRUE);
 
 		// write markers
@@ -305,16 +287,17 @@ int write_jpeg_spatial(
 		}
 		// cleanup
 		jpeg_finish_compress(&cinfo);
-		jpeg_destroy_compress(&cinfo);
-		fclose(fp);
-
-		return 1;
 
 	// error handling
 	} catch(...) {
-		return 0;
+		status = 0;
 	}
 
+	// cleanup and return
+	jpeg_destroy_compress(&cinfo);
+	if(fp != NULL)
+		fclose(fp);
+	return status;
 }
 
 
