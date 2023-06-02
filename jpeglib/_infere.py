@@ -143,10 +143,10 @@ def samp_factor(
         # compute sampling factor
         dims = np.array([np.array(Y.shape[:2]) / np.array(i) for i in dims])
         max_subs = np.max(dims, axis=0)
-        factor = np.array([
+        factor = np.ceil(np.array([
             max_subs,
             *(max_subs / dims)
-        ]).astype('int16')
+        ])).astype('int16')
     return factor
 
 
