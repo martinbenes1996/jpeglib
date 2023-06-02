@@ -361,10 +361,7 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0, 0, 0]))
 
     def test_from_dct(self):
-        """Test creating synthetic JPEG DCT coefficients.
-
-        Write them using from_dct call.
-        """
+        """Test creating synthetic JPEG DCT coefficients."""
         self.logger.info("test_from_dct")
         # generate random DCT
         np.random.seed(12345)
@@ -390,6 +387,35 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(Cb, jpeg.Cb)
         np.testing.assert_array_equal(Cr, jpeg.Cr)
         np.testing.assert_array_equal(qt, jpeg.qt)
+
+    def test_from_dct_unaligned(self):
+        """Test creating synthetic JPEG DCT coefficients."""
+        self.logger.info("test_from_dct_unaligned")
+        # generate random DCT
+        np.random.seed(12345)
+        Y = np.random.randint(-127, 127, (75, 100, 8, 8), dtype=np.int16)
+        Cb = np.random.randint(-127, 127, (38, 50, 8, 8), dtype=np.int16)
+        Cr = np.random.randint(-127, 127, (38, 50, 8, 8), dtype=np.int16)
+        # choose standard QT 50
+        qt = qt50_standard.copy()
+        # generating random QT causes wierd error messages,
+        # increasing values in zigzag order are probably required
+
+        # create synthetic JPEG using from_dct
+        jpeglib.from_dct(
+            Y=Y,
+            Cb=Cb,
+            Cr=Cr,
+            qt=qt,
+            quant_tbl_no=np.array([0, 1, 1]),
+        ).write_dct(self.tmp.name)
+        # load and compare
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(Y, jpeg.Y)
+        np.testing.assert_array_equal(Cb, jpeg.Cb)
+        np.testing.assert_array_equal(Cr, jpeg.Cr)
+        np.testing.assert_array_equal(qt, jpeg.qt)
+
 
     # === tests with non-public software ===
     def test_rainer_MMSec(self):
