@@ -310,6 +310,24 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.coef_arrays[0], im.coef_arrays[0])
         np.testing.assert_array_equal(jpeg.coef_arrays[1], im.coef_arrays[1])
         np.testing.assert_array_equal(jpeg.coef_arrays[2], im.coef_arrays[2])
+        # test comp_info
+        self.assertEqual(len(im.comp_info), 3)
+        self.assertEqual(im.comp_info[0].component_id, 0)
+        self.assertEqual(im.comp_info[0].h_samp_factor, im.samp_factor[0, 0])
+        self.assertEqual(im.comp_info[0].v_samp_factor, im.samp_factor[0, 1])
+        self.assertEqual(im.comp_info[0].quant_tbl_no, im.quant_tbl_no[0])
+        self.assertEqual(
+            im.comp_info[0].downsampled_height,
+            im.height / im.samp_factor[0, 0]
+        )
+        self.assertEqual(
+            im.comp_info[0].downsampled_width,
+            im.width / im.samp_factor[0, 1]
+        )
+        self.assertEqual(im.comp_info[0].height_in_blocks, im.block_dims[0, 0])
+        self.assertEqual(im.comp_info[0].width_in_blocks, im.block_dims[0, 1])
+        self.assertEqual(im.comp_info[1].component_id, 1)
+        self.assertEqual(im.comp_info[2].component_id, 2)
 
     def test_jpegio_write(self):
         """Test writing of DCTJPEGio interface."""
@@ -330,6 +348,7 @@ class TestDCT(unittest.TestCase):
         # check quantization table
         self.assertEqual(im.qt[0, 0, 0], 1)
         self.assertEqual(im.quant_tables[0][0, 0], 1)
+        # TODO: comp_info
 
     def test_dct_edit(self):
         """Test of changing DCT coefficient, e.g."""
