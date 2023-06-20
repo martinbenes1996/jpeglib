@@ -332,6 +332,55 @@ class DCTJPEG(_jpeg.JPEG):
         del self._qt
 
 
+class DCTJPEGio:
+    pass
+
+
+@dataclasses.dataclass
+class ComponentInfo:
+    """ComponentInfo from jpegio, intended for reading only"""
+    component_id: int
+    """component id"""
+    jpeg: DCTJPEGio
+    """DCTJPEGio instance"""
+
+    @property
+    def h_samp_factor(self):
+        return self.jpeg.samp_factor[self.component_id, 0]
+
+    @property
+    def v_samp_factor(self):
+        return self.jpeg.samp_factor[self.component_id, 1]
+
+    @property
+    def quant_tbl_no(self):
+        return self.jpeg.quant_tbl_no[self.component_id]
+
+    @property
+    def ac_tbl_no(self):
+        raise NotImplementedError
+
+    @property
+    def dc_tbl_no(self):
+        raise NotImplementedError
+
+    @property
+    def downsampled_height(self):
+        return self.jpeg.height / self.jpeg.samp_factor[self.component_id, 0]
+
+    @property
+    def downsampled_width(self):
+        return self.jpeg.width / self.jpeg.samp_factor[self.component_id, 1]
+
+    @property
+    def height_in_blocks(self):
+        return self.jpeg.height_in_blocks(self.component_id)
+
+    @property
+    def width_in_blocks(self):
+        return self.jpeg.width_in_blocks(self.component_id)
+
+
 @dataclasses.dataclass
 class DCTJPEGio(DCTJPEG):
     """Class for compatiblity with jpegio."""
@@ -340,6 +389,8 @@ class DCTJPEGio(DCTJPEG):
     """DCT coefficient arrays in jpegio format"""
     quant_tables: List
     """quantization tables in jpegio format"""
+    comp_info: List
+    """component infos"""
 
     def __post_init__(self):
         self._jpeg_to_jpegio()
@@ -360,6 +411,11 @@ class DCTJPEGio(DCTJPEG):
         else:
             self._coef_arrays = [self._convert_dct_jpegio(self.Y)]
             self._quant_tables = [self.get_component_qt(0).astype(np.int32)]
+        # component infos
+        self.comp_info = [
+            ComponentInfo(component_id=i, jpeg=self)
+            for i in range(self.num_components)
+        ]
 
     def _jpegio_to_jpeg(self):
         self.Y = self._convert_jpegio_dct(self.coef_arrays[0])
@@ -377,6 +433,7 @@ class DCTJPEGio(DCTJPEG):
                 self.quant_tables[0]
             ], dtype=np.uint16)
             self.quant_tbl_no = np.array([0])
+        # TODO: component info
 
     def _convert_dct_jpegio(self, dct: np.ndarray) -> np.ndarray:
         # From jpeglib's 4D tensor to jpegio 2D
@@ -421,6 +478,16 @@ class DCTJPEGio(DCTJPEG):
     def quant_tables(self, quant_tables: list):
         """Setter of quantization tables in jpegio format."""
         self._quant_tables = quant_tables
+
+    @property
+    def comp_info(self) -> list:
+        """Convertor of component infos to jpegio format."""
+        return self._comp_info
+
+    @comp_info.setter
+    def comp_info(self, comp_info: list):
+        """Setter of component infos in jpegio format."""
+        self._comp_info = comp_info
 
     def write(self, fpath: str, flags: int = -1, quality: int = -1):
         """Function to write DCT coefficients in jpegio format to JPEG file.
