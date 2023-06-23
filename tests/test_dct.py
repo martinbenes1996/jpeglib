@@ -312,22 +312,21 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.coef_arrays[2], im.coef_arrays[2])
         # test comp_info
         self.assertEqual(len(im.comp_info), 3)
-        self.assertEqual(im.comp_info[0].component_id, 0)
-        self.assertEqual(im.comp_info[0].h_samp_factor, im.samp_factor[0, 0])
-        self.assertEqual(im.comp_info[0].v_samp_factor, im.samp_factor[0, 1])
-        self.assertEqual(im.comp_info[0].quant_tbl_no, im.quant_tbl_no[0])
-        self.assertEqual(
-            im.comp_info[0].downsampled_height,
-            im.height / im.samp_factor[0, 0]
-        )
-        self.assertEqual(
-            im.comp_info[0].downsampled_width,
-            im.width / im.samp_factor[0, 1]
-        )
-        self.assertEqual(im.comp_info[0].height_in_blocks, im.block_dims[0, 0])
-        self.assertEqual(im.comp_info[0].width_in_blocks, im.block_dims[0, 1])
-        self.assertEqual(im.comp_info[1].component_id, 1)
-        self.assertEqual(im.comp_info[2].component_id, 2)
+        for c in range(3):
+            self.assertEqual(im.comp_info[c].component_id, c)
+            self.assertEqual(im.comp_info[c].h_samp_factor, im.samp_factor[c, 0])
+            self.assertEqual(im.comp_info[c].v_samp_factor, im.samp_factor[c, 1])
+            self.assertEqual(im.comp_info[c].quant_tbl_no, im.quant_tbl_no[c])
+            self.assertEqual(
+                im.comp_info[c].downsampled_height,
+                im.height / im.samp_factor[c, 0]
+            )
+            self.assertEqual(
+                im.comp_info[c].downsampled_width,
+                im.width / im.samp_factor[c, 1]
+            )
+            self.assertEqual(im.comp_info[c].height_in_blocks, im.block_dims[c, 0])
+            self.assertEqual(im.comp_info[c].width_in_blocks, im.block_dims[c, 1])
 
     def test_jpegio_write(self):
         """Test writing of DCTJPEGio interface."""
