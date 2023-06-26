@@ -361,7 +361,7 @@ class TestDCT(unittest.TestCase):
         # test matrix
         self.assertEqual(np.sum(jpeg2.Y - Yc), 1)  # difference by 1
         self.assertEqual(
-            tuple([int(i) for i in np.where(jpeg2.Y != Yc)]),
+            tuple([int(i[0]) for i in np.where(jpeg2.Y != Yc)]),
             (0, 0, 0, 1)
         )
         np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
