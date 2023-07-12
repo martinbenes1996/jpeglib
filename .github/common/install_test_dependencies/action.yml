@@ -29,4 +29,7 @@ runs:
         python3 setup.py install || true
         cd ..
         pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox@829dbb9c50d0c885d228fc087de1c104160eee33 || true
-
+        # Compile libjpeg 9e
+        curl -s -L https://ijg.org/files/jpegsrc.v9e.tar.gz | tar xvz
+        cd jpeg-9e
+        mkdir build && ./configure --prefix=$(pwd)/build && make && make install || true
