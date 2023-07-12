@@ -10,6 +10,8 @@ import os
 from parameterized import parameterized
 import tempfile
 import unittest
+import subprocess
+from PIL import Image
 
 import jpeglib
 from _defs import ALL_VERSIONS, version_cluster, qt50_standard
@@ -229,6 +231,83 @@ class TestSpatial(unittest.TestCase):
         self.assert_equal_ratio_greater(im_ifast.Y, im_float.Y, .9)
         self.assert_equal_ratio_greater(im_ifast.Cb, im_float.Cb, .9)
         self.assert_equal_ratio_greater(im_ifast.Cr, im_float.Cr, .9)
+
+    @parameterized.expand([
+        ['examples/images-9e/testimg.bmp', 100],
+        ['examples/images-9e/testimg.bmp', 95],
+    ])
+    def test_dct_methods(self, input_file, quality):
+        self.logger.info("test_dct_methods")
+
+        # Find libjpeg 9e build directory
+        libjpeg_path = os.path.join("jpeg-9e", "build")
+
+        # Find cjpeg executable
+        cjpeg_executable = os.path.join(libjpeg_path, "bin", "cjpeg")
+        if not os.path.exists(cjpeg_executable):
+            # If cjpeg executable could not be found, skip this test. This will happen when executing tests on Windows.
+            self.logger.warning("Could not find cjpeg executable. Skipping this test.")
+            return 1
+
+        # cjpeg is dynamically linked, therefore set LD_LIBRARY_PATH to ensure that cjpeg uses the right libjpeg.so instead of a system-wide version.
+        lib_path = os.path.join(libjpeg_path, "lib")
+        env = dict(os.environ)
+        if "LD_LIBRARY_PATH" in env:
+            env["LD_LIBRARY_PATH"] = lib_path + ":" + env["LD_LIBRARY_PATH"]
+        else:
+            env["LD_LIBRARY_PATH"] = lib_path
+
+        # Set up temporary files
+        cjpeg_outfile = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        jpeglib_outfile = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+
+        with jpeglib.version("9e"):
+            dct_methods = [jpeglib.DCTMethod.JDCT_ISLOW, jpeglib.DCTMethod.JDCT_IFAST, jpeglib.DCTMethod.JDCT_FLOAT]
+
+            for dct_method_compress in dct_methods:
+                dct_method_compress_str = self.dct_method_to_str(dct_method_compress)
+
+                # Compress test image using cjpeg
+                cmd = [cjpeg_executable, "-quality", str(quality), "-dct", dct_method_compress_str, "-outfile", cjpeg_outfile.name, input_file]
+                subprocess.run(cmd, env=env, check=True)
+
+                # Compress test image using jpeglib
+                img = np.array(Image.open(input_file).convert("RGB"))
+
+                jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, dct_method=dct_method_compress)
+
+                # Read and compare DCT coefficients
+                im_cjpeg = jpeglib.read_dct(cjpeg_outfile.name)
+                im_jpeglib = jpeglib.read_dct(jpeglib_outfile.name)
+
+                assert np.all(im_cjpeg.Y == im_jpeglib.Y)
+                if im_cjpeg.has_chrominance:
+                    assert np.all(im_cjpeg.Cb == im_jpeglib.Cb)
+                    assert np.all(im_cjpeg.Cr == im_jpeglib.Cr)
+
+                # Compare decompression methods
+                for decompress_dct_method in dct_methods:
+                    im_cjpeg = jpeglib.read_spatial(cjpeg_outfile.name, dct_method=decompress_dct_method).spatial
+                    im_jpeglib = jpeglib.read_spatial(jpeglib_outfile.name, dct_method=decompress_dct_method).spatial
+
+                    assert np.all(im_cjpeg == im_jpeglib)
+
+        # Clean up
+        cjpeg_outfile.close()
+        jpeglib_outfile.close()
+
+    @staticmethod
+    def dct_method_to_str(dct_method):
+        if dct_method == jpeglib.DCTMethod.JDCT_ISLOW:
+            dct_method_str = "int"
+        elif dct_method == jpeglib.DCTMethod.JDCT_IFAST:
+            dct_method_str = "fast"
+        elif dct_method == jpeglib.DCTMethod.JDCT_FLOAT:
+            dct_method_str = "float"
+        else:
+            raise ValueError("Unknown dct method")
+
+        return dct_method_str
 
     def test_infer_qt1(self):
         """Check that qt_tbl_no is inferred when 1 QT is given."""

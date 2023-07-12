@@ -5,7 +5,6 @@ runs:
   using: composite
   
   steps: # tasks
-
     - name: Run unittests
       shell: bash
       run: python tests/test.py
