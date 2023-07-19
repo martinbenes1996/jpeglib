@@ -434,7 +434,6 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(Cr, jpeg.Cr)
         np.testing.assert_array_equal(qt, jpeg.qt)
 
-
     # === tests with non-public software ===
     def test_rainer_MMSec(self):
         """Test output against Rainer's MMSec library."""

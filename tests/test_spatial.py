@@ -163,7 +163,7 @@ class TestSpatial(unittest.TestCase):
         self.logger.info("test_grayscale")
         # compress
         np.random.seed(12345)
-        x = np.random.randint(0, 255, (128, 128, 1), dtype=np.int16)
+        x = np.random.randint(0, 255, (128, 128, 1), dtype=np.uint8)
         im = jpeglib.from_spatial(x)
         im.write_spatial(self.tmp.name)
         # load DCT
@@ -182,7 +182,7 @@ class TestSpatial(unittest.TestCase):
         self.logger.info("test_cmyk")
         # compress
         np.random.seed(12345)
-        x = np.random.randint(0, 255, (256, 256, 4), dtype=np.int16)
+        x = np.random.randint(0, 255, (256, 256, 4), dtype=np.uint8)
         im = jpeglib.from_spatial(x, jpeglib.Colorspace.JCS_CMYK)
         im.write_spatial(self.tmp.name)
         # load DCT
@@ -209,15 +209,15 @@ class TestSpatial(unittest.TestCase):
         # get decompressed spatial
         im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
         # compress with islow
-        im.write_spatial(self.tmp.name, dct_method=jpeglib.DCTMethod.JDCT_ISLOW)
+        im.write_spatial(self.tmp.name, dct_method=jpeglib.JDCT_ISLOW)
         im_islow = jpeglib.read_dct(self.tmp.name)
         im_islow.load()
         # compress with ifast
-        im.write_spatial(self.tmp.name, dct_method=jpeglib.DCTMethod.JDCT_IFAST)
+        im.write_spatial(self.tmp.name, dct_method=jpeglib.JDCT_IFAST)
         im_ifast = jpeglib.read_dct(self.tmp.name)
         im_ifast.load()
         # compress with float
-        im.write_spatial(self.tmp.name, dct_method=jpeglib.DCTMethod.JDCT_FLOAT)
+        im.write_spatial(self.tmp.name, dct_method=jpeglib.JDCT_FLOAT)
         im_float = jpeglib.read_dct(self.tmp.name)
         im_float.load()
 
@@ -262,7 +262,7 @@ class TestSpatial(unittest.TestCase):
         jpeglib_outfile = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
 
         with jpeglib.version("9e"):
-            dct_methods = [jpeglib.DCTMethod.JDCT_ISLOW, jpeglib.DCTMethod.JDCT_IFAST, jpeglib.DCTMethod.JDCT_FLOAT]
+            dct_methods = [jpeglib.JDCT_ISLOW, jpeglib.JDCT_IFAST, jpeglib.JDCT_FLOAT]
 
             for dct_method_compress in dct_methods:
                 dct_method_compress_str = self.dct_method_to_str(dct_method_compress)
@@ -298,20 +298,20 @@ class TestSpatial(unittest.TestCase):
 
     @staticmethod
     def dct_method_to_str(dct_method):
-        if dct_method == jpeglib.DCTMethod.JDCT_ISLOW:
+        if dct_method == jpeglib.JDCT_ISLOW:
             dct_method_str = "int"
-        elif dct_method == jpeglib.DCTMethod.JDCT_IFAST:
+        elif dct_method == jpeglib.JDCT_IFAST:
             dct_method_str = "fast"
-        elif dct_method == jpeglib.DCTMethod.JDCT_FLOAT:
+        elif dct_method == jpeglib.JDCT_FLOAT:
             dct_method_str = "float"
         else:
             raise ValueError("Unknown dct method")
 
         return dct_method_str
 
-    def test_infer_qt1(self):
+    def test_infer_qt1_custom(self):
         """Check that qt_tbl_no is inferred when 1 QT is given."""
-        self.logger.info("test_infer_qt1")
+        self.logger.info("test_infer_qt1_custom")
         # recompress image with custom QT
         x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
         qt_ref = np.array([
@@ -380,6 +380,44 @@ class TestSpatial(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.qt, qt_ref)
         np.testing.assert_array_equal(jpeg.quant_tbl_no, np.array([0]))
 
+    def test_from_spatial_wrong_dtype(self):
+        """Check that TypeError is raise in from_spatial.
+
+        Suggested by btlorch.
+        """
+        self.logger.info("test_from_spatial_wrong_dtype")
+        # Create random 8x8 integer block
+        rng = np.random.default_rng(12345)
+        spatial = rng.integers(low=0, high=256, size=(8, 8))
+        assert spatial.min() >= 0
+        assert spatial.max() <= 255
+
+        # Create a jpeglib object. Note that the input dtype is int64.
+        try:
+            jpeglib.from_spatial(spatial[:, :, None].astype(int))
+        except TypeError:
+            pass
+
+    def test_from_spatial_correct_dtype(self):
+        """Check that uint8 is accepted by from_spatial.
+
+        Suggested by btlorch.
+        """
+        self.logger.info("test_from_spatial_correct_dtype")
+        # Create random 8x8 integer block
+        rng = np.random.default_rng(12345)
+        spatial = rng.integers(low=0, high=256, size=(8, 8))
+        assert spatial.min() >= 0
+        assert spatial.max() <= 255
+
+        # Write and load jpeglib object
+        im = jpeglib.from_spatial(spatial[:, :, None].astype(np.uint8))
+        im.write_spatial(self.tmp.name, qt=100)
+        im2 = jpeglib.read_spatial(self.tmp.name)
+        spatial2 = im2.spatial[:, :, 0]
+
+        # #
+        # np.testing.assert_array_equal(spatial, spatial2)
 
     # def test_pil_read(self):
     #     jpeglib.version.set('8d')

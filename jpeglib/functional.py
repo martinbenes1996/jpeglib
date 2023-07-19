@@ -234,6 +234,8 @@ def from_spatial(
     """
     # shape
     height, width, num_components = spatial.shape
+    if spatial.dtype != np.uint8:
+        raise TypeError('spatial must be of type uint8')
     # infere colorspace
     if in_color_space is None:
         in_color_space = _infere.in_color_space(num_components)
