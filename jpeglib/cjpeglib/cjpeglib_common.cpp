@@ -187,6 +187,7 @@ void _write_qt(
 				if(qt_ch < 0)
 					continue;
 			}
+			// fprintf(stderr, "Channel %d:\n", ch);
 			cinfo->comp_info[ch].component_id = ch;
 			cinfo->comp_info[ch].quant_tbl_no = qt_ch;
 			if(!(qt_slot_seen & (0x1 << qt_ch))) {
@@ -201,20 +202,36 @@ void _write_qt(
 					jpeg_add_quant_table(cinfo, qt_ch, qt_u, 100, FALSE);
 
 					if(!cinfo->ac_huff_tbl_ptrs[qt_ch]) {
-						int i = qt_ch;
-						while((i >= 0) && !cinfo->ac_huff_tbl_ptrs[--i]) ;
-						cinfo->ac_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
-						memcpy(cinfo->ac_huff_tbl_ptrs[qt_ch], cinfo->ac_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
+						#if (LIBVERSION >= 94) && (LIBVERSION < 3000)
+						jpeg_std_huff_table((j_common_ptr)cinfo, FALSE, qt_ch);
+						#endif
+
+						// // int i = qt_ch;
+						// // while((i >= 0) && !cinfo->ac_huff_tbl_ptrs[--i]) ;
+						// fprintf(stderr, " - jpeg_alloc_huff_table() -> %d\n", qt_ch);
+						// cinfo->ac_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
+						// // fprintf(stderr, " - memcpy AC %d -> %d [%lu]\n", qt_ch, i, sizeof(JHUFF_TBL));
+						// // memcpy(cinfo->ac_huff_tbl_ptrs[qt_ch], cinfo->ac_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
+						// fprintf(stderr, " - AC done\n");
 					}
 					if(!cinfo->dc_huff_tbl_ptrs[qt_ch]) {
-						int i = qt_ch;
-						while((i >= 0) && !cinfo->dc_huff_tbl_ptrs[--i]) {}
-						cinfo->dc_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
-						memcpy(cinfo->dc_huff_tbl_ptrs[qt_ch], cinfo->dc_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
+						#if (LIBVERSION >= 94) && (LIBVERSION < 3000)
+						jpeg_std_huff_table((j_common_ptr)cinfo, TRUE, qt_ch);
+						#endif
+
+						// // fprintf(stderr, " - jpeg_alloc_huff_table DC\n");
+						// // int i = qt_ch;
+						// // while((i >= 0) && !cinfo->dc_huff_tbl_ptrs[--i]) {}
+						// fprintf(stderr, " - jpeg_alloc_huff_table() -> %d\n", qt_ch);
+						// cinfo->dc_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
+						// // fprintf(stderr, " - memcpy AC %d -> %d [%lu]\n", qt_ch, i, sizeof(JHUFF_TBL));
+						// // memcpy(cinfo->dc_huff_tbl_ptrs[qt_ch], cinfo->dc_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
+						// fprintf(stderr, " - DC done\n");
 					}
 
 				// just change
 				} else {
+					// fprintf(stderr, " - change slot\n");
 					for (int i = 0; i < 64; i++)
 						cinfo->quant_tbl_ptrs[qt_ch]->quantval[i] = qt[qt_ch * 64 + i];
 				}
