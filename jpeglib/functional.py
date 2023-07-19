@@ -198,6 +198,7 @@ def from_spatial(
     :param in_color_space: Color space of the input. If not given, infered from the shape.
     :type in_color_space: str | Colorspace, optional
     :raises [IOError]: When color space can't be infered.
+    :raises [TypeError]: When spatial has wrong dtype.
 
     :Example:
 
@@ -221,7 +222,15 @@ def from_spatial(
     >>> try:
     >>>     im = jpeglib.from_spatial(spatial)
     >>> except IOError:
-    >>>     raised
+    >>>     pass
+
+    When spatial has a wrong dtype, TypeError is raised.
+
+    >>> spatial = np.random.randint(0,255,(16,16,7),dtype=np.uint32)
+    >>> try:
+    >>>     im = jpeglib.from_spatial(spatial)
+    >>> except TypeError:
+    >>>     pass
 
     When output is not specified when writing, error is raised.
 
