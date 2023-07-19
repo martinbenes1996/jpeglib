@@ -148,6 +148,8 @@ int write_jpeg_spatial(
 	FILE *fp;
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
+	memset(&cinfo, 0x00, sizeof(struct jpeg_compress_struct));
+	memset(&jerr, 0x00, sizeof(struct jpeg_error_mgr));
 
 	// sanitizing libjpeg errors
 	int status = 1;
@@ -190,6 +192,14 @@ int write_jpeg_spatial(
 			chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;
 			chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
 		}
+
+		// for(int i = 0; i < 4; i++) {
+		// 	fprintf(stderr, "%d) %p %p\n",
+		// 		i,
+		// 		cinfo.dc_huff_tbl_ptrs[i],
+		// 		cinfo.ac_huff_tbl_ptrs[i]
+		// 	);
+		// }
 
 		// write qt
 		if(qt != NULL) {

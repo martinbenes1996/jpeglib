@@ -177,5 +177,25 @@ class TestVersion(unittest.TestCase):
         except RuntimeError as e:
             self.assertEqual(str(e), f'version "{version}" not found, was the package compiled correctly?')
 
+    @parameterized.expand(ALL_VERSIONS)
+    def test_version_custom_QT(self, version):
+        """Test for bug using custom QT in 9e (thows sigsegv)."""
+
+        # Create a random 8x8 image
+        rng = np.random.default_rng(12345)
+        spatial = rng.integers(low=0, high=256, size=(8, 8, 1), dtype='uint8')
+        assert spatial.min() >= 0
+        assert spatial.max() <= 255
+
+        # Create a jpeglib object
+        im = jpeglib.from_spatial(spatial)
+
+        # Create a custom quantization table
+        qt = np.ones((1, 8, 8))
+
+        # Using version "6b" or "mozjpeg403" works, but "9e" exits with code 139 (interrupted by signal 11: SIGSEGV)
+        with jpeglib.version(version):
+            im.write_spatial(self.tmp.name, qt=qt)
+
 
 __all__ = ["TestVersion"]
