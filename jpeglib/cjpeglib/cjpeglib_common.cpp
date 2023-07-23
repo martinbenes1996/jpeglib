@@ -63,9 +63,9 @@ int read_jpeg_info(
 	int *jpeg_color_space,
 	int *marker_lengths,
 	int *marker_types,
-	unsigned char *huffman_valid,
-	unsigned char *huffman_bits,
-	unsigned char *huffman_values,
+    short *huffman_bits,
+    short *huffman_values,
+	int *num_scans,
 	BITMASK *flags
 ) {
 	// allocate
@@ -98,13 +98,15 @@ int read_jpeg_info(
 
 		jpeg_calc_output_dimensions(&cinfo);
 
-		(void)jpeg_read_coefficients(&cinfo);
+		cinfo.buffered_image = TRUE;
+		(void)jpeg_start_decompress(&cinfo);
+		// (void)jpeg_read_coefficients(&cinfo);
 
 		// copy to caller
 		if (block_dims != NULL) {
-			for (int i = 0; i < cinfo.num_components; i++) {
-				block_dims[2 * i] = cinfo.comp_info[i].height_in_blocks;
-				block_dims[2 * i + 1] = cinfo.comp_info[i].width_in_blocks;
+			for (int ch = 0; ch < cinfo.num_components; ch++) {
+				block_dims[2*ch] = cinfo.comp_info[ch].height_in_blocks;
+				block_dims[2*ch + 1] = cinfo.comp_info[ch].width_in_blocks;
 			}
 		}
 		if (image_dims != NULL) {
@@ -122,40 +124,53 @@ int read_jpeg_info(
 		}
 
 		if (samp_factor != NULL)
-			for (int comp = 0; comp < cinfo.num_components; comp++) {
-				*(samp_factor + comp * 2 + 0) = cinfo.comp_info[comp].v_samp_factor;
-				*(samp_factor + comp * 2 + 1) = cinfo.comp_info[comp].h_samp_factor;
+			for (int ch = 0; ch < cinfo.num_components; ch++) {
+				samp_factor[ch*2 + 0] = cinfo.comp_info[ch].v_samp_factor;
+				samp_factor[ch*2 + 1] = cinfo.comp_info[ch].h_samp_factor;
 			}
 
 		if (flags != NULL) {
-			*(flags) = (((cinfo.progressive_mode) ? (-1) : 0) & PROGRESSIVE_MODE) | (*flags);
+			*flags = (((cinfo.progressive_mode) ? (-1) : 0) & PROGRESSIVE_MODE) | (*flags);
 		}
 
 		if(huffman_bits != NULL) {
-			for(int comp = 0; comp < 4; comp++) {
-				*(huffman_valid + (comp)) = cinfo.dc_huff_tbl_ptrs[comp] != NULL;
-				*(huffman_valid + (comp + 4)) = cinfo.ac_huff_tbl_ptrs[comp] != NULL;
+			for(int ch = 0; ch < 4; ch++) {
+				// *(huffman_valid + (ch)) = cinfo.dc_huff_tbl_ptrs[ch] != NULL;
+				// *(huffman_valid + (ch + 4)) = cinfo.ac_huff_tbl_ptrs[ch] != NULL;
+				if(cinfo.dc_huff_tbl_ptrs[ch] == NULL)
+					huffman_bits[(0*4 + ch) * 17] = -1;
+				if(cinfo.ac_huff_tbl_ptrs[ch] == NULL)
+					huffman_bits[(1*4 + ch) * 17] = -1;
+
 				// huffman tables - bits
 				int dc_max = 0, ac_max = 0;
 				for(int i = 0; i < 17; i++) {
-					if(cinfo.dc_huff_tbl_ptrs[comp] != NULL) {
-						*(huffman_bits + comp * 17 + i) = cinfo.dc_huff_tbl_ptrs[comp]->bits[i];
-						dc_max += cinfo.dc_huff_tbl_ptrs[comp]->bits[i];
+					if(cinfo.dc_huff_tbl_ptrs[ch] != NULL) {
+						huffman_bits[(0*4 + ch) * 17 + i] = cinfo.dc_huff_tbl_ptrs[ch]->bits[i];
+						dc_max += cinfo.dc_huff_tbl_ptrs[ch]->bits[i];
 					}
-					if(cinfo.ac_huff_tbl_ptrs[comp] != NULL) {
-						*(huffman_bits + (comp + 4) * 17 + i) = cinfo.ac_huff_tbl_ptrs[comp]->bits[i];
-						ac_max += cinfo.ac_huff_tbl_ptrs[comp]->bits[i];
+					if(cinfo.ac_huff_tbl_ptrs[ch] != NULL) {
+						huffman_bits[(1*4 + ch) * 17 + i] = cinfo.ac_huff_tbl_ptrs[ch]->bits[i];
+						ac_max += cinfo.ac_huff_tbl_ptrs[ch]->bits[i];
 					}
 				}
 				// hufman tables - values
 				for(int v = 0; v < 256; v++) {
-					if(cinfo.dc_huff_tbl_ptrs[comp] != NULL && v < dc_max)
-						*(huffman_values + comp * 256 + v) = cinfo.dc_huff_tbl_ptrs[comp]->huffval[v];
-					if(cinfo.ac_huff_tbl_ptrs[comp] != NULL && v < ac_max)
-						*(huffman_values + (4 + comp) * 256 + v) = cinfo.ac_huff_tbl_ptrs[comp]->huffval[v];
+					if(cinfo.dc_huff_tbl_ptrs[ch] != NULL && v < dc_max)
+						huffman_values[(0*4 + ch) * 256 + v] = cinfo.dc_huff_tbl_ptrs[ch]->huffval[v];
+					if(cinfo.ac_huff_tbl_ptrs[ch] != NULL && v < ac_max)
+						huffman_values[(1*4 + ch) * 256 + v] = cinfo.ac_huff_tbl_ptrs[ch]->huffval[v];
 				}
 			}
 		}
+
+		// load number of scans (reads image data)
+		*num_scans = 0;
+		do {
+			jpeg_start_output(&cinfo, cinfo.input_scan_number);
+			++*num_scans;
+			jpeg_finish_output(&cinfo);
+		} while(!jpeg_input_complete(&cinfo));
 
 	// error handling
 	} catch(...) {
@@ -195,39 +210,9 @@ void _write_qt(
 
 				// allocate slot
 				if(only_create || (cinfo->quant_tbl_ptrs[qt_ch] == NULL)) {
-
 					for (int i = 0; i < 64; i++)
 						qt_u[i] = qt[ch * 64 + i];
-
 					jpeg_add_quant_table(cinfo, qt_ch, qt_u, 100, FALSE);
-
-					if(!cinfo->ac_huff_tbl_ptrs[qt_ch]) {
-						#if (LIBVERSION >= 94) && (LIBVERSION < 3000)
-						jpeg_std_huff_table((j_common_ptr)cinfo, FALSE, qt_ch);
-						#endif
-
-						// // int i = qt_ch;
-						// // while((i >= 0) && !cinfo->ac_huff_tbl_ptrs[--i]) ;
-						// fprintf(stderr, " - jpeg_alloc_huff_table() -> %d\n", qt_ch);
-						// cinfo->ac_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
-						// // fprintf(stderr, " - memcpy AC %d -> %d [%lu]\n", qt_ch, i, sizeof(JHUFF_TBL));
-						// // memcpy(cinfo->ac_huff_tbl_ptrs[qt_ch], cinfo->ac_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
-						// fprintf(stderr, " - AC done\n");
-					}
-					if(!cinfo->dc_huff_tbl_ptrs[qt_ch]) {
-						#if (LIBVERSION >= 94) && (LIBVERSION < 3000)
-						jpeg_std_huff_table((j_common_ptr)cinfo, TRUE, qt_ch);
-						#endif
-
-						// // fprintf(stderr, " - jpeg_alloc_huff_table DC\n");
-						// // int i = qt_ch;
-						// // while((i >= 0) && !cinfo->dc_huff_tbl_ptrs[--i]) {}
-						// fprintf(stderr, " - jpeg_alloc_huff_table() -> %d\n", qt_ch);
-						// cinfo->dc_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
-						// // fprintf(stderr, " - memcpy AC %d -> %d [%lu]\n", qt_ch, i, sizeof(JHUFF_TBL));
-						// // memcpy(cinfo->dc_huff_tbl_ptrs[qt_ch], cinfo->dc_huff_tbl_ptrs[i], sizeof(JHUFF_TBL));
-						// fprintf(stderr, " - DC done\n");
-					}
 
 				// just change
 				} else {
@@ -241,6 +226,64 @@ void _write_qt(
 	}
 }
 
+void _write_huff(
+	struct jpeg_compress_struct *cinfo,
+	short *huffman_bits,
+	short *huffman_values,
+	short *quant_tbl_no
+) {
+	unsigned char slot_seen = 0;
+	for(int ch = 0; ch < cinfo->num_components; ch++) {
+		int qt_ch = ch;
+		if(quant_tbl_no != NULL) {
+			qt_ch = quant_tbl_no[ch];
+			if(qt_ch < 0)
+				continue;
+		}
+		if(!(slot_seen & (0x1 << qt_ch))) {
+			slot_seen |= 0x1 << qt_ch;
+
+			// create standard huffmans
+			if(huffman_bits == NULL) {
+				#if (LIBVERSION >= 94) && (LIBVERSION < 3000) // =>9d
+				if(!cinfo->ac_huff_tbl_ptrs[qt_ch])
+					jpeg_std_huff_table((j_common_ptr)cinfo, FALSE, qt_ch);
+				if(!cinfo->dc_huff_tbl_ptrs[qt_ch])
+					jpeg_std_huff_table((j_common_ptr)cinfo, TRUE, qt_ch);
+				#endif
+
+			// add custom huffmans
+			} else {
+				fprintf(stderr, "set custom huffman to %d\n", ch);
+				// DC
+				if(huffman_bits[(0*4 + ch) * 17] != -1) {
+					if(!cinfo->dc_huff_tbl_ptrs[qt_ch])
+						cinfo->dc_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
+					for(int i = 0; i < 17; i++) {
+						cinfo->dc_huff_tbl_ptrs[ch]->bits[i] = huffman_bits[(0*4 + ch) * 17 + i];
+					}
+					for(int v = 0; v < 256; v++) {
+						cinfo->dc_huff_tbl_ptrs[ch]->huffval[v] = huffman_values[(0*4 + ch) * 256 + v];
+					}
+				}
+				// AC
+				if(huffman_bits[(1*4 + ch) * 17] != -1) {
+					if(!cinfo->ac_huff_tbl_ptrs[qt_ch])
+						cinfo->ac_huff_tbl_ptrs[qt_ch] = jpeg_alloc_huff_table((j_common_ptr)cinfo);
+					for(int i = 0; i < 17; i++) {
+						cinfo->ac_huff_tbl_ptrs[ch]->bits[i] = huffman_bits[(1*4 + ch) * 17 + i];
+					}
+					for(int v = 0; v < 256; v++) {
+						cinfo->ac_huff_tbl_ptrs[ch]->huffval[v] = huffman_values[(1*4 + ch) * 256 + v];
+					}
+				}
+			}
+
+
+		}
+
+	}
+}
 
 int print_jpeg_params(
 	const char *srcfile

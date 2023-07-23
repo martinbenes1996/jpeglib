@@ -21,9 +21,9 @@ int read_jpeg_info(
     int *jpeg_color_space,
     int *marker_lengths,
     int *mark_types,
-	unsigned char *huffman_valid,
-    unsigned char *huffman_bits,
-    unsigned char *huffman_values,
+    short *huffman_bits,
+    short *huffman_values,
+	int *num_scans,
     BITMASK *flags
 );
 
@@ -98,7 +98,28 @@ int write_jpeg_spatial(
     int *marker_types,
     int *marker_lengths,
     unsigned char *markers,
+    int num_scans,
+	int *scan_script,
+    short *huffman_bits,
+    short *huffman_values,
     BITMASK flags
+);
+
+LIBRARY_API
+int read_jpeg_progressive(
+    const char *srcfile,
+	unsigned char *rgb,
+	unsigned char *colormap, // colormap used
+	unsigned char *in_colormap, // colormap to use
+	int out_color_space,
+	int dither_mode,
+	int dct_method,
+	int *scan_script,
+    short *huffman_bits,
+    short *huffman_values,
+	unsigned short *qt,
+    short *quant_tbl_no,
+	BITMASK flags
 );
 
 // int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }

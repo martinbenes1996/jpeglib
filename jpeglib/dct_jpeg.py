@@ -72,8 +72,8 @@ class DCTJPEG(_jpeg.JPEG):
         K = None
         if self.has_black:  # has black
             K = self._alloc_dct_component(3)
-        qt = ((ctypes.c_short * 64) * 4)()
-        _quant_tbl_no = (ctypes.c_ubyte * 4)()
+        qt = ((ctypes.c_ushort * 64) * 4)()
+        _quant_tbl_no = (ctypes.c_short * 4)()
 
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)

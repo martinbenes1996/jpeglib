@@ -48,6 +48,8 @@ class JPEG:
     """color space of the JPEG file"""
     progressive_mode: bool
     """indicator of progressive (True) or sequential (False) JPEG"""
+    num_scans: int
+    """number of scans"""
 
     def height_in_blocks(self, component: int) -> int:
         """Getter of height in blocks.
@@ -244,6 +246,12 @@ class JPEG:
             marker_contents += [i for i in marker.content]
         return (ctypes.c_ubyte*int(np.sum(marker_lengths)))(*marker_contents)
 
+    def c_huffman_bits(self):
+        return None
+
+    def c_huffman_values(self):
+        return None
+
     def copy(self):
         """Create a deep copy of the JPEG object."""
         return copy.deepcopy(self)
@@ -288,9 +296,9 @@ def load_jpeg_info(path: str) -> JPEG:
     _jpeg_color_space = (ctypes.c_int*2)()
     _marker_lengths = (ctypes.c_int*MAX_MARKER)()
     _marker_types = (ctypes.c_uint32*MAX_MARKER)()
-    _huffman_valid = ((ctypes.c_bool*4)*2)()
-    _huffman_bits = (((ctypes.c_uint8*17)*4)*2)()
-    _huffman_values = (((ctypes.c_uint8*256)*4)*2)()
+    _num_scans = (ctypes.c_int*1)()
+    _huffman_bits = (((ctypes.c_int16*17)*4)*2)()
+    _huffman_values = (((ctypes.c_int16*256)*4)*2)()
     _flags = (ctypes.c_uint64*1)()
 
     # call
@@ -303,13 +311,15 @@ def load_jpeg_info(path: str) -> JPEG:
         jpeg_color_space=_jpeg_color_space,
         marker_lengths=_marker_lengths,
         marker_types=_marker_types,
-        huffman_valid=_huffman_valid,
         huffman_bits=_huffman_bits,
         huffman_values=_huffman_values,
+        num_scans=_num_scans,
         flags=_flags
     )
     # process
     num_components = _num_components[0]  # number of components in JPEG
+    num_scans = _num_scans[0]  # number of scans in JPEG
+    print(f'{num_scans=}')
     block_dims = (
         np.array([_block_dims[i] for i in range(2*num_components)], 'int32')
         .reshape(num_components, 2)
@@ -318,18 +328,21 @@ def load_jpeg_info(path: str) -> JPEG:
         np.array([_samp_factor[i] for i in range(2*num_components)], 'int32')
         .reshape(num_components, 2)
     )
-    huffman_valid = np.ctypeslib.as_array(_huffman_valid)
+    # process
     huffman_bits = np.ctypeslib.as_array(_huffman_bits)
     huffman_values = np.ctypeslib.as_array(_huffman_values)
-
     huffmans = []
     for i in range(4):
         huffman = {
-            k: Huffman(bits=huffman_bits[j, i], values=huffman_values[j, i])
+            k: Huffman(
+                bits=huffman_bits[j, i],
+                values=huffman_values[j, i]
+            )
             for k, j in zip(['AC', 'DC'], [1, 0])
-            if huffman_valid[j, i]
+            if huffman_bits[j, i, 0] != -1
         }
         huffmans.append(huffman)
+    print(huffmans)
 
     markers = []
     for i in range(MAX_MARKER):
@@ -370,6 +383,7 @@ def load_jpeg_info(path: str) -> JPEG:
         width=_image_dims[1],
         block_dims=block_dims,
         samp_factor=samp_factor,
+        num_scans=num_scans,
         # num_components=num_components,
         # out_color_space=Colorspace.from_index(_jpeg_color_space[0]),
         jpeg_color_space=Colorspace(_jpeg_color_space[1]),

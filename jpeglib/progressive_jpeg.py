@@ -9,28 +9,36 @@ from dataclasses import dataclass
 import numpy as np
 import os
 import tempfile
-from typing import Union, List
+from typing import List, Union
 import warnings
 
 from ._bind import CJpegLib
-from ._cenum import Colorspace, Dithermode, DCTMethod
+from .spatial_jpeg import SpatialJPEG
+from ._cenum import Colorspace, DCTMethod, Dithermode
+from ._huffman import Huffman
 from . import _infere
-from ._jpeg import JPEG
-
 
 @dataclass
-class SpatialJPEG(JPEG):
-    """JPEG instance to work in spatial domain."""
-    spatial: np.ndarray
+class ProgressiveJPEG(SpatialJPEG):
+    """JPEG instance to work with progressive JPEG in spatial domain."""
+    spatial: List[np.ndarray]
     """pixel data tensor"""
-    color_space: Colorspace
-    """color space of the pixel data"""
+    qt: List[np.ndarray]
+    """list of quantization tables per scan"""
+    quant_tbl_no: List[List[int]]
+    """list of assignments of quantization tables to components per scan"""
     # flags: List[str]
+    # """"""
+    scan_script: np.ndarray
+    """"""
 
     def _alloc_spatial(self, channels: int = None):
         if channels is None:
             channels = self.color_space.channels
-        return (((ctypes.c_ubyte * self.width) * self.height) * channels)()
+        return (
+            (((ctypes.c_ubyte * self.width) * self.height) * channels)
+            * self.num_scans
+        )()
 
     def load(
         self,
@@ -53,7 +61,12 @@ class SpatialJPEG(JPEG):
             dct_method = int(dct_method)
 
         # allocate spatial
-        spatial = self._alloc_spatial(self.color_space.channels)
+        _spatial = self._alloc_spatial(self.color_space.channels)
+        _scan_script = ((ctypes.c_int*9)*self.num_scans)()
+        _huffman_bits = ((((ctypes.c_int16*17)*4)*2)*self.num_scans)()
+        _huffman_values = ((((ctypes.c_int16*256)*4)*2)*self.num_scans)()
+        _qt = (((ctypes.c_ushort * 64) * 4) * self.num_scans)()
+        _quant_tbl_no = ((ctypes.c_short * 4) * self.num_scans)()
 
         # write content into temporary file
         tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
@@ -62,31 +75,69 @@ class SpatialJPEG(JPEG):
         tmp.close()
 
         # call
-        CJpegLib.read_jpeg_spatial(
+        CJpegLib.read_jpeg_progressive(
             path=str(self.path),
             srcfile=tmp.name,
-            spatial=spatial,
+            spatial=_spatial,
             colormap=int(self.jpeg_color_space),
             in_colormap=None,  # support of color quantization
             out_color_space=int(self.color_space),
             dither_mode=dither_mode,
             dct_method=dct_method,
+            scan_script=_scan_script,
+            huffman_bits=_huffman_bits,
+            huffman_values=_huffman_values,
+            qt=_qt,
+            quant_tbl_no=_quant_tbl_no,
             flags=flags,
         )
+
         # clean up temporary file
         os.remove(tmp.name)
         # process
-        self.spatial = (
-            np.ctypeslib.as_array(spatial)
+        spatial = (
+            np.ctypeslib.as_array(_spatial)
             .astype(np.ubyte)
-            .reshape(self.height, -1, self.color_space.channels)
+            .reshape(
+                self.num_scans,
+                self.height,
+                -1,
+                self.color_space.channels,
+            )
         )
+        self.spatial = list(spatial)
+
+        # scanscript
+        self.scan_script = np.ctypeslib.as_array(_scan_script)
+        huffman_bits = np.ctypeslib.as_array(_huffman_bits)
+        huffman_values = np.ctypeslib.as_array(_huffman_values)
+        # qt
+        self.quant_tbl_no = [
+            _quant_tbl_no[s][:self.scan_script[s, 0]]
+            for s in range(self.num_scans)
+        ]
+        qt = np.ctypeslib.as_array(_qt).reshape(self.num_scans, -1, 8, 8)
+        self.qt = [
+            qt[s, :len(np.unique(self.quant_tbl_no[s]))]
+            for s in range(self.num_scans)
+        ]
+        # Huffman
+        self.huffmans = []
+        for s in range(self.num_scans):
+            scan_huffmans = []
+            for i in range(4):
+                huffman = {
+                    k: Huffman(
+                        bits=huffman_bits[s, j, i],
+                        values=huffman_values[s, j, i]
+                    )
+                    for k, j in zip(['AC', 'DC'], [1, 0])
+                    if huffman_bits[s, j, i, 0] != -1
+                }
+                scan_huffmans.append(huffman)
+            self.huffmans.append(scan_huffmans)
 
         return self.spatial
-
-    def read_spatial(self) -> np.ndarray:
-        warnings.warn('read_spatial() is obsolete, use load()')
-        return self.load()
 
     def write_spatial(
         self,
@@ -144,9 +195,9 @@ class SpatialJPEG(JPEG):
         dstfile = path if path is not None else self.path
         if dstfile is None:
             raise IOError('no destination file specified')
-        # scans
-        if self.num_scans > 1:
-            warnings.warn('saving progressive JPEG as sequential')
+        # spatial
+        spatial = self.spatial[-1]  # taking only the last one
+        warnings.warn('writing pixels from the last scan only')
         # quality
         # use default of library
         if qt is None:
@@ -159,14 +210,15 @@ class SpatialJPEG(JPEG):
             except TypeError:
                 # infere quant_tbl_no
                 if quant_tbl_no is None:
-                    quant_tbl_no = _infere.quant_tbl_no(qt, spatial=self.spatial)
+                    quant_tbl_no = _infere.quant_tbl_no(qt, spatial=spatial)
                 #
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
-                quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
+                quant_tbl_no = np.ctypeslib.as_ctypes(
+                    np.array(quant_tbl_no).astype(np.int16))
 
         # process
         spatial = np.ctypeslib.as_ctypes(
-            self.spatial.reshape(
+            spatial.reshape(
                 self.color_space.channels,
                 self.height,
                 self.width,
@@ -190,62 +242,47 @@ class SpatialJPEG(JPEG):
             marker_types=self.c_marker_types(),
             marker_lengths=self.c_marker_lengths(),
             markers=self.c_markers(),
-            num_scans=1,
-            scan_script=None,
+            num_scans=self.num_scans,
+            scan_script=self.c_scan_script(),
             huffman_bits=self.c_huffman_bits(),
             huffman_values=self.c_huffman_values(),
             flags=flags,
         )
 
+
     @property
-    def spatial(self) -> np.ndarray:
-        if self._spatial is None:
+    def qt(self) -> List[np.ndarray]:
+        if self._qt is None:
             self.load()
-        return self._spatial
+        return self._qt
 
-    @spatial.setter
-    def spatial(self, spatial: np.ndarray):
-        self._spatial = spatial
-
-    @property
-    def color_space(self) -> np.ndarray:
-        return self._color_space
-
-    @color_space.setter
-    def color_space(self, color_space: Colorspace):
-        self._color_space = color_space
+    @qt.setter
+    def qt(self, qt: List[np.ndarray]):
+        self._qt = qt
 
     @property
-    def channels(self) -> int:
-        try:
-            return self._color_space.channels
-        except AttributeError:
-            return None
+    def quant_tbl_no(self) -> List[np.ndarray]:
+        if self._quant_tbl_no is None:
+            self.load()
+        return self._quant_tbl_no
 
-    # @property
-    # def dither_mode(self) -> np.ndarray:
-    #     return self._dither_mode
-
-    # @dither_mode.setter
-    # def dither_mode(self, dither_mode: Dithermode):
-    #     self._dither_mode = dither_mode
-
-    # @property
-    # def dct_method(self) -> np.ndarray:
-    #     return self._dct_method
-
-    # @dct_method.setter
-    # def dct_method(self, dct_method: DCTMethod):
-    #     self._dct_method = dct_method
+    @quant_tbl_no.setter
+    def quant_tbl_no(self, quant_tbl_no: List[np.ndarray]):
+        self._quant_tbl_no = quant_tbl_no
 
     @property
-    def flags(self) -> list:
-        return self._flags
+    def scan_script(self) -> np.ndarray:
+        return self._scan_script
 
-    @flags.setter
-    def flags(self, flags: list):
-        self._flags = flags
+    @scan_script.setter
+    def scan_script(self, scan_script: np.ndarray):
+        self._scan_script = scan_script
 
-    def free(self):
-        """Free the allocated tensors."""
-        del self._spatial
+    def c_scan_script(self):
+        return np.ctypeslib.as_ctypes(self.scan_script)
+
+    def c_huffman_bits(self):
+        return None
+
+    def c_huffman_values(self):
+        return None
