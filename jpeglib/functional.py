@@ -10,6 +10,7 @@ import numpy as np
 
 from .dct_jpeg import DCTJPEG
 from .spatial_jpeg import SpatialJPEG
+from .progressive_jpeg import ProgressiveJPEG
 from . import _jpeg
 from ._cenum import Colorspace, DCTMethod, Dithermode
 from . import _infere
@@ -91,7 +92,8 @@ def read_spatial(
     out_color_space: Colorspace = None,
     dct_method: DCTMethod = None,
     dither_mode: Dithermode = None,
-    flags: list = []
+    buffered: bool = False,
+    flags: list = None,
 ) -> SpatialJPEG:
     """Function for decompressing the JPEG as a pixel data (spatial domain).
 
@@ -105,14 +107,16 @@ def read_spatial(
     :type path: str
     :param out_color_space: Output color space. If not given, using the libjpeg default.
     :type out_color_space: :class:`Colorspace`
-    :param dither_mode: Dither mode. If not given, using the libjpeg default.
-    :type dither_mode: :class:`Dithermode`
     :param dct_method: DCT method. If not given, using the libjpeg default.
     :type dct_method: :class:`DCTMethod`
+    :param dither_mode: Dither mode. If not given, using the libjpeg default.
+    :type dither_mode: :class:`Dithermode`
+    :param buffered: Read scan by scan. This will return :class:`ProgressiveJPEG` object.
+    :type buffered: bool
     :param flags: Bool decompression parameters as str. If not given, using the libjpeg default. Read more at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
     :type flags: list, optional
-    :return: Spatial JPEG object
-    :rtype: :class:`SpatialJPEG`
+    :return: JPEG object
+    :rtype: :class:`SpatialJPEG` or :class:`ProgressiveJPEG`
     :raises [IOError]: When source file does not exist
 
     :Example:
@@ -134,6 +138,10 @@ def read_spatial(
     >>> # however on first query, it is read
     >>> print(im.spatial) # read and returned
     >>> print(im.spatial) # second time it is already stored in the object
+
+    Read progressive JPEG with
+
+    >>> im = jpeglib.read_spatial("input.jpeg", buffered=True)
     """  # noqa: E501
     # load file content
     path = str(path)
@@ -154,8 +162,14 @@ def read_spatial(
             out_color_space = 'JCS_GRAYSCALE'
         out_color_space = Colorspace[out_color_space]
 
+    # progressive
+    if buffered:
+        jpeg_cls = ProgressiveJPEG
+    else:
+        jpeg_cls = SpatialJPEG
+
     # create jpeg
-    im = SpatialJPEG(
+    im = jpeg_cls(
         path=path,
         content=content,
         height=info.height,
@@ -163,17 +177,21 @@ def read_spatial(
         block_dims=info.block_dims,
         samp_factor=info.samp_factor,
         jpeg_color_space=jpeg_color_space,
+        num_scans=info.num_scans,
         # num_components = num_components,
         markers=info.markers,
         huffmans=info.huffmans,
         spatial=None,
         color_space=out_color_space,
-        flags=flags,
         progressive_mode=info.progressive_mode
     )
     # load image data
-    if dct_method is not None or dither_mode is not None:
-        im.load(dct_method=dct_method, dither_mode=dither_mode)
+    if dct_method is not None or dither_mode is not None or flags is not None:
+        im.load(
+            dct_method=dct_method,
+            dither_mode=dither_mode,
+            flags=flags,
+        )
     return im
 
 
@@ -259,11 +277,11 @@ def from_spatial(
         block_dims=None,
         samp_factor=None,
         jpeg_color_space=jpeg_color_space,
+        num_scans=1,
         markers=None,
         huffmans=None,
         spatial=spatial,
         color_space=in_color_space,
-        flags=[],
         progressive_mode=None
     )
 
@@ -351,6 +369,7 @@ def from_dct(
         block_dims=block_dims,
         samp_factor=samp_factor,
         jpeg_color_space=jpeg_color_space,
+        num_scans=1,
         # num_components=info.num_components,
         quant_tbl_no=quant_tbl_no,
         markers=None,

@@ -31,9 +31,9 @@ class CJpegLib:
         jpeg_color_space: int,
         marker_lengths,
         marker_types,
-        huffman_valid,
         huffman_bits,
         huffman_values,
+        num_scans,
         flags: List[str],
     ):
         status = cls.get().read_jpeg_info(
@@ -45,9 +45,9 @@ class CJpegLib:
             jpeg_color_space,
             marker_lengths,
             marker_types,
-            huffman_valid,
             huffman_bits,
             huffman_values,
+            num_scans,
             flags
         )
         if status == 0:
@@ -186,6 +186,10 @@ class CJpegLib:
         marker_types,
         marker_lengths,
         markers,
+        num_scans,
+        scan_script,
+        huffman_bits,
+        huffman_values,
         flags: List[str],
     ):
         status = cls.get().write_jpeg_spatial(
@@ -205,10 +209,50 @@ class CJpegLib:
             marker_types,
             marker_lengths,
             markers,
+            num_scans,
+            scan_script,
+            huffman_bits,
+            huffman_values,
             cls.flags_to_mask(flags),
         )
         if status == 0:
             raise IOError(f"writing spatial to {dstfile} failed")
+
+    @classmethod
+    def read_jpeg_progressive(
+        cls,
+        srcfile: str,
+        spatial,
+        colormap,
+        in_colormap,
+        out_color_space,
+        dither_mode,
+        dct_method,
+        scan_script,
+        huffman_bits,
+        huffman_values,
+        qt,
+        quant_tbl_no,
+        flags,
+        path=None,
+    ):
+        status = cls.get().read_jpeg_progressive(
+            cls.cstr(srcfile),
+            spatial,
+            colormap,
+            in_colormap,
+            out_color_space,
+            dither_mode,
+            dct_method,
+            scan_script,
+            huffman_bits,
+            huffman_values,
+            qt,
+            quant_tbl_no,
+            cls.flags_to_mask(flags),
+        )
+        if status == 0:
+            raise IOError(f"reading scanscript of {srcfile} failed")
 
     MASKS = {
         "DO_FANCY_SAMPLING": (0b1 << 0),

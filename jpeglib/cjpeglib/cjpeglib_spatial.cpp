@@ -100,6 +100,20 @@ int read_jpeg_spatial(
 		if(overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS))
 			stride = 1;
 
+		// fprintf(stderr,
+		// 	"- JPEG_REACHED_SOS %d\n"
+		// 	"- JPEG_REACHED_EOI %d\n"
+		// 	"- JPEG_ROW_COMPLETED %d\n"
+		// 	"- JPEG_SCAN_COMPLETED %d\n"
+		// 	"- JPEG_SUSPENDED %d\n",
+		// 	JPEG_REACHED_SOS, JPEG_REACHED_EOI, JPEG_ROW_COMPLETED, JPEG_SCAN_COMPLETED, JPEG_SUSPENDED
+		// );
+		// do {
+		// 	fprintf(stderr, "Scan %d\n", cinfo.input_scan_number);
+		// 	// int res_in = jpeg_consume_input(&cinfo);
+		// 	// fprintf(stderr, "- res_in %d\n", res_in);
+		// 	// JPEG_REACHED_SOS, JPEG_REACHED_EOI, JPEG_ROW_COMPLETED, JPEG_SCAN_COMPLETED, JPEG_SUSPENDED
+		// 	jpeg_start_output(&cinfo, cinfo.input_scan_number);
 		while (cinfo.output_scanline < cinfo.output_height) {
 			jpeg_read_scanlines(
 				&cinfo,
@@ -108,6 +122,11 @@ int read_jpeg_spatial(
 			);
 			rowptr += cinfo.output_width * stride;
 		}
+		// 	jpeg_finish_output(&cinfo);
+
+		// } while(!jpeg_input_complete(&cinfo));
+
+
 
 		// cleanup
 		(void)jpeg_finish_decompress(&cinfo);
@@ -141,9 +160,12 @@ int write_jpeg_spatial(
 	int *marker_types,
 	int *marker_lengths,
 	unsigned char *markers,
+    int num_scans,
+	int *scan_script,
+    short *huffman_bits,
+    short *huffman_values,
 	BITMASK flags
 ) {
-
 	// allocate
 	FILE *fp;
 	struct jpeg_compress_struct cinfo;
@@ -193,14 +215,6 @@ int write_jpeg_spatial(
 			chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
 		}
 
-		// for(int i = 0; i < 4; i++) {
-		// 	fprintf(stderr, "%d) %p %p\n",
-		// 		i,
-		// 		cinfo.dc_huff_tbl_ptrs[i],
-		// 		cinfo.ac_huff_tbl_ptrs[i]
-		// 	);
-		// }
-
 		// write qt
 		if(qt != NULL) {
 			_write_qt(&cinfo, qt, quant_tbl_no, 1);
@@ -223,6 +237,9 @@ int write_jpeg_spatial(
 			jpeg_set_quality(&cinfo, quality, force_baseline);
 		}
 
+		// huffman tables
+		_write_huff(&cinfo, huffman_bits, huffman_values, quant_tbl_no);
+
 		if (smoothing_factor >= 0) {
 			cinfo.smoothing_factor = smoothing_factor;
 		}
@@ -238,7 +255,68 @@ int write_jpeg_spatial(
 			cinfo.progressive_mode = flag_is_set(flags, PROGRESSIVE_MODE);
 		}
 		if (overwrite_flag(flags, PROGRESSIVE_MODE) && flag_is_set(flags, PROGRESSIVE_MODE)) {
-			jpeg_simple_progression(&cinfo);
+			if(scan_script == NULL) {
+				jpeg_simple_progression(&cinfo);
+			} else {
+				if (cinfo.script_space == NULL || cinfo.script_space_size < num_scans) {
+					cinfo.script_space = (jpeg_scan_info *)(*cinfo.mem->alloc_small)(
+						(j_common_ptr)&cinfo,
+						JPOOL_PERMANENT,
+						num_scans * sizeof(jpeg_scan_info)
+					);
+				}
+				cinfo.scan_info = cinfo.script_space;
+				cinfo.num_scans = num_scans;
+
+				jpeg_scan_info * scanptr = cinfo.script_space;
+				for(int s = 0; s < num_scans; s++) {
+					scanptr->comps_in_scan = scan_script[s*9 + 0];
+					scanptr->component_index[0] = scan_script[s*9 + 1];
+					scanptr->component_index[1] = scan_script[s*9 + 2];
+					scanptr->component_index[2] = scan_script[s*9 + 3];
+					scanptr->component_index[3] = scan_script[s*9 + 4];
+					scanptr->Ss = scan_script[s*9 + 5];
+					scanptr->Se = scan_script[s*9 + 6];
+					scanptr->Ah = scan_script[s*9 + 7];
+					scanptr->Al = scan_script[s*9 + 8];
+				}
+
+				// if (ncomps == 3 && cinfo->jpeg_color_space == JCS_YCbCr) {
+				// 	/* Custom script for YCbCr color images. */
+				// 	/* Initial DC scan */
+				// 	scanptr = fill_dc_scans(scanptr, ncomps, 0, 1);
+				// 	/* Initial AC scan: get some luma data out in a hurry */
+				// 	scanptr = fill_a_scan(scanptr, 0, 1, 5, 0, 2);
+				// 	/* Chroma data is too small to be worth expending many scans on */
+				// 	scanptr = fill_a_scan(scanptr, 2, 1, 63, 0, 1);
+				// 	scanptr = fill_a_scan(scanptr, 1, 1, 63, 0, 1);
+				// 	/* Complete spectral selection for luma AC */
+				// 	scanptr = fill_a_scan(scanptr, 0, 6, 63, 0, 2);
+				// 	/* Refine next bit of luma AC */
+				// 	scanptr = fill_a_scan(scanptr, 0, 1, 63, 2, 1);
+				// 	/* Finish DC successive approximation */
+				// 	scanptr = fill_dc_scans(scanptr, ncomps, 1, 0);
+				// 	/* Finish AC successive approximation */
+				// 	scanptr = fill_a_scan(scanptr, 2, 1, 63, 1, 0);
+				// 	scanptr = fill_a_scan(scanptr, 1, 1, 63, 1, 0);
+				// 	/* Luma bottom bit comes last since it's usually largest scan */
+				// 	scanptr = fill_a_scan(scanptr, 0, 1, 63, 1, 0);
+				// } else {
+				// 	/* All-purpose script for other color spaces. */
+				// 	/* Successive approximation first pass */
+				// 	scanptr = fill_dc_scans(scanptr, ncomps, 0, 1);
+				// 	scanptr = fill_scans(scanptr, ncomps, 1, 5, 0, 2);
+				// 	scanptr = fill_scans(scanptr, ncomps, 6, 63, 0, 2);
+				// 	/* Successive approximation second pass */
+				// 	scanptr = fill_scans(scanptr, ncomps, 1, 63, 2, 1);
+				// 	/* Successive approximation final pass */
+				// 	scanptr = fill_dc_scans(scanptr, ncomps, 1, 0);
+				// 	scanptr = fill_scans(scanptr, ncomps, 1, 63, 1, 0);
+				// }
+
+
+			}
+
 		}
 		if (overwrite_flag(flags, OPTIMIZE_CODING)) {
 			cinfo.optimize_coding = flag_is_set(flags, OPTIMIZE_CODING);

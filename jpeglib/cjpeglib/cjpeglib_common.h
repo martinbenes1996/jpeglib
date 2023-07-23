@@ -49,6 +49,13 @@ void _write_qt(
 	unsigned char only_create
 );
 
+void _write_huff(
+	struct jpeg_compress_struct *cinfo,
+	short *huffman_bits,
+	short *huffman_values,
+	short *quant_tbl_no
+);
+
 int print_jpeg_params(
 	const char *srcfile
 );
