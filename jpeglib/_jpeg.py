@@ -247,10 +247,29 @@ class JPEG:
         return (ctypes.c_ubyte*int(np.sum(marker_lengths)))(*marker_contents)
 
     def c_huffman_bits(self):
-        return None
+        if self.huffmans is None:
+            return None
+        huffman_bits = np.zeros((2, 4, 17), dtype='int16')
+        for i, slot in enumerate(self.huffmans):
+            for k, j in zip(['AC', 'DC'], [1, 0]):
+                if k in slot:
+                    huffman_bits[j, i, :] = slot[k].bits
+                else:
+                    huffman_bits[j, i, 0] = -1
+        return np.ctypeslib.as_ctypes(huffman_bits)
 
     def c_huffman_values(self):
-        return None
+        if self.huffmans is None:
+            return None
+        huffman_values = np.zeros((2, 4, 256), dtype='int16')
+        for i, slot in enumerate(self.huffmans):
+            for k, j in zip(['AC', 'DC'], [1, 0]):
+                if k in slot:
+                    huffman_values[j, i, :] = slot[k].values
+                else:
+                    huffman_values[j, i, 0] = -1
+        return np.ctypeslib.as_ctypes(huffman_values)
+
 
     def copy(self):
         """Create a deep copy of the JPEG object."""
@@ -319,7 +338,7 @@ def load_jpeg_info(path: str) -> JPEG:
     # process
     num_components = _num_components[0]  # number of components in JPEG
     num_scans = _num_scans[0]  # number of scans in JPEG
-    print(f'{num_scans=}')
+    # print(f'{num_scans=}')
     block_dims = (
         np.array([_block_dims[i] for i in range(2*num_components)], 'int32')
         .reshape(num_components, 2)
@@ -342,7 +361,7 @@ def load_jpeg_info(path: str) -> JPEG:
             if huffman_bits[j, i, 0] != -1
         }
         huffmans.append(huffman)
-    print(huffmans)
+    # print(huffmans)
 
     markers = []
     for i in range(MAX_MARKER):

@@ -5,6 +5,7 @@ Affiliation: Universitaet Innsbruck
 """
 
 import logging
+import os
 import tempfile
 import unittest
 
@@ -15,11 +16,14 @@ class TestMarker(unittest.TestCase):
     logger = logging.getLogger()
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        self.original_version = jpeglib.version.get()
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        self.tmp.close()
 
     def tearDown(self):
-        self.tmp.close()
+        os.remove(self.tmp.name)
         del self.tmp
+        jpeglib.version.set(self.original_version)
 
     def test_marker_jpeg_app0(self):
         """Interface of marker."""

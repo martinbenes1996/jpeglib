@@ -41,7 +41,7 @@ int read_jpeg_dct(
   short *Cr,
   short *K,
   unsigned short *qt,
-  unsigned char *quant_tbl_no
+  short *quant_tbl_no
 ) {
 	// allocate
 	FILE *fp;

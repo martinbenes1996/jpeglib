@@ -25,8 +25,6 @@ from test_performance import TestPerformance  # noqa: F401,E402
 from test_progressive import TestProgressive  # noqa: F401,E402
 from test_spatial import TestSpatial  # noqa: F401,E402
 from test_version import TestVersion  # noqa: F401,E402
-
-# from test_flags import TestFlags  # noqa: F401,E402
 # ==================
 
 # run unittests
