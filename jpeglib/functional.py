@@ -74,6 +74,7 @@ def read_dct(
         block_dims=info.block_dims,
         samp_factor=info.samp_factor,
         jpeg_color_space=info.jpeg_color_space,
+        num_scans=info.num_scans,
         # num_components=info.num_components,
         quant_tbl_no=None,
         markers=info.markers,

@@ -6,6 +6,7 @@ Affiliation: Universitaet Innsbruck
 
 import logging
 import numpy as np
+import os
 import tempfile
 import unittest
 
@@ -16,11 +17,14 @@ class TestFlags(unittest.TestCase):
     logger = logging.getLogger(__name__)
 
     def setUp(self):
-        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        self.original_version = jpeglib.version.get()
+        self.tmp = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        self.tmp.close()
 
     def tearDown(self):
-        self.tmp.close()
+        os.remove(self.tmp.name)
         del self.tmp
+        jpeglib.version.set(self.original_version)
 
     def test_fancy_upsampling(self):
         self.logger.info("test_fancy_upsampling")

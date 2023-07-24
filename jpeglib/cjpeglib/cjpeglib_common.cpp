@@ -233,7 +233,7 @@ void _write_huff(
 	short *quant_tbl_no
 ) {
 	unsigned char slot_seen = 0;
-	for(int ch = 0; ch < cinfo->num_components; ch++) {
+	for(int ch = 0; ch < 4; ch++) {
 		int qt_ch = ch;
 		if(quant_tbl_no != NULL) {
 			qt_ch = quant_tbl_no[ch];
@@ -245,16 +245,21 @@ void _write_huff(
 
 			// create standard huffmans
 			if(huffman_bits == NULL) {
+				// fprintf(stderr, "create standard huffman\n");
 				#if (LIBVERSION >= 94) && (LIBVERSION < 3000) // =>9d
-				if(!cinfo->ac_huff_tbl_ptrs[qt_ch])
-					jpeg_std_huff_table((j_common_ptr)cinfo, FALSE, qt_ch);
-				if(!cinfo->dc_huff_tbl_ptrs[qt_ch])
-					jpeg_std_huff_table((j_common_ptr)cinfo, TRUE, qt_ch);
+				// if(!cinfo->ac_huff_tbl_ptrs[qt_ch]) {
+				// 	jpeg_std_huff_table((j_common_ptr)cinfo, FALSE, qt_ch);
+				// 	fprintf(stderr, "- AC\n");
+				// }
+				// if(!cinfo->dc_huff_tbl_ptrs[qt_ch]) {
+				// 	jpeg_std_huff_table((j_common_ptr)cinfo, TRUE, qt_ch);
+				// 	fprintf(stderr, "- DC\n");
+				// }
 				#endif
 
 			// add custom huffmans
 			} else {
-				fprintf(stderr, "set custom huffman to %d\n", ch);
+				// fprintf(stderr, "set custom huffman to %d\n", ch);
 				// DC
 				if(huffman_bits[(0*4 + ch) * 17] != -1) {
 					if(!cinfo->dc_huff_tbl_ptrs[qt_ch])

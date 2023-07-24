@@ -42,7 +42,7 @@ int read_jpeg_dct(
     short *Cr,
     short *K,
     unsigned short *qt,
-    unsigned char *quant_tbl_no
+    short *quant_tbl_no
 );
 LIBRARY_API
 int write_jpeg_dct(

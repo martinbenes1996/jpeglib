@@ -163,7 +163,6 @@ class SpatialJPEG(JPEG):
                 #
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
                 quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
-
         # process
         spatial = np.ctypeslib.as_ctypes(
             self.spatial.reshape(
