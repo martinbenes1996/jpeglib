@@ -273,6 +273,9 @@ class CJpegLib:
         "FORCE_BASELINE": (0b1 << 26),
         "TRELLIS_QUANT": (0b1 << 28),
         "TRELLIS_QUANT_DC": (0b1 << 30),
+        "TRELLIS_Q_OPT": (0b1 << 32),
+        "OPTIMIZE_SCANS": (0b1 << 34),
+        "USE_SCANS_IN_TRELLIS": (0b1 << 36),
     }
 
     @classmethod

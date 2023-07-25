@@ -35,6 +35,9 @@ unsigned char overwrite_flag(
 #define FORCE_BASELINE ((BITMASK)0b1 << 26)
 #define TRELLIS_QUANT ((BITMASK)0b1 << 28)
 #define TRELLIS_QUANT_DC ((BITMASK)0b1 << 30)
+#define TRELLIS_Q_OPT ((BITMASK)0b1 << 32)
+#define OPTIMIZE_SCANS ((BITMASK)0b1 << 34)
+#define USE_SCANS_IN_TRELLIS ((BITMASK)0b1 << 36)
 
 #ifdef __cplusplus
 }
