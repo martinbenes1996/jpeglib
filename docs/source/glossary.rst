@@ -119,6 +119,23 @@ References
 * `Chroma subsampling and JPEG sampling factors <https://zpl.fi/chroma-subsampling-and-jpeg-sampling-factors/>`_
 
 
+Progressive JPEG
+----------------
+
+Progressive JPEG arranges the data in the file by placing the low-level image first, and details later.
+On slow internet connection, progressive JPEG loads by gradually focusing, while sequential JPEG shows in full quality line-by-line.
+
+Progressive JPEG consists of scans, which carry parts of the DCT coefficients. DCT coefficients can be split by subband (frequency) and by precision (bits).
+After full loading of all the scans, progressive image should be, in theory, identical to its sequential counterpart.
+However, MozJPEG uses Trellis optimization which optimizes the file size and allows introduction of a imperceptible distortion.
+
+References
+""""""""""
+
+* `Hofer, Böhme: Progressive JPEGs in the Wild: Implications for Information Hiding and Forensics <https://informationsecurity.uibk.ac.at/pdfs/HB2023_IHMMSEC.pdf>`_
+
+
+
 Glossary terms
 --------------
 

@@ -274,23 +274,18 @@ int write_jpeg_spatial(
 				for(int s = 0; s < num_scans; s++) {
 					// fprintf(stderr, "- scan %d\n", s);
 					scanptr->comps_in_scan = scan_script[s*9 + 0];
+					scanptr->Ss = scan_script[s*9 + 1];
+					scanptr->Se = scan_script[s*9 + 2];
+					scanptr->Ah = scan_script[s*9 + 3];
+					scanptr->Al = scan_script[s*9 + 4];
 					for(int ch = 0; ch < 4; ch++) {
 						if(scan_script[s*9 + ch + 1] != -1)
-							scanptr->component_index[ch] = scan_script[s*9 + ch + 1];
+							scanptr->component_index[ch] = scan_script[s*9 + ch + 5];
+							// TODO: copy ac_tbl_no and dc_tbl_no
 					}
-					// fprintf(stderr, "- components %d %d %d %d\n",
-					// 		scanptr->component_index[0],
-					// 		scanptr->component_index[1],
-					// 		scanptr->component_index[2],
-					// 		scanptr->component_index[3]);
-					scanptr->Ss = scan_script[s*9 + 5];
-					scanptr->Se = scan_script[s*9 + 6];
-					scanptr->Ah = scan_script[s*9 + 7];
-					scanptr->Al = scan_script[s*9 + 8];
-					// fprintf(stderr, "- parameters %d %d %d %d\n",
-					// 		scanptr->Ss, scanptr->Se, scanptr->Ah, scanptr->Al);
 					scanptr++;
 				}
+
 			}
 
 		}

@@ -16,21 +16,22 @@ from ._bind import CJpegLib
 from .spatial_jpeg import SpatialJPEG
 from ._cenum import Colorspace, DCTMethod, Dithermode
 from ._huffman import Huffman
+from ._scan import Scan
 from . import _infere
 
 @dataclass
 class ProgressiveJPEG(SpatialJPEG):
     """JPEG instance to work with progressive JPEG in spatial domain."""
     spatial: List[np.ndarray]
-    """pixel data tensor"""
+    """pixel data tensors per scan"""
     qt: List[np.ndarray]
     """list of quantization tables per scan"""
     quant_tbl_no: List[List[int]]
-    """list of assignments of quantization tables to components per scan"""
-    # flags: List[str]
-    # """"""
-    scan_script: np.ndarray
-    """"""
+    """assignments of quantization tables to components per scan"""
+    scans: List[Scan]
+    """list of scans"""
+    # scan_script: np.ndarray
+    # """arrangment of scans in the file, comps_in_scans, component index (4), Ss, Se, Ah, Al. Will be split in the future."""
 
     def _alloc_spatial(self, channels: int = None):
         if channels is None:
@@ -62,7 +63,7 @@ class ProgressiveJPEG(SpatialJPEG):
 
         # allocate spatial
         _spatial = self._alloc_spatial(self.color_space.channels)
-        _scan_script = ((ctypes.c_int*9)*self.num_scans)()
+        _scan_script = ((ctypes.c_int*17)*self.num_scans)()
         _huffman_bits = ((((ctypes.c_int16*17)*4)*2)*self.num_scans)()
         _huffman_values = ((((ctypes.c_int16*256)*4)*2)*self.num_scans)()
         _qt = (((ctypes.c_ushort * 64) * 4) * self.num_scans)()
@@ -108,9 +109,19 @@ class ProgressiveJPEG(SpatialJPEG):
         self.spatial = list(spatial)
 
         # scanscript
-        self.scan_script = np.ctypeslib.as_array(_scan_script)
-        huffman_bits = np.ctypeslib.as_array(_huffman_bits)
-        huffman_values = np.ctypeslib.as_array(_huffman_values)
+        scan_script = np.ctypeslib.as_array(_scan_script)
+        self.scans = []
+        for s in range(self.num_scans):
+            scan = Scan(
+                components=scan_script[5:5+scan_script[0]],
+                dc_tbl_no=scan_script[9:9+scan_script[0]],
+                ac_tbl_no=scan_script[13:13+scan_script[0]],
+                Ss=scan_script[1],
+                Se=scan_script[2],
+                Ah=scan_script[3],
+                Al=scan_script[4],
+            )
+            self.scans.append(scan)
         # qt
         self.quant_tbl_no = [
             _quant_tbl_no[s][:self.scan_script[s, 0]]
@@ -122,6 +133,8 @@ class ProgressiveJPEG(SpatialJPEG):
             for s in range(self.num_scans)
         ]
         # Huffman
+        huffman_bits = np.ctypeslib.as_array(_huffman_bits)
+        huffman_values = np.ctypeslib.as_array(_huffman_values)
         self.huffmans = []
         for s in range(self.num_scans):
             scan_huffmans = []
@@ -249,7 +262,6 @@ class ProgressiveJPEG(SpatialJPEG):
             flags=flags,
         )
 
-
     @property
     def qt(self) -> List[np.ndarray]:
         if self._qt is None:
@@ -271,18 +283,31 @@ class ProgressiveJPEG(SpatialJPEG):
         self._quant_tbl_no = quant_tbl_no
 
     @property
-    def scan_script(self) -> np.ndarray:
-        return self._scan_script
+    def scans(self) -> np.ndarray:
+        return self._scans
 
-    @scan_script.setter
-    def scan_script(self, scan_script: np.ndarray):
-        self._scan_script = scan_script
+    @scans.setter
+    def scans(self, scans: np.ndarray):
+        self._scans = scans
 
     def c_scan_script(self):
-        return np.ctypeslib.as_ctypes(self.scan_script)
+        scan_script = np.zeros((self.num_scans, 17), dtype='int')
+        for s in range(self.num_scans):
+            scan = self.scans[s]
+            scan_script[0] = len(scan.components)
+            scan_script[1] = scan.Ss
+            scan_script[2] = scan.Se
+            scan_script[3] = scan.Ah
+            scan_script[4] = scan.Al
+            scan_script[5:5+len(scan.components)] = scan.components
+            scan_script[5+len(scan.components):9] = -1
+            scan_script[9:9+len(scan.components)] = scan.dc_tbl_no
+            scan_script[9+len(scan.components):13] = -1
+            scan_script[13:13+len(scan.components)] = scan.ac_tbl_no
+        return np.ctypeslib.as_ctypes(scan_script)
 
-    def c_huffman_bits(self):
-        return None
+    # def c_huffman_bits(self):
+    #     return None
 
-    def c_huffman_values(self):
-        return None
+    # def c_huffman_values(self):
+    #     return None
