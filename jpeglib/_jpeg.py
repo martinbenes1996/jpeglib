@@ -338,7 +338,6 @@ def load_jpeg_info(path: str) -> JPEG:
     # process
     num_components = _num_components[0]  # number of components in JPEG
     num_scans = _num_scans[0]  # number of scans in JPEG
-    # print(f'{num_scans=}')
     block_dims = (
         np.array([_block_dims[i] for i in range(2*num_components)], 'int32')
         .reshape(num_components, 2)
@@ -361,7 +360,6 @@ def load_jpeg_info(path: str) -> JPEG:
             if huffman_bits[j, i, 0] != -1
         }
         huffmans.append(huffman)
-    # print(huffmans)
 
     markers = []
     for i in range(MAX_MARKER):

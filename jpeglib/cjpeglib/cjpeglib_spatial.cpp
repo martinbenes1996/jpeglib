@@ -256,6 +256,7 @@ int write_jpeg_spatial(
 		}
 		if (overwrite_flag(flags, PROGRESSIVE_MODE) && flag_is_set(flags, PROGRESSIVE_MODE)) {
 			if(scan_script == NULL) {
+				// fprintf(stderr, "scan script not given");
 				jpeg_simple_progression(&cinfo);
 			} else {
 				if (cinfo.script_space == NULL || cinfo.script_space_size < num_scans) {
@@ -269,52 +270,27 @@ int write_jpeg_spatial(
 				cinfo.num_scans = num_scans;
 
 				jpeg_scan_info * scanptr = cinfo.script_space;
+				// fprintf(stderr, "set scan script");
 				for(int s = 0; s < num_scans; s++) {
+					// fprintf(stderr, "- scan %d\n", s);
 					scanptr->comps_in_scan = scan_script[s*9 + 0];
-					scanptr->component_index[0] = scan_script[s*9 + 1];
-					scanptr->component_index[1] = scan_script[s*9 + 2];
-					scanptr->component_index[2] = scan_script[s*9 + 3];
-					scanptr->component_index[3] = scan_script[s*9 + 4];
+					for(int ch = 0; ch < 4; ch++) {
+						if(scan_script[s*9 + ch + 1] != -1)
+							scanptr->component_index[ch] = scan_script[s*9 + ch + 1];
+					}
+					// fprintf(stderr, "- components %d %d %d %d\n",
+					// 		scanptr->component_index[0],
+					// 		scanptr->component_index[1],
+					// 		scanptr->component_index[2],
+					// 		scanptr->component_index[3]);
 					scanptr->Ss = scan_script[s*9 + 5];
 					scanptr->Se = scan_script[s*9 + 6];
 					scanptr->Ah = scan_script[s*9 + 7];
 					scanptr->Al = scan_script[s*9 + 8];
+					// fprintf(stderr, "- parameters %d %d %d %d\n",
+					// 		scanptr->Ss, scanptr->Se, scanptr->Ah, scanptr->Al);
+					scanptr++;
 				}
-
-				// if (ncomps == 3 && cinfo->jpeg_color_space == JCS_YCbCr) {
-				// 	/* Custom script for YCbCr color images. */
-				// 	/* Initial DC scan */
-				// 	scanptr = fill_dc_scans(scanptr, ncomps, 0, 1);
-				// 	/* Initial AC scan: get some luma data out in a hurry */
-				// 	scanptr = fill_a_scan(scanptr, 0, 1, 5, 0, 2);
-				// 	/* Chroma data is too small to be worth expending many scans on */
-				// 	scanptr = fill_a_scan(scanptr, 2, 1, 63, 0, 1);
-				// 	scanptr = fill_a_scan(scanptr, 1, 1, 63, 0, 1);
-				// 	/* Complete spectral selection for luma AC */
-				// 	scanptr = fill_a_scan(scanptr, 0, 6, 63, 0, 2);
-				// 	/* Refine next bit of luma AC */
-				// 	scanptr = fill_a_scan(scanptr, 0, 1, 63, 2, 1);
-				// 	/* Finish DC successive approximation */
-				// 	scanptr = fill_dc_scans(scanptr, ncomps, 1, 0);
-				// 	/* Finish AC successive approximation */
-				// 	scanptr = fill_a_scan(scanptr, 2, 1, 63, 1, 0);
-				// 	scanptr = fill_a_scan(scanptr, 1, 1, 63, 1, 0);
-				// 	/* Luma bottom bit comes last since it's usually largest scan */
-				// 	scanptr = fill_a_scan(scanptr, 0, 1, 63, 1, 0);
-				// } else {
-				// 	/* All-purpose script for other color spaces. */
-				// 	/* Successive approximation first pass */
-				// 	scanptr = fill_dc_scans(scanptr, ncomps, 0, 1);
-				// 	scanptr = fill_scans(scanptr, ncomps, 1, 5, 0, 2);
-				// 	scanptr = fill_scans(scanptr, ncomps, 6, 63, 0, 2);
-				// 	/* Successive approximation second pass */
-				// 	scanptr = fill_scans(scanptr, ncomps, 1, 63, 2, 1);
-				// 	/* Successive approximation final pass */
-				// 	scanptr = fill_dc_scans(scanptr, ncomps, 1, 0);
-				// 	scanptr = fill_scans(scanptr, ncomps, 1, 63, 1, 0);
-				// }
-
-
 			}
 
 		}
@@ -350,6 +326,30 @@ int write_jpeg_spatial(
 				flag_is_set(flags, TRELLIS_QUANT_DC)
 			);
 		}
+		if(overwrite_flag(flags, TRELLIS_Q_OPT)) {
+			jpeg_c_set_bool_param(
+				&cinfo,
+				JBOOLEAN_TRELLIS_QUANT_DC,
+				flag_is_set(flags, TRELLIS_Q_OPT)
+			);
+		}
+		// if(overwrite_flag(flags, OPTIMIZE_SCANS)) {
+		// 	jpeg_c_set_bool_param(
+		// 		&cinfo,
+		// 		JBOOLEAN_OPTIMIZE_SCANS,
+		// 		flag_is_set(flags, OPTIMIZE_SCANS)
+		// 	);
+		// }
+		if(overwrite_flag(flags, USE_SCANS_IN_TRELLIS)) {
+			jpeg_c_set_bool_param(
+				&cinfo,
+				JBOOLEAN_USE_SCANS_IN_TRELLIS,
+				flag_is_set(flags, USE_SCANS_IN_TRELLIS)
+			);
+		}
+		// JBOOLEAN_TRELLIS_EOB_OPT = 0xD7F73780, /* TRUE=optimize for sequences of EOB */
+		// JBOOLEAN_USE_LAMBDA_WEIGHT_TBL = 0x339DB65F, /* TRUE=use lambda weighting table */
+		// JBOOLEAN_OVERSHOOT_DERINGING = 0x3F4BBBF9 /* TRUE=preprocess input to reduce ringing of edges on white background */
 		#endif
 
 		jpeg_start_compress(&cinfo, TRUE);
