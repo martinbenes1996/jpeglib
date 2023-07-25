@@ -76,25 +76,19 @@ int read_jpeg_progressive(
 
 			// scan script
 			scan_script[s*9 + 0] = cinfo.comps_in_scan;
+			scan_script[s*9 + 1] = cinfo.Ss;
+			scan_script[s*9 + 2] = cinfo.Se;
+			scan_script[s*9 + 3] = cinfo.Ah;
+			scan_script[s*9 + 4] = cinfo.Al;
 			for(int ch = 0; ch < 4; ch++) {
 				if(cinfo.cur_comp_info[ch] != NULL) {
-					scan_script[s*9 + ch + 1] = cinfo.cur_comp_info[ch]->component_index;
+					scan_script[s*9 + ch + 5] = cinfo.cur_comp_info[ch]->component_index;
+					scan_script[s*9 + ch + 9] = cinfo.cur_comp_info[ch]->dc_tbl_no;
+					scan_script[s*9 + ch + 13] = cinfo.cur_comp_info[ch]->ac_tbl_no;
 				} else {
-					scan_script[s*9 + ch + 1] = -1;
+					scan_script[s*9 + ch + 5] = scan_script[s*9 + ch + 9] = scan_script[s*9 + ch + 13] = -1;
 				}
 			}
-			scan_script[s*9 + 5] = cinfo.Ss;
-			scan_script[s*9 + 6] = cinfo.Se;
-			scan_script[s*9 + 7] = cinfo.Ah;
-			scan_script[s*9 + 8] = cinfo.Al;
-			// fprintf(stderr, "- Ss %d Se %d\n", cinfo.Ss, cinfo.Se);
-			// fprintf(stderr, "- Ah %d Al %d\n", cinfo.Ah, cinfo.Al);
-			// fprintf(stderr, "- comps_in_scan %d\n", cinfo.comps_in_scan);
-			// for(int c = 0; c < cinfo.comps_in_scan; c++) {
-			// 	fprintf(stderr, "- component %d\n", cinfo.cur_comp_info[c]->component_index);
-			// 	fprintf(stderr, "  - qt %d\n", cinfo.cur_comp_info[c]->quant_tbl_no);
-			// 	fprintf(stderr, "  - huffman %d %d\n", cinfo.cur_comp_info[c]->dc_tbl_no, cinfo.cur_comp_info[c]->ac_tbl_no);
-			// }
 
 			// huffman
 			for(int comp = 0; comp < 4; comp++) {

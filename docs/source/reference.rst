@@ -29,6 +29,16 @@ Inside spatial domain
    :members: path, spatial, write_spatial, color_space, flags, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance
 
 
+Going progressive
+"""""""""""""""""
+
+.. autofunction:: jpeglib.read_spatial
+
+.. autofunction:: jpeglib.from_spatial
+
+.. autoclass:: jpeglib.ProgressiveJPEG
+   :members: path, spatial, write_spatial, color_space, flags, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance
+
 Using jpegio interface
 """"""""""""""""""""""
 

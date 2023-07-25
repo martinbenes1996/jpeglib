@@ -59,7 +59,6 @@ class TestProgressive(unittest.TestCase):
         ))
         # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
 
-
     @parameterized.expand(LIBJPEG_VERSIONS)
     def test_progressive_dct(self, version):
         self.logger.info(f"test_progressive_dct_{version}")
@@ -87,6 +86,19 @@ class TestProgressive(unittest.TestCase):
             flags=['+PROGRESSIVE_MODE']
         )
         np.testing.assert_array_almost_equal(im_seq.spatial, im_prog.spatial)
+
+    def test_progressive_standard_scanscript(self):
+        self.logger.info('test_progressive_standard_scanscript')
+
+        # TODO
+
+    def test_progressive_same_scanscript(self):
+        self.logger.info('test_progressive_same_scanscript')
+
+        # TODO
+
+    def test_progressive_set_scanscript(self):
+        self.logger.info('test_progressive_set_scanscript')
 
 
 __all__ = ["TestProgressive"]
