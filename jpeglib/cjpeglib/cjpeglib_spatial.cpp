@@ -256,7 +256,6 @@ int write_jpeg_spatial(
 		}
 		if (overwrite_flag(flags, PROGRESSIVE_MODE) && flag_is_set(flags, PROGRESSIVE_MODE)) {
 			if(scan_script == NULL) {
-				// fprintf(stderr, "scan script not given");
 				jpeg_simple_progression(&cinfo);
 			} else {
 				if (cinfo.script_space == NULL || cinfo.script_space_size < num_scans) {
@@ -270,17 +269,15 @@ int write_jpeg_spatial(
 				cinfo.num_scans = num_scans;
 
 				jpeg_scan_info * scanptr = cinfo.script_space;
-				// fprintf(stderr, "set scan script");
 				for(int s = 0; s < num_scans; s++) {
-					// fprintf(stderr, "- scan %d\n", s);
-					scanptr->comps_in_scan = scan_script[s*9 + 0];
-					scanptr->Ss = scan_script[s*9 + 1];
-					scanptr->Se = scan_script[s*9 + 2];
-					scanptr->Ah = scan_script[s*9 + 3];
-					scanptr->Al = scan_script[s*9 + 4];
+					scanptr->comps_in_scan = scan_script[s*17 + 0];
+					scanptr->Ss = scan_script[s*17 + 1];
+					scanptr->Se = scan_script[s*17 + 2];
+					scanptr->Ah = scan_script[s*17 + 3];
+					scanptr->Al = scan_script[s*17 + 4];
 					for(int ch = 0; ch < 4; ch++) {
 						if(scan_script[s*9 + ch + 1] != -1)
-							scanptr->component_index[ch] = scan_script[s*9 + ch + 5];
+							scanptr->component_index[ch] = scan_script[s*17 + ch + 5];
 							// TODO: copy ac_tbl_no and dc_tbl_no
 					}
 					scanptr++;

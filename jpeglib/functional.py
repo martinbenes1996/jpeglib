@@ -164,8 +164,10 @@ def read_spatial(
         out_color_space = Colorspace[out_color_space]
 
     # progressive
+    kw = {}
     if buffered:
         jpeg_cls = ProgressiveJPEG
+        kw['scans'] = None
     else:
         jpeg_cls = SpatialJPEG
 
@@ -184,7 +186,8 @@ def read_spatial(
         huffmans=info.huffmans,
         spatial=None,
         color_space=out_color_space,
-        progressive_mode=info.progressive_mode
+        progressive_mode=info.progressive_mode,
+        **kw,
     )
     # load image data
     if dct_method is not None or dither_mode is not None or flags is not None:

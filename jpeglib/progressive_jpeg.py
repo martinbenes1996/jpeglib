@@ -28,10 +28,8 @@ class ProgressiveJPEG(SpatialJPEG):
     """list of quantization tables per scan"""
     quant_tbl_no: List[List[int]]
     """assignments of quantization tables to components per scan"""
-    scans: List[Scan]
+    scans: List[Scan]  # = []
     """list of scans"""
-    # scan_script: np.ndarray
-    # """arrangment of scans in the file, comps_in_scans, component index (4), Ss, Se, Ah, Al. Will be split in the future."""
 
     def _alloc_spatial(self, channels: int = None):
         if channels is None:
@@ -110,21 +108,21 @@ class ProgressiveJPEG(SpatialJPEG):
 
         # scanscript
         scan_script = np.ctypeslib.as_array(_scan_script)
-        self.scans = []
-        for s in range(self.num_scans):
-            scan = Scan(
-                components=scan_script[5:5+scan_script[0]],
-                dc_tbl_no=scan_script[9:9+scan_script[0]],
-                ac_tbl_no=scan_script[13:13+scan_script[0]],
-                Ss=scan_script[1],
-                Se=scan_script[2],
-                Ah=scan_script[3],
-                Al=scan_script[4],
+        self.scans = [
+            Scan(
+                components=scan_script[s, 5:5+scan_script[s, 0]],
+                dc_tbl_no=scan_script[s, 9:9+scan_script[s, 0]],
+                ac_tbl_no=scan_script[s, 13:13+scan_script[s, 0]],
+                Ss=scan_script[s, 1],
+                Se=scan_script[s, 2],
+                Ah=scan_script[s, 3],
+                Al=scan_script[s, 4],
             )
-            self.scans.append(scan)
+            for s in range(self.num_scans)
+        ]
         # qt
         self.quant_tbl_no = [
-            _quant_tbl_no[s][:self.scan_script[s, 0]]
+            _quant_tbl_no[s][:scan_script[s, 0]]
             for s in range(self.num_scans)
         ]
         qt = np.ctypeslib.as_array(_qt).reshape(self.num_scans, -1, 8, 8)
@@ -149,7 +147,7 @@ class ProgressiveJPEG(SpatialJPEG):
                 }
                 scan_huffmans.append(huffman)
             self.huffmans.append(scan_huffmans)
-
+        #
         return self.spatial
 
     def write_spatial(
@@ -273,6 +271,16 @@ class ProgressiveJPEG(SpatialJPEG):
         self._qt = qt
 
     @property
+    def scans(self) -> np.ndarray:
+        if self._scans is None:
+            self.load()
+        return self._scans
+
+    @scans.setter
+    def scans(self, scans: np.ndarray):
+        self._scans = scans
+
+    @property
     def quant_tbl_no(self) -> List[np.ndarray]:
         if self._quant_tbl_no is None:
             self.load()
@@ -281,14 +289,6 @@ class ProgressiveJPEG(SpatialJPEG):
     @quant_tbl_no.setter
     def quant_tbl_no(self, quant_tbl_no: List[np.ndarray]):
         self._quant_tbl_no = quant_tbl_no
-
-    @property
-    def scans(self) -> np.ndarray:
-        return self._scans
-
-    @scans.setter
-    def scans(self, scans: np.ndarray):
-        self._scans = scans
 
     def c_scan_script(self):
         scan_script = np.zeros((self.num_scans, 17), dtype='int')
