@@ -90,15 +90,19 @@ class TestProgressive(unittest.TestCase):
     def test_progressive_standard_scanscript(self):
         self.logger.info('test_progressive_standard_scanscript')
 
-        # TODO
+        # TODO: libjpeg produces the standard scanscript during compression
 
     def test_progressive_same_scanscript(self):
         self.logger.info('test_progressive_same_scanscript')
 
-        # TODO
+        # TODO:
 
     def test_progressive_set_scanscript(self):
         self.logger.info('test_progressive_set_scanscript')
 
+        # TODO: create custom scanscript and compress with it
+
+    # TODO: tests for social network scan scripts?
+    # TODO: ?
 
 __all__ = ["TestProgressive"]
