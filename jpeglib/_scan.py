@@ -104,13 +104,12 @@ class Scan:
         self._Al = Al
 
     def __repr__(self) -> str:
-        bits = ','.join(map(str, self.bits[:5]))
-        return f'<Huffman {bits},...>'
+        return f'<Scan {self.Ss},{self.Se},{self.Ah},{self.Al}>'
 
     def __str__(self) -> str:
         """Converts the class to str, returns name."""
         return repr(self)
 
-    def __eq__(self, other) -> bool:
-        """Compares two huffman tables for equality."""
-        return (self.bits == other.bits).all() and (self.values == other.values).all()
+    # def __eq__(self, other) -> bool:
+    #     """Compares two scans tables for equality."""
+    #     return (self.bits == other.bits).all() and (self.values == other.values).all()

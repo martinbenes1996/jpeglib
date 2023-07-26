@@ -190,6 +190,7 @@ class CJpegLib:
         scan_script,
         huffman_bits,
         huffman_values,
+        progressive_mode,
         flags: List[str],
     ):
         status = cls.get().write_jpeg_spatial(
@@ -213,7 +214,7 @@ class CJpegLib:
             scan_script,
             huffman_bits,
             huffman_values,
-            cls.flags_to_mask(flags),
+            cls.flags_to_mask(flags, progressive_mode),
         )
         if status == 0:
             raise IOError(f"writing spatial to {dstfile} failed")
@@ -249,7 +250,7 @@ class CJpegLib:
             huffman_values,
             qt,
             quant_tbl_no,
-            cls.flags_to_mask(flags),
+            cls.flags_to_mask(flags, True),
         )
         if status == 0:
             raise IOError(f"reading scanscript of {srcfile} failed")
@@ -279,10 +280,20 @@ class CJpegLib:
     }
 
     @classmethod
-    def flags_to_mask(cls, flags: List[str]):
+    def flags_to_mask(
+        cls,
+        flags: List[str],
+        progressive_mode: bool = None,
+    ):
         mask = 0xFFFFFFFF
         if flags is None:
             return mask
+        # progressive mode
+        if progressive_mode is not None:
+            mask ^= cls.MASKS['PROGRESSIVE_MODE'] << 1
+            if not progressive_mode:
+                mask ^= cls.MASKS['PROGRESSIVE_MODE']
+        # manual flags
         for flag in flags:
             # parse sign
             sign = '-' if flag[0] == '-' else '+'
@@ -294,8 +305,7 @@ class CJpegLib:
             # map
             mask ^= defbit  # reset default value
             if sign == '-':
-                mask ^= (flagbit)  # erase bit
-
+                mask ^= flagbit  # erase bit
         return ctypes.c_ulonglong(mask)
 
     @classmethod

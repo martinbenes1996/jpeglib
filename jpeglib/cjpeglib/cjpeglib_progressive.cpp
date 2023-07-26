@@ -75,18 +75,18 @@ int read_jpeg_progressive(
 			}
 
 			// scan script
-			scan_script[s*9 + 0] = cinfo.comps_in_scan;
-			scan_script[s*9 + 1] = cinfo.Ss;
-			scan_script[s*9 + 2] = cinfo.Se;
-			scan_script[s*9 + 3] = cinfo.Ah;
-			scan_script[s*9 + 4] = cinfo.Al;
+			scan_script[s*17 + 0] = cinfo.comps_in_scan;
+			scan_script[s*17 + 1] = cinfo.Ss;
+			scan_script[s*17 + 2] = cinfo.Se;
+			scan_script[s*17 + 3] = cinfo.Ah;
+			scan_script[s*17 + 4] = cinfo.Al;
 			for(int ch = 0; ch < 4; ch++) {
 				if(cinfo.cur_comp_info[ch] != NULL) {
-					scan_script[s*9 + ch + 5] = cinfo.cur_comp_info[ch]->component_index;
-					scan_script[s*9 + ch + 9] = cinfo.cur_comp_info[ch]->dc_tbl_no;
-					scan_script[s*9 + ch + 13] = cinfo.cur_comp_info[ch]->ac_tbl_no;
+					scan_script[s*17 + ch + 5] = cinfo.cur_comp_info[ch]->component_index;
+					scan_script[s*17 + ch + 9] = cinfo.cur_comp_info[ch]->dc_tbl_no;
+					scan_script[s*17 + ch + 13] = cinfo.cur_comp_info[ch]->ac_tbl_no;
 				} else {
-					scan_script[s*9 + ch + 5] = scan_script[s*9 + ch + 9] = scan_script[s*9 + ch + 13] = -1;
+					scan_script[s*17 + ch + 5] = scan_script[s*17 + ch + 9] = scan_script[s*17 + ch + 13] = -1;
 				}
 			}
 

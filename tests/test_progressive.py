@@ -89,8 +89,73 @@ class TestProgressive(unittest.TestCase):
 
     def test_progressive_standard_scanscript(self):
         self.logger.info('test_progressive_standard_scanscript')
-
-        # TODO: libjpeg produces the standard scanscript during compression
+        jpeglib.version.set('9e')
+        # compress as progressive
+        rgb = np.random.randint(0, 256, (64, 64, 3), dtype='uint8')
+        im = jpeglib.from_spatial(rgb)
+        im.write_spatial('output.jpeg', flags=['+PROGRESSIVE_MODE'])
+        # read buffered
+        im = jpeglib.read_spatial('output.jpeg', buffered=True)  # self.tmp.name
+        # scan 1
+        np.testing.assert_array_equal(im.scans[0].components, [0, 1, 2])
+        np.testing.assert_array_equal(im.scans[0].Ss, 0)
+        np.testing.assert_array_equal(im.scans[0].Se, 0)
+        np.testing.assert_array_equal(im.scans[0].Ah, 0)
+        np.testing.assert_array_equal(im.scans[0].Al, 1)
+        # scan 2
+        np.testing.assert_array_equal(im.scans[1].components, [0])
+        np.testing.assert_array_equal(im.scans[1].Ss, 1)
+        np.testing.assert_array_equal(im.scans[1].Se, 5)
+        np.testing.assert_array_equal(im.scans[1].Ah, 0)
+        np.testing.assert_array_equal(im.scans[1].Al, 2)
+        # scan 3
+        np.testing.assert_array_equal(im.scans[2].components, [2])
+        np.testing.assert_array_equal(im.scans[2].Ss, 1)
+        np.testing.assert_array_equal(im.scans[2].Se, 63)
+        np.testing.assert_array_equal(im.scans[2].Ah, 0)
+        np.testing.assert_array_equal(im.scans[2].Al, 1)
+        # scan 4
+        np.testing.assert_array_equal(im.scans[3].components, [1])
+        np.testing.assert_array_equal(im.scans[3].Ss, 1)
+        np.testing.assert_array_equal(im.scans[3].Se, 63)
+        np.testing.assert_array_equal(im.scans[3].Ah, 0)
+        np.testing.assert_array_equal(im.scans[3].Al, 1)
+        # scan 5
+        np.testing.assert_array_equal(im.scans[4].components, [0])
+        np.testing.assert_array_equal(im.scans[4].Ss, 6)
+        np.testing.assert_array_equal(im.scans[4].Se, 63)
+        np.testing.assert_array_equal(im.scans[4].Ah, 0)
+        np.testing.assert_array_equal(im.scans[4].Al, 2)
+        # scan 6
+        np.testing.assert_array_equal(im.scans[5].components, [0])
+        np.testing.assert_array_equal(im.scans[5].Ss, 1)
+        np.testing.assert_array_equal(im.scans[5].Se, 63)
+        np.testing.assert_array_equal(im.scans[5].Ah, 2)
+        np.testing.assert_array_equal(im.scans[5].Al, 1)
+        # scan 7
+        np.testing.assert_array_equal(im.scans[6].components, [0, 1, 2])
+        np.testing.assert_array_equal(im.scans[6].Ss, 0)
+        np.testing.assert_array_equal(im.scans[6].Se, 0)
+        np.testing.assert_array_equal(im.scans[6].Ah, 1)
+        np.testing.assert_array_equal(im.scans[6].Al, 0)
+        # scan 8
+        np.testing.assert_array_equal(im.scans[7].components, [2])
+        np.testing.assert_array_equal(im.scans[7].Ss, 1)
+        np.testing.assert_array_equal(im.scans[7].Se, 63)
+        np.testing.assert_array_equal(im.scans[7].Ah, 1)
+        np.testing.assert_array_equal(im.scans[7].Al, 0)
+        # scan 9
+        np.testing.assert_array_equal(im.scans[8].components, [1])
+        np.testing.assert_array_equal(im.scans[8].Ss, 1)
+        np.testing.assert_array_equal(im.scans[8].Se, 63)
+        np.testing.assert_array_equal(im.scans[8].Ah, 1)
+        np.testing.assert_array_equal(im.scans[8].Al, 0)
+        # scan 10
+        np.testing.assert_array_equal(im.scans[9].components, [0])
+        np.testing.assert_array_equal(im.scans[9].Ss, 1)
+        np.testing.assert_array_equal(im.scans[9].Se, 63)
+        np.testing.assert_array_equal(im.scans[9].Ah, 1)
+        np.testing.assert_array_equal(im.scans[9].Al, 0)
 
     def test_progressive_same_scanscript(self):
         self.logger.info('test_progressive_same_scanscript')
