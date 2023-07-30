@@ -22,6 +22,7 @@ ALL_VERSIONS = [
     ['turbo150'],
     ['turbo200'],
     ['turbo210'],
+    # ['turbo300'],
     ['mozjpeg101'],
     ['mozjpeg201'],
     ['mozjpeg300'],

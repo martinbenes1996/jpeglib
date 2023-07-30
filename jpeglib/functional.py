@@ -7,12 +7,15 @@ Affiliation: Universitaet Innsbruck
 """
 
 import numpy as np
+import typing
+import warnings
 
 from .dct_jpeg import DCTJPEG
 from .spatial_jpeg import SpatialJPEG
 from .progressive_jpeg import ProgressiveJPEG
 from . import _jpeg
 from ._cenum import Colorspace, DCTMethod, Dithermode
+from ._scan import Scan
 from . import _infere
 
 
@@ -95,7 +98,7 @@ def read_spatial(
     dither_mode: Dithermode = None,
     buffered: bool = False,
     flags: list = None,
-) -> SpatialJPEG:
+) -> typing.Union[SpatialJPEG, ProgressiveJPEG]:
     """Function for decompressing the JPEG as a pixel data (spatial domain).
 
     The file content is loaded once at the call.
@@ -170,6 +173,8 @@ def read_spatial(
         kw['scans'] = None
     else:
         jpeg_cls = SpatialJPEG
+        # if info.progressive_mode:
+        #     warnings.warn('loading progressive JPEG as sequential')
 
     # create jpeg
     im = jpeg_cls(
@@ -201,7 +206,8 @@ def read_spatial(
 
 def from_spatial(
     spatial: np.ndarray,
-    in_color_space: Colorspace = None
+    in_color_space: Colorspace = None,
+    scans: typing.List[Scan] = None,
 ) -> SpatialJPEG:
     """A factory of :class:`SpatialJPEG` from pixel data.
 
@@ -272,8 +278,22 @@ def from_spatial(
         in_color_space = _infere.in_color_space(num_components)
     jpeg_color_space = _infere.jpeg_in_color_space(in_color_space)
 
+    #
+    kw = {
+        'progressive_mode': None,
+        'num_scans': 1,
+    }
+    if scans is None:
+        jpeg_cls = SpatialJPEG
+    else:
+        jpeg_cls = ProgressiveJPEG
+        kw['scans'] = scans
+        kw['progressive_mode'] = True
+        kw['num_scans'] = len(scans)
+        spatial = np.expand_dims(spatial, 0)
+
     # create jpeg
-    return SpatialJPEG(
+    return jpeg_cls(
         path=None,
         content=None,
         height=height,
@@ -281,12 +301,11 @@ def from_spatial(
         block_dims=None,
         samp_factor=None,
         jpeg_color_space=jpeg_color_space,
-        num_scans=1,
         markers=None,
         huffmans=None,
         spatial=spatial,
         color_space=in_color_space,
-        progressive_mode=None
+        **kw,
     )
 
 

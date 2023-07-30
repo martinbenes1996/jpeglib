@@ -36,6 +36,7 @@ class version:
             elif version in {
                 'turbo120', 'turbo130', 'turbo140',
                 'turbo150', 'turbo200', 'turbo210',
+                # 'turbo300',
             }:
                 CJpegLib.set_version(version=version)
             # mozjpeg

@@ -26,20 +26,18 @@ class Scan:
     """"""
     Al: int
     """"""
+    # Description: https://gitlab.linphone.org/BC/public/external/libjpeg-turbo/-/blob/bc/wizard.txt
 
     # def __post_init__(self):
-    #     print(self.bits)
-    #     print(len(np.unique(self.values)))
-    #     print(self.values)
-    #     assert len(self.values) == np.sum(self.bits), 'invalid histogram'
+    #     print(self.dc_tbl_no)
 
     @property
-    def components(self) -> str:
+    def components(self) -> np.ndarray:
         """Components getter."""
         return self._components
 
     @components.setter
-    def components(self, components: str):
+    def components(self, components: np.ndarray):
         """Components setter."""
         self._components = components
 
@@ -104,7 +102,8 @@ class Scan:
         self._Al = Al
 
     def __repr__(self) -> str:
-        return f'<Scan {self.Ss},{self.Se},{self.Ah},{self.Al}>'
+        scan_params = f'{self.Ss},{self.Se},{self.Ah},{self.Al}'
+        return f'<Scan {scan_params}: {self.components}>'
 
     def __str__(self) -> str:
         """Converts the class to str, returns name."""

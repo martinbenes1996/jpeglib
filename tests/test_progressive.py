@@ -93,9 +93,9 @@ class TestProgressive(unittest.TestCase):
         # compress as progressive
         rgb = np.random.randint(0, 256, (64, 64, 3), dtype='uint8')
         im = jpeglib.from_spatial(rgb)
-        im.write_spatial('output.jpeg', flags=['+PROGRESSIVE_MODE'])
+        im.write_spatial(self.tmp.name, flags=['+PROGRESSIVE_MODE'])
         # read buffered
-        im = jpeglib.read_spatial('output.jpeg', buffered=True)  # self.tmp.name
+        im = jpeglib.read_spatial(self.tmp.name, buffered=True)
         # scan 1
         np.testing.assert_array_equal(im.scans[0].components, [0, 1, 2])
         np.testing.assert_array_equal(im.scans[0].Ss, 0)
@@ -157,17 +157,133 @@ class TestProgressive(unittest.TestCase):
         np.testing.assert_array_equal(im.scans[9].Ah, 1)
         np.testing.assert_array_equal(im.scans[9].Al, 0)
 
-    def test_progressive_same_scanscript(self):
-        self.logger.info('test_progressive_same_scanscript')
+    def test_progressive_trellis_djpeg(self):
+        """Test progressive with Trellis is identical as djpeg output."""
+        self.logger.info('test_progressive_trellis_djpeg')
 
-        # TODO:
+        im = jpeglib.read_spatial('examples/progressive_trellis.jpeg', buffered=True)
+        # scan 1
+        np.testing.assert_array_equal(im.scans[0].components, [0, 1, 2])
+        np.testing.assert_array_equal(im.scans[0].Ss, 0)
+        np.testing.assert_array_equal(im.scans[0].Se, 0)
+        np.testing.assert_array_equal(im.scans[0].Ah, 0)
+        np.testing.assert_array_equal(im.scans[0].Al, 0)
+        # scan 2
+        np.testing.assert_array_equal(im.scans[1].components, [0])
+        np.testing.assert_array_equal(im.scans[1].Ss, 1)
+        np.testing.assert_array_equal(im.scans[1].Se, 2)
+        np.testing.assert_array_equal(im.scans[1].Ah, 0)
+        np.testing.assert_array_equal(im.scans[1].Al, 1)
+        # scan 3
+        np.testing.assert_array_equal(im.scans[2].components, [0])
+        np.testing.assert_array_equal(im.scans[2].Ss, 3)
+        np.testing.assert_array_equal(im.scans[2].Se, 63)
+        np.testing.assert_array_equal(im.scans[2].Ah, 0)
+        np.testing.assert_array_equal(im.scans[2].Al, 1)
+        # scan 4
+        np.testing.assert_array_equal(im.scans[3].components, [0])
+        np.testing.assert_array_equal(im.scans[3].Ss, 1)
+        np.testing.assert_array_equal(im.scans[3].Se, 63)
+        np.testing.assert_array_equal(im.scans[3].Ah, 1)
+        np.testing.assert_array_equal(im.scans[3].Al, 0)
+        # scan 5
+        np.testing.assert_array_equal(im.scans[4].components, [1])
+        np.testing.assert_array_equal(im.scans[4].Ss, 1)
+        np.testing.assert_array_equal(im.scans[4].Se, 2)
+        np.testing.assert_array_equal(im.scans[4].Ah, 0)
+        np.testing.assert_array_equal(im.scans[4].Al, 0)
+        # scan 6
+        np.testing.assert_array_equal(im.scans[5].components, [1])
+        np.testing.assert_array_equal(im.scans[5].Ss, 3)
+        np.testing.assert_array_equal(im.scans[5].Se, 63)
+        np.testing.assert_array_equal(im.scans[5].Ah, 0)
+        np.testing.assert_array_equal(im.scans[5].Al, 0)
+        # scan 7
+        np.testing.assert_array_equal(im.scans[6].components, [2])
+        np.testing.assert_array_equal(im.scans[6].Ss, 1)
+        np.testing.assert_array_equal(im.scans[6].Se, 2)
+        np.testing.assert_array_equal(im.scans[6].Ah, 0)
+        np.testing.assert_array_equal(im.scans[6].Al, 0)
+        # scan 8
+        np.testing.assert_array_equal(im.scans[7].components, [2])
+        np.testing.assert_array_equal(im.scans[7].Ss, 3)
+        np.testing.assert_array_equal(im.scans[7].Se, 63)
+        np.testing.assert_array_equal(im.scans[7].Ah, 0)
+        np.testing.assert_array_equal(im.scans[7].Al, 0)
 
     def test_progressive_set_scanscript(self):
         self.logger.info('test_progressive_set_scanscript')
-
-        # TODO: create custom scanscript and compress with it
+        scans = [
+            jpeglib.Scan(
+                components=np.array([0, 1, 2]),
+                Ss=0,
+                Se=0,
+                Ah=0,
+                Al=2,
+                dc_tbl_no=np.array([0, 1, 1]),
+                ac_tbl_no=np.array([0, 1, 1]),
+            ),  # DC w/o 2LSB
+            jpeglib.Scan(
+                components=np.array([0, 1, 2]),
+                Ss=0,
+                Se=0,
+                Ah=2,
+                Al=1,
+                dc_tbl_no=np.array([0, 1, 1]),
+                ac_tbl_no=np.array([0, 1, 1]),
+            ),  # DC 2nd LSB
+            jpeglib.Scan(
+                components=np.array([0, 1, 2]),
+                Ss=0,
+                Se=0,
+                Ah=1,
+                Al=0,
+                dc_tbl_no=np.array([0, 1, 1]),
+                ac_tbl_no=np.array([0, 1, 1]),
+            ),  # DC LSB
+            jpeglib.Scan(
+                components=np.array([1]),
+                Ss=1,
+                Se=63,
+                Ah=0,
+                Al=0,
+                dc_tbl_no=np.array([1]),
+                ac_tbl_no=np.array([1]),
+            ),  # AC of Cb
+            jpeglib.Scan(
+                components=np.array([2]),
+                Ss=1,
+                Se=63,
+                Ah=0,
+                Al=0,
+                dc_tbl_no=np.array([1]),
+                ac_tbl_no=np.array([1]),
+            ),  # AC of Cr
+            jpeglib.Scan(
+                components=np.array([0]),
+                Ss=1,
+                Se=63,
+                Ah=0,
+                Al=0,
+                dc_tbl_no=np.array([0]),
+                ac_tbl_no=np.array([0]),
+            ),  # AC of Y
+        ]
+        rgb = np.array(Image.open('examples/00001.tif'))
+        im = jpeglib.from_spatial(rgb, scans=scans)
+        im.write_spatial(self.tmp.name)
+        #
+        im2 = jpeglib.read_spatial(self.tmp.name, buffered=True)
+        for i, scan in enumerate(scans):
+            np.testing.assert_array_equal(
+                im2.scans[i].components, scan.components)
+            np.testing.assert_array_equal(im2.scans[i].Ss, scan.Ss)
+            np.testing.assert_array_equal(im2.scans[i].Se, scan.Se)
+            np.testing.assert_array_equal(im2.scans[i].Ah, scan.Ah)
+            np.testing.assert_array_equal(im2.scans[i].Al, scan.Al)
 
     # TODO: tests for social network scan scripts?
     # TODO: ?
+
 
 __all__ = ["TestProgressive"]

@@ -1,0 +1,39 @@
+Performing C SOURCE FILE Test RIGHT_SHIFT_IS_UNSIGNED failed with the following compile output:
+Change Dir: /Users/martin/UIBK/jpeglib/jpeglib/cjpeglib/turbo300/cmakescripts/CMakeFiles/CMakeScratch/TryCompile-0qeWA9
+
+Run Build Command(s):/usr/bin/make -f Makefile cmTC_a753b/fast && /Library/Developer/CommandLineTools/usr/bin/make  -f CMakeFiles/cmTC_a753b.dir/build.make CMakeFiles/cmTC_a753b.dir/build
+Building C object CMakeFiles/cmTC_a753b.dir/src.c.o
+/Library/Developer/CommandLineTools/usr/bin/cc -DRIGHT_SHIFT_IS_UNSIGNED  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -mmacosx-version-min=13.2 -MD -MT CMakeFiles/cmTC_a753b.dir/src.c.o -MF CMakeFiles/cmTC_a753b.dir/src.c.o.d -o CMakeFiles/cmTC_a753b.dir/src.c.o -c /Users/martin/UIBK/jpeglib/jpeglib/cjpeglib/turbo300/cmakescripts/CMakeFiles/CMakeScratch/TryCompile-0qeWA9/src.c
+/Users/martin/UIBK/jpeglib/jpeglib/cjpeglib/turbo300/cmakescripts/CMakeFiles/CMakeScratch/TryCompile-0qeWA9/src.c:10:22: warning: shifting a negative signed value is undefined [-Wshift-negative-value]
+        res |= (~0L) << (32-4);
+               ~~~~~ ^
+1 warning generated.
+Linking C executable cmTC_a753b
+/opt/homebrew/Cellar/cmake/3.25.3/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a753b.dir/link.txt --verbose=1
+/Library/Developer/CommandLineTools/usr/bin/cc  -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -mmacosx-version-min=13.2 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/cmTC_a753b.dir/src.c.o -o cmTC_a753b 
+
+
+...and run output:
+
+Return value: 1
+Source file was:
+
+      #include <stdio.h>
+      #include <stdlib.h>
+      int is_shifting_signed (long arg) {
+        long res = arg >> 4;
+        if (res == -0x7F7E80CL)
+          return 1; /* right shift is signed */
+        /* see if unsigned-shift hack will fix it. */
+        /* we can't just test exact value since it depends on width of long... */
+        res |= (~0L) << (32-4);
+        if (res == -0x7F7E80CL)
+          return 0; /* right shift is unsigned */
+        printf("Right shift isn't acting as I expect it to.\n");
+        printf("I fear the JPEG software will not work at all.\n\n");
+        return 0; /* try it with unsigned anyway */
+      }
+      int main (void) {
+        exit(is_shifting_signed(-0x7F7E80B1L));
+      }
+
