@@ -207,8 +207,9 @@ class ProgressiveJPEG(SpatialJPEG):
         if dstfile is None:
             raise IOError('no destination file specified')
         # spatial
+        if self.spatial.shape[0] > 1:
+            warnings.warn('writing pixels from the last scan only')
         spatial = self.spatial[-1]  # taking only the last one
-        warnings.warn('writing pixels from the last scan only')
         # quality
         # use default of library
         if qt is None:
@@ -257,6 +258,7 @@ class ProgressiveJPEG(SpatialJPEG):
             scan_script=self.c_scan_script(),
             huffman_bits=self.c_huffman_bits(),
             huffman_values=self.c_huffman_values(),
+            progressive_mode=True,
             flags=flags,
         )
 
@@ -294,16 +296,26 @@ class ProgressiveJPEG(SpatialJPEG):
         scan_script = np.zeros((self.num_scans, 17), dtype='int')
         for s in range(self.num_scans):
             scan = self.scans[s]
-            scan_script[0] = len(scan.components)
-            scan_script[1] = scan.Ss
-            scan_script[2] = scan.Se
-            scan_script[3] = scan.Ah
-            scan_script[4] = scan.Al
-            scan_script[5:5+len(scan.components)] = scan.components
-            scan_script[5+len(scan.components):9] = -1
-            scan_script[9:9+len(scan.components)] = scan.dc_tbl_no
-            scan_script[9+len(scan.components):13] = -1
-            scan_script[13:13+len(scan.components)] = scan.ac_tbl_no
+            K = len(scan.components)
+            scan_script[s, 0] = len(scan.components)
+            scan_script[s, 1] = scan.Ss
+            scan_script[s, 2] = scan.Se
+            scan_script[s, 3] = scan.Ah
+            scan_script[s, 4] = scan.Al
+            scan_script[s, 5:5+K] = scan.components
+            scan_script[s, 5+K:9] = -1
+            if scan.dc_tbl_no is not None:
+                scan_script[s, 9:9+K] = scan.dc_tbl_no
+                scan_script[s, 9+K:13] = -1
+            else:
+                scan_script[s, 9:13] = -1
+
+            if scan.ac_tbl_no is not None:
+                scan_script[s, 13:13+K] = scan.ac_tbl_no
+                scan_script[s, 13+K:] = -1
+            else:
+                scan_script[s, 13:] = -1
+
         return np.ctypeslib.as_ctypes(scan_script)
 
     # def c_huffman_bits(self):

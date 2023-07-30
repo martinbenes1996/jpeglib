@@ -1,6 +1,7 @@
 
 import codecs
 import ctypes
+import glob
 import os
 from pathlib import Path
 import re
@@ -45,6 +46,7 @@ libjpeg_versions = {
     'turbo150': ('1.5.0', 3150),
     'turbo200': ('2.0.0', 3200),
     'turbo210': ('2.1.0', 3210),
+    # 'turbo300': ('3.0.0', 3300),
     'mozjpeg101': ('1.0.1', 6101),
     'mozjpeg201': ('2.0.1', 6201),
     'mozjpeg300': ('3.0.0', 6300),
@@ -52,11 +54,8 @@ libjpeg_versions = {
 }
 
 # requirements
-try:
-    with open('requirements.txt') as f:
-        reqs = f.read().splitlines()
-except FileNotFoundError:
-    reqs = ['numpy']
+with open('requirements.txt') as f:
+    reqs = f.read().splitlines()
 
 # description
 with codecs.open("README.md", "r", encoding="UTF-8") as fh:
@@ -69,30 +68,46 @@ for v in libjpeg_versions:
 
     # library-dependent
     is_moz = v[:3] == "moz"
-    is_turbo_moz = v[:5] == "turbo" or is_moz
+    is_turbo = v[:5] == "turbo"
 
     # name of C library
-    clib = f'jpeglib/cjpeglib/{v}'
+    rootlib = Path('jpeglib') / 'cjpeglib'
+    clib = rootlib / v
 
     # create missing
     package_name = 'libjpeg'
-    (Path(clib) / 'jconfig.h').touch()
-    (Path(clib) / 'config.h').touch()
+    (clib / 'jconfig.h').touch()
+    (clib / 'config.h').touch()
     if True:  # not (Path(clib) / 'vjpeglib.h').exists():
-        with open(Path(clib) / 'vjpeglib.h', 'w') as f:
+        with open(clib / 'vjpeglib.h', 'w') as f:
             f.write('#include "jpeglib.h"')
-    if is_turbo_moz:
+    if is_turbo or is_moz:
         package_name += '-turbo'
-        (Path(clib) / 'jconfigint.h').touch()
+        (clib / 'jconfigint.h').touch()
         if is_moz:
             package_name = 'mozjpeg'
-            (Path(clib) / 'config.h').touch()
+            (clib / 'config.h').touch()
+        else:
+            (clib / 'jversion.h').touch()
+
+    #
+    simddirs = []
+    # if is_turbo:
+    #     simddirs.append(clib/'simd')
+    #     # simddirs.append(clib/'simd'/'arm')
+    #     simddirs.append(clib/'simd'/'i386')
+    #     # simddirs.append(clib/'simd'/'mips')
+    #     # simddirs.append(clib/'simd'/'mips64')
+    #     # simddirs.append(clib/'simd'/'nasm')
+    #     # simddirs.append(clib/'simd'/'powerpc')
+    #     simddirs.append(clib/'simd'/'x86_64')
 
     # get all files
     files = [
-        f'{clib}/{f}'
-        for f in os.listdir(clib)
-        if re.fullmatch(r'.*\.(c|h)', f)
+        f
+        for d in [rootlib, clib, *simddirs]
+        for f in glob.glob(str(d/'*'))
+        if re.fullmatch(r'.*\.(c|h|cpp)', f)
     ]
     # exclude files
     for excluded_module in [
@@ -117,24 +132,27 @@ for v in libjpeg_versions:
         'jcstest', 'tjunittest', 'tjbench',
         'turbojpeg-jni', 'turbojpeg', 'turbojpegl',
         'jpegut', 'jpgtest',
+        'turbojpeg-mp',
+        # 'jsimddct',
+        'jcgryext-neon',
+        'jdcolext-neon',
+        'jdmrgext-neon',
         # mozjpeg
         'bmp', 'jpegyuv',
     ]:
         lim = -2 - len(excluded_module)
         files = [f for f in files if f[lim:-2] != excluded_module]
+
     # split to sources and headers
-    cfiles[v] = [f for f in files if f[-2:] == '.c']
-    hfiles[v] = [f for f in files if f[-2:] == '.h']
+    cfiles[v] = [
+        f for f in files
+        if any(f.endswith(s) for s in ['c', '.cpp'])
+    ]
+    hfiles[v] = [
+        f for f in files
+        if f[-2:] == '.h'
+    ]
     sources = cfiles[v]
-    hfiles[v].append('jpeglib/cjpeglib/cjpeglib_common.h')
-    hfiles[v].append('jpeglib/cjpeglib/cjpeglib_common_flags.h')
-    hfiles[v].append('jpeglib/cjpeglib/cjpeglib_common_markers.h')
-    sources.append('jpeglib/cjpeglib/cjpeglib_dct.cpp')
-    sources.append('jpeglib/cjpeglib/cjpeglib_spatial.cpp')
-    sources.append('jpeglib/cjpeglib/cjpeglib_common_flags.c')
-    sources.append('jpeglib/cjpeglib/cjpeglib_common_markers.cpp')
-    sources.append('jpeglib/cjpeglib/cjpeglib_progressive.cpp')
-    sources.append('jpeglib/cjpeglib/cjpeglib_common.cpp')
 
     # define macros
     macros = [
@@ -144,9 +162,10 @@ for v in libjpeg_versions:
         ("LIBVERSION", libjpeg_versions[v][1]),
         ("HAVE_PROTOTYPES", 1),
         ("Py_LIMITED_API", "0x03080000"),
+        ('WITH_SIMD', 0),  # TODO: 1
     ]
     # turbo/moz-only macros
-    if is_turbo_moz:
+    if is_turbo or is_moz:
         macros += [
             ("INLINE", "__inline__" if not sys.platform.startswith("win") else "__inline"),
             ("PACKAGE_NAME", f"\"{package_name}\""),
@@ -156,7 +175,7 @@ for v in libjpeg_versions:
             ("THREAD_LOCAL", "__thread"),
             ("C_ARITH_CODING_SUPPORTED", 1),
             ("D_ARITH_CODING_SUPPORTED", 1),
-            ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
+            ("JPEG_LIB_VERSION", 70),
         ]
         # moz-only macros
         if is_moz:
@@ -164,6 +183,11 @@ for v in libjpeg_versions:
                 # ("JPEG_LIB_VERSION", 69),
                 ('MEM_SRCDST_SUPPORTED', 1),
             ]
+        else:
+            macros += [
+                ('FALLTHROUGH', ''),
+            ]
+
         # if not is_moz or libjpeg_versions[v][1] <= 403:
         #     macros += [
         #         ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0

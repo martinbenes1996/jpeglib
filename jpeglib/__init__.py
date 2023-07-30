@@ -18,6 +18,7 @@ from .spatial_jpeg import SpatialJPEG
 # cenums
 from ._cenum import Colorspace, DCTMethod, Dithermode, MarkerType
 from ._marker import Marker
+from ._scan import Scan
 # cenum abbreviations
 JCS_UNKNOWN = Colorspace.JCS_UNKNOWN
 JCS_GRAYSCALE = Colorspace.JCS_GRAYSCALE

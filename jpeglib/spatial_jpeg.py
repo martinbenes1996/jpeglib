@@ -146,7 +146,7 @@ class SpatialJPEG(JPEG):
             raise IOError('no destination file specified')
         # scans
         if self.num_scans > 1:
-            warnings.warn('saving progressive JPEG as sequential')
+            warnings.warn('saving progressive JPEG as sequential, specify buffered=True in read_spatial to stay progressive')
         # quality
         # use default of library
         if qt is None:
@@ -155,6 +155,9 @@ class SpatialJPEG(JPEG):
             # quality factor
             try:
                 quality, qt = int(qt), None
+                if quality < 1:
+                    warnings.warn('quality factor clipped to 1')
+                    quality = 1
             # quantization table
             except TypeError:
                 # infere quant_tbl_no
