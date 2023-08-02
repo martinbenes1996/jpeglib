@@ -9,8 +9,5 @@ runs:
     - name: Build library # build CJpegLib
       shell: bash
       run: |
-        python setup.py bdist
-        cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/ || true
-        cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.pyd jpeglib/cjpeglib/ || true
-
+        pip3 install -e .
 
