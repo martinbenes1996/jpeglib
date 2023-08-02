@@ -349,6 +349,7 @@ class CJpegLib:
         so_files = [
             f
             for f in os.listdir(list(cjpeglib.__path__)[0])
+            # for f in os.listdir()
             if re.fullmatch(r'cjpeglib_.*\.(.*\.so|pyd)', f)
         ]
         return so_files

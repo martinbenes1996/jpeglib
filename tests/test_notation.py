@@ -64,7 +64,7 @@ class TestNotation(unittest.TestCase):
     def test_samp_factor(self, Jab, samp_factor):
         self.logger.info(f'test_samp_factor({Jab})')
         # load image
-        im = jpeglib.read_spatial('examples/IMG_0311.jpeg')
+        im = jpeglib.read_spatial('tests/assets/IMG_0311.jpeg')
         # store with sampling factor
         im.samp_factor = Jab
         im.write_spatial(self.tmp.name)

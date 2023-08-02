@@ -71,7 +71,7 @@ for v in libjpeg_versions:
     is_turbo = v[:5] == "turbo"
 
     # name of C library
-    rootlib = Path('jpeglib') / 'cjpeglib'
+    rootlib = Path('src') / 'jpeglib' / 'cjpeglib'
     clib = rootlib / v
 
     # create missing
@@ -195,9 +195,9 @@ for v in libjpeg_versions:
 
     # define the extension
     cjpeglib[v] = setuptools.Extension(
-        name=f"jpeglib/cjpeglib/cjpeglib_{v}",
-        library_dirs=['./jpeglib/cjpeglib', f'./{clib}'],
-        include_dirs=['./jpeglib/cjpeglib', f'./{clib}'],
+        name=f"jpeglib.cjpeglib.cjpeglib_{v}",
+        library_dirs=['jpeglib/cjpeglib', f'{clib}'],
+        include_dirs=['jpeglib/cjpeglib', f'{clib}'],
         sources=sources,
         headers=hfiles[v],
         define_macros=macros,
@@ -231,7 +231,7 @@ setuptools.setup(
                 "libjpeg for handling JPEG files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=setuptools.find_packages(),
+    packages=['jpeglib'],
     license='MPL',
     project_urls={
         "Homepage": "https://pypi.org/project/jpeglib/",
@@ -241,7 +241,7 @@ setuptools.setup(
     keywords=['jpeglib', 'jpeg', 'jpg', 'libjpeg', 'compression',
               'decompression', 'dct-coefficients', 'dct'],
     install_requires=reqs,
-    package_dir={'': '.'},
+    package_dir={'': 'src'},
     package_data={'': ['data/*']},
     include_package_data=True,
     ext_modules=[cjpeglib[v] for v in libjpeg_versions],

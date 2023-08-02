@@ -46,7 +46,7 @@ class TestCEnum(unittest.TestCase):
         #
         im = {
             k: jpeglib.read_spatial(
-                'examples/IMG_0311.jpeg',
+                'tests/assets/IMG_0311.jpeg',
                 dct_method=jpeglib.DCTMethod[k],
             )
             for k in ['JDCT_ISLOW', 'JDCT_IFAST', 'JDCT_FLOAT']

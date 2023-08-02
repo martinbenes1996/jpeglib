@@ -32,10 +32,10 @@ class TestProgressive(unittest.TestCase):
     def test_read_progressive_flag(self):
         self.logger.info("test_read_progressive_flag")
 
-        im = jpeglib.read_spatial("examples/images-6b/testprog.jpg")
+        im = jpeglib.read_spatial("tests/assets/images-6b/testprog.jpg")
         self.assertTrue(im.progressive_mode)
 
-        im = jpeglib.read_spatial("examples/images-6b/testimg.jpg")
+        im = jpeglib.read_spatial("tests/assets/images-6b/testimg.jpg")
         self.assertFalse(im.progressive_mode)
 
     @parameterized.expand(LIBJPEG_VERSIONS)
@@ -46,7 +46,7 @@ class TestProgressive(unittest.TestCase):
 
         # im_prog = jpeglib.read_spatial(
         _ = jpeglib.read_spatial(
-            f'examples/images-{version}/testprog.jpg',
+            f'tests/assets/images-{version}/testprog.jpg',
             flags=[
                 '+PROGRESSIVE_MODE',
                 '+DO_FANCY_UPSAMPLING',
@@ -55,7 +55,7 @@ class TestProgressive(unittest.TestCase):
         )
         # im_prog = jpeglib.read_spatial(
         _ = np.array(Image.open(
-            f'examples/images-{version}/testprog.jpg'
+            f'tests/assets/images-{version}/testprog.jpg'
         ))
         # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
 
@@ -63,7 +63,7 @@ class TestProgressive(unittest.TestCase):
     def test_progressive_dct(self, version):
         self.logger.info(f"test_progressive_dct_{version}")
         # load dct - to fix
-        im = jpeglib.read_dct(f'examples/images-{version}/testprog.jpg')
+        im = jpeglib.read_dct(f'tests/assets/images-{version}/testprog.jpg')
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_dct(self.tmp.name)
         np.testing.assert_array_equal(im.Y, im2.Y)
@@ -78,11 +78,11 @@ class TestProgressive(unittest.TestCase):
 
         # load progressive image
         im_seq = jpeglib.read_spatial(
-            f'examples/images-{version}/testimg.jpg',
+            f'tests/assets/images-{version}/testimg.jpg',
             flags=['-PROGRESSIVE_MODE']
         )
         im_prog = jpeglib.read_spatial(
-            f'examples/images-{version}/testimgp.jpg',
+            f'tests/assets/images-{version}/testimgp.jpg',
             flags=['+PROGRESSIVE_MODE']
         )
         np.testing.assert_array_almost_equal(im_seq.spatial, im_prog.spatial)
@@ -161,7 +161,7 @@ class TestProgressive(unittest.TestCase):
         """Test progressive with Trellis is identical as djpeg output."""
         self.logger.info('test_progressive_trellis_djpeg')
 
-        im = jpeglib.read_spatial('examples/progressive_trellis.jpeg', buffered=True)
+        im = jpeglib.read_spatial('tests/assets/progressive_trellis.jpeg', buffered=True)
         # scan 1
         np.testing.assert_array_equal(im.scans[0].components, [0, 1, 2])
         np.testing.assert_array_equal(im.scans[0].Ss, 0)
@@ -269,7 +269,7 @@ class TestProgressive(unittest.TestCase):
                 ac_tbl_no=np.array([0]),
             ),  # AC of Y
         ]
-        rgb = np.array(Image.open('examples/00001.tif'))
+        rgb = np.array(Image.open('tests/assets/00001.tif'))
         im = jpeglib.from_spatial(rgb, scans=scans)
         im.write_spatial(self.tmp.name)
         #

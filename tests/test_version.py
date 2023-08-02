@@ -36,7 +36,7 @@ class TestVersion(unittest.TestCase):
         """Use a version to read and write spatial domain."""
         self.logger.info(f"test_set_version_spatial_{version}")
         jpeglib.version.set(version)
-        im = jpeglib.read_spatial('examples/IMG_0791.jpeg')
+        im = jpeglib.read_spatial('tests/assets/IMG_0791.jpeg')
         im.spatial  # execute lazy loading
         im.write_spatial(self.tmp.name)
         self.assertEqual(jpeglib.version.get(), version)
@@ -46,7 +46,7 @@ class TestVersion(unittest.TestCase):
         """Use a version to read and write DCT domain."""
         self.logger.info(f"test_set_version_dct_{version}")
         jpeglib.version.set(version)
-        jpeg = jpeglib.read_dct('examples/IMG_0791.jpeg')
+        jpeg = jpeglib.read_dct('tests/assets/IMG_0791.jpeg')
         jpeg.Y  # execute lazy loading
         jpeg.write_dct(self.tmp.name)
         self.assertEqual(jpeglib.version.get(), version)
@@ -64,7 +64,7 @@ class TestVersion(unittest.TestCase):
         # check that library is not loaded
         self.assertEqual(jpeglib.version.get(), '6b')
         # read
-        im = jpeglib.read_dct('examples/IMG_0791.jpeg')
+        im = jpeglib.read_dct('tests/assets/IMG_0791.jpeg')
         im.load()
         # check default version
         self.assertEqual(jpeglib.version.get(), '6b')
@@ -110,27 +110,27 @@ class TestVersion(unittest.TestCase):
             return
 
         # test original
-        im_ppm = Image.open(f'examples/images-{version}/testimg.ppm')
+        im_ppm = Image.open(f'tests/assets/images-{version}/testimg.ppm')
         rgb_ppm = np.array(im_ppm)
-        im = jpeglib.read_spatial(f'examples/images-{version}/testorig.jpg')
+        im = jpeglib.read_spatial(f'tests/assets/images-{version}/testorig.jpg')
         np.testing.assert_array_almost_equal(im.spatial, rgb_ppm)
 
         # TODO: fix quantization
         # # test 256 colors
-        # im_bmp = Image.open("examples/images-6b/testimg.bmp")
+        # im_bmp = Image.open("tests/assets/images-6b/testimg.bmp")
         # bmp_palette = np.array(im_bmp.getpalette()).reshape(-1,3)#[:,::-1]
         # print("Before call")
         # print(bmp_palette[:6])
         # rgb_bmp = np.array([[bmp_palette[i] for i in row] for row in np.array(im_bmp)])  # noqa: E501
-        # im = jpeglib.JPEG(f'examples/images-{version}/testorig.jpg')
+        # im = jpeglib.JPEG(f'tests/assets/images-{version}/testorig.jpg')
         # rgb = im.read_spatial(out_color_space='JCS_RGB', colormap=bmp_palette, flags=['QUANTIZE_COLORS'])  # noqa: E501
         # rgb = np.array([[bmp_palette[i] for i in row] for row in np.array(rgb)])  # noqa: E501
         # np.testing.assert_array_equal(rgb, rgb_bmp)
         # print(rgb_bmp.shape)
 
         # compress
-        jpeg = jpeglib.read_dct(f'examples/images-{version}/testimg.jpg')
-        im_ppm = Image.open(f"examples/images-{version}/testimg.ppm")
+        jpeg = jpeglib.read_dct(f'tests/assets/images-{version}/testimg.jpg')
+        im_ppm = Image.open(f"tests/assets/images-{version}/testimg.ppm")
         rgb_ppm = np.array(im_ppm)
         jpeglib.from_spatial(rgb_ppm).write_spatial(self.tmp.name)
         jpeg2 = jpeglib.read_dct(self.tmp.name)
@@ -143,7 +143,7 @@ class TestVersion(unittest.TestCase):
         jpeglib.from_spatial(
             spatial=rgb_ppm,
         ).write_spatial(self.tmp.name, flags=['+PROGRESSIVE_MODE'])
-        jpeg = jpeglib.read_dct(f'examples/images-{version}/testimgp.jpg')
+        jpeg = jpeglib.read_dct(f'tests/assets/images-{version}/testimgp.jpg')
         jpeg2 = jpeglib.read_dct(self.tmp.name)
         np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
         np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
@@ -151,8 +151,8 @@ class TestVersion(unittest.TestCase):
         np.testing.assert_array_equal(jpeg.qt, jpeg2.qt)
 
         # no difference between progressive and sequential
-        jpeg = jpeglib.read_dct(f'examples/images-{version}/testprog.jpg')
-        jpeg2 = jpeglib.read_dct(f'examples/images-{version}/testorig.jpg')
+        jpeg = jpeglib.read_dct(f'tests/assets/images-{version}/testprog.jpg')
+        jpeg2 = jpeglib.read_dct(f'tests/assets/images-{version}/testorig.jpg')
         np.testing.assert_array_equal(jpeg.Y, jpeg2.Y)
         np.testing.assert_array_equal(jpeg.Cb, jpeg2.Cb)
         np.testing.assert_array_equal(jpeg.Cr, jpeg2.Cr)

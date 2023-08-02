@@ -29,7 +29,7 @@ class TestFlags(unittest.TestCase):
     def test_fancy_upsampling(self):
         self.logger.info("test_fancy_upsampling")
         jpeglib.version.set('8')
-        fname = 'examples/IMG_0791.jpeg'
+        fname = 'tests/assets/IMG_0791.jpeg'
         im_def = jpeglib.read_spatial(fname, flags=[])
         im_fu = jpeglib.read_spatial(fname, flags=['+DO_FANCY_UPSAMPLING'])
         im_ss = jpeglib.read_spatial(fname, flags=['-DO_FANCY_UPSAMPLING'])
@@ -39,7 +39,7 @@ class TestFlags(unittest.TestCase):
     def test_fancy_downsampling(self):
         self.logger.info("test_fancy_downsampling")
         jpeglib.version.set('9')
-        im = jpeglib.read_spatial('examples/IMG_0311.jpeg')
+        im = jpeglib.read_spatial('tests/assets/IMG_0311.jpeg')
 
         # default
         im.write_spatial(self.tmp.name, flags=[])
