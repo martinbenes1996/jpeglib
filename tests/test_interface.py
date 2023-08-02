@@ -30,9 +30,9 @@ class TestInterface(unittest.TestCase):
 
     def test_read_dct(self):
         self.logger.info("test_read_dct")
-        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0791.jpeg")
         # inner state before reading
-        self.assertEqual(im.path, "examples/IMG_0791.jpeg")  # source file
+        self.assertEqual(im.path, "tests/assets/IMG_0791.jpeg")  # source file
         self.assertTrue(im.content is not None)
         self.assertIsInstance(im.content, bytes)
         self.assertEqual(im.height, 3024)
@@ -90,9 +90,9 @@ class TestInterface(unittest.TestCase):
 
     def test_read_spatial(self):
         self.logger.info("test_read_spatial")
-        im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0791.jpeg")
         # inner state before reading
-        self.assertEqual(im.path, "examples/IMG_0791.jpeg")  # source file
+        self.assertEqual(im.path, "tests/assets/IMG_0791.jpeg")  # source file
         self.assertTrue(im.content is not None)
         self.assertIsInstance(im.content, bytes)
         self.assertEqual(im.height, 3024)
@@ -126,9 +126,9 @@ class TestInterface(unittest.TestCase):
     def test_read_spatial_grayscale(self):
         self.logger.info("test_read_spatial_grayscale")
         # read info
-        im = jpeglib.read_spatial("examples/IMG_0791.jpeg", jpeglib.Colorspace.JCS_GRAYSCALE)
+        im = jpeglib.read_spatial("tests/assets/IMG_0791.jpeg", jpeglib.Colorspace.JCS_GRAYSCALE)
         # inner state before reading
-        self.assertEqual(im.path, "examples/IMG_0791.jpeg")  # source file
+        self.assertEqual(im.path, "tests/assets/IMG_0791.jpeg")  # source file
         self.assertTrue(im.content is not None)
         self.assertIsInstance(im.content, bytes)
         self.assertEqual(im.height, 3024)
@@ -173,7 +173,7 @@ class TestInterface(unittest.TestCase):
         """Test path as pathlib.Path."""
         self.logger.info("test_pathlib")
         # open
-        path = Path('examples/IMG_0311.jpeg')
+        path = Path('tests/assets/IMG_0311.jpeg')
         im = jpeglib.read_spatial(path)
         jpeg = jpeglib.read_dct(path)
         # load
@@ -185,11 +185,11 @@ class TestInterface(unittest.TestCase):
     def test_read_pil(self):
         self.logger.info("test_read_pil")
         # read with PIL
-        im = Image.open("examples/IMG_0791.jpeg")
+        im = Image.open("tests/assets/IMG_0791.jpeg")
         pilnpshape = np.array(im).shape
         pilsize = im.size
         # read spatial
-        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0791.jpeg")
         # Y
         self.assertEqual(im.Y.shape[0], pilsize[1]//8)
         self.assertEqual(im.Y.shape[1], pilsize[0]//8)
@@ -206,7 +206,7 @@ class TestInterface(unittest.TestCase):
         self.assertEqual(im.Cr.shape[0], pilnpshape[0]//8//2)
         self.assertEqual(im.Cr.shape[1], pilnpshape[1]//8//2)
         # read dct
-        im = jpeglib.read_spatial("examples/IMG_0791.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0791.jpeg")
         # spatial
         self.assertEqual(im.spatial.shape[0], pilsize[1])
         self.assertEqual(im.spatial.shape[1], pilsize[0])
@@ -216,7 +216,7 @@ class TestInterface(unittest.TestCase):
     def test_copy(self):
         self.logger.info("test_read_pil")
         # read DCT
-        im = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0791.jpeg")
         Y_original = im.Y.copy()
         # change DCT
         im2 = im.copy()

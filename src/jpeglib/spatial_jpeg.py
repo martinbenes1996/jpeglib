@@ -155,9 +155,10 @@ class SpatialJPEG(JPEG):
             # quality factor
             try:
                 quality, qt = int(qt), None
-                if quality < 1:
-                    warnings.warn('quality factor clipped to 1')
-                    quality = 1
+                if quality < 1 or quality > 100:
+                    warnings.warn('quality factor clipped to 1-100')
+                quality = np.clip(quality, 1, 100)
+
             # quantization table
             except TypeError:
                 # infere quant_tbl_no

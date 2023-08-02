@@ -69,7 +69,7 @@ class TestMarker(unittest.TestCase):
     def test_image_marker(self):
         self.logger.info("test_image_marker")
         # read im
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         # check markers
         self.assertIsInstance(im.markers, list)
         self.assertEqual(len(im.markers), 2)

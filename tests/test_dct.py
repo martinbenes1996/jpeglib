@@ -35,7 +35,7 @@ class TestDCT(unittest.TestCase):
         """Test of lossless reading and writing of DCT."""
         self.logger.info("test_dct")
         # get original DCT coefficients
-        jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        jpeg = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         # write and read again
         jpeg.write_dct(self.tmp.name)
         jpeg2 = jpeglib.read_dct(self.tmp.name)
@@ -49,7 +49,7 @@ class TestDCT(unittest.TestCase):
         """Test of grayscale DCT coefficients."""
         self.logger.info("test_dct_grayscale")
         # get original DCT coefficients
-        jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        jpeg = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         # write grayscale
         jpeglib.from_dct(
             Y=jpeg.Y,
@@ -73,7 +73,7 @@ class TestDCT(unittest.TestCase):
         """Test of reading DCT with different sampling factors."""
         self.logger.info(f'test_dct_samp_factor({samp_factor})')
         # compress image with given sampling factor
-        im = jpeglib.read_spatial('examples/IMG_0311.jpeg')
+        im = jpeglib.read_spatial('tests/assets/IMG_0311.jpeg')
         im.samp_factor = samp_factor
         im.write_spatial(self.tmp.name)
         # read DCT coefficients
@@ -112,7 +112,7 @@ class TestDCT(unittest.TestCase):
         """Compress with given two versions and observe differing output."""
         self.logger.info(f"test_mismatch_baseline_{v1}_{v2}")
         # compress image with given versions
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
         Y1, (Cb1, Cr1), _ = self._compressed_dct(im, v1)
         Y2, (Cb2, Cr2), _ = self._compressed_dct(im, v2)
         # compare not equal
@@ -134,7 +134,7 @@ class TestDCT(unittest.TestCase):
         """Compress with given versions and observe the same output."""
         self.logger.info(f"test_mismatch_baseline_{'_'.join(versions)}")
         # compress image with reference
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
         Y_ref, (Cb_ref, Cr_ref), qt_ref = self._compressed_dct(im, versions[0])
         # compress with each version and compare to the reference
         for v in versions:
@@ -148,7 +148,7 @@ class TestDCT(unittest.TestCase):
         """Test output against btlorch/dct-coefficient-decoder."""
         self.logger.info("test_dct_coefficient_decoder")
         # read DCT with jpeglib
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         # read DCT with dct-coefficient-decoder
         try:
             from decoder import PyCoefficientDecoder
@@ -157,7 +157,7 @@ class TestDCT(unittest.TestCase):
                 f"invalid installation of dct-coefficient-decoder: {e}"
             )
             return
-        d = PyCoefficientDecoder('examples/IMG_0311.jpeg')
+        d = PyCoefficientDecoder('tests/assets/IMG_0311.jpeg')
         # convert to the same format
         qtT = np.stack([
             d.get_quantization_table(0),
@@ -183,14 +183,14 @@ class TestDCT(unittest.TestCase):
         """Test output against daniellerch/python-jpeg-toolbox."""
         self.logger.info("test_python_jpeg_toolbox")
         # read DCT with jpeglib
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         # read DCT with python-jpeg-toolbox
         try:
             import jpeg_toolbox
         except (ModuleNotFoundError, ImportError) as e:
             logging.error(f"invalid installation of python-jpeg-toolbox: {e}")
             return
-        img = jpeg_toolbox.load('examples/IMG_0311.jpeg')
+        img = jpeg_toolbox.load('tests/assets/IMG_0311.jpeg')
         # convert to the same format
         YT = (
             img['coef_arrays'][0]
@@ -218,12 +218,12 @@ class TestDCT(unittest.TestCase):
         """Test output against queuecumber/torchjpeg."""
         self.logger.info("test_torchjpeg")
         # read DCT with jpeglib
-        jpeg = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        jpeg = jpeglib.read_dct("tests/assets/IMG_0791.jpeg")
         # read DCT with torchjpeg
         try:
             import torchjpeg.codec
             shape, qt, Y, CbCr = torchjpeg.codec.read_coefficients(  # noqa: E501
-                "examples/IMG_0791.jpeg"
+                "tests/assets/IMG_0791.jpeg"
             )
         except ModuleNotFoundError as e:  # error loading
             logging.error(
@@ -269,9 +269,9 @@ class TestDCT(unittest.TestCase):
         """Test the same QT is acquired from pillow."""
         self.logger.info("test_pil_qt")
         # read qt with jpeglib
-        jpeg = jpeglib.read_dct("examples/IMG_0791.jpeg")
+        jpeg = jpeglib.read_dct("tests/assets/IMG_0791.jpeg")
         # pillow
-        im = Image.open("examples/IMG_0791.jpeg")
+        im = Image.open("tests/assets/IMG_0791.jpeg")
         # convert to the same format
         pil_qt = [
             (
@@ -292,7 +292,7 @@ class TestDCT(unittest.TestCase):
         """Test identical output of jpegio to DCTJPEGio interface."""
         self.logger.info("test_to_jpegio")
         # jpeglib
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         im = jpeglib.to_jpegio(im)
         # jpegio
         try:
@@ -300,7 +300,7 @@ class TestDCT(unittest.TestCase):
         except (ModuleNotFoundError, ImportError) as e:
             logging.error(f"invalid installation of jpegio: {e}")
             return 1
-        jpeg = jpegio.read('examples/IMG_0311.jpeg')
+        jpeg = jpegio.read('tests/assets/IMG_0311.jpeg')
         # test quantization
         self.assertEqual(len(im.quant_tables), 2)
         np.testing.assert_array_equal(jpeg.quant_tables[0], im.quant_tables[0])
@@ -332,7 +332,7 @@ class TestDCT(unittest.TestCase):
         """Test writing of DCTJPEGio interface."""
         self.logger.info("test_jpegio_write")
         # jpeglib
-        im = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        im = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         im = jpeglib.to_jpegio(im)
         # change quantization table in JPEGio
         im.qt[0, 0, 0] = 2
@@ -353,7 +353,7 @@ class TestDCT(unittest.TestCase):
         """Test of changing DCT coefficient, e.g."""
         self.logger.info("test_dct_edit")
         # write with different qt
-        jpeg = jpeglib.read_dct("examples/IMG_0311.jpeg")
+        jpeg = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         Yc = jpeg.Y.copy()
         jpeg.Y[0, 0, 0, 1] += 1  # change DCT (e.g., steganography)
         jpeg.write_dct(self.tmp.name)
@@ -372,7 +372,7 @@ class TestDCT(unittest.TestCase):
         """Test reading DCT of color JPEG with one QT."""
         self.logger.info("test_qt1")
         # read DCT of JPEG having one QT
-        jpeg = jpeglib.read_dct("examples/qt1.jpeg")
+        jpeg = jpeglib.read_dct("tests/assets/qt1.jpeg")
         self.assertEqual(jpeg.qt.shape[0], 1)
         # np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
         # np.testing.assert_array_equal(jpeg.qt[0], jpeg.qt[1])
@@ -440,7 +440,7 @@ class TestDCT(unittest.TestCase):
         self.logger.info("test_rainer_MMSec")
 
         # read image using jpeglib
-        jpeg = jpeglib.read_dct('examples/IMG_0791.jpeg')
+        jpeg = jpeglib.read_dct('tests/assets/IMG_0791.jpeg')
         jpeglib_dct = {
             'Y': jpeg.Y,
             'Cb': jpeg.Cb,
@@ -461,7 +461,7 @@ class TestDCT(unittest.TestCase):
                         "Rscript", "tests/test_rainer.R",  # script
                         "dct",  # mode - quantization table or DCT coefficients
                         channel,  # channel - Y, Cr, or Cb
-                        "examples/IMG_0791.jpeg ",  # input file
+                        "tests/assets/IMG_0791.jpeg ",  # input file
                         self.tmp.name,  # output file
                     ],
                     shell=True,
@@ -486,7 +486,7 @@ class TestDCT(unittest.TestCase):
                         "Rscript", "tests/test_rainer.R",  # script
                         "qt",  # produce quantization table
                         channel,  # Y, Cr or Cb
-                        "examples/IMG_0791.jpeg",  # input file
+                        "tests/assets/IMG_0791.jpeg",  # input file
                         self.tmp.name,  # output file
                     ],
                     shell=True

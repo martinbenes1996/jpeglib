@@ -45,7 +45,7 @@ class TestSpatial(unittest.TestCase):
         """Test of compression and decompression."""
         self.logger.info("test_spatial")
         # get decompressed spatial
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
         # write and read again
         im.write_spatial(self.tmp.name)
         im2 = jpeglib.read_spatial(self.tmp.name)
@@ -76,7 +76,7 @@ class TestSpatial(unittest.TestCase):
         """Test default quality factor for a given version."""
         self.logger.info(f"test_default_quality_{version}")
         with jpeglib.version(version):
-            jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+            jpeg = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
             # with explicit qf
             jpeg.write_spatial(self.tmp.name, qt=75, base_quant_tbl_idx=0)
             _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
@@ -95,12 +95,12 @@ class TestSpatial(unittest.TestCase):
         self.logger.info(f"test_default_quality_{v1}_{v2}")
         # get QT from version 1
         with jpeglib.version(v1):
-            jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+            jpeg = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
             jpeg.write_spatial(self.tmp.name, qt=75)
             _, _, qt1 = jpeglib.read_dct(self.tmp.name).load()
         # get QT from version 2
         with jpeglib.version(v2):
-            jpeg = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+            jpeg = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
             jpeg.write_spatial(self.tmp.name, qt=75)
             _, _, qt2 = jpeglib.read_dct(self.tmp.name).load()
         # not equal
@@ -109,7 +109,7 @@ class TestSpatial(unittest.TestCase):
     def test_spatial_quality(self):
         """Tests standard QF given."""
         self.logger.info("test_spatial_quality")
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
         im.write_spatial(self.tmp.name, qt=50)
         jpeg = jpeglib.read_dct(self.tmp.name)
         np.testing.assert_array_equal(jpeg.qt, qt50_standard)
@@ -117,7 +117,7 @@ class TestSpatial(unittest.TestCase):
     def test_spatial_qt(self):
         """Tests custom QT given."""
         self.logger.info("test_spatial_qt")
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
         qt50_3 = np.zeros((3, 8, 8))
         qt50_3[:2] = qt50_standard
         qt50_3[2] = qt50_standard[1]
@@ -134,9 +134,9 @@ class TestSpatial(unittest.TestCase):
         self.logger.info(f"test_mismatch_baseline_{v1}_{v2}")
         # decompress image with given versions
         with jpeglib.version(v1):
-            x1 = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+            x1 = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         with jpeglib.version(v2):
-            x2 = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+            x2 = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         # compare not equal
         self.assertFalse((x1 == x2).all())
 
@@ -151,11 +151,11 @@ class TestSpatial(unittest.TestCase):
         self.logger.info(f"test_mismatch_baseline_{'_'.join(versions)}")
         # decompress image with reference
         with jpeglib.version(versions[0]):
-            x_ref = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+            x_ref = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         # decompress with each version and compare to the reference
         for v in versions:
             with jpeglib.version(v):
-                x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+                x = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
             np.testing.assert_array_equal(x_ref, x)
 
     def test_grayscale(self):
@@ -207,7 +207,7 @@ class TestSpatial(unittest.TestCase):
         """Test of compression DCT methods."""
         self.logger.info("test_spatial_dct_compression")
         # get decompressed spatial
-        im = jpeglib.read_spatial("examples/IMG_0311.jpeg")
+        im = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg")
         # compress with islow
         im.write_spatial(self.tmp.name, dct_method=jpeglib.JDCT_ISLOW)
         im_islow = jpeglib.read_dct(self.tmp.name)
@@ -233,8 +233,8 @@ class TestSpatial(unittest.TestCase):
         self.assert_equal_ratio_greater(im_ifast.Cr, im_float.Cr, .9)
 
     @parameterized.expand([
-        ['examples/images-9e/testimg.bmp', 100],
-        ['examples/images-9e/testimg.bmp', 95],
+        ['tests/assets/images-9e/testimg.bmp', 100],
+        ['tests/assets/images-9e/testimg.bmp', 95],
     ])
     def test_dct_methods(self, input_file, quality):
         self.logger.info("test_dct_methods")
@@ -313,7 +313,7 @@ class TestSpatial(unittest.TestCase):
         """Check that qt_tbl_no is inferred when 1 QT is given."""
         self.logger.info("test_infer_qt1_custom")
         # recompress image with custom QT
-        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        x = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         qt_ref = np.array([
             [
                 [17, 18, 24, 47, 99, 99, 99, 99],
@@ -335,7 +335,7 @@ class TestSpatial(unittest.TestCase):
         """Check that qt_tbl_no is inferred when 1 QT is given."""
         self.logger.info("test_infer_qt1")
         # recompress image with custom QT
-        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        x = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         qt_ref = np.ascontiguousarray(qt50_standard[:1])
         jpeglib.from_spatial(x).write_spatial(self.tmp.name, qt=qt_ref)
         # compare QTs
@@ -346,7 +346,7 @@ class TestSpatial(unittest.TestCase):
         """Check that qt_tbl_no is inferred when 2 QT is given."""
         self.logger.info("test_infer_qt2")
         # recompress image with custom QT
-        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        x = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         jpeglib.from_spatial(x).write_spatial(self.tmp.name, qt=qt50_standard)
         # compare QTs
         jpeg = jpeglib.read_dct(self.tmp.name)
@@ -357,7 +357,7 @@ class TestSpatial(unittest.TestCase):
         """Check that qt_tbl_no is inferred when 3 QT is given."""
         self.logger.info("test_infer_qt3")
         # recompress image with custom QT
-        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        x = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         qt50_3 = np.zeros((3, 8, 8))
         qt50_3[:2] = qt50_standard
         qt50_3[2] = qt50_standard[1]
@@ -371,7 +371,7 @@ class TestSpatial(unittest.TestCase):
         """Check that qt_tbl_no is inferred when grayscale spatial is given."""
         self.logger.info("test_infer_grayscale")
         # recompress image with custom QT
-        x = jpeglib.read_spatial("examples/IMG_0311.jpeg").spatial
+        x = jpeglib.read_spatial("tests/assets/IMG_0311.jpeg").spatial
         x_gray = np.ascontiguousarray(x[:, :, :1])
         qt_ref = np.ascontiguousarray(qt50_standard[:1])
         jpeglib.from_spatial(x_gray).write_spatial(self.tmp.name, qt=qt_ref)
@@ -419,10 +419,27 @@ class TestSpatial(unittest.TestCase):
         # #
         # np.testing.assert_array_equal(spatial, spatial2)
 
+    @parameterized.expand([[0], [-1], [101]])
+    def test_compress_qf_oob(self, qf):
+        """Compress with invalid quality factor."""
+        self.logger.info("test_compress_qf_oob")
+        x = np.random.randint(0, 256, (128, 128, 3), dtype='uint8')
+        im = jpeglib.from_spatial(x)
+        # check compression raises
+        with self.assertWarns(UserWarning):  # QF out of 1-100 is clipped and raises warning
+            im.write_spatial(self.tmp.name, qt=qf)
+        qt = jpeglib.read_dct(self.tmp.name).qt
+        # get reference qt
+        im.write_spatial(self.tmp.name, qt=np.clip(qf, 1, 100))
+        qt_ref = jpeglib.read_dct(self.tmp.name).qt
+        # compare qt
+        np.testing.assert_array_equal(qt, qt_ref)
+
+
     # def test_pil_read(self):
     #     jpeglib.version.set('8d')
     #     # read rgb
-    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im1:
+    #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im1:
     #         x1 = im1.read_spatial(
     #             out_color_space='JCS_RGB',
     #             dct_method='JDCT_ISLOW',
@@ -431,7 +448,7 @@ class TestSpatial(unittest.TestCase):
     #         )
     #         x1 = x1.squeeze()
     #     # read rgb via PIL
-    #     im2 = Image.open("examples/IMG_0791.jpeg")
+    #     im2 = Image.open("tests/assets/IMG_0791.jpeg")
     #     x2 = np.array(im2)
 
     #     # test
@@ -451,14 +468,14 @@ class TestSpatial(unittest.TestCase):
     #     # print("test_pil_write")
     #     q = 75  # quality
     #     # pass the image through jpeglib
-    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im:
     #         # print("read spatial")
     #         data = im.read_spatial(flags=['DO_FANCY_UPSAMPLING'])
     #         # print("write spatial")
     #         im.write_spatial(data, self.tmp.name, qt=q,
     #                          flags=['DO_FANCY_UPSAMPLING'])
     #     # pass the image through PIL
-    #     im = Image.open("examples/IMG_0791.jpeg")
+    #     im = Image.open("tests/assets/IMG_0791.jpeg")
     #     im.save(self.tmp2.name, qt=q, subsampling=-1)
     #     im.close()
     #     # load both with PIL
@@ -496,7 +513,7 @@ class TestSpatial(unittest.TestCase):
     # #         "Rscript tests/test_rainer.R " + # script
     # #         "rgb " + " " + # produce quantization table
     # #         outchannel + " " +# Y, Cr or Cb
-    # #         "examples/IMG_0791.jpeg " + # input file
+    # #         "tests/assets/IMG_0791.jpeg " + # input file
     # #         "tmp/result.csv", # output file
     # #         shell=True)
     # #     if res != 0:
@@ -511,7 +528,7 @@ class TestSpatial(unittest.TestCase):
 
     # # def test_rainer_rgb_R(self):
     # #     # read images
-    # #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    # #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im:
     # #         rgb = im.read_spatial(
     # #             out_color_space="JCS_RGB",
     # #             flags=['DO_FANCY_UPSAMPLING']
@@ -521,7 +538,7 @@ class TestSpatial(unittest.TestCase):
 
     # # def test_rainer_rgb_G(self):
     # #     # read images
-    # #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    # #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im:
     # #         rgb = im.read_spatial(
     # #             out_color_space="JCS_RGB",
     # #             flags=['DO_FANCY_UPSAMPLING']
@@ -531,7 +548,7 @@ class TestSpatial(unittest.TestCase):
 
     # # def test_rainer_rgb_B(self):
     # #     # read images
-    # #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    # #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im:
     # #         rgb = im.read_spatial(
     # #             out_color_space="JCS_RGB",
     # #             flags=['DO_FANCY_UPSAMPLING']
@@ -542,14 +559,14 @@ class TestSpatial(unittest.TestCase):
     # # def test_cv2(self):
     # #     jpeglib.version.set('8d')
     # #     # read rgb
-    # #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im1:
+    # #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im1:
     # #         x1 = im1.read_spatial(
     # #             out_color_space='JCS_RGB',
     # #             dct_method='JDCT_ISLOW'
     # #         )
     # #         x1 = x1.squeeze()
     # #     # read rgb via cv2
-    # #     x2 = cv2.imread("examples/IMG_0791.jpeg", cv2.IMREAD_COLOR)
+    # #     x2 = cv2.imread("tests/assets/IMG_0791.jpeg", cv2.IMREAD_COLOR)
     # #     x2 = cv2.cvtColor(x2, cv2.COLOR_BGR2RGB)
 
     # #     # test
@@ -562,11 +579,11 @@ class TestSpatial(unittest.TestCase):
 
     # # def test_pylibjpeg(self):
     # #     # read rgb
-    # #     with libjpeg.JPEG("examples/IMG_0791.jpeg") as im1:
+    # #     with libjpeg.JPEG("tests/assets/IMG_0791.jpeg") as im1:
     # #         x1 = im1.read_spatial(flags=['DO_FANCY_UPSAMPLING'])
     # #         x1 = x1.squeeze()
     # #     # read rgb via pylibjpeg
-    # #     x2 = decode("examples/IMG_0791.jpeg")
+    # #     x2 = decode("tests/assets/IMG_0791.jpeg")
 
     # #     # test
     # #     if (x1 != x2).any():
@@ -583,11 +600,11 @@ class TestSpatial(unittest.TestCase):
     # #     finally:
     # #         os.mkdir("tmp")
     # #     # pass the image through
-    # #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    # #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im:
     # #         Y,CbCr,qt = im.read_dct()
     # #         im.write_dct("tmp/test.jpeg", Y, CbCr)
     # #     # images
-    # #     im1 = Image.open("examples/IMG_0791.jpeg")
+    # #     im1 = Image.open("tests/assets/IMG_0791.jpeg")
     # #     im2 = Image.open("tmp/test.jpeg")
     # #     # to numpy
     # #     x1,x2 = np.array(im1),np.array(im2)
@@ -603,10 +620,10 @@ class TestSpatial(unittest.TestCase):
     # # #def test_pil_backwards(self):
     # # #
     # # #    # load image
-    # # #    im1 = jpeglib.JPEG("examples/IMG_0791.jpeg")
+    # # #    im1 = jpeglib.JPEG("tests/assets/IMG_0791.jpeg")
     # # #    Y,CbCr,qt = im1.read_dct()
     # # #    # reference
-    # # #    im2_rgb = Image.open("examples/IMG_0791.jpeg")
+    # # #    im2_rgb = Image.open("tests/assets/IMG_0791.jpeg")
     # # #
     # # #    # convert reference to dct blocks
     # # #    # TODO
@@ -625,13 +642,13 @@ class TestSpatial(unittest.TestCase):
 
     # def test_change_block1(self):
     #     # pass the image through
-    #     with jpeglib.JPEG("examples/IMG_0791.jpeg") as im:
+    #     with jpeglib.JPEG("tests/assets/IMG_0791.jpeg") as im:
     #         Y, CbCr, qt = im.read_dct()
     #         # change
     #         Y[0, 0, 0, :4] = 0
     #         im.write_dct(Y, CbCr, self.tmp.name)
     #     # images
-    #     im1 = Image.open("examples/IMG_0791.jpeg")
+    #     im1 = Image.open("tests/assets/IMG_0791.jpeg")
     #     im2 = Image.open(self.tmp.name)
     #     # to numpy
     #     x1, x2 = np.array(im1), np.array(im2)

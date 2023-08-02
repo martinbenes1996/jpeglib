@@ -35,7 +35,7 @@ class TestPerformance(unittest.TestCase):
         jpeglib.version.set('turbo210')
         res_jpeglib = timeit.repeat(
             lambda: jpeglib.read_spatial(
-                "examples/IMG_0791.jpeg",
+                "tests/assets/IMG_0791.jpeg",
                 flags=['DO_FANCY_UPSAMPLING', 'DO_BLOCK_SMOOTHING']
             ).spatial,
             repeat=50, number=1,
@@ -52,7 +52,7 @@ class TestPerformance(unittest.TestCase):
     def test_writing(self):
         """Test writing is statistically significantly faster than 300ms."""
         self.logger.info("test_writing")
-        x = jpeglib.read_spatial("examples/IMG_0791.jpeg").spatial
+        x = jpeglib.read_spatial("tests/assets/IMG_0791.jpeg").spatial
         jpeglib.version.set('turbo210')
         # load and time jpeglib 50 times
         res_jpeglib = timeit.repeat(
