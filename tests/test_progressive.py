@@ -88,6 +88,7 @@ class TestProgressive(unittest.TestCase):
         np.testing.assert_array_almost_equal(im_seq.spatial, im_prog.spatial)
 
     def test_progressive_standard_scanscript(self):
+        """Test standard script is used when compressing with libjpeg."""
         self.logger.info('test_progressive_standard_scanscript')
         jpeglib.version.set('9e')
         # compress as progressive
@@ -212,6 +213,7 @@ class TestProgressive(unittest.TestCase):
         np.testing.assert_array_equal(im.scans[7].Al, 0)
 
     def test_progressive_set_sequential_script(self):
+        """Test setting all-in-one script for progressive JPEG compression."""
         self.logger.info('test_progressive_set_sequential_script')
         scans = [
             jpeglib.Scan(
@@ -238,6 +240,7 @@ class TestProgressive(unittest.TestCase):
             np.testing.assert_array_equal(im2.scans[i].Al, scan.Al)
 
     def test_progressive_set_progressive_script(self):
+        """Test setting custom script for progressive JPEG compression."""
         self.logger.info('test_progressive_set_progressive_script')
         scans = [
             jpeglib.Scan(
@@ -308,6 +311,7 @@ class TestProgressive(unittest.TestCase):
             np.testing.assert_array_equal(im2.scans[i].Ah, scan.Ah)
             np.testing.assert_array_equal(im2.scans[i].Al, scan.Al)
 
+    # TODO: test mozjpeg uses optimized scan script? - How?
     # TODO: tests for social network scan scripts?
     # TODO: ?
 
