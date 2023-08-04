@@ -270,14 +270,17 @@ int write_jpeg_spatial(
 
 				jpeg_scan_info * scanptr = cinfo.script_space;
 				for(int s = 0; s < num_scans; s++) {
+					// fprintf(stderr, "Scan %d:\n", s);
 					scanptr->comps_in_scan = scan_script[s*17 + 0];
+					// fprintf(stderr, "- comps_in_scan %d\n", scanptr->comps_in_scan);
 					scanptr->Ss = scan_script[s*17 + 1];
 					scanptr->Se = scan_script[s*17 + 2];
 					scanptr->Ah = scan_script[s*17 + 3];
 					scanptr->Al = scan_script[s*17 + 4];
 					for(int ch = 0; ch < 4; ch++) {
-						if(scan_script[s*9 + ch + 1] != -1)
+						if(scan_script[s*17 + ch + 5] != -1)
 							scanptr->component_index[ch] = scan_script[s*17 + ch + 5];
+						// fprintf(stderr, "- component_index[%d] %d %d\n", ch, scan_script[s*17 + ch + 5], scanptr->component_index[ch]);
 							// TODO: copy ac_tbl_no and dc_tbl_no
 					}
 					scanptr++;

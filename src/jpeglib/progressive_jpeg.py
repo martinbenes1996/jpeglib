@@ -293,7 +293,7 @@ class ProgressiveJPEG(SpatialJPEG):
         self._quant_tbl_no = quant_tbl_no
 
     def c_scan_script(self):
-        scan_script = np.zeros((self.num_scans, 17), dtype='int')
+        scan_script = np.zeros((self.num_scans, 17), dtype='int32')
         for s in range(self.num_scans):
             scan = self.scans[s]
             K = len(scan.components)
@@ -315,7 +315,6 @@ class ProgressiveJPEG(SpatialJPEG):
                 scan_script[s, 13+K:] = -1
             else:
                 scan_script[s, 13:] = -1
-
         return np.ctypeslib.as_ctypes(scan_script)
 
     # def c_huffman_bits(self):
