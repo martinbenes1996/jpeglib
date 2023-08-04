@@ -1,9 +1,9 @@
 
 #if ! ls jpeglib/cjpeglib/*.so 1> /dev/null 2>&1 ; then
-    
+
     # remove previous releases
-    rm -rf build/ dist/ stegojpeg.egg-info/ __pycache__/
-    rm -rf jpeglib/cjpeglib/*.so
+    rm -rf build/ dist/ src/jpeglib.egg-info/ __pycache__/
+    rm -rf src/jpeglib/cjpeglib/*.so
 
     # compile
     python setup.py bdist --verbose
@@ -13,7 +13,7 @@
     fi
 
     # get dynamic libs
-    cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so jpeglib/cjpeglib/
+    cp $(find build/lib* -maxdepth 0)/jpeglib/cjpeglib/*.so src/jpeglib/cjpeglib/
 
 #fi
 

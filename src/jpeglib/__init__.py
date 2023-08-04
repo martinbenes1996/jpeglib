@@ -29,6 +29,9 @@ JCS_YCCK = Colorspace.JCS_YCCK
 JDCT_ISLOW = DCTMethod.JDCT_ISLOW
 JDCT_IFAST = DCTMethod.JDCT_IFAST
 JDCT_FLOAT = DCTMethod.JDCT_FLOAT
+JPEG_APP0 = MarkerType.JPEG_APP0
+JPEG_APP1 = MarkerType.JPEG_APP1
+JPEG_COM = MarkerType.JPEG_COM
 
 # libjpeg versions
 from .version import version

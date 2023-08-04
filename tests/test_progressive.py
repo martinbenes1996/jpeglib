@@ -211,8 +211,34 @@ class TestProgressive(unittest.TestCase):
         np.testing.assert_array_equal(im.scans[7].Ah, 0)
         np.testing.assert_array_equal(im.scans[7].Al, 0)
 
-    def test_progressive_set_scanscript(self):
-        self.logger.info('test_progressive_set_scanscript')
+    def test_progressive_set_sequential_script(self):
+        self.logger.info('test_progressive_set_sequential_script')
+        scans = [
+            jpeglib.Scan(
+                components=np.array([0, 1, 2]),
+                Ss=0,
+                Se=63,
+                Ah=0,
+                Al=0,
+                dc_tbl_no=np.array([0, 1, 1]),
+                ac_tbl_no=np.array([0, 1, 1]),
+            )
+        ]
+        rgb = np.array(Image.open('tests/assets/00001.tif'))
+        im = jpeglib.from_spatial(rgb, scans=scans)
+        im.write_spatial(self.tmp.name)
+        #
+        im2 = jpeglib.read_spatial(self.tmp.name, buffered=True)
+        for i, scan in enumerate(scans):
+            np.testing.assert_array_equal(
+                im2.scans[i].components, scan.components)
+            np.testing.assert_array_equal(im2.scans[i].Ss, scan.Ss)
+            np.testing.assert_array_equal(im2.scans[i].Se, scan.Se)
+            np.testing.assert_array_equal(im2.scans[i].Ah, scan.Ah)
+            np.testing.assert_array_equal(im2.scans[i].Al, scan.Al)
+
+    def test_progressive_set_progressive_script(self):
+        self.logger.info('test_progressive_set_progressive_script')
         scans = [
             jpeglib.Scan(
                 components=np.array([0, 1, 2]),
