@@ -167,14 +167,10 @@ class SpatialJPEG(JPEG):
                 #
                 quality, qt = -1, np.ctypeslib.as_ctypes(qt.astype(np.uint16))
                 quant_tbl_no = np.ctypeslib.as_ctypes(np.array(quant_tbl_no).astype(np.int16))
+
         # process
-        spatial = np.ctypeslib.as_ctypes(
-            self.spatial.reshape(
-                self.color_space.channels,
-                self.height,
-                self.width,
-            )
-        )
+        spatial = np.ctypeslib.as_ctypes(self.spatial.flatten())
+
         # call
         CJpegLib.write_jpeg_spatial(
             dstfile=str(dstfile),
