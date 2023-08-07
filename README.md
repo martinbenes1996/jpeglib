@@ -26,6 +26,12 @@ Simply install the package with pip3
 pip install jpeglib
 ```
 
+or using the cloned repository
+
+```bash
+python setup.py install
+```
+
 
 > :warning: This will install `jpeglib` together with multiple versions of libjpeg, libjpeg-turbo and mozjpeg. For common architectures/OS we provide prebuilt wheels, but installing from source takes couple of minutes.
 
