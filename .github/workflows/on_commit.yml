@@ -10,7 +10,7 @@ jobs:
   unit_tests_linux:
     name: Run unit tests on Linux
     runs-on: ubuntu-latest # runner
-    if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master'  || !contains(github.event.head_commit.message, '#notest_linux')}}
+    if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master'  || !contains(github.event.head_commit.message, '#nolinuxtest')}}
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2
