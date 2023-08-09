@@ -10,7 +10,7 @@ jobs:
   unit_tests_linux:
     name: Run unit tests on Linux
     runs-on: ubuntu-latest # runner
-    if: ${{ !contains(github.event.head_commit.message, '#notest') || github.ref == 'refs/heads/master'  || !contains(github.event.head_commit.message, '#nolinuxtest')}}
+    if: ${{ (!contains(github.event.head_commit.message, '#notest') && !contains(github.event.head_commit.message, '#nolinuxtest')) || github.ref == 'refs/heads/master' }}
     steps: # tasks
       - name: Set Github Workspace # access Github Workspace
         uses: actions/checkout@v2
@@ -39,7 +39,7 @@ jobs:
           python-version: "3.10"
           architecture: "x64" # architecture
       - name: Install test dependencies
-        uses: ./.github/common/install_test_dependencies
+        uses: ./.github/common/install_test_dependencies_windows
       - name: Build from source
         uses: ./.github/common/build_from_source
       - name: Run unit tests # run unittests
