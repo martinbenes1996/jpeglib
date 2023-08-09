@@ -13,6 +13,7 @@ runs:
     - name: Install test dependencies
       shell: bash
       run: |
+        pip3 install setuptools wheel
         pip3 install torchjpeg
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
