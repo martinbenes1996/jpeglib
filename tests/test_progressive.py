@@ -12,7 +12,7 @@ from PIL import Image
 import tempfile
 import unittest
 
-from _defs import LIBJPEG_VERSIONS
+from _defs import LIBJPEG_VERSIONS, ALL_VERSIONS
 import jpeglib
 
 
@@ -29,42 +29,23 @@ class TestProgressive(unittest.TestCase):
         del self.tmp
         jpeglib.version.set(self.original_version)
 
-    def test_read_progressive_flag(self):
+    @parameterized.expand(ALL_VERSIONS)
+    def test_read_progressive_flag(self, version):
         """Test if progressive_mode flag is correctly set."""
+        jpeglib.version.set(version)
         self.logger.info("test_read_progressive_flag")
 
-        im = jpeglib.read_spatial(f"tests/assets/images-6b/testprog.jpg")
-        self.assertTrue(im.progressive_mode)
+        # Test for progressive image
+        im = jpeglib.read_spatial(f"tests/assets/images-{version}/testprog.jpg")
+        self.assertTrue(im.progressive_mode), f"{version}"
 
-        im = jpeglib.read_spatial("tests/assets/images-6b/testimg.jpg")
-        self.assertFalse(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-turbo210/testprog.jpg")
-        self.assertTrue(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg101/testprog.jpg")
-        self.assertTrue(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg101/testseq.jpg")
-        self.assertFalse(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg201/testprog.jpg")
-        self.assertTrue(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg201/testseq.jpg")
-        self.assertFalse(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg300/testprog.jpg")
-        self.assertTrue(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg300/testseq.jpg")
-        self.assertFalse(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg403/testprog.jpg")
-        self.assertTrue(im.progressive_mode)
-
-        im = jpeglib.read_spatial(f"tests/assets/images-mozjpeg403/testseq.jpg")
-        self.assertFalse(im.progressive_mode)
+        # Test for baseline sequential image
+        if "mozjpeg" in str(version):
+            im = jpeglib.read_spatial(f"tests/assets/images-{version}/testseq.jpg")
+            self.assertFalse(im.progressive_mode)
+        else:
+            im = jpeglib.read_spatial(f"tests/assets/images-{version}/testimg.jpg")
+            self.assertFalse(im.progressive_mode)
 
     # TODO: Update to all versions - create test progressive image - Nora fix
     @parameterized.expand(LIBJPEG_VERSIONS)
@@ -82,7 +63,7 @@ class TestProgressive(unittest.TestCase):
         _ = np.array(Image.open(f"tests/assets/images-{version}/testprog.jpg"))
         # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
 
-    @parameterized.expand(LIBJPEG_VERSIONS)  # TODO: Nora fix
+    @parameterized.expand(ALL_VERSIONS)
     def test_progressive_dct(self, version):
         self.logger.info(f"test_progressive_dct_{version}")
         # load dct - to fix
