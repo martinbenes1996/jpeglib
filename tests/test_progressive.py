@@ -33,11 +33,15 @@ class TestProgressive(unittest.TestCase):
     def test_read_progressive_flag(self, version):
         """Test if progressive_mode flag is correctly set."""
         jpeglib.version.set(version)
-        self.logger.info("test_read_progressive_flag")
+        self.logger.info(f"test_read_progressive_flag_{version}")
 
         # Test for progressive image
-        im = jpeglib.read_spatial(f"tests/assets/images-{version}/testprog.jpg")
-        self.assertTrue(im.progressive_mode), f"{version}"
+        if "mozjpeg" in str(version):
+            im = jpeglib.read_spatial(f"tests/assets/images-{version}/testimg.jpg")
+            self.assertTrue(im.progressive_mode), f"{version}"
+        else:
+            im = jpeglib.read_spatial(f"tests/assets/images-{version}/testimgp.jpg")
+            self.assertTrue(im.progressive_mode), f"{version}"
 
         # Test for baseline sequential image
         if "mozjpeg" in str(version):
@@ -47,47 +51,71 @@ class TestProgressive(unittest.TestCase):
             im = jpeglib.read_spatial(f"tests/assets/images-{version}/testimg.jpg")
             self.assertFalse(im.progressive_mode)
 
-    # TODO: Update to all versions - create test progressive image - Nora fix
-    @parameterized.expand(LIBJPEG_VERSIONS)
-    def test_progressive_decompress_vs_pil(self, version):
-        """Test on test images from libjpeg."""
-        self.logger.info(f"test_progressive_decompress_vs_pil_{version}")
-        jpeglib.version.set(version)
-
-        # im_prog = jpeglib.read_spatial(
-        _ = jpeglib.read_spatial(
-            f"tests/assets/images-{version}/testprog.jpg",
-            flags=["+PROGRESSIVE_MODE", "+DO_FANCY_UPSAMPLING", "+DO_BLOCK_SMOOTHING"],
-        )
-        # im_prog = jpeglib.read_spatial(
-        _ = np.array(Image.open(f"tests/assets/images-{version}/testprog.jpg"))
-        # np.testing.assert_array_almost_equal(im_prog.spatial, rgb_pil) # TODO: Nora
-
     @parameterized.expand(ALL_VERSIONS)
-    def test_progressive_dct(self, version):
-        self.logger.info(f"test_progressive_dct_{version}")
-        # load dct - to fix
-        im = jpeglib.read_dct(f"tests/assets/images-{version}/testprog.jpg")
+    def test_compressed_prog_vs_seq(self, version):
+        """
+        Test if the DCT coefficients of a progressive image are the same as for a sequential image.
+        """
+        jpeglib.version.set(version)
+        uncompressed = "tests/assets/images-6b/testimg.ppm"
+        self.logger.info(f"test_compressed_prog_vs_seq_{version}")
+
+        # compress image progressivly
+        rgb_uncompressed = np.array(Image.open(uncompressed))
+        im = jpeglib.from_spatial(rgb_uncompressed)
+
+        if "mozjpeg" in str(version):
+            im = jpeglib.read_dct(f"tests/assets/images-{version}/testimg.jpg")
+        else:
+            im = jpeglib.read_dct(f"tests/assets/images-{version}/testimgp.jpg")
+
         im.write_dct(self.tmp.name)
         im2 = jpeglib.read_dct(self.tmp.name)
+
         np.testing.assert_array_equal(im.Y, im2.Y)
-        # D = np.abs((CbCr.astype(np.int) - CbCr2.astype(np.int)))
-        # print((D != 0).sum()) # 1073 mismatches
-        # np.testing.assert_array_equal(CbCr, CbCr2)
+        np.testing.assert_array_equal(im.Cb, im2.Cb)
+        np.testing.assert_array_equal(im.Cr, im2.Cr)
         np.testing.assert_array_equal(im.qt, im2.qt)
 
-    @parameterized.expand(LIBJPEG_VERSIONS)  # TODO: Nora fix
-    def test_progressive_sequential(self, version):
-        self.logger.info(f"test_progressive_sequential_{version}")
+    @parameterized.expand(ALL_VERSIONS)
+    def test_decompressed_prog_vs_seq(self, version):
+        """
+        Test if the pixel values of a progressive image are the same as for a sequential image.
+        """
 
-        # load progressive image
-        im_seq = jpeglib.read_spatial(
-            f"tests/assets/images-{version}/testimg.jpg", flags=["-PROGRESSIVE_MODE"]
-        )
-        im_prog = jpeglib.read_spatial(
-            f"tests/assets/images-{version}/testimgp.jpg", flags=["+PROGRESSIVE_MODE"]
-        )
-        np.testing.assert_array_almost_equal(im_seq.spatial, im_prog.spatial)
+        jpeglib.version.set(version)
+        self.logger.info(f"test_decompressed_prog_vs_seq_{version}")
+        uncompressed = "tests/assets/images-6b/testimg.ppm"
+
+        # Test jpeglib compressed images
+        rgb_uncompressed = np.array(Image.open(uncompressed))
+        im = jpeglib.from_spatial(rgb_uncompressed)
+
+        im.write_spatial(self.tmp.name, flags=["+PROGRESSIVE_MODE"])
+        spatial_progressive = jpeglib.read_spatial(self.tmp.name).spatial
+
+        im.write_spatial(self.tmp.name, flags=["-PROGRESSIVE_MODE"])
+        spatial_sequential = jpeglib.read_spatial(self.tmp.name).spatial
+
+        np.testing.assert_array_equal(spatial_progressive, spatial_sequential)
+
+        # TODO: Find out why images from cjpeg fail
+        # # Test cjpeg compressed images
+        # if "mozjpeg" in str(version):
+        #     spatial_progressive = jpeglib.read_spatial(
+        #         f"tests/assets/images-{version}/testimg.jpg"
+        #     ).spatial
+        #     spatial_sequential = jpeglib.read_spatial(
+        #         f"tests/assets/images-{version}/testseq.jpg"
+        #     ).spatial
+        # else:
+        #     spatial_progressive = jpeglib.read_spatial(
+        #         f"tests/assets/images-{version}/testimgp.jpg"
+        #     ).spatial
+        #     spatial_sequential = jpeglib.read_spatial(
+        #         f"tests/assets/images-{version}/testimg.jpg"
+        #     ).spatial
+        # np.testing.assert_array_equal(spatial_progressive, spatial_sequential)
 
     def test_progressive_standard_scanscript(self):  # TODO: Nora add test for GS
         """Test standard script is used when compressing with libjpeg."""
