@@ -13,21 +13,6 @@ runs:
     - name: Install test dependencies
       shell: bash
       run: |
-        pip3 install setuptools wheel Cython
-        git clone https://github.com/btlorch/dct-coefficient-decoder
-        cd dct-coefficient-decoder
-        git checkout 8f05ed58ff95a2475defa117f9eeccdcee795dc2
-        cat decoder.pyx | sed -E 's/(.*BG_RGB.*)/# \1/g' | sed -E 's/(.*BG_YCC.*)/# \1/g' > decoder.pyx
-        python setup.py install
-        cd ..
-        sudo apt-get install -y libjpeg62-dev
-        git clone https://github.com/dwgoon/jpegio
-        cd jpegio
-        sed -E 's/^.*-march=native.*$//' -i setup.py
-        sed -E 's/const //' -i jpegio/clibjpeg.pxd
-        python3 setup.py install
-        cd ..
-        pip3 install git+https://github.com/daniellerch/python-jpeg-toolbox@829dbb9c50d0c885d228fc087de1c104160eee33
         # Compile libjpeg 9e
         curl -s -L https://ijg.org/files/jpegsrc.v9e.tar.gz | tar xvz
         cd jpeg-9e
