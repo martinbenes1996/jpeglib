@@ -39,7 +39,7 @@ jobs:
           python-version: "3.10"
           architecture: "x64" # architecture
       - name: Install test dependencies on windows
-        uses: ./.github/common/install_dependencies_windows
+        uses: ./.github/common/install_test_dependencies_windows
       - name: Build from source
         uses: ./.github/common/build_from_source
       - name: Run unit tests # run unittests
