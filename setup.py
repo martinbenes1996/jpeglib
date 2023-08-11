@@ -188,11 +188,6 @@ for v in libjpeg_versions:
                 ('FALLTHROUGH', ''),
             ]
 
-        # if not is_moz or libjpeg_versions[v][1] <= 403:
-        #     macros += [
-        #         ("JPEG_LIB_VERSION", 70),  # 70), # turbo 2.1.0
-        #     ]
-
     # define the extension
     cjpeglib[v] = setuptools.Extension(
         name=f"jpeglib.cjpeglib.cjpeglib_{v}",
