@@ -17,7 +17,6 @@ runs:
       shell: bash
       run: |
         pip3 install setuptools wheel
-        pip3 install torchjpeg
         git clone https://github.com/btlorch/dct-coefficient-decoder
         cd dct-coefficient-decoder
         git checkout 8f05ed58ff95a2475defa117f9eeccdcee795dc2
