@@ -10,9 +10,6 @@ runs:
     - name: Install package dependencies
       uses: ./.github/common/install_dependencies
     
-    - name: ssh connection
-      uses: mxschmitt/action-tmate@v3
-
     - name: Install test dependencies
       shell: bash
       run: |
