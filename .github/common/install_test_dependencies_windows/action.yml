@@ -13,7 +13,4 @@ runs:
     - name: Install test dependencies
       shell: bash
       run: |
-        # Compile libjpeg 9e
-        curl -s -L https://ijg.org/files/jpegsrc.v9e.tar.gz | tar xvz
-        cd jpeg-9e
-        mkdir build && ./configure --prefix=$(pwd)/build && make && make install
+        if [ -f tests/requirements.txt ]; then pip3 install -r tests/requirements.txt; fi
