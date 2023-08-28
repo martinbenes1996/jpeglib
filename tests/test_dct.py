@@ -318,12 +318,12 @@ class TestDCT(unittest.TestCase):
             self.assertEqual(im.comp_info[c].v_samp_factor, im.samp_factor[c, 1])
             self.assertEqual(im.comp_info[c].quant_tbl_no, im.quant_tbl_no[c])
             self.assertEqual(
-                im.comp_info[c].downsampled_height,
-                im.height / im.samp_factor[c, 0]
+                im.comp_info[c].downsampled_width,
+                im.width / im.samp_factor[c, 0]
             )
             self.assertEqual(
-                im.comp_info[c].downsampled_width,
-                im.width / im.samp_factor[c, 1]
+                im.comp_info[c].downsampled_height,
+                im.height / im.samp_factor[c, 1]
             )
             self.assertEqual(im.comp_info[c].height_in_blocks, im.block_dims[c, 0])
             self.assertEqual(im.comp_info[c].width_in_blocks, im.block_dims[c, 1])

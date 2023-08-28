@@ -366,11 +366,11 @@ class ComponentInfo:
 
     @property
     def downsampled_height(self):
-        return self.jpeg.height / self.jpeg.samp_factor[self.component_id, 0]
+        return self.jpeg.height / self.v_samp_factor
 
     @property
     def downsampled_width(self):
-        return self.jpeg.width / self.jpeg.samp_factor[self.component_id, 1]
+        return self.jpeg.width / self.h_samp_factor
 
     @property
     def height_in_blocks(self):
