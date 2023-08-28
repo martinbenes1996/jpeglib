@@ -65,14 +65,13 @@ class JPEG:
         >>> im = jpeglib.read_spatial("input.jpeg")
         >>> im.height_in_blocks(0) # -> math.ceil(im.height/8)
 
-        Block dimension takes into account
-        the chroma sampling factor for chrominance channels.
+        Block dimension takes into account the chroma sampling factor for chrominance channels.
 
         >>> im = jpeglib.read_spatial("input.jpeg")
         >>> im.height_in_blocks(1)
-        >>> #=math.ceil(im.height/8*im.samp_factor[1][0]/im.samp_factor[0][0])
+        >>> #=math.ceil(im.height/8*im.samp_factor[1, 1]/im.samp_factor[0, 1])
         >>> im.height_in_blocks(2)
-        >>> #=math.ceil(im.height/8*im.samp_factor[2][0]/im.samp_factor[0][0])
+        >>> #=math.ceil(im.height/8*im.samp_factor[2, 1]/im.samp_factor[0, 1])
 
         Block dimensions are not initialized,
         when constructing from spatial domain.
@@ -100,14 +99,13 @@ class JPEG:
         >>> im.width_in_blocks(0)
         >>> #=math.ceil(im.width/8)
 
-        Block dimension takes into account
-        the chroma sampling factor for chrominance channels.
+        Block dimension takes into account the chroma sampling factor for chrominance channels.
 
         >>> im = jpeglib.read_spatial("input.jpeg")
         >>> im.width_in_blocks(1)
-        >>> #=math.ceil(im.width/8*im.samp_factor[1][1]/im.samp_factor[0][1])
+        >>> #=math.ceil(im.width/8*im.samp_factor[1, 0]/im.samp_factor[0, 0])
         >>> im.width_in_blocks(2)
-        >>> #=math.ceil(im.width/8*im.samp_factor[2][1]/im.samp_factor[0][1])
+        >>> #=math.ceil(im.width/8*im.samp_factor[2, 0]/im.samp_factor[0, 0])
 
         Block dimensions are not initialized,
         when constructing from spatial domain.
@@ -218,7 +216,7 @@ class JPEG:
             samp_factor = Jab_to_factors(
                 list(map(int, self.samp_factor.split(':')))
             )
-        # [[vY,hY],[vCb,hCb],[vCr,hCr]]
+        # [[Y_h, Y_v], [Cb_h, Cb_v], [Cr_h, Cr_v]]
         else:
             samp_factor = self.samp_factor
         samp_factor = np.array(samp_factor, dtype=np.int32)

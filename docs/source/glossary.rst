@@ -64,7 +64,7 @@ You can specify the chroma subsampling before writing a JPEG image as follows:
 >>> # Variant 1: Specify in J:a:b notation
 >>> im.samp_factor = '4:4:4'
 >>>
->>> # Variant 2: Specify per-channel sampling factors as a list [[vY, hY], [vCb, hCb],[vCr, hCr]]
+>>> # Variant 2: Specify per-channel sampling factors as a list [[Y_h, Y_v], [Cb_h, Cb_v],[Cr_h, Cr_v]]
 >>> im.samp_factor = [[1, 1], [1, 1], [1, 1]]
 >>>
 >>> # now you can write im to a file
