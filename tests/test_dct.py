@@ -82,10 +82,10 @@ class TestDCT(unittest.TestCase):
         ratio_Cr = [samp_factor[0][i]/samp_factor[2][i] for i in range(2)]
         # test DCT coefficients are the same after read
         # Note that ratio_Cb[0] is the horizontal factor, ratio_Cb[1] is the vertical factor.
-        self.assertEqual(jpeg.Y.shape[0], jpeg.Cb.shape[0] * ratio_Cb[1])
-        self.assertEqual(jpeg.Y.shape[1], jpeg.Cb.shape[1] * ratio_Cb[0])
-        self.assertEqual(jpeg.Y.shape[0], jpeg.Cr.shape[0] * ratio_Cr[1])
-        self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1] * ratio_Cr[0])
+        self.assertEqual(jpeg.Y.shape[0], jpeg.Cb.shape[0] * ratio_Cb[0])
+        self.assertEqual(jpeg.Y.shape[1], jpeg.Cb.shape[1] * ratio_Cb[1])
+        self.assertEqual(jpeg.Y.shape[0], jpeg.Cr.shape[0] * ratio_Cr[0])
+        self.assertEqual(jpeg.Y.shape[1], jpeg.Cr.shape[1] * ratio_Cr[1])
         # write DCT coefficients
         jpeglib.from_dct(
             Y=jpeg.Y,
@@ -315,16 +315,16 @@ class TestDCT(unittest.TestCase):
         self.assertEqual(len(im.comp_info), 3)
         for c in range(3):
             self.assertEqual(im.comp_info[c].component_id, c)
-            self.assertEqual(im.comp_info[c].h_samp_factor, im.samp_factor[c, 0])
-            self.assertEqual(im.comp_info[c].v_samp_factor, im.samp_factor[c, 1])
+            self.assertEqual(im.comp_info[c].v_samp_factor, im.samp_factor[c, 0])
+            self.assertEqual(im.comp_info[c].h_samp_factor, im.samp_factor[c, 1])
             self.assertEqual(im.comp_info[c].quant_tbl_no, im.quant_tbl_no[c])
             self.assertEqual(
-                im.comp_info[c].downsampled_width,
-                im.width / im.samp_factor[c, 0]
+                im.comp_info[c].downsampled_height,
+                im.height / im.samp_factor[c, 0]
             )
             self.assertEqual(
-                im.comp_info[c].downsampled_height,
-                im.height / im.samp_factor[c, 1]
+                im.comp_info[c].downsampled_width,
+                im.width / im.samp_factor[c, 1]
             )
             self.assertEqual(im.comp_info[c].height_in_blocks, im.block_dims[c, 0])
             self.assertEqual(im.comp_info[c].width_in_blocks, im.block_dims[c, 1])
