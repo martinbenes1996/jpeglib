@@ -37,7 +37,7 @@ class JPEG:
     samp_factor: Union[np.ndarray, str]
     """sampling factor;
     first is the channel, (0 Y, 1 Cb, 2 Cr),
-    second is orientation (0 horizontal, 1 vertical)
+    second is orientation (0 vertical, 1 horizontal)
     can be also specified as str in format 'J:a:b'
     """
     markers: List[Marker]

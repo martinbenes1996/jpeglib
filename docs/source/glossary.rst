@@ -86,9 +86,9 @@ Following table contains pairs of sampling factor in per-channel and J:a:b notat
 
 .. note::
 
-    For consistence with the rest of interface, jpeglib uses horizontal-vertical order.
+    For consistence with the rest of interface, jpeglib uses vertical-horizontal order.
     In cjpeg, ImageMagick, and `this tutorial <https://zpl.fi/chroma-subsampling-and-jpeg-sampling-factors/>`_,
-    the chroma sampling factors are defined in vertical-horizontal order.
+    the chroma sampling factors are defined in horizontal-vertical order.
 
 Flags
 """""
