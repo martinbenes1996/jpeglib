@@ -51,24 +51,43 @@ chrominance is another component that can be reduced with so called chroma subsa
 It is controlled using sampling factors, a pair of integer numbers per each channel,
 3 pairs for YCbCr, `[[h1,w1],[h2,w2],[h3,w3]]`.
 
-Let's have an example: an RGB image with 300px x 300px and sampling factors [[2,3],[1,2],[2,1]].
-What we want is the resolution of channels YCbCr stored in JPEG. We start with computing
-hmax and wmax (2 and 3) and normalizing factors with the respective maximum; now we have
-[[1,1],[1/2,2/3],[1,1/3]], which stands for how large are sides compared to a rectangle 2x3 pixels.
-Thus multiplied by the image size, Y has 300 x 300, Cb 150 x 200 and Cr 300 x 100.
-
-You can specify the chroma subsampling before writing a JPEG image as follows:
+An RGB image with 300px x 300px compressed with sampling factors [[2,2],[2,1],[1,2]]
+will have components Y of size 200 x 200, Cb of size 200 x 100 and Cr of size 100 x 200.
+You can specify this before writing a JPEG image
 
 >>> # im is a jpeglib.JPEG object
 >>>
->>> # Variant 1: Specify in J:a:b notation
->>> im.samp_factor = '4:4:4'
->>>
->>> # Variant 2: Specify per-channel sampling factors as a list [[Y_h, Y_v], [Cb_h, Cb_v],[Cr_h, Cr_v]]
->>> # Note that the horizontal factor comes before the vertical factor to match the commonly used definition.
->>> im.samp_factor = [[1, 1], [1, 1], [1, 1]]
+>>> # Sampling factors as a list [[Y_v, Y_h], [Cb_v, Cb_h],[Cr_v, Cr_h]]
+>>> im.samp_factor = [[2, 2], [2, 1], [1, 2]]
 >>>
 >>> # now you can write im to a file
+
+Researchers often use J:a:b notation, which is shorter, but assumes same subsampling for both chrominances.
+No chroma subsampling, [[1,1],[1,1],[1,1]], is denoted as 4:4:4.
+
+>>> # Variant 1: Per-channel sampling factors
+>>> im.samp_factor = [[1, 1], [1, 1], [1, 1]]
+>>>
+>>> # Variant 2: Specify in J:a:b notation
+>>> im.samp_factor = '4:4:4'
+
+Following table contains pairs of sampling factor in per-channel and J:a:b notation.
+
+.. list-table:: Notations for chroma sampling.
+   :widths: 25 50 25
+   :header-rows: 1
+
+   * - J:a:b notation
+     - Per-channel notation
+     - Applied ratio
+   * - 4:4:4
+     - [[1, 1], [1, 1], [1, 1]]
+     - :math:`1/1`, :math:`1/1`
+
+.. note::
+
+    Unlike in cjpeg interface, jpeglib expects horizontal factor before vertical.
+    This is to be consistent with the rest of jpeglib interface.
 
 Flags
 """""
