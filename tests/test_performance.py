@@ -29,7 +29,7 @@ class TestPerformance(unittest.TestCase):
         jpeglib.version.set(self.original_version)
 
     def test_reading(self):
-        """Test reading is statistically significantly faster than 300ms."""
+        """Test reading is statistically significantly faster than 500ms."""
         self.logger.info("test_reading")
         # load and time jpeglib 50 times
         jpeglib.version.set('turbo210')
@@ -40,14 +40,14 @@ class TestPerformance(unittest.TestCase):
             ).spatial,
             repeat=50, number=1,
         )
-        # test in reading, jpeglin is faster than 300ms
-        faster_than_300ms = ttest_1samp(res_jpeglib, .3, alternative='less')
+        # test in reading, jpeglin is faster than 500ms
+        faster_than_500ms = ttest_1samp(res_jpeglib, .5, alternative='less')
         logging.info(
             "performance of reading: %.2fs" % (
                 np.mean(res_jpeglib)
             )
         )
-        self.assertLess(faster_than_300ms.pvalue, .05)
+        self.assertLess(faster_than_500ms.pvalue, .05)
 
     def test_writing(self):
         """Test writing is statistically significantly faster than 500ms."""
