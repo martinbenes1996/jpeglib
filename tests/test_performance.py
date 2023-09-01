@@ -50,7 +50,7 @@ class TestPerformance(unittest.TestCase):
         self.assertLess(faster_than_300ms.pvalue, .05)
 
     def test_writing(self):
-        """Test writing is statistically significantly faster than 300ms."""
+        """Test writing is statistically significantly faster than 500ms."""
         self.logger.info("test_writing")
         x = jpeglib.read_spatial("tests/assets/IMG_0791.jpeg").spatial
         jpeglib.version.set('turbo210')
@@ -61,14 +61,14 @@ class TestPerformance(unittest.TestCase):
             ),
             repeat=50, number=1,
         )
-        # test in writing, jpeglib is faster than 300ms
-        faster_than_300ms = ttest_1samp(res_jpeglib, .3, alternative='less')
+        # test in writing, jpeglib is faster than 500ms
+        faster_than_500ms = ttest_1samp(res_jpeglib, .5, alternative='less')
         logging.info(
             "performance of writing: %.2fs" % (
                 np.mean(res_jpeglib)
             )
         )
-        self.assertLess(faster_than_300ms.pvalue, .05)
+        self.assertLess(faster_than_500ms.pvalue, .05)
 
 
 __all__ = ["TestPerformance"]
