@@ -211,8 +211,8 @@ int write_jpeg_spatial(
 				cinfo.comp_info[ch].h_samp_factor = samp_factor[2*ch + 1];
 			}
 		} else {
-			chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;
-			chroma_factor[1] = cinfo.comp_info[0].v_samp_factor;
+			chroma_factor[0] = cinfo.comp_info[0].v_samp_factor;
+			chroma_factor[1] = cinfo.comp_info[0].h_samp_factor;
 		}
 
 		// write qt

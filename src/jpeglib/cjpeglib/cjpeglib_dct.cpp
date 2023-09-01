@@ -209,12 +209,11 @@ int write_jpeg_dct(
 		// set sampling factors
 		int chroma_factor[2];
 		if(samp_factor != NULL) {
-
-			chroma_factor[0] = *(samp_factor + 0);
-			chroma_factor[1] = *(samp_factor + 1);
+			chroma_factor[0] = samp_factor[0];
+			chroma_factor[1] = samp_factor[1];
 			for(int comp = 0; comp < cinfo_out.num_components; comp++) {
-				cinfo_out.comp_info[comp].v_samp_factor = *(samp_factor + comp*2 + 0);
-				cinfo_out.comp_info[comp].h_samp_factor = *(samp_factor + comp*2 + 1);
+				cinfo_out.comp_info[comp].v_samp_factor = samp_factor[comp*2 + 0];
+				cinfo_out.comp_info[comp].h_samp_factor = samp_factor[comp*2 + 1];
 			}
 		}
 
