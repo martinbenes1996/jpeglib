@@ -69,7 +69,7 @@ libjpeg-like structures
 """""""""""""""""""""""
 
 .. autoclass:: jpeglib.Huffman
-   :members: components, Ss, Se, Ah, Al
+   :members: bits, values
 
 
 Manage libjpeg version
