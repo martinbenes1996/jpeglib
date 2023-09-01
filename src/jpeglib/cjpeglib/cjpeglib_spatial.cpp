@@ -204,11 +204,11 @@ int write_jpeg_spatial(
 		}
 		int chroma_factor[2];
 		if (samp_factor != NULL) {
-			chroma_factor[0] = *(samp_factor + 0);
-			chroma_factor[1] = *(samp_factor + 1);
+			chroma_factor[0] = samp_factor[0];
+			chroma_factor[1] = samp_factor[1];
 			for (int ch = 0; ch < cinfo.num_components; ch++) {
-				cinfo.comp_info[ch].h_samp_factor = *(samp_factor + ch * 2 + 0);
-				cinfo.comp_info[ch].v_samp_factor = *(samp_factor + ch * 2 + 1);
+				cinfo.comp_info[ch].h_samp_factor = samp_factor[2*ch + 0];
+				cinfo.comp_info[ch].v_samp_factor = samp_factor[2*ch + 1];
 			}
 		} else {
 			chroma_factor[0] = cinfo.comp_info[0].h_samp_factor;

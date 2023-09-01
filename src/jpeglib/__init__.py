@@ -14,6 +14,7 @@ from .functional import read_dct, read_spatial, from_spatial, from_dct
 # jpeg objects
 from .dct_jpeg import DCTJPEG, DCTJPEGio, to_jpegio
 from .spatial_jpeg import SpatialJPEG
+from .progressive_jpeg import ProgressiveJPEG
 
 # cenums
 from ._cenum import Colorspace, DCTMethod, Dithermode, MarkerType
