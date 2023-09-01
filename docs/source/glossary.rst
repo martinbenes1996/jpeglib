@@ -130,9 +130,7 @@ into progressive JPEG, with explicitly disabling Huffman code optimization.
 The values of not-specified flags are kept to be defaultly set by the selected libjpeg version,
 or copied from the source image.
 
-
-References
-""""""""""
+**References**
 
 * `Using the IJG JPEG library <https://freedesktop.org/wiki/Software/libjpeg/>`_
 * `Interface Definitions for libjpeg <https://refspecs.linuxbase.org/LSB_3.1.0/LSB-Desktop-generic/LSB-Desktop-generic/libjpegman.html>`_
@@ -150,11 +148,9 @@ Progressive JPEG consists of scans, which carry parts of the DCT coefficients. D
 After full loading of all the scans, progressive image should be, in theory, identical to its sequential counterpart.
 However, MozJPEG uses Trellis optimization which optimizes the file size and allows introduction of a imperceptible distortion.
 
-References
-""""""""""
+**References**
 
 * `Hofer, Böhme: Progressive JPEGs in the Wild: Implications for Information Hiding and Forensics <https://informationsecurity.uibk.ac.at/pdfs/HB2023_IHMMSEC.pdf>`_
-
 
 
 Glossary terms

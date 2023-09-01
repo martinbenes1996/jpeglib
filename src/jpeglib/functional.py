@@ -208,7 +208,7 @@ def from_spatial(
     spatial: np.ndarray,
     in_color_space: Colorspace = None,
     scans: typing.List[Scan] = None,
-) -> SpatialJPEG:
+) -> typing.Union[SpatialJPEG, ProgressiveJPEG]:
     """A factory of :class:`SpatialJPEG` from pixel data.
 
     The color space inference is based on number of color channels.
