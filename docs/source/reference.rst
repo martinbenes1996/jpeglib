@@ -35,6 +35,9 @@ Going progressive
 .. autoclass:: jpeglib.ProgressiveJPEG
    :members: path, spatial, write_spatial, color_space, flags, content, height, width, height_in_blocks, width_in_blocks, num_components, num_markers, samp_factor, progressive_mode, has_chrominance
 
+.. autoclass:: jpeglib.Scan
+   :members: components, Ss, Se, Ah, Al
+
 Using jpegio interface
 """"""""""""""""""""""
 
@@ -61,6 +64,12 @@ libjpeg-like enumerations
 
 .. autoclass:: jpeglib.MarkerType
    :members: JPEG_RST0, JPEG_RST1, JPEG_RST2, JPEG_RST3, JPEG_RST4, JPEG_RST5, JPEG_RST6, JPEG_RST7, JPEG_RST8, JPEG_EOI, JPEG_APP0, JPEG_APP1, JPEG_APP2, JPEG_APP3, JPEG_APP4, JPEG_APP5, JPEG_APP6, JPEG_APP7, JPEG_APP8, JPEG_APP9, JPEG_APP10, JPEG_APP11, JPEG_APP12, JPEG_APP13, JPEG_APP14, JPEG_APP15, JPEG_COM
+
+libjpeg-like structures
+"""""""""""""""""""""""
+
+.. autoclass:: jpeglib.Huffman
+   :members: components, Ss, Se, Ah, Al
 
 
 Manage libjpeg version
