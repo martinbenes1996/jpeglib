@@ -71,7 +71,7 @@ No chroma subsampling, [[1,1],[1,1],[1,1]], is denoted as 4:4:4.
 >>> # Variant 2: Specify in J:a:b notation
 >>> im.samp_factor = '4:4:4'
 
-Following table contains chroma sampling notations of jpeglib and J:a:b notation.
+The following table contains chroma sampling notations of jpeglib and J:a:b notation.
 
 .. list-table:: Notations for chroma sampling.
    :widths: 25 25 25 25
@@ -97,12 +97,20 @@ Following table contains chroma sampling notations of jpeglib and J:a:b notation
      - [[2, 2], [1, 1], [1, 1]]
      - :math:`1/2`
      - :math:`1/2`
+   * - 4:1:1
+     - [[1, 4], [1, 1], [1, 1]]
+     - :math:`1/1`
+     - :math:`1/4`
+   * - 4:1:0
+     - [[2, 4], [1, 1], [1, 1]]
+     - :math:`1/2`
+     - :math:`1/4`
 
 .. note::
 
     In cjpeg, ImageMagick, and `this tutorial <https://zpl.fi/chroma-subsampling-and-jpeg-sampling-factors/>`_,
     the chroma sampling factors are defined in horizontal-vertical order.
-    For consistence with the rest of interface, jpeglib uses vertical-horizontal order.
+    For consistency with the rest of the interface, jpeglib uses vertical-horizontal order.
 
 Flags
 """""
