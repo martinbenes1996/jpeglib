@@ -31,9 +31,12 @@ class TestDCT(unittest.TestCase):
         del self.tmp
         jpeglib.version.set(self.original_version)
 
-    def test_dct(self):
+
+    @parameterized.expand(ALL_VERSIONS)
+    def test_dct(self, version:str):
         """Test of lossless reading and writing of DCT."""
         self.logger.info("test_dct")
+        jpeglib.version.set(version)
         # get original DCT coefficients
         jpeg = jpeglib.read_dct("tests/assets/IMG_0311.jpeg")
         # write and read again
