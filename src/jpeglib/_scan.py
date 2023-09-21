@@ -12,6 +12,7 @@ import numpy as np
 @dataclasses.dataclass
 class Scan:
     """"""
+
     components: np.ndarray
     """index of components"""
     dc_tbl_no: np.ndarray
@@ -102,13 +103,21 @@ class Scan:
         self._Al = Al
 
     def __repr__(self) -> str:
-        scan_params = f'{self.Ss},{self.Se},{self.Ah},{self.Al}'
-        return f'<Scan {scan_params}: {self.components}>'
+        scan_params = f"{self.Ss},{self.Se},{self.Ah},{self.Al}"
+        return f"<Scan {scan_params}: {self.components}>"
 
     def __str__(self) -> str:
         """Converts the class to str, returns name."""
         return repr(self)
 
-    # def __eq__(self, other) -> bool:
-    #     """Compares two scans tables for equality."""
-    #     return (self.bits == other.bits).all() and (self.values == other.values).all()
+    def __eq__(self, other) -> bool:
+        """Compares two scans for equality."""
+        return all(
+            [
+                (self._components == other.components).all(),
+                self._Ss == other.Ss,
+                self._Se == other.Se,
+                self._Ah == other.Ah,
+                self._Al == other.Al,
+            ]
+        )
