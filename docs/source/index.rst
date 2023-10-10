@@ -36,3 +36,4 @@ Contents
    usage
    reference
    glossary
+   faq
