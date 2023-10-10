@@ -15,7 +15,7 @@ import tempfile
 import unittest
 
 import jpeglib
-from _defs import version_cluster, qt50_standard
+from _defs import version_cluster, qt50_standard, ALL_VERSIONS
 
 
 class TestDCT(unittest.TestCase):
