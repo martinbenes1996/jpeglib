@@ -324,7 +324,7 @@ int write_jpeg_spatial(
 		if(overwrite_flag(flags, TRELLIS_Q_OPT)) {
 			jpeg_c_set_bool_param(
 				&cinfo,
-				JBOOLEAN_TRELLIS_QUANT_DC,
+				JBOOLEAN_TRELLIS_Q_OPT,
 				flag_is_set(flags, TRELLIS_Q_OPT)
 			);
 		}
