@@ -232,6 +232,34 @@ class TestSpatial(unittest.TestCase):
         self.assert_equal_ratio_greater(im_ifast.Cb, im_float.Cb, .9)
         self.assert_equal_ratio_greater(im_ifast.Cr, im_float.Cr, .9)
 
+    def assert_identical_dct(self, filepath_a, filepath_b):
+        """
+        Compare to JPEG images and raise an assertion error when they do not match.
+        :param filepath_a: path to first JPEG file
+        :param filepath_b: path to second JPEG file
+        """
+        im_a = jpeglib.read_dct(filepath_a)
+        im_b = jpeglib.read_dct(filepath_b)
+
+        # Compare quantization tables
+        np.testing.assert_array_equal(im_a.qt, im_b.qt, strict=True)
+
+        # Compare chroma subsampling factors
+        np.testing.assert_array_equal(im_a.samp_factor, im_b.samp_factor, strict=True)
+
+        # Compare luminance channel
+        np.testing.assert_array_equal(im_a.Y, im_b.Y, strict=True)
+
+        # Compare presence of chroma channels
+        self.assertTrue(im_a.has_chrominance == im_b.has_chrominance)
+
+        if im_a.has_chrominance:
+            # Compare Cb channel
+            np.testing.assert_array_equal(im_a.Cb, im_b.Cb)
+
+            # Compare Cr channel
+            np.testing.assert_array_equal(im_a.Cr, im_b.Cr)
+
     @parameterized.expand([
         ['tests/assets/images-9e/testimg.bmp', 100],
         ['tests/assets/images-9e/testimg.bmp', 95],
@@ -276,14 +304,8 @@ class TestSpatial(unittest.TestCase):
 
                 jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, dct_method=dct_method_compress)
 
-                # Read and compare DCT coefficients
-                im_cjpeg = jpeglib.read_dct(cjpeg_outfile.name)
-                im_jpeglib = jpeglib.read_dct(jpeglib_outfile.name)
-
-                assert np.all(im_cjpeg.Y == im_jpeglib.Y)
-                if im_cjpeg.has_chrominance:
-                    assert np.all(im_cjpeg.Cb == im_jpeglib.Cb)
-                    assert np.all(im_cjpeg.Cr == im_jpeglib.Cr)
+                # Compare DCT coefficients
+                self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
 
                 # Compare decompression methods
                 for decompress_dct_method in dct_methods:
@@ -291,6 +313,74 @@ class TestSpatial(unittest.TestCase):
                     im_jpeglib = jpeglib.read_spatial(jpeglib_outfile.name, dct_method=decompress_dct_method).spatial
 
                     assert np.all(im_cjpeg == im_jpeglib)
+
+        # Clean up
+        cjpeg_outfile.close()
+        jpeglib_outfile.close()
+
+    def test_trellis_optimization(self, input_file, quality):
+        self.logger.info("test_trellis_optimization")
+
+        # Find MozJPEG build directory
+        mozjpeg_build_path = os.path.join("mozjpeg-4.0.3", "build")
+
+        # Find cjpeg executable
+        cjpeg_executable = os.path.join(mozjpeg_build_path, "cjpeg")
+        if not os.path.exists(cjpeg_executable):
+            # If cjpeg executable could not be found, skip this test. This will happen when executing tests on Windows.
+            self.logger.warning("Could not find cjpeg executable. Skipping this test.")
+            return 1
+
+        # cjpeg is dynamically linked, therefore set LD_LIBRARY_PATH to ensure that cjpeg uses the right libjpeg.so instead of a system-wide version.
+        lib_path = os.path.join(mozjpeg_build_path)
+        env = dict(os.environ)
+        if "LD_LIBRARY_PATH" in env:
+            env["LD_LIBRARY_PATH"] = lib_path + ":" + env["LD_LIBRARY_PATH"]
+        else:
+            env["LD_LIBRARY_PATH"] = lib_path
+
+        # Set up temporary files
+        cjpeg_outfile = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+        jpeglib_outfile = tempfile.NamedTemporaryFile(suffix='.jpeg', delete=False)
+
+        with jpeglib.version("mozjpeg403"):
+            #
+            # Test 1: In the default settings, trellis optimization of DC and AC coefficients is enabled
+            #
+            cmd = [cjpeg_executable, "-quality", str(quality), "-outfile", cjpeg_outfile.name, input_file]
+            subprocess.run(cmd, env=env, check=True)
+
+            # Compress test image using jpeglib
+            img = np.array(Image.open(input_file).convert("RGB"))
+
+            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality)
+
+            # Compare DCT coefficients
+            self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
+
+            #
+            # Test 2: Disable trellis optimization of the DC coefficient
+            #
+            cmd = [cjpeg_executable, "-quality", str(quality), "-notrellis-dc", "-outfile", cjpeg_outfile.name, input_file]
+            subprocess.run(cmd, env=env, check=True)
+
+            # Compress test image using jpeglib
+            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT_DC"])
+
+            # Compare DCT coefficients
+            self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
+
+            #
+            # Test 3: Disable trellis optimization
+            #
+            cmd = [cjpeg_executable, "-quality", str(quality), "-notrellis", "-outfile", cjpeg_outfile.name, input_file]
+            subprocess.run(cmd, env=env, check=True)
+
+            # Compress test image using jpeglib
+            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT"])
+
+            # Compare DCT coefficients
+            self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
 
         # Clean up
         cjpeg_outfile.close()
