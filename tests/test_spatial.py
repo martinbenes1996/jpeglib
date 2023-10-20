@@ -332,8 +332,8 @@ class TestSpatial(unittest.TestCase):
         return dct_method_str
 
     @parameterized.expand([
-        ['tests/assets/images-mozjpeg403/testimg.bmp', 100],
-        ['tests/assets/images-mozjpeg403/testimg.bmp', 95],
+        ['tests/assets/images-9e/testimg.bmp', 100],
+        ['tests/assets/images-9e/testimg.bmp', 95],
     ])
     def test_trellis_optimization(self, input_file, quality):
         self.logger.info("test_trellis_optimization")
