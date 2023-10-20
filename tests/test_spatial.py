@@ -318,6 +318,23 @@ class TestSpatial(unittest.TestCase):
         cjpeg_outfile.close()
         jpeglib_outfile.close()
 
+    @staticmethod
+    def dct_method_to_str(dct_method):
+        if dct_method == jpeglib.JDCT_ISLOW:
+            dct_method_str = "int"
+        elif dct_method == jpeglib.JDCT_IFAST:
+            dct_method_str = "fast"
+        elif dct_method == jpeglib.JDCT_FLOAT:
+            dct_method_str = "float"
+        else:
+            raise ValueError("Unknown dct method")
+
+        return dct_method_str
+
+    @parameterized.expand([
+        ['tests/assets/images-mozjpeg403/testimg.bmp', 100],
+        ['tests/assets/images-mozjpeg403/testimg.bmp', 95],
+    ])
     def test_trellis_optimization(self, input_file, quality):
         self.logger.info("test_trellis_optimization")
 
@@ -382,22 +399,21 @@ class TestSpatial(unittest.TestCase):
             # Compare DCT coefficients
             self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
 
+            #
+            # Test 4: Disable AC trellis optimization, enable DC trellis optimization
+            #
+            cmd = [cjpeg_executable, "-quality", str(quality), "-notrellis", "-trellis-dc", "-outfile", cjpeg_outfile.name, input_file]
+            subprocess.run(cmd, env=env, check=True)
+
+            # Compress test image using jpeglib
+            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT", "+TRELLIS_QUANT_DC"])
+
+            # Compare DCT coefficients
+            self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
+
         # Clean up
         cjpeg_outfile.close()
         jpeglib_outfile.close()
-
-    @staticmethod
-    def dct_method_to_str(dct_method):
-        if dct_method == jpeglib.JDCT_ISLOW:
-            dct_method_str = "int"
-        elif dct_method == jpeglib.JDCT_IFAST:
-            dct_method_str = "fast"
-        elif dct_method == jpeglib.JDCT_FLOAT:
-            dct_method_str = "float"
-        else:
-            raise ValueError("Unknown dct method")
-
-        return dct_method_str
 
     def test_infer_qt1_custom(self):
         """Check that qt_tbl_no is inferred when 1 QT is given."""
