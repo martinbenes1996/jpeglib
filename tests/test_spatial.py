@@ -364,13 +364,15 @@ class TestSpatial(unittest.TestCase):
             #
             # Test 1: In the default settings, trellis optimization of DC and AC coefficients is enabled
             #
-            cmd = [cjpeg_executable, "-quality", str(quality), "-outfile", cjpeg_outfile.name, input_file]
+            cmd = [cjpeg_executable, "-quality", str(quality), "-sample", "2x2", "-outfile", cjpeg_outfile.name, input_file]
             subprocess.run(cmd, env=env, check=True)
 
             # Compress test image using jpeglib
             img = np.array(Image.open(input_file).convert("RGB"))
 
-            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality)
+            img_jpeglib = jpeglib.from_spatial(img)
+            img_jpeglib.samp_factor = "4:2:0"
+            img_jpeglib.write_spatial(jpeglib_outfile.name, qt=quality)
 
             # Compare DCT coefficients
             self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
@@ -378,11 +380,13 @@ class TestSpatial(unittest.TestCase):
             #
             # Test 2: Disable trellis optimization of the DC coefficient
             #
-            cmd = [cjpeg_executable, "-quality", str(quality), "-notrellis-dc", "-outfile", cjpeg_outfile.name, input_file]
+            cmd = [cjpeg_executable, "-quality", str(quality), "-sample", "2x2", "-notrellis-dc", "-outfile", cjpeg_outfile.name, input_file]
             subprocess.run(cmd, env=env, check=True)
 
             # Compress test image using jpeglib
-            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT_DC"])
+            img_jpeglib = jpeglib.from_spatial(img)
+            img_jpeglib.samp_factor = "4:2:0"
+            img_jpeglib.write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT_DC"])
 
             # Compare DCT coefficients
             self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
@@ -390,11 +394,13 @@ class TestSpatial(unittest.TestCase):
             #
             # Test 3: Disable trellis optimization
             #
-            cmd = [cjpeg_executable, "-quality", str(quality), "-notrellis", "-outfile", cjpeg_outfile.name, input_file]
+            cmd = [cjpeg_executable, "-quality", str(quality), "-sample", "2x2", "-notrellis", "-outfile", cjpeg_outfile.name, input_file]
             subprocess.run(cmd, env=env, check=True)
 
             # Compress test image using jpeglib
-            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT"])
+            img_jpeglib = jpeglib.from_spatial(img)
+            img_jpeglib.samp_factor = "4:2:0"
+            img_jpeglib.write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT"])
 
             # Compare DCT coefficients
             self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
@@ -402,11 +408,13 @@ class TestSpatial(unittest.TestCase):
             #
             # Test 4: Disable AC trellis optimization, enable DC trellis optimization
             #
-            cmd = [cjpeg_executable, "-quality", str(quality), "-notrellis", "-trellis-dc", "-outfile", cjpeg_outfile.name, input_file]
+            cmd = [cjpeg_executable, "-quality", str(quality), "-sample", "2x2", "-notrellis", "-trellis-dc", "-outfile", cjpeg_outfile.name, input_file]
             subprocess.run(cmd, env=env, check=True)
 
             # Compress test image using jpeglib
-            jpeglib.from_spatial(img).write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT", "+TRELLIS_QUANT_DC"])
+            img_jpeglib = jpeglib.from_spatial(img)
+            img_jpeglib.samp_factor = "4:2:0"
+            img_jpeglib.write_spatial(jpeglib_outfile.name, qt=quality, flags=["-TRELLIS_QUANT", "+TRELLIS_QUANT_DC"])
 
             # Compare DCT coefficients
             self.assert_identical_dct(cjpeg_outfile.name, jpeglib_outfile.name)
