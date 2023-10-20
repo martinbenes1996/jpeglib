@@ -50,9 +50,11 @@ def Jab_to_factors(Jab) -> List:
     else:
         assert a in {J, 1, 0}
     assert b in {a, 0}
+
     # chroma dimensions
     Y = [2, J]
     Cb = Cr = [(a == b) + 1, a]
+
     # normalize by GCD
     gcd0 = GCD(Y[0], Cb[0], Cr[0])
     gcd1 = GCD(Y[1], Cb[1], Cr[1])

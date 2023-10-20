@@ -33,3 +33,8 @@ runs:
         curl -s -L https://ijg.org/files/jpegsrc.v9e.tar.gz | tar xvz
         cd jpeg-9e
         mkdir build && ./configure --prefix=$(pwd)/build && make && make install || true
+        cd ..
+        # Compile MozJPEG 4.0.3
+        curl -s -L https://github.com/mozilla/mozjpeg/archive/refs/tags/v4.0.3.tar.gz | tar xvz
+        cd mozjpeg-4.0.3
+        mkdir build && cd build && cmake -G"Unix Makefiles" .. && make || true
