@@ -158,7 +158,12 @@ class DCTJPEG(_jpeg.JPEG):
                 return None
             comp = comp.reshape((*comp.shape[:-2], 64))
             return np.ctypeslib.as_ctypes(comp.astype(np.int16))
-        qt = process_component(self.qt)
+        if isinstance(self.qt, int):
+            qt = None
+            if quality != -1:
+                quality = self.qt
+        else:
+            qt = process_component(self.qt)
         quant_tbl_no = np.array([-1]*4)
         if self.quant_tbl_no is not None:
             for i, q in enumerate(self.quant_tbl_no):
