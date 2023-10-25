@@ -15,7 +15,7 @@ import tempfile
 import unittest
 
 import jpeglib
-from _defs import version_cluster, qt50_standard, ALL_VERSIONS
+from _defs import version_cluster, qt50_standard, qt75_standard, ALL_VERSIONS
 
 
 class TestDCT(unittest.TestCase):
@@ -437,6 +437,35 @@ class TestDCT(unittest.TestCase):
         np.testing.assert_array_equal(Cb, jpeg.Cb)
         np.testing.assert_array_equal(Cr, jpeg.Cr)
         np.testing.assert_array_equal(qt, jpeg.qt)
+
+    def test_from_dct_qf(self):
+        """Test saving DCT with qf."""
+        self.logger.info("test_from_dct_qf")
+        # generate random DCT
+        np.random.seed(12345)
+        Y = np.random.randint(-127, 127, (75, 100, 8, 8), dtype=np.int16)
+        Cb = np.random.randint(-127, 127, (38, 50, 8, 8), dtype=np.int16)
+        Cr = np.random.randint(-127, 127, (38, 50, 8, 8), dtype=np.int16)
+        # create synthetic color JPEG using from_dct
+        jpeglib.from_dct(
+            Y=Y,
+            Cb=Cb,
+            Cr=Cr,
+            qt=75,
+        ).write_dct(self.tmp.name)
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(Y, jpeg.Y)
+        np.testing.assert_array_equal(Cb, jpeg.Cb)
+        np.testing.assert_array_equal(Cr, jpeg.Cr)
+        np.testing.assert_array_equal(qt75_standard, jpeg.qt)
+        # create synthetic grayscale JPEG using from_dct
+        jpeglib.from_dct(
+            Y=Y,
+            qt=75,
+        ).write_dct(self.tmp.name)
+        jpeg = jpeglib.read_dct(self.tmp.name)
+        np.testing.assert_array_equal(Y, jpeg.Y)
+        np.testing.assert_array_equal(qt75_standard[:1], jpeg.qt)
 
     # === tests with non-public software ===
     def test_rainer_MMSec(self):
