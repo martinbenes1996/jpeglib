@@ -224,12 +224,12 @@ int write_jpeg_dct(
 		else if (quality > 0) {
 			jpeg_set_quality(&cinfo_out, quality, TRUE);
 		}
-		if (overwrite_flag(flags, OPTIMIZE_CODING)) {
-			cinfo_out.optimize_coding = flag_is_set(flags, OPTIMIZE_CODING);
+		if (overwrite_default(flags, OPTIMIZE_CODING)) {
+			cinfo_out.optimize_coding = flag_to_boolean_value(flags, OPTIMIZE_CODING);
 		}
 		#ifdef C_ARITH_CODING_SUPPORTED
-		if (overwrite_flag(flags, ARITH_CODE)) {
-			cinfo_out.arith_code = flag_is_set(flags, ARITH_CODE);
+		if (overwrite_default(flags, ARITH_CODE)) {
+			cinfo_out.arith_code = flag_to_boolean_value(flags, ARITH_CODE);
 		}
 		#endif
 

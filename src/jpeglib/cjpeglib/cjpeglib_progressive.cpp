@@ -42,8 +42,8 @@ int read_jpeg_progressive(
 		if(dct_method >= 0) {
 			cinfo.dct_method = (J_DCT_METHOD)dct_method;
 		}
-		if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
-			cinfo.do_fancy_upsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+		if (overwrite_default(flags, DO_FANCY_UPSAMPLING)) {
+			cinfo.do_fancy_upsampling = flag_to_boolean_value(flags, DO_FANCY_UPSAMPLING);
 		}
 
         jpeg_calc_output_dimensions(&cinfo);
