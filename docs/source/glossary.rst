@@ -126,6 +126,7 @@ Boolean parameters are in jpeglib simply called flags, and contain following.
 - ARITH_CODE
 - TRELLIS_QUANT (>= mozjpeg300)
 - TRELLIS_QUANT_DC (>= mozjpeg300)
+- OVERSHOOT_DERINGING (>= mozjpeg300)
 - FORCE_BASELINE
 - WRITE_JFIF_HEADER
 - WRITE_ADOBE_MARKER
