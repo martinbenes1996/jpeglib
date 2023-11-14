@@ -5,7 +5,7 @@ extern "C" {
 
 #include "cjpeglib_common_flags.h"
 
-boolean flag_to_value(
+boolean flag_to_boolean_value(
 	BITMASK flags,
 	BITMASK mask
 ) {

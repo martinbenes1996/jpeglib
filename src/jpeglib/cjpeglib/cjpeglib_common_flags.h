@@ -14,6 +14,7 @@ boolean flag_to_boolean_value(
 	BITMASK flags,
 	BITMASK mask
 );
+
 boolean overwrite_default(
 	BITMASK flags,
 	BITMASK mask
