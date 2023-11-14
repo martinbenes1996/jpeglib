@@ -10,15 +10,16 @@ extern "C" {
 
 typedef unsigned long long BITMASK;
 
-boolean flag_is_set(
+boolean flag_to_boolean_value(
 	BITMASK flags,
 	BITMASK mask
 );
-unsigned char overwrite_flag(
+boolean overwrite_default(
 	BITMASK flags,
 	BITMASK mask
 );
 
+// There are 2 bits per flag. The more significant bit (MSB) indicates whether to keep the default value (= 1) or whether to overwrite the default value (= 0). If the MSB is 1, the less significant bit (LSB) is ignored. If the MSB is 0, the LSB is taken as the new value.
 #define DO_FANCY_UPSAMPLING ((BITMASK)0b1 << 0)
 #define DO_BLOCK_SMOOTHING ((BITMASK)0b1 << 2)
 #define TWO_PASS_QUANTIZE ((BITMASK)0b1 << 4)
@@ -38,6 +39,7 @@ unsigned char overwrite_flag(
 #define TRELLIS_Q_OPT ((BITMASK)0b1 << 32)
 #define OPTIMIZE_SCANS ((BITMASK)0b1 << 34)
 #define USE_SCANS_IN_TRELLIS ((BITMASK)0b1 << 36)
+#define OVERSHOOT_DERINGING ((BITMASK)0b1 << 38)
 
 #ifdef __cplusplus
 }

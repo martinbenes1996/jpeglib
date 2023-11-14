@@ -277,6 +277,7 @@ class CJpegLib:
         "TRELLIS_Q_OPT": (0b1 << 32),
         "OPTIMIZE_SCANS": (0b1 << 34),
         "USE_SCANS_IN_TRELLIS": (0b1 << 36),
+        "OVERSHOOT_DERINGING": (0b1 << 38),
     }
 
     @classmethod
@@ -285,27 +286,40 @@ class CJpegLib:
         flags: List[str],
         progressive_mode: bool = None,
     ):
-        mask = 0xFFFFFFFF
+        # Create a 64-bit mask with all 1s
+        mask = 0xFFFFFFFFFFFFFFFF
+        
         if flags is None:
             return mask
+        
         # progressive mode
         if progressive_mode is not None:
             mask ^= cls.MASKS['PROGRESSIVE_MODE'] << 1
             if not progressive_mode:
                 mask ^= cls.MASKS['PROGRESSIVE_MODE']
+        
         # manual flags
         for flag in flags:
             # parse sign
             sign = '-' if flag[0] == '-' else '+'
             if not flag[0].isalpha():
+                # flag does not have a sign, so we interpret it as +
                 flag = flag[1:]
-            # get flags
-            flagbit = cls.MASKS[flag.upper()]
+            
+            # The more significant bit indicates whether to keep the default (defbit = 1) or change (defbit = 0).
             defbit = cls.MASKS[flag.upper()] << 1
-            # map
-            mask ^= defbit  # reset default value
+            
+            # The less significant bit contains the changed value.
+            flagbit = cls.MASKS[flag.upper()]
+            
+            # Set defbit to 0, meaning that the default value should be overwritten.
+            mask ^= defbit
+            
+            # Set the new value. By default, it is set to 1.
             if sign == '-':
-                mask ^= flagbit  # erase bit
+                # Set new value to 0
+                mask ^= flagbit
+
         return ctypes.c_ulonglong(mask)
 
     @classmethod
