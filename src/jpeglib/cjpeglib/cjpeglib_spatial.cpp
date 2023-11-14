@@ -50,14 +50,14 @@ int read_jpeg_spatial(
 		if(dct_method >= 0) {
 			cinfo.dct_method = (J_DCT_METHOD)dct_method;
 		}
-		if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
-			cinfo.do_fancy_upsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+		if (overwrite_default(flags, DO_FANCY_UPSAMPLING)) {
+			cinfo.do_fancy_upsampling = flag_to_boolean_value(flags, DO_FANCY_UPSAMPLING);
 		}
-		if (overwrite_flag(flags, DO_BLOCK_SMOOTHING)) {
-			cinfo.do_block_smoothing = flag_is_set(flags, DO_BLOCK_SMOOTHING);
+		if (overwrite_default(flags, DO_BLOCK_SMOOTHING)) {
+			cinfo.do_block_smoothing = flag_to_boolean_value(flags, DO_BLOCK_SMOOTHING);
 		}
-		if (overwrite_flag(flags, QUANTIZE_COLORS)) {
-			cinfo.quantize_colors = flag_is_set(flags, QUANTIZE_COLORS);
+		if (overwrite_default(flags, QUANTIZE_COLORS)) {
+			cinfo.quantize_colors = flag_to_boolean_value(flags, QUANTIZE_COLORS);
 		}
 		unsigned char *cmap[256];
 		if (in_colormap != NULL)
@@ -65,40 +65,40 @@ int read_jpeg_spatial(
 				cmap[i] = in_colormap + i * 3;
 			}
 
-		if (overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS)) {
+		if (overwrite_default(flags, QUANTIZE_COLORS) && flag_to_boolean_value(flags, QUANTIZE_COLORS)) {
 			cinfo.actual_number_of_colors = 256; // TODO: parametrized
 			cinfo.desired_number_of_colors = 256;
 			if (in_colormap != NULL)
 				cinfo.colormap = (JSAMPARRAY)cmap;
 		}
 
-		if (overwrite_flag(flags, PROGRESSIVE_MODE)) {
-			cinfo.progressive_mode = flag_is_set(flags, PROGRESSIVE_MODE);
+		if (overwrite_default(flags, PROGRESSIVE_MODE)) {
+			cinfo.progressive_mode = flag_to_boolean_value(flags, PROGRESSIVE_MODE);
 		}
-		if (overwrite_flag(flags, ARITH_CODE)) {
-			cinfo.arith_code = flag_is_set(flags, ARITH_CODE);
+		if (overwrite_default(flags, ARITH_CODE)) {
+			cinfo.arith_code = flag_to_boolean_value(flags, ARITH_CODE);
 		}
-		if (overwrite_flag(flags, CCIR601_SAMPLING)) {
-			cinfo.CCIR601_sampling = flag_is_set(flags, CCIR601_SAMPLING);
+		if (overwrite_default(flags, CCIR601_SAMPLING)) {
+			cinfo.CCIR601_sampling = flag_to_boolean_value(flags, CCIR601_SAMPLING);
 		}
-		if (overwrite_flag(flags, TWO_PASS_QUANTIZE)) {
-			cinfo.two_pass_quantize = flag_is_set(flags, TWO_PASS_QUANTIZE);
+		if (overwrite_default(flags, TWO_PASS_QUANTIZE)) {
+			cinfo.two_pass_quantize = flag_to_boolean_value(flags, TWO_PASS_QUANTIZE);
 		}
-		if (overwrite_flag(flags, ENABLE_1PASS_QUANT)) {
-			cinfo.enable_1pass_quant = flag_is_set(flags, ENABLE_1PASS_QUANT);
+		if (overwrite_default(flags, ENABLE_1PASS_QUANT)) {
+			cinfo.enable_1pass_quant = flag_to_boolean_value(flags, ENABLE_1PASS_QUANT);
 		}
-		if (overwrite_flag(flags, ENABLE_EXTERNAL_QUANT)) {
-			cinfo.enable_external_quant = flag_is_set(flags, ENABLE_EXTERNAL_QUANT);
+		if (overwrite_default(flags, ENABLE_EXTERNAL_QUANT)) {
+			cinfo.enable_external_quant = flag_to_boolean_value(flags, ENABLE_EXTERNAL_QUANT);
 		}
-		if (overwrite_flag(flags, ENABLE_2PASS_QUANT)) {
-			cinfo.enable_2pass_quant = flag_is_set(flags, ENABLE_2PASS_QUANT);
+		if (overwrite_default(flags, ENABLE_2PASS_QUANT)) {
+			cinfo.enable_2pass_quant = flag_to_boolean_value(flags, ENABLE_2PASS_QUANT);
 		}
 		// decompress
 		(void)jpeg_start_decompress(&cinfo);
 		// read pixels
 		char *rowptr = (char *)rgb;
 		unsigned short stride = cinfo.out_color_components;
-		if(overwrite_flag(flags, QUANTIZE_COLORS) && flag_is_set(flags, QUANTIZE_COLORS))
+		if(overwrite_default(flags, QUANTIZE_COLORS) && flag_to_boolean_value(flags, QUANTIZE_COLORS))
 			stride = 1;
 
 		// fprintf(stderr,
@@ -233,8 +233,8 @@ int write_jpeg_spatial(
 
 			// force baseline (8bit quantization)
 			boolean force_baseline = FALSE;
-			if (overwrite_flag(flags, FORCE_BASELINE))
-				force_baseline = flag_is_set(flags, FORCE_BASELINE);
+			if (overwrite_default(flags, FORCE_BASELINE))
+				force_baseline = flag_to_boolean_value(flags, FORCE_BASELINE);
 			jpeg_set_quality(&cinfo, quality, force_baseline);
 		}
 
@@ -248,14 +248,14 @@ int write_jpeg_spatial(
 		//   cinfo.in_color_space = in_color_space;
 
 		#if LIBVERSION >= 70
-		if (overwrite_flag(flags, DO_FANCY_UPSAMPLING)) {
-			cinfo.do_fancy_downsampling = flag_is_set(flags, DO_FANCY_UPSAMPLING);
+		if (overwrite_default(flags, DO_FANCY_UPSAMPLING)) {
+			cinfo.do_fancy_downsampling = flag_to_boolean_value(flags, DO_FANCY_UPSAMPLING);
 		}
 		#endif
-		if (overwrite_flag(flags, PROGRESSIVE_MODE)) {
-			cinfo.progressive_mode = flag_is_set(flags, PROGRESSIVE_MODE);
+		if (overwrite_default(flags, PROGRESSIVE_MODE)) {
+			cinfo.progressive_mode = flag_to_boolean_value(flags, PROGRESSIVE_MODE);
 		}
-		if (overwrite_flag(flags, PROGRESSIVE_MODE) && flag_is_set(flags, PROGRESSIVE_MODE)) {
+		if (overwrite_default(flags, PROGRESSIVE_MODE) && flag_to_boolean_value(flags, PROGRESSIVE_MODE)) {
 			if(scan_script == NULL) {
 				jpeg_simple_progression(&cinfo);
 			} else {
@@ -290,52 +290,52 @@ int write_jpeg_spatial(
 			}
 
 		}
-		if (overwrite_flag(flags, OPTIMIZE_CODING)) {
-			cinfo.optimize_coding = flag_is_set(flags, OPTIMIZE_CODING);
+		if (overwrite_default(flags, OPTIMIZE_CODING)) {
+			cinfo.optimize_coding = flag_to_boolean_value(flags, OPTIMIZE_CODING);
 		}
 		#ifdef C_ARITH_CODING_SUPPORTED
-		if (overwrite_flag(flags, ARITH_CODE)) {
-			cinfo.arith_code = flag_is_set(flags, ARITH_CODE);
+		if (overwrite_default(flags, ARITH_CODE)) {
+			cinfo.arith_code = flag_to_boolean_value(flags, ARITH_CODE);
 		}
 		#endif
-		if (overwrite_flag(flags, WRITE_JFIF_HEADER)) {
-			cinfo.write_JFIF_header = flag_is_set(flags, WRITE_JFIF_HEADER);
+		if (overwrite_default(flags, WRITE_JFIF_HEADER)) {
+			cinfo.write_JFIF_header = flag_to_boolean_value(flags, WRITE_JFIF_HEADER);
 		}
-		if (overwrite_flag(flags, WRITE_ADOBE_MARKER)) {
-			cinfo.write_Adobe_marker = flag_is_set(flags, WRITE_ADOBE_MARKER);
+		if (overwrite_default(flags, WRITE_ADOBE_MARKER)) {
+			cinfo.write_Adobe_marker = flag_to_boolean_value(flags, WRITE_ADOBE_MARKER);
 		}
-		if (overwrite_flag(flags, CCIR601_SAMPLING)) {
-			cinfo.CCIR601_sampling = flag_is_set(flags, CCIR601_SAMPLING);
+		if (overwrite_default(flags, CCIR601_SAMPLING)) {
+			cinfo.CCIR601_sampling = flag_to_boolean_value(flags, CCIR601_SAMPLING);
 		}
 		#if LIBVERSION >= 6300
-		if(overwrite_flag(flags, TRELLIS_QUANT)) {
+		if(overwrite_default(flags, TRELLIS_QUANT)) {
 			jpeg_c_set_bool_param(
 				&cinfo,
 				JBOOLEAN_TRELLIS_QUANT,
-				flag_is_set(flags, TRELLIS_QUANT)
+				flag_to_boolean_value(flags, TRELLIS_QUANT)
 			);
 		}
-		if(overwrite_flag(flags, TRELLIS_QUANT_DC)) {
+		if(overwrite_default(flags, TRELLIS_QUANT_DC)) {
 			jpeg_c_set_bool_param(
 				&cinfo,
 				JBOOLEAN_TRELLIS_QUANT_DC,
-				flag_is_set(flags, TRELLIS_QUANT_DC)
+				flag_to_boolean_value(flags, TRELLIS_QUANT_DC)
 			);
 		}
-		if(overwrite_flag(flags, TRELLIS_Q_OPT)) {
+		if(overwrite_default(flags, TRELLIS_Q_OPT)) {
 			jpeg_c_set_bool_param(
 				&cinfo,
 				JBOOLEAN_TRELLIS_Q_OPT,
-				flag_is_set(flags, TRELLIS_Q_OPT)
+				flag_to_boolean_value(flags, TRELLIS_Q_OPT)
 			);
 		}
-		if(overwrite_flag(flags, OVERSHOOT_DERINGING)) {
-			printf("Going to overwrite overshoot deringing? %d\n", flag_is_set(flags, OVERSHOOT_DERINGING));
+		if(overwrite_default(flags, OVERSHOOT_DERINGING)) {
+			printf("Going to overwrite overshoot deringing? %d\n", flag_to_boolean_value(flags, OVERSHOOT_DERINGING));
 
 			jpeg_c_set_bool_param(
 				&cinfo,
 				JBOOLEAN_OVERSHOOT_DERINGING,
-				flag_is_set(flags, OVERSHOOT_DERINGING)
+				flag_to_boolean_value(flags, OVERSHOOT_DERINGING)
 			);
 		}
 
@@ -344,18 +344,18 @@ int write_jpeg_spatial(
 		printf("cinfo.master->trellis_quant_dc = %d\n", cinfo.master->trellis_quant_dc);
 		printf("cinfo.master->master->overshoot_deringing = %d\n", cinfo.master->overshoot_deringing);
 
-		// if(overwrite_flag(flags, OPTIMIZE_SCANS)) {
+		// if(overwrite_default(flags, OPTIMIZE_SCANS)) {
 		// 	jpeg_c_set_bool_param(
 		// 		&cinfo,
 		// 		JBOOLEAN_OPTIMIZE_SCANS,
-		// 		flag_is_set(flags, OPTIMIZE_SCANS)
+		// 		flag_to_boolean_value(flags, OPTIMIZE_SCANS)
 		// 	);
 		// }
-		if(overwrite_flag(flags, USE_SCANS_IN_TRELLIS)) {
+		if(overwrite_default(flags, USE_SCANS_IN_TRELLIS)) {
 			jpeg_c_set_bool_param(
 				&cinfo,
 				JBOOLEAN_USE_SCANS_IN_TRELLIS,
-				flag_is_set(flags, USE_SCANS_IN_TRELLIS)
+				flag_to_boolean_value(flags, USE_SCANS_IN_TRELLIS)
 			);
 		}
 		// JBOOLEAN_TRELLIS_EOB_OPT = 0xD7F73780, /* TRUE=optimize for sequences of EOB */
