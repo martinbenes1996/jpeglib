@@ -11,7 +11,6 @@ extern "C" {
 #include "vjpeglib.h"
 #include "cjpeglib.h"
 #include "cjpeglib_common.h"
-#include "jpegint.h"
 
 
 int read_jpeg_spatial(
@@ -330,19 +329,12 @@ int write_jpeg_spatial(
 			);
 		}
 		if(overwrite_default(flags, OVERSHOOT_DERINGING)) {
-			printf("Going to overwrite overshoot deringing? %d\n", flag_to_boolean_value(flags, OVERSHOOT_DERINGING));
-
 			jpeg_c_set_bool_param(
 				&cinfo,
 				JBOOLEAN_OVERSHOOT_DERINGING,
 				flag_to_boolean_value(flags, OVERSHOOT_DERINGING)
 			);
 		}
-
-		printf("flags: %llu\n", flags);
-		printf("cinfo.master->trellis_quant = %d\n", cinfo.master->trellis_quant);
-		printf("cinfo.master->trellis_quant_dc = %d\n", cinfo.master->trellis_quant_dc);
-		printf("cinfo.master->master->overshoot_deringing = %d\n", cinfo.master->overshoot_deringing);
 
 		// if(overwrite_default(flags, OPTIMIZE_SCANS)) {
 		// 	jpeg_c_set_bool_param(
