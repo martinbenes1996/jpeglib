@@ -403,9 +403,9 @@ class CJpegLib:
         # Explicitly specify argument types
         cjpeglib_dylib.read_jpeg_spatial.argtypes = [
             ctypes.c_char_p, # const char* srcfile
-            ctypes.POINTER(ctypes.c_ubyte), # unsigned char* rgb
-            ctypes.POINTER(ctypes.c_ubyte), # unsigned char* colormap
-            ctypes.POINTER(ctypes.c_ubyte), # unsigned char* in_colormap
+            ctypes.c_ubyte_p, # unsigned char* rgb
+            ctypes.c_ubyte_p, # unsigned char* colormap
+            ctypes.c_ubyte_p, # unsigned char* in_colormap
             ctypes.c_int, # int out_color_space
             ctypes.c_int, # int dither mode
             ctypes.c_int, # int dct method
