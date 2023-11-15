@@ -1,6 +1,7 @@
 import numpy as np
 from parameterized import parameterized
 
+
 ALL_VERSIONS = [
     ["6b"],
     ["7"],
