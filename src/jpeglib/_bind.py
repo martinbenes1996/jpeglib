@@ -310,7 +310,7 @@ class CJpegLib:
     ):
         # Create a 32-bit masks
         mask_overwrite = 0x0
-        mask_set_value = ~0
+        mask_set_value = ~0  # 0xFFFF...
 
         uint = ctypes.c_uint
         if flags is None:
