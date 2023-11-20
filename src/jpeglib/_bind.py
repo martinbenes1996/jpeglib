@@ -362,13 +362,16 @@ class CJpegLib:
     def _versions(cls):
         """
         Find all library files in cjpeglib directory.
-        Library files must start with "cjpeglib" and the file extensions must be ".so" or ".dll".
+        Library files must start with "cjpeglib" and the file extensions must be one of the following:
+        - ".so" (Linux and Mac),
+        - ".dll" (Windows Cygwin), or
+        - ".pyd" (similar to a Windows DLL).
         Return a list of matching filenames.
         """
         so_files = [
             f
             for f in os.listdir(list(cjpeglib.__path__)[0])
-            if re.fullmatch(r'cjpeglib_.*\.(so|dll)', f)
+            if re.fullmatch(r'cjpeglib_.*\.(so|dll|pyd)', f)
         ]
         return so_files
 
@@ -387,7 +390,7 @@ class CJpegLib:
         all_so_files = cls._versions()
 
         # Select the desired version
-        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}\..*\.(so|dll)', f), all_so_files))
+        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}\..*\.(so|dll|pyd)', f), all_so_files))
         if len(matching_so_files) == 0:
             raise RuntimeError(f'version "{version}" not found')
         elif len(matching_so_files) > 1:
