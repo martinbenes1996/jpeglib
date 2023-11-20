@@ -128,7 +128,7 @@ class CJpegLib:
             marker_types,
             marker_lengths,
             markers,
-            cls.flags_to_mask(flags),
+            *cls.flags_to_mask(flags),
         )
         if status == 0:
             raise IOError(f"writing DCT to {dstfile} failed")
@@ -162,7 +162,7 @@ class CJpegLib:
             out_color_space,
             dither_mode,
             dct_method,
-            cls.flags_to_mask(flags)
+            *cls.flags_to_mask(flags)
         )
         if status == 0:
             raise IOError(f"reading of {path} spatial failed")
@@ -214,7 +214,7 @@ class CJpegLib:
             scan_script,
             huffman_bits,
             huffman_values,
-            cls.flags_to_mask(flags, progressive_mode),
+            *cls.flags_to_mask(flags, progressive_mode),
         )
         if status == 0:
             raise IOError(f"writing spatial to {dstfile} failed")
@@ -250,34 +250,56 @@ class CJpegLib:
             huffman_values,
             qt,
             quant_tbl_no,
-            cls.flags_to_mask(flags, True),
+            *cls.flags_to_mask(flags, True),
         )
         if status == 0:
             raise IOError(f"reading scanscript of {srcfile} failed")
 
     MASKS = {
+        # "DO_FANCY_SAMPLING": (0b1 << 0),
+        # "DO_FANCY_UPSAMPLING": (0b1 << 0),
+        # "DO_FANCY_DOWNSAMPLING": (0b1 << 0),
+        # "DO_BLOCK_SMOOTHING": (0b1 << 2),
+        # "TWO_PASS_QUANTIZE": (0b1 << 4),
+        # "ENABLE_1PASS_QUANT": (0b1 << 6),
+        # "ENABLE_EXTERNAL_QUANT": (0b1 << 8),
+        # "ENABLE_2PASS_QUANT": (0b1 << 10),
+        # "OPTIMIZE_CODING": (0b1 << 12),
+        # "PROGRESSIVE_MODE": (0b1 << 14),
+        # "QUANTIZE_COLORS": (0b1 << 16),
+        # "ARITH_CODE": (0b1 << 18),
+        # "WRITE_JFIF_HEADER": (0b1 << 20),
+        # "WRITE_ADOBE_MARKER": (0b1 << 22),
+        # "CCIR601_SAMPLING": (0b1 << 24),
+        # "FORCE_BASELINE": (0b1 << 26),
+        # "TRELLIS_QUANT": (0b1 << 28),
+        # "TRELLIS_QUANT_DC": (0b1 << 30),
+        # "TRELLIS_Q_OPT": (0b1 << 32),
+        # "OPTIMIZE_SCANS": (0b1 << 34),
+        # "USE_SCANS_IN_TRELLIS": (0b1 << 36),
+        # "OVERSHOOT_DERINGING": (0b1 << 38),
         "DO_FANCY_SAMPLING": (0b1 << 0),
         "DO_FANCY_UPSAMPLING": (0b1 << 0),
         "DO_FANCY_DOWNSAMPLING": (0b1 << 0),
-        "DO_BLOCK_SMOOTHING": (0b1 << 2),
-        "TWO_PASS_QUANTIZE": (0b1 << 4),
-        "ENABLE_1PASS_QUANT": (0b1 << 6),
-        "ENABLE_EXTERNAL_QUANT": (0b1 << 8),
-        "ENABLE_2PASS_QUANT": (0b1 << 10),
-        "OPTIMIZE_CODING": (0b1 << 12),
-        "PROGRESSIVE_MODE": (0b1 << 14),
-        "QUANTIZE_COLORS": (0b1 << 16),
-        "ARITH_CODE": (0b1 << 18),
-        "WRITE_JFIF_HEADER": (0b1 << 20),
-        "WRITE_ADOBE_MARKER": (0b1 << 22),
-        "CCIR601_SAMPLING": (0b1 << 24),
-        "FORCE_BASELINE": (0b1 << 26),
-        "TRELLIS_QUANT": (0b1 << 28),
-        "TRELLIS_QUANT_DC": (0b1 << 30),
-        "TRELLIS_Q_OPT": (0b1 << 32),
-        "OPTIMIZE_SCANS": (0b1 << 34),
-        "USE_SCANS_IN_TRELLIS": (0b1 << 36),
-        "OVERSHOOT_DERINGING": (0b1 << 38),
+        "DO_BLOCK_SMOOTHING": (0b1 << 1),
+        "TWO_PASS_QUANTIZE": (0b1 << 2),
+        "ENABLE_1PASS_QUANT": (0b1 << 3),
+        "ENABLE_EXTERNAL_QUANT": (0b1 << 4),
+        "ENABLE_2PASS_QUANT": (0b1 << 5),
+        "OPTIMIZE_CODING": (0b1 << 6),
+        "PROGRESSIVE_MODE": (0b1 << 7),
+        "QUANTIZE_COLORS": (0b1 << 8),
+        "ARITH_CODE": (0b1 << 9),
+        "WRITE_JFIF_HEADER": (0b1 << 10),
+        "WRITE_ADOBE_MARKER": (0b1 << 11),
+        "CCIR601_SAMPLING": (0b1 << 12),
+        "FORCE_BASELINE": (0b1 << 13),
+        "TRELLIS_QUANT": (0b1 << 14),
+        "TRELLIS_QUANT_DC": (0b1 << 15),
+        "TRELLIS_Q_OPT": (0b1 << 16),
+        "OPTIMIZE_SCANS": (0b1 << 17),
+        "USE_SCANS_IN_TRELLIS": (0b1 << 18),
+        "OVERSHOOT_DERINGING": (0b1 << 19),
     }
 
     @classmethod
@@ -286,18 +308,21 @@ class CJpegLib:
         flags: List[str],
         progressive_mode: bool = None,
     ):
-        # Create a 64-bit mask with all 1s
-        mask = 0xFFFFFFFFFFFFFFFF
-        
+        # Create a 32-bit mask with all 1s
+        mask_overwrite = 0x0
+        mask_set_value = ~0
+        # mask = 0xFFFFFFFFFFFFFFFF
+
+        uint = ctypes.c_uint
         if flags is None:
-            return mask
-        
+            return uint(mask_overwrite), uint(mask_set_value)
+
         # progressive mode
         if progressive_mode is not None:
-            mask ^= cls.MASKS['PROGRESSIVE_MODE'] << 1
-            if not progressive_mode:
-                mask ^= cls.MASKS['PROGRESSIVE_MODE']
-        
+            mask_overwrite ^= cls.MASKS['PROGRESSIVE_MODE']
+            if progressive_mode is False:
+                mask_set_value ^= cls.MASKS['PROGRESSIVE_MODE']
+
         # manual flags
         for flag in flags:
             # parse sign
@@ -305,30 +330,28 @@ class CJpegLib:
             if not flag[0].isalpha():
                 # flag does not have a sign, so we interpret it as +
                 flag = flag[1:]
-            
-            # The more significant bit indicates whether to keep the default (defbit = 1) or change (defbit = 0).
-            defbit = cls.MASKS[flag.upper()] << 1
-            
-            # The less significant bit contains the changed value.
-            flagbit = cls.MASKS[flag.upper()]
-            
-            # Set defbit to 0, meaning that the default value should be overwritten.
-            mask ^= defbit
-            
-            # Set the new value. By default, it is set to 1.
-            if sign == '-':
-                # Set new value to 0
-                mask ^= flagbit
 
-        return ctypes.c_ulonglong(mask)
+            # bit indicating whether to keep the default (0 = change)
+            b_overwrite = cls.MASKS[flag.upper()]
+
+            # bit carrying the new value of the bit (if changed)
+            b_value = cls.MASKS[flag.upper()]
+
+            # set b_ovewrite to 1, the default value will be overwritten
+            mask_overwrite ^= b_overwrite
+
+            # set the new value - by default 1
+            if sign == '-':
+                # set to 0
+                mask_set_value ^= b_value
+
+        return uint(mask_overwrite), uint(mask_set_value)
 
     @classmethod
     def mask_to_flags(cls, mask: int):
         flags = []
         bitmask = mask[0]
-        # PROGRESSIVE_MODE = 0b00100
-        # mask = ??1?? or ??0??
-        if ((cls.MASKS["PROGRESSIVE_MODE"]) & bitmask) != 0:
+        if (bitmask & cls.MASKS["PROGRESSIVE_MODE"]) != 0:
             flags.append("PROGRESSIVE_MODE")
 
         return flags

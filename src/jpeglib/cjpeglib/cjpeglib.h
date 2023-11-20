@@ -24,7 +24,7 @@ int read_jpeg_info(
     short *huffman_bits,
     short *huffman_values,
 	int *num_scans,
-    BITMASK *flags
+    BITMASK *flags_set_value
 );
 
 LIBRARY_API
@@ -64,7 +64,8 @@ int write_jpeg_dct(
     int *marker_types,
     int *marker_lengths,
     unsigned char *markers,
-	BITMASK flags
+	BITMASK flags_overwrite,
+	BITMASK flags_set_value
 );
 
 // ----------- RGB -------------
@@ -77,7 +78,8 @@ int read_jpeg_spatial(
     int out_color_space,
     int dither_mode,
     int dct_method,
-    BITMASK flags
+	BITMASK flags_overwrite,
+	BITMASK flags_set_value
 );
 
 LIBRARY_API
@@ -102,7 +104,8 @@ int write_jpeg_spatial(
 	int *scan_script,
     short *huffman_bits,
     short *huffman_values,
-    BITMASK flags
+	BITMASK flags_overwrite,
+	BITMASK flags_set_value
 );
 
 LIBRARY_API
@@ -119,7 +122,8 @@ int read_jpeg_progressive(
     short *huffman_values,
 	unsigned short *qt,
     short *quant_tbl_no,
-	BITMASK flags
+	BITMASK flags_overwrite,
+	BITMASK flags_set_value
 );
 
 // int jpeg_lib_version(void) { return JPEG_LIB_VERSION; }

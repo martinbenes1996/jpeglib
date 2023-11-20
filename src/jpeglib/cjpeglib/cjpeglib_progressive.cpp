@@ -17,7 +17,8 @@ int read_jpeg_progressive(
     short *huffman_values,
 	unsigned short *qt,
     short *quant_tbl_no,
-	BITMASK flags
+	BITMASK flags_overwrite,
+	BITMASK flags_set_value
 ) {
     // allocate
 	FILE *fp = NULL;
@@ -42,8 +43,8 @@ int read_jpeg_progressive(
 		if(dct_method >= 0) {
 			cinfo.dct_method = (J_DCT_METHOD)dct_method;
 		}
-		if (overwrite_default(flags, DO_FANCY_UPSAMPLING)) {
-			cinfo.do_fancy_upsampling = flag_to_boolean_value(flags, DO_FANCY_UPSAMPLING);
+		if (overwrite_default(flags_overwrite, DO_FANCY_UPSAMPLING)) {
+			cinfo.do_fancy_upsampling = flag_to_boolean_value(flags_set_value, DO_FANCY_UPSAMPLING);
 		}
 
         jpeg_calc_output_dimensions(&cinfo);
