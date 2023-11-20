@@ -387,7 +387,7 @@ class CJpegLib:
         all_so_files = cls._versions()
 
         # Select the desired version
-        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}.*\.(so|dll)', f), all_so_files))
+        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}\..*\.(so|dll)', f), all_so_files))
         if len(matching_so_files) == 0:
             raise RuntimeError(f'version "{version}" not found')
         elif len(matching_so_files) > 1:
