@@ -320,7 +320,7 @@ class CJpegLib:
         # progressive mode
         if progressive_mode is not None:
             mask_overwrite ^= cls.MASKS['PROGRESSIVE_MODE']
-            if progressive_mode:
+            if progressive_mode is False:
                 mask_set_value ^= cls.MASKS['PROGRESSIVE_MODE']
 
         # manual flags
@@ -351,9 +351,7 @@ class CJpegLib:
     def mask_to_flags(cls, mask: int):
         flags = []
         bitmask = mask[0]
-        # PROGRESSIVE_MODE = 0b00100
-        # mask = ??1?? or ??0??
-        if ((cls.MASKS["PROGRESSIVE_MODE"]) & bitmask) != 0:
+        if (bitmask & cls.MASKS["PROGRESSIVE_MODE"]) != 0:
             flags.append("PROGRESSIVE_MODE")
 
         return flags
