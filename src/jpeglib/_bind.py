@@ -368,6 +368,10 @@ class CJpegLib:
         - ".pyd" (similar to a Windows DLL).
         Return a list of matching filenames.
         """
+
+        # Temporary printing
+        print(os.listdir(list(cjpeglib.__path__)[0]))
+
         so_files = [
             f
             for f in os.listdir(list(cjpeglib.__path__)[0])
