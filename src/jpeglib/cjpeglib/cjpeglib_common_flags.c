@@ -23,6 +23,8 @@ boolean overwrite_default(
 	return ((flags & mask) != 0);
 }
 
+// TODO: merge?
+
 #ifdef __cplusplus
 }
 #endif
