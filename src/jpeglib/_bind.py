@@ -366,12 +366,11 @@ class CJpegLib:
         - ".so" (Linux and Mac),
         - ".dll" (Windows Cygwin), or
         - ".pyd" (similar to a Windows DLL).
+
+        Examples are "cjpeglib_7.abi3.so" and "cjpeglib_7.pyd".
+
         Return a list of matching filenames.
         """
-
-        # Temporary printing
-        print(os.listdir(list(cjpeglib.__path__)[0]))
-
         so_files = [
             f
             for f in os.listdir(list(cjpeglib.__path__)[0])
@@ -394,7 +393,7 @@ class CJpegLib:
         all_so_files = cls._versions()
 
         # Select the desired version
-        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}\..*\.(so|dll|pyd)', f), all_so_files))
+        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}(\..*)?\.(so|dll|pyd)', f), all_so_files))
         if len(matching_so_files) == 0:
             raise RuntimeError(f'version "{version}" not found')
         elif len(matching_so_files) > 1:
