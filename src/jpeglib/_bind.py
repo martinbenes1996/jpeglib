@@ -308,9 +308,9 @@ class CJpegLib:
         flags: List[str],
         progressive_mode: bool = None,
     ):
-        # Create a 32-bit masks
+        # Create 32-bit masks
         mask_overwrite = 0x0
-        mask_set_value = ~0  # 0xFFFF...
+        mask_set_value = 0xFFFFFFFF
 
         uint = ctypes.c_uint
         if flags is None:
