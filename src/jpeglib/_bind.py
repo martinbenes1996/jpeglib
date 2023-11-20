@@ -360,43 +360,47 @@ class CJpegLib:
 
     @classmethod
     def _versions(cls):
+        """
+        Find all library files in cjpeglib directory.
+        Library files must start with "cjpeglib" and the file extensions must be ".so" or ".dll".
+        Return a list of matching filenames.
+        """
         so_files = [
             f
             for f in os.listdir(list(cjpeglib.__path__)[0])
-            # for f in os.listdir()
-            if re.fullmatch(r'cjpeglib_.*\.(.*\.so|pyd)', f)
+            if re.fullmatch(r'cjpeglib_.*\.(so|dll)', f)
         ]
         return so_files
 
     @classmethod
     def versions(cls):
-        # list DLLs
-        vs = [
-            re.search(r'cjpeglib_[^.]*\.(.*\.so|pyd)', f)[0]
-            for f in cls._versions()
-        ]
-        # parse versions
-        vs = [
-            re.search(r'(?<=cjpeglib_)[^.]*', f)[0]
-            for f in cls._versions()
-        ]
+        """
+        Find all library files in the cjpeglib directory and extract the version names
+        Return a list of the version names.
+        """
+        vs = [re.search(r'(?<=cjpeglib_)[^.]*', f)[0] for f in cls._versions()]
         return vs
 
     @classmethod
     def _bind_lib(cls, version='6b'):
-        # path of the library
-        so_files = [f for f in cls._versions() if re.fullmatch(
-            f'cjpeglib_{version}' + r'\.(.*\.so|pyd)', f)]
-        try:
-            so_file = so_files[0]
-        except IndexError:
-            so_file = None
-        if so_file is None:
+        # List all library files
+        all_so_files = cls._versions()
+
+        # Select the desired version
+        matching_so_files = list(filter(lambda f: re.fullmatch(rf'cjpeglib_{version}.*\.(so|dll)', f), all_so_files))
+        if len(matching_so_files) == 0:
             raise RuntimeError(f'version "{version}" not found')
-        libname = str(pathlib.Path(list(cjpeglib.__path__)[0]) / so_file)
-        # libname = str(os.path.join(list(cjpeglib.__path__)[0], so_file))
-        # connect
-        cjpeglib_dylib = ctypes.CDLL(libname)
+        elif len(matching_so_files) > 1:
+            raise RuntimeError(f'found several versions matching the given version string "{version}"')
+
+        # Found exactly one library file
+        so_file = matching_so_files[0]
+
+        # Obtain full path
+        lib_full_path = str(pathlib.Path(list(cjpeglib.__path__)[0]) / so_file)
+
+        # Connect
+        cjpeglib_dylib = ctypes.CDLL(lib_full_path)
         cls.version = version
         return cjpeglib_dylib
 
