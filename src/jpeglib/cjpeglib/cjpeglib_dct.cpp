@@ -147,7 +147,8 @@ int write_jpeg_dct(
 	int *marker_types,
 	int *marker_lengths,
 	unsigned char *markers,
-	BITMASK flags
+	BITMASK flags_overwrite,
+	BITMASK flags_set_value
 ) {
 	// allocate
 	FILE *fp_in = NULL, *fp_out = NULL;
@@ -224,12 +225,12 @@ int write_jpeg_dct(
 		else if (quality > 0) {
 			jpeg_set_quality(&cinfo_out, quality, TRUE);
 		}
-		if (overwrite_default(flags, OPTIMIZE_CODING)) {
-			cinfo_out.optimize_coding = flag_to_boolean_value(flags, OPTIMIZE_CODING);
+		if (overwrite_default(flags_overwrite, OPTIMIZE_CODING)) {
+			cinfo_out.optimize_coding = flag_to_boolean_value(flags_set_value, OPTIMIZE_CODING);
 		}
 		#ifdef C_ARITH_CODING_SUPPORTED
-		if (overwrite_default(flags, ARITH_CODE)) {
-			cinfo_out.arith_code = flag_to_boolean_value(flags, ARITH_CODE);
+		if (overwrite_default(flags_overwrite, ARITH_CODE)) {
+			cinfo_out.arith_code = flag_to_boolean_value(flags_set_value, ARITH_CODE);
 		}
 		#endif
 

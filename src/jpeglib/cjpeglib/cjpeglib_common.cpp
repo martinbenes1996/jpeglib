@@ -66,7 +66,7 @@ int read_jpeg_info(
     short *huffman_bits,
     short *huffman_values,
 	int *num_scans,
-	BITMASK *flags
+	BITMASK *flags_set_value
 ) {
 	// allocate
 	FILE *fp = NULL;
@@ -129,8 +129,12 @@ int read_jpeg_info(
 				samp_factor[ch*2 + 1] = cinfo.comp_info[ch].h_samp_factor;
 			}
 
-		if (flags != NULL) {
-			*flags = (((cinfo.progressive_mode) ? (-1) : 0) & PROGRESSIVE_MODE) | (*flags);
+		if (flags_set_value != NULL) {
+			*flags_set_value = 0;
+			if(cinfo.progressive_mode)
+				*flags_set_value |= PROGRESSIVE_MODE;
+
+			// *flags_set_value = (((cinfo.progressive_mode) ? (-1) : 0) & PROGRESSIVE_MODE) | (*flags_set_value);
 		}
 
 		if(huffman_bits != NULL) {
