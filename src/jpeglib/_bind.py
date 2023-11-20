@@ -331,7 +331,7 @@ class CJpegLib:
                 # flag does not have a sign, so we interpret it as +
                 flag = flag[1:]
 
-            # bit indicating whether to keep the default (0 = change)
+            # bit indicating whether to overwrite the default (1 = change)
             b_overwrite = cls.MASKS[flag.upper()]
 
             # bit carrying the new value of the bit (if changed)
