@@ -222,7 +222,7 @@ setuptools.setup(
     version=__version__,
     author=u'Martin Beneš',
     author_email='martinbenes1996@gmail.com',
-    description="Python envelope for the popular C library" +
+    description="Python envelope for the popular C library " +
                 "libjpeg for handling JPEG files.",
     long_description=long_description,
     long_description_content_type="text/markdown",
