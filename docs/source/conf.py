@@ -6,8 +6,8 @@ project = 'jpeglib'
 copyright = '2021, Martin Benes'
 author = 'Martin Benes'
 
-release = '0.5'
-version = '0.5.3'
+release = '0.14'
+version = '0.14.0'
 
 # -- General configuration
 
@@ -30,7 +30,7 @@ intersphinx_disabled_domains = ['std']
 templates_path = ['_templates']
 
 # -- Options for HTML output
-html_theme = 'sphinx_rtd_theme'  # 'alabaster'
+html_theme = 'sphinx-rtd-theme'  # 'alabaster'
 
 # -- Options for EPUB output
 epub_show_urls = 'footnote'
