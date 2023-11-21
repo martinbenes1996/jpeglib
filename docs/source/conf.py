@@ -2,6 +2,8 @@
 
 # -- Project information
 
+import sphinx_rtd_theme
+
 project = 'jpeglib'
 copyright = '2021, Martin Benes'
 author = 'Martin Benes'
@@ -12,6 +14,7 @@ version = '0.14.0'
 # -- General configuration
 
 extensions = [
+    'sphinx_rtd_theme',
     'sphinx.ext.duration',
     'sphinx.ext.doctest',
     'sphinx.ext.autodoc',
@@ -19,7 +22,6 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
     'sphinx.ext.autosectionlabel',
-    'sphinx_rtd_theme'
 ]
 
 intersphinx_mapping = {
