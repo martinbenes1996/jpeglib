@@ -9,9 +9,14 @@ sphinx:
   builder: html
   configuration: docs/source/conf.py
   fail_on_warning: true
+
 formats:
   - pdf
 
 python:
   install:
-    - requirements: docs/requirements.txt
+    - requirements:
+      - docs/requirements.txt
+      - requirements.txt
+    - method: setuptools
+      path: .
