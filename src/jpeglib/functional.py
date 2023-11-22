@@ -8,7 +8,6 @@ Affiliation: Universitaet Innsbruck
 
 import numpy as np
 import typing
-import warnings
 
 from .dct_jpeg import DCTJPEG
 from .spatial_jpeg import SpatialJPEG

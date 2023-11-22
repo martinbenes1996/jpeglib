@@ -268,7 +268,6 @@ class JPEG:
                     huffman_values[j, i, 0] = -1
         return np.ctypeslib.as_ctypes(huffman_values)
 
-
     def copy(self):
         """Create a deep copy of the JPEG object."""
         return copy.deepcopy(self)

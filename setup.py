@@ -16,8 +16,8 @@ try:
     class bdist_wheel_abi3(bdist_wheel):
         def get_tag(self):
             python, abi, plat = super().get_tag()
-            if python.startswith("cp"):
-                return "cp38", "abi3", plat
+            if python.startswith('cp'):
+                return 'cp38', 'abi3', plat
             return python, abi, plat
 
     custom_bdist_wheel = {'bdist_wheel': bdist_wheel_abi3}
@@ -25,7 +25,7 @@ except ModuleNotFoundError:
     custom_bdist_wheel = {}
 
 # versions
-__version__ = os.environ.get('VERSION_NEW', '0.14.0')
+__version__ = os.environ.get('VERSION_NEW', '1.0.0')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
@@ -58,7 +58,7 @@ with open('requirements.txt') as f:
     reqs = f.read().splitlines()
 
 # description
-with codecs.open("README.md", "r", encoding="UTF-8") as fh:
+with codecs.open('README.md', 'r', encoding='UTF-8') as fh:
     long_description = fh.read()
 
 # create version dependent extensions
@@ -67,8 +67,8 @@ cjpeglib = {}
 for v in libjpeg_versions:
 
     # library-dependent
-    is_moz = v[:3] == "moz"
-    is_turbo = v[:5] == "turbo"
+    is_moz = v[:3] == 'moz'
+    is_turbo = v[:5] == 'turbo'
 
     # name of C library
     rootlib = Path('src') / 'jpeglib' / 'cjpeglib'
@@ -156,31 +156,31 @@ for v in libjpeg_versions:
 
     # define macros
     macros = [
-        ("BITS_IN_JSAMPLE", 8),
-        ("HAVE_UNSIGNED_CHAR", 1),
-        ("HAVE_STDLIB_H", 1),
-        ("LIBVERSION", libjpeg_versions[v][1]),
-        ("HAVE_PROTOTYPES", 1),
-        ("Py_LIMITED_API", "0x03080000"),
+        ('BITS_IN_JSAMPLE', 8),
+        ('HAVE_UNSIGNED_CHAR', 1),
+        ('HAVE_STDLIB_H', 1),
+        ('LIBVERSION', libjpeg_versions[v][1]),
+        ('HAVE_PROTOTYPES', 1),
+        ('Py_LIMITED_API', '0x03080000'),
         ('WITH_SIMD', 0),  # TODO: 1
     ]
     # turbo/moz-only macros
     if is_turbo or is_moz:
         macros += [
-            ("INLINE", "__inline__" if not sys.platform.startswith("win") else "__inline"),
-            ("PACKAGE_NAME", f"\"{package_name}\""),
-            ("BUILD", "\"unknown\""),
-            ("VERSION", f"\"{libjpeg_versions[v][0]}\""),
-            ("SIZEOF_SIZE_T", int(ctypes.sizeof(ctypes.c_size_t))),
-            ("THREAD_LOCAL", "__thread"),
-            ("C_ARITH_CODING_SUPPORTED", 1),
-            ("D_ARITH_CODING_SUPPORTED", 1),
-            ("JPEG_LIB_VERSION", 70),
+            ('INLINE', '__inline__' if not sys.platform.startswith('win') else '__inline'),
+            ('PACKAGE_NAME', f'"{package_name}"'),
+            ('BUILD', '"unknown"'),
+            ('VERSION', f'"{libjpeg_versions[v][0]}"'),
+            ('SIZEOF_SIZE_T', int(ctypes.sizeof(ctypes.c_size_t))),
+            ('THREAD_LOCAL', '__thread'),
+            ('C_ARITH_CODING_SUPPORTED', 1),
+            ('D_ARITH_CODING_SUPPORTED', 1),
+            ('JPEG_LIB_VERSION', 70),
         ]
         # moz-only macros
         if is_moz:
             macros += [
-                # ("JPEG_LIB_VERSION", 69),
+                # ('JPEG_LIB_VERSION', 69),
                 ('MEM_SRCDST_SUPPORTED', 1),
             ]
         else:
@@ -190,13 +190,13 @@ for v in libjpeg_versions:
 
     # define the extension
     cjpeglib[v] = setuptools.Extension(
-        name=f"jpeglib.cjpeglib.cjpeglib_{v}",
+        name=f'jpeglib.cjpeglib.cjpeglib_{v}',
         library_dirs=['jpeglib/cjpeglib', f'{clib}'],
         include_dirs=['jpeglib/cjpeglib', f'{clib}'],
         sources=sources,
         headers=hfiles[v],
         define_macros=macros,
-        extra_compile_args=[] if sys.platform.startswith("win") else ["-fPIC", "-g"],
+        extra_compile_args=[] if sys.platform.startswith('win') else ['-fPIC'],
         # language='C++',
         py_limited_api=True,
     )
@@ -205,11 +205,11 @@ for v in libjpeg_versions:
 # extension builder
 class custom_build_ext(setuptools.command.build_ext.build_ext):
     def get_export_symbols(self, ext):
-        parts = ext.name.split(".")
-        if parts[-1] == "__init__":
-            initfunc_name = "PyInit_" + parts[-2]
+        parts = ext.name.split('.')
+        if parts[-1] == '__init__':
+            initfunc_name = 'PyInit_' + parts[-2]
         else:
-            initfunc_name = "PyInit_" + parts[-1]
+            initfunc_name = 'PyInit_' + parts[-1]
 
     def build_extensions(self):
         setuptools.command.build_ext.build_ext.build_extensions(self)
@@ -222,16 +222,16 @@ setuptools.setup(
     version=__version__,
     author=u'Martin Beneš',
     author_email='martinbenes1996@gmail.com',
-    description="Python envelope for the popular C library " +
-                "libjpeg for handling JPEG files.",
+    description='Python envelope for the popular C library ' +
+                'libjpeg for handling JPEG files.',
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type='text/markdown',
     packages=['jpeglib'],
     license='MPL',
     project_urls={
-        "Homepage": "https://pypi.org/project/jpeglib/",
-        "Documentation": 'https://jpeglib.readthedocs.io/en/latest/',
-        "Source": "https://github.com/martinbenes1996/jpeglib/",
+        'Homepage': 'https://pypi.org/project/jpeglib/',
+        'Documentation': 'https://jpeglib.readthedocs.io/en/latest/',
+        'Source': 'https://github.com/martinbenes1996/jpeglib/',
     },
     keywords=['jpeglib', 'jpeg', 'jpg', 'libjpeg', 'compression',
               'decompression', 'dct-coefficients', 'dct'],
@@ -241,11 +241,11 @@ setuptools.setup(
     include_package_data=True,
     ext_modules=[cjpeglib[v] for v in libjpeg_versions],
     cmdclass={
-        "build_ext": custom_build_ext,
+        'build_ext': custom_build_ext,
         **custom_bdist_wheel
     },
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
         'Intended Audience :: Developers',
         'Intended Audience :: Education',

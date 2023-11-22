@@ -14,9 +14,11 @@ class _Enum(enum.Enum):
     def __int__(self):
         """"""
         return self.value
+
     def __str__(self):
         """"""
         return self.name
+
     def __repr__(self):
         """"""
         return self.name
@@ -52,10 +54,12 @@ class Colorspace(_Enum):
             "JCS_YCCK":      4,
         }
         return channel_no[self.name]
+
     # must define, dataclass changes this
     def __repr__(self):
         """"""
         return self.name
+
 
 class DCTMethod(_Enum):
     """Representation of DCT method."""
