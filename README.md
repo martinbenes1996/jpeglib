@@ -49,7 +49,7 @@ Get *discrete cosine transform* (DCT) coefficients and quantization matrices as 
 
 
 ```python
-im = jpeglib.read_dct("input.jpeg")
+im = jpeglib.read_dct('input.jpeg')
 im.Y; im.Cb; im.Cr; im.qt
 ```
 
@@ -58,7 +58,7 @@ You get luminance DCT, chrominance DCT and quantization tables.
 Write the DCT coefficients back to a file with
 
 ```python
-im.write_dct("output.jpeg")
+im.write_dct('output.jpeg')
 ```
 
 ### Pixel data
@@ -66,7 +66,7 @@ im.write_dct("output.jpeg")
 Decompress the `input.jpeg` into spatial representation in numpy array with
 
 ```python
-im = jpeglib.read_spatial("input.jpeg")
+im = jpeglib.read_spatial('input.jpeg')
 im.spatial
 ```
 
@@ -75,7 +75,7 @@ You can specify parameters such as output color space, DCT method, dithering, et
 Write spatial representation in numpy arrray back to file with
 
 ```python
-im.write_spatial("output.jpeg")
+im.write_spatial('output.jpeg')
 ```
 
 You can specify input color space, DCT method, sampling factor, output quality, smoothing factor etc.
@@ -112,5 +112,5 @@ im = jpeglib.read_spatial('image.jpeg') # using 6b again
 
 ## Credits
 
-Developed by [Martin Benes](https://github.com/martinbenes1996), Universität Innsbruck, 2023.
+Developed by [Martin Benes](https://github.com/martinbenes1996), University of Innsbruck, 2023.
 

@@ -5,7 +5,7 @@
 import sphinx_rtd_theme
 
 project = 'jpeglib'
-copyright = '2021, Martin Benes'
+copyright = '2023, Martin Benes'
 author = 'Martin Benes'
 
 release = '0.14'
