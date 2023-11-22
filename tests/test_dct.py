@@ -1,7 +1,7 @@
 """
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 import logging
@@ -33,7 +33,7 @@ class TestDCT(unittest.TestCase):
 
 
     @parameterized.expand(ALL_VERSIONS)
-    def test_dct(self, version:str):
+    def test_dct(self, version: str):
         """Test of lossless reading and writing of DCT."""
         self.logger.info("test_dct")
         jpeglib.version.set(version)

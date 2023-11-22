@@ -1,7 +1,7 @@
 """
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 from dataclasses import dataclass

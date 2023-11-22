@@ -1,7 +1,7 @@
 """Main module for tests.
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 import sys

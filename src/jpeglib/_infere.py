@@ -1,7 +1,7 @@
 """
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 import numpy as np
@@ -46,6 +46,7 @@ IN_JPEG_COLORSPACE = {
     'JCS_YCbCr': Colorspace.JCS_YCbCr,
 }
 
+
 def jpeg_in_color_space(
     in_color_space: Colorspace,
 ) -> Colorspace:
@@ -55,6 +56,7 @@ def jpeg_in_color_space(
         str(in_color_space),
         Colorspace.JCS_YCbCr
     )
+
 
 ASSIGNMENT_YCC = {
     1: np.array([0, 0, 0]),
@@ -74,6 +76,7 @@ ASSIGNMENT_YCCK = {
     3: np.array([0, 1, 1, 2]),
     4: np.array([0, 1, 2, 3]),
 }
+
 
 def quant_tbl_no(
     qt: np.ndarray,

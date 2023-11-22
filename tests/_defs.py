@@ -1,3 +1,9 @@
+"""
+
+Author: Martin Benes
+Affiliation: University of Innsbruck
+"""
+
 import numpy as np
 from parameterized import parameterized
 
