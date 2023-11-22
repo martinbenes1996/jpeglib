@@ -12,7 +12,7 @@ from PIL import Image
 import tempfile
 import unittest
 
-from _defs import LIBJPEG_VERSIONS, ALL_VERSIONS, VERSIONS_EXCLUDE_MOZ
+from _defs import ALL_VERSIONS, VERSIONS_EXCLUDE_MOZ
 import jpeglib
 
 

@@ -9,7 +9,7 @@ import dataclasses
 import numpy as np
 import os
 import tempfile
-from typing import List
+from typing import List, Tuple
 import warnings
 
 from ._bind import CJpegLib
@@ -41,7 +41,7 @@ class DCTJPEG(_jpeg.JPEG):
             self.height_in_blocks(i)
         )()
 
-    def load(self) -> tuple:
+    def load(self) -> Tuple:
         """Function to allocate the buffer and read the image data.
 
         :return:
@@ -121,7 +121,7 @@ class DCTJPEG(_jpeg.JPEG):
         # return
         return self.Y, (self.Cb, self.Cr), self.qt
 
-    def read_dct(self) -> tuple:
+    def read_dct(self) -> Tuple:
         warnings.warn('read_dct() is obsolete, use load()')
         return self.load()
 
@@ -186,21 +186,6 @@ class DCTJPEG(_jpeg.JPEG):
             tmp.write(self.content)
             tmp.flush()
         tmp.close()
-
-        # print(self.samp_factor)
-        # print(self.c_block_dims()[:])
-        # print(
-        #     self.c_samp_factor()[0][:],
-        #     self.c_samp_factor()[1][:],
-        #     self.c_samp_factor()[1][:],
-        # )
-
-        # print(Y, Cb, Cr, K)
-        # print(np.ctypeslib.as_array(self.c_image_dims()))
-        # print(np.ctypeslib.as_array(self.c_block_dims()))
-        # print(np.ctypeslib.as_array(self.c_samp_factor()))
-        # print(self.jpeg_color_space.index)
-        # print(self.num_components)
 
         # call
         CJpegLib.write_jpeg_dct(
@@ -288,14 +273,14 @@ class DCTJPEG(_jpeg.JPEG):
         self._qt = qt
 
     @property
-    def quant_tbl_no(self) -> list:
+    def quant_tbl_no(self) -> List:
         """Getter of assignment of quantization tables to components"""
         if self._quant_tbl_no is None:
             self.load()
         return self._quant_tbl_no
 
     @quant_tbl_no.setter
-    def quant_tbl_no(self, quant_tbl_no: list):
+    def quant_tbl_no(self, quant_tbl_no: List):
         """Setter of assignment of quantization tables to components"""
         self._quant_tbl_no = quant_tbl_no
 
@@ -465,32 +450,32 @@ class DCTJPEGio(DCTJPEG):
         ).astype(np.int16)
 
     @property
-    def coef_arrays(self) -> list:
+    def coef_arrays(self) -> List:
         """Convertor of DCT coefficients to jpegio format."""
         return self._coef_arrays
 
     @coef_arrays.setter
-    def coef_arrays(self, coef_arrays: list):
+    def coef_arrays(self, coef_arrays: List):
         """Setter of coefficient arrays in jpegio format."""
         self._coef_arrays = coef_arrays
 
     @property
-    def quant_tables(self) -> list:
+    def quant_tables(self) -> List:
         """Convertor of quantization tables to jpegio format."""
         return self._quant_tables
 
     @quant_tables.setter
-    def quant_tables(self, quant_tables: list):
+    def quant_tables(self, quant_tables: List):
         """Setter of quantization tables in jpegio format."""
         self._quant_tables = quant_tables
 
     @property
-    def comp_info(self) -> list:
+    def comp_info(self) -> List:
         """Convertor of component infos to jpegio format."""
         return self._comp_info
 
     @comp_info.setter
-    def comp_info(self, comp_info: list):
+    def comp_info(self, comp_info: List):
         """Setter of component infos in jpegio format."""
         self._comp_info = comp_info
 

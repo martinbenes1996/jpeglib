@@ -549,7 +549,6 @@ class TestSpatial(unittest.TestCase):
         # compare qt
         np.testing.assert_array_equal(qt, qt_ref)
 
-
     # def test_pil_read(self):
     #     jpeglib.version.set('8d')
     #     # read rgb

@@ -10,11 +10,15 @@ Affiliation: Universitaet Innsbruck
 
 # functions
 from .functional import read_dct, read_spatial, from_spatial, from_dct
+from ._notations import Jab_to_factors
 
 # jpeg objects
 from .dct_jpeg import DCTJPEG, DCTJPEGio, to_jpegio
 from .spatial_jpeg import SpatialJPEG
 from .progressive_jpeg import ProgressiveJPEG
+
+# libjpeg versions
+from .version import version
 
 # cenums
 from ._cenum import Colorspace, DCTMethod, Dithermode, MarkerType
@@ -35,12 +39,6 @@ JPEG_APP0 = MarkerType.JPEG_APP0
 JPEG_APP1 = MarkerType.JPEG_APP1
 JPEG_COM = MarkerType.JPEG_COM
 
-# libjpeg versions
-from .version import version
-
-# for unit tests
-from ._notations import Jab_to_factors
-
 # package version
 import pkg_resources
 try:
@@ -58,8 +56,8 @@ except IndexError:
 
 __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
-    'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio',
-    'Colorspace', 'DCTMethod', 'Dithermode', 'Marker', 'MarkerType',
+    'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio', 'ProgressiveJPEG',
+    'Colorspace', 'DCTMethod', 'Dithermode', 'Marker', 'MarkerType', 'Huffman', 'Scan',
     'version', 'Jab_to_factors',
     '__version__',
 ]

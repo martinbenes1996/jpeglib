@@ -19,6 +19,7 @@ from ._huffman import Huffman
 from ._scan import Scan
 from . import _infere
 
+
 @dataclass
 class ProgressiveJPEG(SpatialJPEG):
     """JPEG instance to work with progressive JPEG in spatial domain."""
