@@ -3,7 +3,7 @@
 Global functions to call.
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 import numpy as np

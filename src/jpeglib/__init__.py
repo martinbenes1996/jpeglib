@@ -5,7 +5,7 @@ It offers full control over compression and decompression
 and exposes DCT coefficients and quantization tables.
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 # functions

@@ -1,7 +1,7 @@
 """Module with C-enumerations.
 
 Author: Martin Benes
-Affiliation: Universitaet Innsbruck
+Affiliation: University of Innsbruck
 """
 
 from __future__ import annotations
