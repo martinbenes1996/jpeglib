@@ -6,8 +6,8 @@
 [![Stars](https://img.shields.io/github/stars/martinbenes1996/jpeglib.svg)](https://github.com/martinbenes1996/jpeglib/stargazers)
 [![Contributors](https://img.shields.io/github/contributors/martinbenes1996/jpeglib)](https://github.com/martinbenes1996/jpeglib/graphs/contributors)
 [![Wheel](https://img.shields.io/pypi/wheel/jpeglib)](https://pypi.org/project/jpeglib/)
-[![Status](https://img.shields.io/pypi/status/jpeglib)](https://pypi.com/project/jpeglib/)
-[![PyPi license](https://badgen.net/pypi/license/jpeglib)](https://pypi.com/project/jpeglib/)
+[![Status](https://img.shields.io/pypi/status/jpeglib)](https://pypi.org/project/jpeglib/)
+[![PyPi license](https://badgen.net/pypi/license/jpeglib)](https://pypi.org/project/jpeglib/)
 [![Last commit](https://img.shields.io/github/last-commit/martinbenes1996/jpeglib)](https://GitHub.com/martinbenes1996/jpeglib)
 
 
