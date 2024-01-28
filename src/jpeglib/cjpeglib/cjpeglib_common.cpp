@@ -59,6 +59,7 @@ FILE * f_unquantized = NULL; // tmp file for collecting unquantized coefficients
 void start_unquantized_loading(const char *dstfile_uq) {
 	if(f_unquantized != NULL)
 		throw "unquantized loading started already!";
+	fprintf(stderr, "Trying to open %s!\n", dstfile_uq);
 	f_unquantized = fopen(dstfile_uq, "wb");
 	if(f_unquantized == NULL)
 		throw "failed to open unquantized tmp file!";
