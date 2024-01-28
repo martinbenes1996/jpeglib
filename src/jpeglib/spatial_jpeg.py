@@ -222,8 +222,8 @@ class SpatialJPEG(JPEG):
         assert self.samp_factor == '4:4:4' or (self.samp_factor == 1).all()
         assert version.get() in version.LIBJPEG_VERSIONS
         # write to temporary files
-        dst = tempfile.NamedTemporaryFile('w', suffix='.jpeg')
-        dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin')
+        dst = tempfile.NamedTemporaryFile('w', suffix='.jpeg', delete=False)
+        dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin', delete=False)
         dst.close()
         dst_uq.close()
         self.write_spatial(
@@ -238,6 +238,8 @@ class SpatialJPEG(JPEG):
             content = fp.read()
         os.remove(dst.name)
         os.remove(dst_uq.name)
+        del dst
+        del dst_uq
         uq = struct.unpack(f'<{len(content)//4}f', content)
         uq = np.reshape(uq, (
             self.height//8, self.width//8,
