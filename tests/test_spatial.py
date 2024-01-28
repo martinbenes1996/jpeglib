@@ -549,6 +549,38 @@ class TestSpatial(unittest.TestCase):
         # compare qt
         np.testing.assert_array_equal(qt, qt_ref)
 
+    @parameterized.expand([
+        [dct_method, colorspace]
+        for dct_method in [jpeglib.JDCT_FLOAT, jpeglib.JDCT_ISLOW]#, jpeglib.JDCT_IFAST]
+        for colorspace in [jpeglib.JCS_GRAYSCALE, jpeglib.JCS_RGB]
+    ])
+    def test_unquantized(self, dct_method, colorspace):
+        """Extract uncompressed DCT coefficients."""
+        self.logger.info(f"test_unquantized({dct_method=}, {colorspace=})")
+        # compress
+        x = np.random.randint(
+            0, 256, (128, 128, colorspace.channels),
+            dtype='uint8',
+        )
+        im = jpeglib.from_spatial(x)
+        im.samp_factor = '4:4:4'
+        with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
+            im.write_spatial(tmp.name, dct_method=dct_method)
+            Y = jpeglib.read_dct(tmp.name).Y
+
+        # extract compression error
+        qt_Y = jpeglib.qf_to_qt(75, colorspace)[0]
+        Y_uq = im.unquantized_coefficients(dct_method=dct_method)[0]
+        Y_q = jpeglib.quantize(Y_uq, qt_Y, dct_method=dct_method)
+
+        # error is less
+        err = Y_uq / qt_Y - Y_q
+        err0_5 = np.abs(np.abs(err) - .5) < .001
+        # print(Y[Y != Y_q])
+        # print(Y_q[Y != Y_q])
+        np.testing.assert_array_equal(Y[~err0_5], Y_q[~err0_5])
+        np.testing.assert_array_almost_equal(Y[err0_5], Y_q[err0_5], decimal=0)
+
     # def test_pil_read(self):
     #     jpeglib.version.set('8d')
     #     # read rgb

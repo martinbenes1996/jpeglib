@@ -56,6 +56,9 @@ void _write_huff(
 	short *quant_tbl_no
 );
 
+void start_unquantized_loading(const char *dstfile_uq);
+void end_unquantized_loading();
+
 int print_jpeg_params(
 	const char *srcfile
 );

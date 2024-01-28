@@ -30,7 +30,7 @@ except ModuleNotFoundError:
     custom_bdist_wheel = {}
 
 # versions
-__version__ = os.environ.get('VERSION_NEW', '1.0.0')
+__version__ = os.environ.get('VERSION_NEW', '1.0.1')
 libjpeg_versions = {
     '6b': (None, 60),
     '7': (None, 70),
@@ -45,6 +45,7 @@ libjpeg_versions = {
     '9c': (None, 93),
     '9d': (None, 94),
     '9e': (None, 95),
+    '9f': (None, 96),
     'turbo120': ('1.2.0', 3120),
     'turbo130': ('1.3.0', 3130),
     'turbo140': ('1.4.0', 3140),

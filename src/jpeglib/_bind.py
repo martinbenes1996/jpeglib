@@ -191,6 +191,7 @@ class CJpegLib:
         huffman_bits,
         huffman_values,
         progressive_mode,
+        dst_unquantized,
         flags: List[str],
     ):
         status = cls.get().write_jpeg_spatial(
@@ -214,6 +215,7 @@ class CJpegLib:
             scan_script,
             huffman_bits,
             huffman_values,
+            cls.cstr(dst_unquantized),
             *cls.flags_to_mask(flags, progressive_mode),
         )
         if status == 0:

@@ -11,6 +11,7 @@ extern "C" {
 #include "cjpeglib.h"
 #include "cjpeglib_common.h"
 
+
 /**
  * @brief Helper for indexing DCT block base[channel][w][h].
  *

@@ -104,6 +104,7 @@ int write_jpeg_spatial(
 	int *scan_script,
     short *huffman_bits,
     short *huffman_values,
+    const char *dstfile_uq,
 	BITMASK flags_overwrite,
 	BITMASK flags_set_value
 );

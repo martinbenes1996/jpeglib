@@ -4,23 +4,14 @@ Author: Martin Benes
 Affiliation: University of Innsbruck
 """
 
+import jpeglib
 import numpy as np
 from parameterized import parameterized
 
+LIBJPEG_VERSIONS = [[v] for v in jpeglib.version.LIBJPEG_VERSIONS]
+
 ALL_VERSIONS = [
-    ["6b"],
-    ["7"],
-    ["8"],
-    ["8a"],
-    ["8b"],
-    ["8c"],
-    ["8d"],
-    ["9"],
-    ["9a"],
-    ["9b"],
-    ["9c"],
-    ["9d"],
-    ["9e"],
+    *LIBJPEG_VERSIONS,
     ["turbo120"],
     ["turbo130"],
     ["turbo140"],
@@ -34,37 +25,8 @@ ALL_VERSIONS = [
     ["mozjpeg403"],
 ]
 
-
-LIBJPEG_VERSIONS = [
-    ["6b"],
-    ["7"],
-    ["8"],
-    ["8a"],
-    ["8b"],
-    ["8c"],
-    ["8d"],
-    ["9"],
-    ["9a"],
-    ["9b"],
-    ["9c"],
-    ["9d"],
-    ["9e"],
-]
-
 VERSIONS_EXCLUDE_MOZ = [
-    ["6b"],
-    ["7"],
-    ["8"],
-    ["8a"],
-    ["8b"],
-    ["8c"],
-    ["8d"],
-    ["9"],
-    ["9a"],
-    ["9b"],
-    ["9c"],
-    ["9d"],
-    ["9e"],
+    *LIBJPEG_VERSIONS,
     ["turbo120"],
     ["turbo130"],
     ["turbo140"],

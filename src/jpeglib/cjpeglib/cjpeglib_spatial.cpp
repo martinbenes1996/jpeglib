@@ -165,6 +165,7 @@ int write_jpeg_spatial(
 	int *scan_script,
     short *huffman_bits,
     short *huffman_values,
+    const char *dstfile_uq,
 	BITMASK flags_overwrite,
 	BITMASK flags_set_value
 ) {
@@ -216,6 +217,10 @@ int write_jpeg_spatial(
 			chroma_factor[0] = cinfo.comp_info[0].v_samp_factor;
 			chroma_factor[1] = cinfo.comp_info[0].h_samp_factor;
 		}
+
+		// setup tmp file for unquantized coefficients
+		if(dstfile_uq != NULL)
+			start_unquantized_loading(dstfile_uq);
 
 		// write qt
 		if(qt != NULL) {
@@ -388,6 +393,8 @@ int write_jpeg_spatial(
 
 	// cleanup and return
 	jpeg_destroy_compress(&cinfo);
+	if(dstfile_uq != NULL)
+		end_unquantized_loading();
 	if(fp != NULL)
 		fclose(fp);
 	return status;
