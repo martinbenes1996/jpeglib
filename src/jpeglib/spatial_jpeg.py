@@ -8,6 +8,7 @@ import ctypes
 from dataclasses import dataclass
 import numpy as np
 import os
+import pathlib
 import struct
 import tempfile
 from typing import Union, List
@@ -222,24 +223,25 @@ class SpatialJPEG(JPEG):
         assert self.samp_factor == '4:4:4' or (self.samp_factor == 1).all()
         assert version.get() in version.LIBJPEG_VERSIONS
         # write to temporary files
-        dst = tempfile.NamedTemporaryFile('w', suffix='.jpeg', delete=False)
-        dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin', delete=False)
-        dst.close()
-        dst_uq.close()
+        tmp_dir = pathlib.Path(tempfile.mkdtemp())
+        dst = str(tmp_dir / 'dst.jpeg')
+        dst_uq = str(tmp_dir / 'uq.bin')
+        # dst = tempfile.NamedTemporaryFile('w', suffix='.jpeg', delete=False)
+        # dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin', delete=False)
+        # dst.close()
+        # dst_uq.close()
         self.write_spatial(
-            path=dst.name,
+            path=dst,  #.name,
             dct_method=dct_method,
-            dst_unquantized=dst_uq.name,
+            dst_unquantized=dst_uq,  #.name,
             flags=flags
         )
 
         # extract unquantized coefficients
-        with open(dst_uq.name, 'rb') as fp:
+        with open(dst_uq, 'rb') as fp:
             content = fp.read()
-        os.remove(dst.name)
-        os.remove(dst_uq.name)
-        del dst
-        del dst_uq
+        os.remove(dst)
+        os.remove(dst_uq)
         uq = struct.unpack(f'<{len(content)//4}f', content)
         uq = np.reshape(uq, (
             self.height//8, self.width//8,
