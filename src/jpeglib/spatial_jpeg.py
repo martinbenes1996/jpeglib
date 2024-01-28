@@ -222,8 +222,8 @@ class SpatialJPEG(JPEG):
         assert self.samp_factor == '4:4:4' or (self.samp_factor == 1).all()
         assert version.get() in version.LIBJPEG_VERSIONS
         # write to temporary files
-        dst = tempfile.NamedTemporaryFile(suffix='.jpeg')
-        dst_uq = tempfile.NamedTemporaryFile(suffix='.bin')
+        dst = tempfile.NamedTemporaryFile('wb+', suffix='.jpeg')
+        dst_uq = tempfile.NamedTemporaryFile('wb+', suffix='.bin')
         self.write_spatial(
             path=dst.name,
             dct_method=dct_method,
