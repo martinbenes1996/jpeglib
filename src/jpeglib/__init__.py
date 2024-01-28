@@ -10,6 +10,7 @@ Affiliation: University of Innsbruck
 
 # functions
 from .functional import read_dct, read_spatial, from_spatial, from_dct
+from .functional import quantize, qf_to_qt
 from ._notations import Jab_to_factors
 
 # jpeg objects

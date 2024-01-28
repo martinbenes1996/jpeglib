@@ -168,6 +168,8 @@ start_pass_fdctmgr (j_compress_ptr cinfo)
 }
 
 
+extern FILE * f_unquantized;
+
 /*
  * Perform forward DCT on one or more blocks of a component.
  *
@@ -248,6 +250,9 @@ forward_DCT (j_compress_ptr cinfo, jpeg_component_info * compptr,
 #else
 #define DIVIDE_BY(a,b)	if (a >= b) a /= b; else a = 0
 #endif
+	float unquantized = ((float)(temp >> 3) + (float)(temp & 7)/8.);
+	if(f_unquantized != NULL)
+		fwrite(&unquantized, sizeof(unquantized), 1, f_unquantized);
 	if (temp < 0) {
 	  temp = -temp;
 	  temp += qval>>1;	/* for rounding */
@@ -320,8 +325,23 @@ forward_DCT_float (j_compress_ptr cinfo, jpeg_component_info * compptr,
       register JCOEFPTR output_ptr = coef_blocks[bi];
 
       for (i = 0; i < DCTSIZE2; i++) {
+        if(f_unquantized != NULL) {
+          const float aanscalefactor[DCTSIZE] = {
+            1.0, 1.387039845, 1.306562965, 1.175875602,
+            1.0, 0.785694958, 0.541196100, 0.275899379
+          };
+          float unquantized = (
+            (float)workspace[i] /
+            aanscalefactor[i%8] /
+            aanscalefactor[i/8] /
+            8.
+          );
+          fwrite(&unquantized, sizeof(unquantized), 1, f_unquantized);
+        }
+
 	/* Apply the quantization and scaling factor */
 	temp = workspace[i] * divisors[i];
+
 	/* Round to nearest integer.
 	 * Since C does not specify the direction of rounding for negative
 	 * quotients, we have to force the dividend positive for portability.
@@ -329,6 +349,7 @@ forward_DCT_float (j_compress_ptr cinfo, jpeg_component_info * compptr,
 	 * code should work for either 16-bit or 32-bit ints.
 	 */
 	output_ptr[i] = (JCOEF) ((int) (temp + (FAST_FLOAT) 16384.5) - 16384);
+
       }
     }
   }

@@ -54,6 +54,23 @@ FILE *_read_jpeg(const char *filename,
 	return fp;
 }
 
+FILE * f_unquantized = NULL; // tmp file for collecting unquantized coefficients
+
+void start_unquantized_loading(const char *dstfile_uq) {
+	if(f_unquantized != NULL)
+		throw "unquantized loading started already!";
+	f_unquantized = fopen(dstfile_uq, "wb");
+	if(f_unquantized == NULL)
+		throw "failed to open unquantized tmp file!";
+}
+
+void end_unquantized_loading() {
+	if(f_unquantized == NULL)
+		throw "unquantized loading never started";
+	fclose(f_unquantized);
+	f_unquantized = NULL;
+}
+
 int read_jpeg_info(
 	const char *srcfile,
 	int *block_dims,

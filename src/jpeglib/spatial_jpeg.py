@@ -8,6 +8,7 @@ import ctypes
 from dataclasses import dataclass
 import numpy as np
 import os
+import struct
 import tempfile
 from typing import Union, List
 import warnings
@@ -16,6 +17,7 @@ from ._bind import CJpegLib
 from ._cenum import Colorspace, Dithermode, DCTMethod
 from . import _infere
 from ._jpeg import JPEG
+from .version import version
 
 
 @dataclass
@@ -97,6 +99,7 @@ class SpatialJPEG(JPEG):
         dct_method: DCTMethod = None,
         # dither_mode: Dithermode = None,
         smoothing_factor: int = None,
+        dst_unquantized: str = None,
         flags: List[str] = []
     ):
         """Writes a spatial image representation (i.e. RGB) to a file.
@@ -194,8 +197,50 @@ class SpatialJPEG(JPEG):
             huffman_bits=self.c_huffman_bits(),
             huffman_values=self.c_huffman_values(),
             progressive_mode=self.progressive_mode,
+            dst_unquantized=dst_unquantized,
             flags=flags,
         )
+
+    def unquantized_coefficients(
+        self,
+        dct_method: DCTMethod = None,
+        flags: List[str] = [],
+    ) -> List[np.ndarray]:
+        """Get unquantized coefficients.
+
+        :param dct_method: DCT method, must be accepted by :class:`_dctmethod.DCTMethod`. If not given, using the libjpeg default.
+        :type dct_method: str | :class:`_dctmethod.DCTMethod`, optional
+        :param flags: Compression flags.
+        :type flags: list
+        :return: Bool compression parameters as str. If not given, using the libjpeg default. More at `glossary <https://jpeglib.readthedocs.io/en/latest/glossary.html#flags>`_.
+        :rtype: list
+
+        Quick-and-dirty implementation.
+        Current TODOs are JDCT_IFAST method and other samp_factors
+        """
+        # implementation limits
+        assert self.samp_factor == '4:4:4' or (self.samp_factor == 1).all()
+        assert version.get() in version.LIBJPEG_VERSIONS
+        # write to temporary files
+        dst = tempfile.NamedTemporaryFile(suffix='.jpeg')
+        dst_uq = tempfile.NamedTemporaryFile(suffix='.bin')
+        self.write_spatial(
+            path=dst.name,
+            dct_method=dct_method,
+            dst_unquantized=dst_uq.name,
+            flags=flags
+        )
+
+        # extract unquantized coefficients
+        with open(dst_uq.name, 'rb') as fp:
+            content = fp.read()
+        uq = struct.unpack(f'<{len(content)//4}f', content)
+        uq = np.reshape(uq, (
+            self.height//8, self.width//8,
+            self.num_components,
+            8, 8,
+        ))
+        return np.moveaxis(uq, 2, 0)
 
     @property
     def spatial(self) -> np.ndarray:

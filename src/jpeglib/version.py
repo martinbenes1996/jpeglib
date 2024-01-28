@@ -11,12 +11,17 @@ from ._bind import CJpegLib
 
 class version:
     """Class grouping functions for controlling libjpeg method."""
+    LIBJPEG_VERSIONS: List[str] = {
+        '6b', '7', '8', '8a', '8b', '8c', '8d',
+        '9', '9a', '9b', '9c', '9d', '9e', '9f',
+    }
+    """libjpeg versions"""
 
     @classmethod
     def set(cls, version: str):
         """Sets the version of libjpeg to use. Loads the library.
 
-        :param version: libjpeg version, one of 6b, 7, 8, 8a, 8b, 8c, 8d, 9, 9a, 9b, 9c, 9d, 9e, turbo120, turbo130, turbo140, turbo150, turbo200, turbo210, mozjpeg101, mozjpeg201, mozjpeg300, mozjpeg403.
+        :param version: libjpeg version, one of 6b, 7, 8, 8a, 8b, 8c, 8d, 9, 9a, 9b, 9c, 9d, 9e, 9f, turbo120, turbo130, turbo140, turbo150, turbo200, turbo210, mozjpeg101, mozjpeg201, mozjpeg300, mozjpeg403.
         :type version: str
         :raises [NotImplementedError]: unsupported libjpeg version
 
@@ -27,10 +32,7 @@ class version:
         """  # noqa: E501
         try:
             # libjpeg
-            if version in {
-                '6b', '7', '8', '8a', '8b', '8c', '8d',
-                '9', '9a', '9b', '9c', '9d', '9e'
-            }:
+            if version in cls.LIBJPEG_VERSIONS:
                 CJpegLib.set_version(version=version)
             # libjpeg-turbo
             elif version in {

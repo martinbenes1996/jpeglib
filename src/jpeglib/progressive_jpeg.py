@@ -260,6 +260,7 @@ class ProgressiveJPEG(SpatialJPEG):
             huffman_bits=self.c_huffman_bits(),
             huffman_values=self.c_huffman_values(),
             progressive_mode=True,
+            dst_unquantized=None,
             flags=flags,
         )
 

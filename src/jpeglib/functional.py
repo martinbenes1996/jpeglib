@@ -7,6 +7,7 @@ Affiliation: University of Innsbruck
 """
 
 import numpy as np
+import tempfile
 import typing
 
 from .dct_jpeg import DCTJPEG
@@ -403,3 +404,73 @@ def from_dct(
         qt=qt,
         progressive_mode=None,
     )
+
+
+def quantize(
+    array_unquantized: np.ndarray,
+    qt: np.ndarray,
+    dct_method: DCTMethod = DCTMethod.JDCT_ISLOW,
+) -> np.ndarray:
+    """A default libjpeg quantizer for DCT coefficients.
+
+    The output slightly differs from the libjpeg due
+    to number representation in the exported file.
+
+    :param array_unquantized: Unquantized DCT coefficients.
+    :type array_unquantized: np.ndarray
+    :param qt: Quantization table tensor.
+    :type qt: np.ndarray
+    :return: Quantized DCT coefficients.
+    :rtype: np.ndarray
+    """
+    if dct_method == DCTMethod.JDCT_ISLOW:
+        # convert negatives to positives
+        neg = array_unquantized < 0
+        array_unquantized[neg] = -array_unquantized[neg]
+
+        # quantize
+        array_quantized = (array_unquantized + qt[None, None]/2.) / qt[None, None]
+
+        # convert negatives back
+        array_quantized[neg] = -array_quantized[neg]
+
+        # quantize
+        return np.trunc(array_quantized)
+
+    elif dct_method == DCTMethod.JDCT_FLOAT:
+        # quantize
+        array_quantized = array_unquantized * 8 / (qt[None, None] * 8)
+
+        # convert to positives
+        array_quantized = (array_quantized + 16384.5)
+
+        # quantize
+        return np.trunc(array_quantized) - 16384.
+
+    else:
+        raise NotImplementedError(f'unknown dct_method {dct_method}')
+
+
+def qf_to_qt(
+    qf: int,
+    in_color_space: Colorspace = Colorspace.JCS_RGB,
+) -> np.ndarray:
+    """Convert QF to QT.
+
+    :param qf: Quality factor.
+    :type qf: int
+    :param in_color_space: Input color space.
+    :type in_color_space: :class:`Colorspace`
+    :return: Quantization table tensor.
+    :rtype: np.ndarray
+    """
+    # write dummy spatial
+    x = np.random.randint(
+        0, 256, (16, 16, in_color_space.channels),
+        dtype='uint8',
+    )
+    with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
+        from_spatial(x, in_color_space=in_color_space).write_spatial(tmp.name)
+
+        # collect quantization table
+        return read_dct(tmp.name).qt
