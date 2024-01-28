@@ -222,8 +222,10 @@ class SpatialJPEG(JPEG):
         assert self.samp_factor == '4:4:4' or (self.samp_factor == 1).all()
         assert version.get() in version.LIBJPEG_VERSIONS
         # write to temporary files
-        dst = tempfile.NamedTemporaryFile('wb+', suffix='.jpeg')
-        dst_uq = tempfile.NamedTemporaryFile('wb+', suffix='.bin')
+        dst = tempfile.NamedTemporaryFile('w', suffix='.jpeg')
+        dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin')
+        dst.close()
+        dst_uq.close()
         self.write_spatial(
             path=dst.name,
             dct_method=dct_method,
@@ -234,6 +236,8 @@ class SpatialJPEG(JPEG):
         # extract unquantized coefficients
         with open(dst_uq.name, 'rb') as fp:
             content = fp.read()
+        os.remove(dst.name)
+        os.remove(dst_uq.name)
         uq = struct.unpack(f'<{len(content)//4}f', content)
         uq = np.reshape(uq, (
             self.height//8, self.width//8,
