@@ -564,10 +564,10 @@ class TestSpatial(unittest.TestCase):
         )
         im = jpeglib.from_spatial(x)
         im.samp_factor = '4:4:4'
-        with tempfile.NamedTemporaryFile('wb+', suffix='.jpeg') as tmp:
-            print('writing to', tmp.name)
-            im.write_spatial(tmp.name, dct_method=dct_method)
-            Y = jpeglib.read_dct(tmp.name).Y
+        print('writing to', self.tmp.name)
+        im.write_spatial(self.tmp.name, dct_method=dct_method)
+        self.tmp.flush()
+        Y = jpeglib.read_dct(self.tmp.name).Y
 
         # extract compression error
         qt_Y = jpeglib.qf_to_qt(75, colorspace)[0]
