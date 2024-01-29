@@ -230,8 +230,7 @@ class SpatialJPEG(JPEG):
         pathlib.Path(dst.name).parent.mkdir(parents=True, exist_ok=True)
         dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin', delete=False)
         pathlib.Path(dst_uq.name).parent.mkdir(parents=True, exist_ok=True)
-        # dst.close()
-        # dst_uq.close()
+
         self.write_spatial(
             path=dst.name,
             dct_method=dct_method,
@@ -243,6 +242,8 @@ class SpatialJPEG(JPEG):
         print('opening', dst_uq.name)
         with open(dst_uq.name, 'rb') as fp:
             content = fp.read()
+        dst.close()
+        dst_uq.close()
         os.remove(dst.name)
         os.remove(dst_uq.name)
         uq = struct.unpack(f'<{len(content)//4}f', content)
