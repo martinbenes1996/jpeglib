@@ -565,8 +565,9 @@ class TestSpatial(unittest.TestCase):
         im = jpeglib.from_spatial(x)
         im.samp_factor = '4:4:4'
         print('writing to', self.tmp.name)
+        with open(self.tmp.name, 'wb') as fp:
+            fp.write(x.tobytes())
         im.write_spatial(self.tmp.name, dct_method=dct_method)
-        # im.write_spatial('out/image.jpeg', dct_method=dct_method)
         Y = jpeglib.read_dct(self.tmp.name).Y
 
         # extract compression error
