@@ -7,6 +7,7 @@ Affiliation: University of Innsbruck
 """
 
 import numpy as np
+import os
 import tempfile
 import typing
 
@@ -469,8 +470,11 @@ def qf_to_qt(
         0, 256, (16, 16, in_color_space.channels),
         dtype='uint8',
     )
-    with tempfile.NamedTemporaryFile(suffix='.jpeg') as tmp:
-        from_spatial(x, in_color_space=in_color_space).write_spatial(tmp.name)
+    tmp = tempfile.NamedTemporaryFile('w', suffix='.jpeg', delete=False)
+    tmp.close()
+    from_spatial(x, in_color_space=in_color_space).write_spatial(tmp.name)
 
-        # collect quantization table
-        return read_dct(tmp.name).qt
+    # collect quantization table
+    qt = read_dct(tmp.name).qt
+    os.unlink(tmp.name)
+    return qt
