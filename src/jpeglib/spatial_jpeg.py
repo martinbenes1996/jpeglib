@@ -227,9 +227,9 @@ class SpatialJPEG(JPEG):
         # dst = str(tmp_dir / 'dst.jpeg')
         # dst_uq = str(tmp_dir / 'uq.bin')
         dst = tempfile.NamedTemporaryFile('w', suffix='.jpeg', delete=False)
-        pathlib.Path(dst).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(dst.name).parent.mkdir(parents=True, exist_ok=True)
         dst_uq = tempfile.NamedTemporaryFile('w', suffix='.bin', delete=False)
-        pathlib.Path(dst_uq).parent.mkdir(parents=True, exist_ok=True)
+        pathlib.Path(dst_uq.name).parent.mkdir(parents=True, exist_ok=True)
         # dst.close()
         # dst_uq.close()
         self.write_spatial(
