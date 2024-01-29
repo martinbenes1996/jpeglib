@@ -221,7 +221,7 @@ int write_jpeg_spatial(
 
 		// setup tmp file for unquantized coefficients
 		if(dstfile_uq != NULL) {
-			fprintf(stderr, "start %s\n", dstfile_uq);
+			// fprintf(stderr, "start %s\n", dstfile_uq);
 			start_unquantized_loading(dstfile_uq);
 		}
 
