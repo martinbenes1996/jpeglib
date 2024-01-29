@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -182,7 +183,7 @@ int write_jpeg_spatial(
 
 		// open the destination file
 		if ((fp = fopen(dstfile, "wb")) == NULL) {
-			fprintf(stderr, "can't open %s\n", dstfile);
+			fprintf(stderr, "can't open %s: errno %d\n", dstfile, errno);
 			return 0;
 		}
 		cinfo.err = jpeg_std_error(&jerr);
