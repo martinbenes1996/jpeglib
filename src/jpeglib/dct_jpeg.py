@@ -321,7 +321,7 @@ class DCTJPEG(_jpeg.JPEG):
         del self._K
         del self._qt
 
-    def __add__(self, delta: Tuple[np.ndarray]) -> DCTJPEG:
+    def __add__(self, delta: Tuple[np.ndarray]):
         """Add difference image (e.g., steganographic noise) to respective components.
 
         :param delta: difference images
