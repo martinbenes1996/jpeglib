@@ -57,6 +57,7 @@ except IndexError:
 
 __all__ = [
     'read_dct', 'read_spatial', 'from_spatial', 'from_dct', 'to_jpegio',
+    'quantize', 'qf_to_qt',
     'SpatialJPEG', 'DCTJPEG', 'DCTJPEGio', 'ProgressiveJPEG',
     'Colorspace', 'DCTMethod', 'Dithermode', 'Marker', 'MarkerType', 'Huffman', 'Scan',
     'version', 'Jab_to_factors',
