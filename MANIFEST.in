@@ -3,3 +3,4 @@ recursive-include jpeglib/cjpeglib/* *.c
 include jpeglib/cjpeglib/*.h
 include jpeglib/cjpeglib/*.c
 include jpeglib/cjpeglib/*.cpp
+include requirements.txt
