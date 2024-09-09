@@ -150,7 +150,8 @@ class SpatialJPEG(JPEG):
             raise IOError('no destination file specified')
         # scans
         if self.num_scans > 1:
-            warnings.warn('saving progressive JPEG as sequential, specify buffered=True in read_spatial to stay progressive')
+            warnings.warn('saving progressive JPEG as sequential, '
+                          'specify buffered=True in read_spatial to stay progressive')
         # quality
         # use default of library
         if qt is None:
@@ -218,7 +219,7 @@ class SpatialJPEG(JPEG):
 
         Quick-and-dirty implementation.
         Current TODOs are JDCT_IFAST method and other samp_factors
-        """
+        """  # noqa: E501
         # implementation limits
         assert self.samp_factor == '4:4:4' or (self.samp_factor == 1).all()
         assert version.get() in version.LIBJPEG_VERSIONS
