@@ -1,1 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/cc -O3 -DNDEBUG -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -mmacosx-version-min=13.2 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/jcstest.dir/__/jcstest.c.o -o ../jcstest  -Wl,-rpath,/Users/martin/UIBK/jpeglib/jpeglib/cjpeglib/turbo300/cmakescripts ../libjpeg.62.4.0.dylib 

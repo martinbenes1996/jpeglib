@@ -74,8 +74,8 @@ class TestVersion(unittest.TestCase):
         # default version
         self.assertEqual(jpeglib.version.get(), '6b')
         # version changes in the block
-        with jpeglib.version('9e'):
-            self.assertEqual(jpeglib.version.get(), '9e')
+        with jpeglib.version('9f'):
+            self.assertEqual(jpeglib.version.get(), '9f')
         # back to default version
         self.assertEqual(jpeglib.version.get(), '6b')
 

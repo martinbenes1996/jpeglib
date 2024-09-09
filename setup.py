@@ -139,7 +139,8 @@ for v in libjpeg_versions:
         'turbojpeg-jni', 'turbojpeg', 'turbojpegl',
         'jpegut', 'jpgtest',
         'turbojpeg-mp',
-        # 'jsimddct',
+        'jsimd',
+        'jsimddct',
         'jcgryext-neon',
         'jdcolext-neon',
         'jdmrgext-neon',
@@ -168,7 +169,9 @@ for v in libjpeg_versions:
         ('LIBVERSION', libjpeg_versions[v][1]),
         ('HAVE_PROTOTYPES', 1),
         ('Py_LIMITED_API', '0x03080000'),
-        ('WITH_SIMD', 0),  # TODO: 1
+        # ('C_LOSSLESS_SUPPORTED', 1),
+        # ('D_LOSSLESS_SUPPORTED', 1),
+        # ('WITH_SIMD', 0),  # TODO: 1
     ]
     # turbo/moz-only macros
     if is_turbo or is_moz:
