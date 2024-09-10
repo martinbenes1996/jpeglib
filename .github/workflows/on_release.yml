@@ -25,11 +25,11 @@ jobs:
           - os: windows-2019
             arch: x86
           # MacOS
-          - os: macos-11
+          - os: macos-13
             arch: x86_64
-          - os: macos-11
+          - os: macos-13
             arch: arm64
-          - os: macos-11
+          - os: macos-13
             arch: universal2
           # Linux
           - os: ubuntu-20.04
