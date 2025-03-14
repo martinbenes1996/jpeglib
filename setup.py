@@ -171,7 +171,9 @@ for v in libjpeg_versions:
         ('Py_LIMITED_API', '0x03080000'),
         # ('C_LOSSLESS_SUPPORTED', 1),
         # ('D_LOSSLESS_SUPPORTED', 1),
-        # ('WITH_SIMD', 0),  # TODO: 1
+        ('WITH_SIMD', 0),  # TODO: 1
+        ('C_ARITH_CODING_SUPPORTED', 1),
+        ('D_ARITH_CODING_SUPPORTED', 1),
     ]
     # turbo/moz-only macros
     if is_turbo or is_moz:
@@ -182,8 +184,8 @@ for v in libjpeg_versions:
             ('VERSION', f'"{libjpeg_versions[v][0]}"'),
             ('SIZEOF_SIZE_T', int(ctypes.sizeof(ctypes.c_size_t))),
             ('THREAD_LOCAL', '__thread'),
-            ('C_ARITH_CODING_SUPPORTED', 1),
-            ('D_ARITH_CODING_SUPPORTED', 1),
+            # ('C_ARITH_CODING_SUPPORTED', 1),
+            # ('D_ARITH_CODING_SUPPORTED', 1),
             ('JPEG_LIB_VERSION', 70),
         ]
         # moz-only macros
