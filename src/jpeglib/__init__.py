@@ -41,10 +41,10 @@ JPEG_APP1 = MarkerType.JPEG_APP1
 JPEG_COM = MarkerType.JPEG_COM
 
 # package version
-import pkg_resources
+import importlib.metadata
 try:
-    __version__ = pkg_resources.get_distribution("jpeglib").version
-except pkg_resources.DistributionNotFound:
+    __version__ = importlib.metadata.version("jpeglib")
+except importlib.metadata.PackageNotFoundError:
     __version__ = None
 
 # set default version
