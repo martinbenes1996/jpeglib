@@ -1,3 +1,4 @@
 wheel
 numpy
 setuptools
+wheel
