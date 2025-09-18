@@ -46,3 +46,5 @@ result.jpeg
 
 # temporary output
 output*.jpeg
+
+.venv
