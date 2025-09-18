@@ -21,29 +21,29 @@ jobs:
           # https://github.com/scikit-learn/scikit-learn/blob/main/.github/workflows/wheels.yml
           # https://cibuildwheel.readthedocs.io/en/stable/options/
           # Windows
-          - os: windows-2019
+          - os: windows-latest
             arch: AMD64
-          - os: windows-2019
+          - os: windows-latest
             arch: x86
           # MacOS
-          - os: macos-13
+          - os: macos-latest
             arch: x86_64
-          - os: macos-13
+          - os: macos-latest
             arch: arm64
-          - os: macos-13
+          - os: macos-latest
             arch: universal2
           # Linux
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: x86_64
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             arch: i686
     steps:
       - name: Set Github Workspace
         uses: actions/checkout@v2
-      - name: Set up Python 3.10 # set architecture and Python3
+      - name: Set up Python 3.12 # set architecture and Python3
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.12"
       - name: Install dependencies
         uses: ./.github/common/install_dependencies
       - name: Build wheels
