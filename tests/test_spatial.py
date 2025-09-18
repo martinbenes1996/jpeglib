@@ -275,7 +275,7 @@ class TestSpatial(unittest.TestCase):
         if not os.path.exists(cjpeg_executable):
             # If cjpeg executable could not be found, skip this test. This will happen when executing tests on Windows.
             self.logger.warning("Could not find cjpeg executable. Skipping this test.")
-            return 1
+            return
 
         # cjpeg is dynamically linked, therefore set LD_LIBRARY_PATH to ensure that cjpeg uses the right libjpeg.so instead of a system-wide version.
         lib_path = os.path.join(libjpeg_path, "lib")
@@ -346,7 +346,7 @@ class TestSpatial(unittest.TestCase):
         if not os.path.exists(cjpeg_executable):
             # If cjpeg executable could not be found, skip this test. This will happen when executing tests on Windows.
             self.logger.warning("Could not find cjpeg executable. Skipping this test.")
-            return 1
+            return
 
         # cjpeg is dynamically linked, therefore set LD_LIBRARY_PATH to ensure that cjpeg uses the right libjpeg.so instead of a system-wide version.
         lib_path = os.path.join(mozjpeg_build_path)
