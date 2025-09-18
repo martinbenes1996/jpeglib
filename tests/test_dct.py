@@ -310,7 +310,7 @@ class TestDCT(unittest.TestCase):
             import jpegio
         except (ModuleNotFoundError, ImportError) as e:
             logging.error(f"invalid installation of jpegio: {e}")
-            return 1
+            return
         jpeg = jpegio.read('tests/assets/IMG_0311.jpeg')
         # test quantization
         self.assertEqual(len(im.quant_tables), 2)
