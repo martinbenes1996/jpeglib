@@ -12,7 +12,7 @@ runs:
 
     - name: Build wheels
       shell: bash
-      run: python -m cibuildwheel --output-dir wheelhouse
+      run: python -m cibuildwheel --output-dir dist
       env:
         CIBW_BUILD: cp310*
         CIBW_SKIP: pp* *-musllinux*
