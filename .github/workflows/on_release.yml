@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifact-${{ strategy.job-index }}-binary
-          path: ./dist/sealwatch*.whl
+          path: ./dist/jpeglib*.whl
 
   make_sdist:
     name: Make source distribution
