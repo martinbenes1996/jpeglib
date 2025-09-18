@@ -37,14 +37,6 @@ jobs:
             arch: x86_64
           - os: ubuntu-20.04
             arch: i686
-
-          # - os: ubuntu-20.04  # raspberry pi, takes long
-          #   arch: aarch64
-
-          # - os: ubuntu-20.04
-          #   arch: ppc64le
-          # - os: ubuntu-20.04
-          #   arch: s390x
     steps:
       - name: Set Github Workspace
         uses: actions/checkout@v2
@@ -56,10 +48,12 @@ jobs:
         uses: ./.github/common/install_dependencies
       - name: Build wheels
         uses: ./.github/common/build_wheels
+
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          path: ./wheelhouse/*.whl
+          name: artifact-${{ strategy.job-index }}-binary
+          path: ./dist/sealwatch*.whl
 
   make_sdist:
     name: Make source distribution
@@ -71,8 +65,9 @@ jobs:
           submodules: true  # Optional, use if you have submodules
       - name: Build SDist
         run: pipx run build --sdist
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: artifact-${{ strategy.job-index }}-source
           path: dist/*.tar.gz
 
   unit_tests:
@@ -88,9 +83,10 @@ jobs:
           python-version: "3.10"
           architecture: "x64" # architecture
       - name: Downloads artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: artifact-*-binary
+          merge-multiple: true
           path: dist
       - name: Install test dependencies
         uses: ./.github/common/install_test_dependencies
@@ -98,7 +94,11 @@ jobs:
         run: pip install --find-links ./dist jpeglib --no-index
       - name: Run unit tests # run unittests
         uses: ./.github/common/unit_tests
-
+      - name: Print log
+        shell: bash
+        if: always()
+        run: |
+          if [ -f test.log ]; then cat test.log; fi
 
   code_analysis:
     name: Run code analysis
@@ -124,9 +124,10 @@ jobs:
     if: ${{ github.ref == 'refs/heads/release' }}
     steps:
       - name: Downloads artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: artifact-*
+          merge-multiple: true
           path: dist
       - name: Publish on TestPyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
@@ -143,9 +144,10 @@ jobs:
     if: ${{github.event_name == 'release' && github.event.action == 'created'}}
     steps:
       - name: Downloads artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: artifact-*
+          merge-multiple: true
           path: dist
       - name: Publish on PyPI
         uses: pypa/gh-action-pypi-publish@v1.4.1
